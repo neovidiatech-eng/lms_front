@@ -31,7 +31,9 @@ const translations = {
     choosePackage: 'اختر الباقة',
     registerNow: 'تسجيل الآن',
     afterRegistration: 'بعد التسجيل، سيتم مراجعة طلبك من قبل الإدارة وسيتم إشعارك بالموافقة',
-    backToLogin: 'العودة لتسجيل الدخول'
+    backToLogin: 'العودة لتسجيل الدخول',
+    donthaveanaccount: "ليس لديك حساب؟",
+    or: "أو"
   },
   en: {
     createNewStudentAccount: 'Create New Student Account',
@@ -54,7 +56,9 @@ const translations = {
     choosePackage: 'Choose Package',
     registerNow: 'Register Now',
     afterRegistration: 'After registration, your request will be reviewed by the administration and you will be notified of approval',
-    backToLogin: 'Back to Login'
+    backToLogin: 'Back to Login',
+    donthaveanaccount: "Don't have an account",
+    or: "Or"
   }
 };
 

@@ -1,8 +1,10 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { useState } from 'react';
+import { GoogleOAuthProvider } from '@react-oauth/google';
 import { LanguageProvider } from './contexts/LanguageContext';
 import { SessionsProvider } from './contexts/SessionsContext';
 import { SettingsProvider } from './contexts/SettingsContext';
+import { googleClientId } from './components/constants/index';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import Dashboard from './pages/Dashboard';
@@ -37,67 +39,68 @@ function App() {
   };
 
   return (
-    <SettingsProvider>
-      <LanguageProvider>
-        <SessionsProvider>
-          <Router>
-            {!isAuthenticated && <LanguageSwitcher />}
-            <Routes>
-              <Route 
-                path="/login" 
-                element={
-                  !isAuthenticated ? (
-                    <Login onLoginSuccess={handleLogin} />
-                  ) : (
-                    <Navigate to="/dashboard" replace />
-                  )
-                } 
-              />
-              <Route 
-                path="/register" 
-                element={
-                  !isAuthenticated ? (
-                    <Register onRegisterSuccess={handleLogin} />
-                  ) : (
-                    <Navigate to="/dashboard" replace />
-                  )
-                } 
-              />
-              
-              <Route 
-                path="/dashboard" 
-                element={isAuthenticated ? <Dashboard /> : <Navigate to="/login" replace />}
-              >
-                <Route index element={null} /> {/* This will be handled inside Dashboard for now, or we can move DashboardHome here */}
-                <Route path="admins" element={<UsersPage />} />
-                <Route path="students" element={<StudentsPage />} />
-                <Route path="teachers" element={<TeachersPage />} />
-                <Route path="parents" element={<ParentsPage />} />
-                <Route path="sessions" element={<SessionsPage />} />
-                <Route path="agenda" element={<AgendaPage />} />
-                <Route path="exams" element={<ExamsPage />} />
-                <Route path="assignments" element={<AssignmentsPage />} />
-                <Route path="subscription-requests" element={<SubscriptionRequestsPage />} />
-                <Route path="all-subscriptions" element={<AllSubscriptionsPage />} />
-                <Route path="plans" element={<PlansPage />} />
-                <Route path="currencies" element={<CurrenciesPage />} />
-                <Route path="expenses" element={<ExpensesPage />} />
-                <Route path="transactions" element={<TransactionsPage />} />
-                <Route path="teacher-requests" element={<TeacherRequestsPage />} />
-                <Route path="teacher-availability" element={<TeacherAvailabilityPage />} />
-                <Route path="subjects" element={<SubjectsPage />} />
-                <Route path="lms-courses" element={<LMSCoursesPage />} />
-                <Route path="settings" element={<SettingsPage />} />
-              </Route>
+    <GoogleOAuthProvider clientId={googleClientId}>
+      <SettingsProvider>
+        <LanguageProvider>
+          <SessionsProvider>
+            <Router>
+              {!isAuthenticated && <LanguageSwitcher />}
+              <Routes>
+                <Route 
+                  path="/login" 
+                  element={
+                    !isAuthenticated ? (
+                      <Login onLoginSuccess={handleLogin} />
+                    ) : (
+                      <Navigate to="/dashboard" replace />
+                    )
+                  } 
+                />
+                <Route 
+                  path="/register" 
+                  element={
+                    !isAuthenticated ? (
+                      <Register onRegisterSuccess={handleLogin} />
+                    ) : (
+                      <Navigate to="/dashboard" replace />
+                    )
+                  } 
+                />
+                
+                <Route 
+                  path="/dashboard" 
+                  element={isAuthenticated ? <Dashboard /> : <Navigate to="/login" replace />}
+                >
+                  <Route index element={null} />
+                  <Route path="admins" element={<UsersPage />} />
+                  <Route path="students" element={<StudentsPage />} />
+                  <Route path="teachers" element={<TeachersPage />} />
+                  <Route path="parents" element={<ParentsPage />} />
+                  <Route path="sessions" element={<SessionsPage />} />
+                  <Route path="agenda" element={<AgendaPage />} />
+                  <Route path="exams" element={<ExamsPage />} />
+                  <Route path="assignments" element={<AssignmentsPage />} />
+                  <Route path="subscription-requests" element={<SubscriptionRequestsPage />} />
+                  <Route path="all-subscriptions" element={<AllSubscriptionsPage />} />
+                  <Route path="plans" element={<PlansPage />} />
+                  <Route path="currencies" element={<CurrenciesPage />} />
+                  <Route path="expenses" element={<ExpensesPage />} />
+                  <Route path="transactions" element={<TransactionsPage />} />
+                  <Route path="teacher-requests" element={<TeacherRequestsPage />} />
+                  <Route path="teacher-availability" element={<TeacherAvailabilityPage />} />
+                  <Route path="subjects" element={<SubjectsPage />} />
+                  <Route path="lms-courses" element={<LMSCoursesPage />} />
+                  <Route path="settings" element={<SettingsPage />} />
+                </Route>
 
-              <Route path="/" element={<Navigate to="/login" replace />} />
-            </Routes>
-          </Router>
-        </SessionsProvider>
-      </LanguageProvider>
-    </SettingsProvider>
+                <Route path="/" element={<Navigate to="/login" replace />} />
+              </Routes>
+            </Router>
+          </SessionsProvider>
+        </LanguageProvider>
+      </SettingsProvider>
+    </GoogleOAuthProvider>
   );
 }
 
 export default App;
-
