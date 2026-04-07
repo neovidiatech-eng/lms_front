@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { X, Save } from 'lucide-react';
 import { useLanguage } from '../../contexts/LanguageContext';
 import type { Transaction } from '../../pages/Transactions';
-
+import CustomSelect from '../ui/CustomSelect';
 interface EditTransactionModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -93,14 +93,14 @@ export default function EditTransactionModal({ isOpen, onClose, transaction, onS
         <form onSubmit={handleSubmit} className="p-6 space-y-5">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2 text-right">{text.type[language]}</label>
-            <select
+            <CustomSelect
               value={formData.type}
-              onChange={(e) => setFormData({ ...formData, type: e.target.value as 'income' | 'teacher_expense' })}
-              className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 text-right bg-white appearance-none"
-            >
-              <option value="income">{text.income[language]}</option>
-              <option value="teacher_expense">{text.teacher_expense[language]}</option>
-            </select>
+              onChange={(value) => setFormData({ ...formData, type: value as 'income' | 'teacher_expense' })}
+              options={[
+                { value: 'income', label: text.income[language] },
+                { value: 'teacher_expense', label: text.teacher_expense[language] }
+              ]}
+            />
           </div>
 
           {formData.type === 'income' && (
@@ -141,17 +141,17 @@ export default function EditTransactionModal({ isOpen, onClose, transaction, onS
                 </div>
                 <div>
                   <label className="block text-xs font-medium text-gray-700 mb-1 text-right">{text.sessionDuration[language]}</label>
-                  <select
+                  <CustomSelect
                     value={formData.sessionDuration}
-                    onChange={(e) => setFormData({ ...formData, sessionDuration: parseInt(e.target.value) })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg text-right text-sm bg-white appearance-none"
-                  >
-                    <option value={30}>30</option>
-                    <option value={45}>45</option>
-                    <option value={60}>60</option>
-                    <option value={90}>90</option>
-                    <option value={120}>120</option>
-                  </select>
+                    onChange={(value) => setFormData({ ...formData, sessionDuration: parseInt(value as string) })}
+                    options={[
+                      { value: 30, label: '30' },
+                      { value: 45, label: '45' },
+                      { value: 60, label: '60' },
+                      { value: 90, label: '90' },
+                      { value: 120, label: '120' }
+                    ]}
+                  />
                 </div>
                 <div>
                   <label className="block text-xs font-medium text-gray-700 mb-1 text-right">{text.ratePerHour[language]}</label>
@@ -189,15 +189,14 @@ export default function EditTransactionModal({ isOpen, onClose, transaction, onS
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2 text-right">{text.currency[language]}</label>
-              <select
+              <CustomSelect
                 value={formData.currency}
-                onChange={(e) => setFormData({ ...formData, currency: e.target.value })}
-                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 text-right bg-white appearance-none"
-              >
-                {currencies.map(c => (
-                  <option key={c.code} value={c.code}>{c.symbol} {c.code}</option>
-                ))}
-              </select>
+                onChange={(value) => setFormData({ ...formData, currency: value as string })}
+                options={currencies.map(c => ({
+                  value: c.code,
+                  label: `${c.symbol} ${c.code}`
+                }))}
+              />
             </div>
           </div>
 
@@ -225,14 +224,14 @@ export default function EditTransactionModal({ isOpen, onClose, transaction, onS
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2 text-right">{text.status[language]}</label>
-            <select
+            <CustomSelect
               value={formData.status}
-              onChange={(e) => setFormData({ ...formData, status: e.target.value as 'completed' | 'pending' })}
-              className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 text-right bg-white appearance-none"
-            >
-              <option value="pending">{text.pending[language]}</option>
-              <option value="completed">{text.completed[language]}</option>
-            </select>
+              onChange={(value) => setFormData({ ...formData, status: value as 'completed' | 'pending' })}
+              options={[
+                { value: 'pending', label: text.pending[language] },
+                { value: 'completed', label: text.completed[language] }
+              ]}
+            />
           </div>
 
           <div>

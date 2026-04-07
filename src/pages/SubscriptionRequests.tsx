@@ -1,9 +1,10 @@
 import { useState } from 'react';
-import { Search, Filter, CheckCircle, XCircle, Eye, Clock } from 'lucide-react';
+import { Search, CheckCircle, XCircle, Eye, Clock } from 'lucide-react';
 import { useLanguage } from '../contexts/LanguageContext';
 import Pagination from '../components/ui/Pagination';
 import WhatsAppPhone from '../components/ui/WhatsAppPhone';
 import ViewSubscriptionRequestModal from '../components/modals/ViewSubscriptionRequestModal';
+import CustomSelect from '../components/ui/CustomSelect';
 
 interface SubscriptionRequest {
   id: string;
@@ -154,17 +155,18 @@ export default function SubscriptionRequests() {
           </div>
 
           <div className="flex items-center gap-2">
-            <Filter className="w-5 h-5 text-gray-400" />
-            <select
-              value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value as any)}
-              className="px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent text-right"
-            >
-              <option value="all">{text.all[language]}</option>
-              <option value="pending">{text.pending[language]}</option>
-              <option value="approved">{text.approved[language]}</option>
-              <option value="rejected">{text.rejected[language]}</option>
-            </select>
+            <CustomSelect
+            value={statusFilter}
+onChange={(value) => setStatusFilter(value as "all" | "pending" | "approved" | "rejected")}
+            options={[
+              { value: 'all', label: text.all[language] },
+              { value: 'pending', label: text.pending[language] },
+              { value: 'approved', label: text.approved[language] },
+              { value: 'rejected', label: text.rejected[language] }
+            ]}
+            placeholder={text.filter[language]}
+            className="px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent text-right"
+            />
           </div>
         </div>
 

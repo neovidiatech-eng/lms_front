@@ -4,9 +4,11 @@ import { useLanguage } from '../contexts/LanguageContext';
 import { useSessions } from '../contexts/SessionsContext';
 import Pagination from '../components/ui/Pagination';
 import AddSessionModal from '../components/modals/AddSessionModal';
-import AddMultipleSessionsModal from '../components/modals/AddMultipleSessionsModal';
+import AddMultipleSessionsModal, { SessionPreviewItem } from '../components/modals/AddMultipleSessionsModal';
 import ViewSessionDetailsModal from '../components/modals/ViewSessionDetailsModal';
 import EditSessionModal from '../components/modals/EditSessionModal';
+import { ContextSession, SessionDisplay, SessionGroupDetails, SingleSessionInput } from '../types/sessions';
+import { MultipleSessionsFormData } from '../lib/schemas/SessionSchema';
 
 interface Session {
   id: string;
@@ -30,8 +32,8 @@ export default function Sessions() {
   const [showAddMultipleModal, setShowAddMultipleModal] = useState(false);
   const [showViewModal, setShowViewModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
-  const [selectedSessionGroup, setSelectedSessionGroup] = useState<any>(null);
-  const [selectedSessionToEdit, setSelectedSessionToEdit] = useState<any>(null);
+  const [selectedSessionGroup, setSelectedSessionGroup] = useState<SessionGroupDetails | null >(null);
+  const [selectedSessionToEdit, setSelectedSessionToEdit] = useState<ContextSession | null >(null);
   const [filters, setFilters] = useState({
     status: '',
     dateFrom: '',
@@ -43,33 +45,32 @@ export default function Sessions() {
   const itemsPerPage = 7;
 
   // Convert context sessions to display format and group by student/teacher/subject
-  const sessions = useMemo(() => {
-    const grouped = new Map<string, Session>();
+const sessions = useMemo<SessionDisplay[]>(() => {
+  const grouped = new Map<string, Session>();
 
-    allSessionsFromContext.forEach(session => {
-      const key = `${session.studentName}-${session.teacherName}-${session.subject}`;
-      if (!grouped.has(key)) {
-        grouped.set(key, {
-          id: key,
-          title: session.sessionName,
-          teacher: session.teacherName,
-          subject: session.studentName,
-          grade: session.subject,
-          date: session.date,
-          time: `${session.time} - ${session.endTime}`,
-          duration: 60,
-          status: 'scheduled' as const
-        });
-      }
-    });
+  allSessionsFromContext.forEach(session => {
+    const key = `${session.studentName}-${session.teacherName}-${session.subject}`;
+    if (!grouped.has(key)) {
+      grouped.set(key, {
+        id: key,
+        title: session.sessionName || '',
+        teacher: session.teacherName || '',
+        subject: session.studentName || '', 
+        grade: session.subject || '',      
+        date: session.date || '',
+        time: `${session.time || ''} - ${session.endTime || ''}`,
+        duration: 60,
+        status: 'scheduled' as const
+      });
+    }
+  });
 
-    return Array.from(grouped.values());
-  }, [allSessionsFromContext]);
+  return Array.from(grouped.values());
+}, [allSessionsFromContext]);
 
   // Build session group details from context
   const sessionGroupDetails = useMemo(() => {
-    const grouped: { [key: string]: any } = {};
-
+const grouped: Record<string, SessionGroupDetails> = {};
     allSessionsFromContext.forEach(session => {
       const key = `${session.studentName}-${session.teacherName}-${session.subject}`;
 
@@ -139,12 +140,18 @@ export default function Sessions() {
     all: { ar: 'الكل', en: 'All' }
   };
 
-  const filteredSessions = sessions.filter(session =>
-    session.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    session.teacher.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    session.subject.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    session.grade.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+ const filteredSessions = sessions.filter(session => {
+  const title = (session.title || "").toLowerCase();
+  const teacher = (session.teacher || "").toLowerCase();
+  const subject = (session.subject || "").toLowerCase();
+  const grade = (session.grade || "").toLowerCase();
+  const search = searchTerm.toLowerCase();
+
+  return title.includes(search) || 
+         teacher.includes(search) || 
+         subject.includes(search) || 
+         grade.includes(search);
+});
 
   const totalPages = Math.ceil(filteredSessions.length / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
@@ -155,37 +162,58 @@ export default function Sessions() {
     setCurrentPage(page);
   };
 
-  const handleAddSession = (sessionData: any) => {
+  const handleAddSession = (sessionData: SingleSessionInput) => {
+    const dayName = new Date(sessionData.sessionDate).toLocaleDateString(
+    language === 'ar' ? 'ar-EG' : 'en-US', 
+    { weekday: 'long' }
+  );
     const newSession = {
       id: Date.now().toString(),
-      sessionName: sessionData.sessionName,
-      studentName: sessionData.studentName,
-      teacherName: sessionData.teacherName,
+      sessionName: sessionData.title,
+      studentName: sessionData.student,
+      teacherName: sessionData.teacher,
       subject: sessionData.subject,
-      day: sessionData.day,
-      date: sessionData.date,
-      time: sessionData.time,
+     day:dayName,                    // القيمة المحسوبة
+    date: sessionData.sessionDate,   // القيمة القادمة من المودال
+    time: sessionData.startTime,
       endTime: sessionData.endTime,
       meetingLink: sessionData.meetingLink
     };
     addSession(newSession);
+    console.log(newSession)
   };
+const calculateEndTime = (startTime: string, durationMinutes: string | number) => {
+  if (!startTime) return '';
+  const [hours, minutes] = startTime.split(':').map(Number);
+  const date = new Date();
+  date.setHours(hours);
+  date.setMinutes(minutes + Number(durationMinutes));
+  return date.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', hour12: false });
+};
 
-  const handleAddMultipleSessions = (sessionsData: any) => {
-    const newSessions = sessionsData.sessions.map((session: any, index: number) => ({
-      id: `${Date.now()}-${index}`,
-      sessionName: sessionsData.sessionName,
-      studentName: sessionsData.studentName,
-      teacherName: sessionsData.teacherName,
-      subject: sessionsData.subject,
-      day: session.day,
-      date: session.date,
-      time: session.time,
-      endTime: session.endTime,
-      meetingLink: session.meetingLink
-    }));
-    addMultipleSessions(newSessions);
-  };
+const handleAddMultipleSessions = (data: { 
+  formData: MultipleSessionsFormData; 
+  sessions: SessionPreviewItem[] 
+}) => {
+  const { formData, sessions } = data;
+
+  const newSessions = sessions.map((session, index) => ({
+    id: `${Date.now()}-${index}`,
+    sessionName: formData.title, 
+    studentName: formData.student,
+    teacherName: formData.teacher,
+    subject: formData.subject,
+    day: session.day,
+    date: session.date,
+    time: session.time,
+    endTime: calculateEndTime(session.time, formData.duration),
+    meetingLink: formData.meetingLink
+  }));
+
+  addMultipleSessions(newSessions);
+  setShowAddMultipleModal(false);
+  console.log(newSessions); 
+};
 
   const handleViewSession = (sessionId: string) => {
     const groupDetails = sessionGroupDetails[sessionId as keyof typeof sessionGroupDetails];
@@ -217,8 +245,8 @@ export default function Sessions() {
         id: sessionId,
         sessionIndex: sessionIndex,
         sessionName: groupDetails.sessionName,
-        studentName: groupDetails.studentName,
-        teacherName: groupDetails.teacherName,
+        studentName: groupDetails.student,
+        teacherName: groupDetails.teacher,
         subject: groupDetails.subject,
         ...sessionToEdit
       });
@@ -226,7 +254,7 @@ export default function Sessions() {
     }
   };
 
-  const handleSaveEditedSession = (updatedSession: any) => {
+  const handleSaveEditedSession = (updatedSession: ContextSession) => {
     // Find the actual session in context and update it
     const sessionInContext = allSessionsFromContext.find(s =>
       s.studentName === updatedSession.studentName &&

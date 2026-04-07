@@ -30,7 +30,11 @@ export default function Header({ onMenuClick, userRole, userName, userEmail }: H
   ];
 
   const handleLogout = () => {
-    console.log('Logout clicked');
+    localStorage.removeItem("platform_settings");
+    sessionStorage.removeItem("platform_settings");
+    localStorage.removeItem("token");
+    sessionStorage.removeItem("token");
+    window.location.href = "/login";
   };
 
   return (

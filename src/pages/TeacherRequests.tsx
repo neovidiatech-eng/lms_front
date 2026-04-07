@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { CheckCircle, XCircle, Clock, Search, Eye, Calendar, User } from 'lucide-react';
 import { useLanguage } from '../contexts/LanguageContext';
+import CustomSelect from '../components/ui/CustomSelect';
 
 type RequestStatus = 'pending' | 'approved' | 'rejected';
 type RequestType = 'leave' | 'permission' | 'sick' | 'vacation' | 'other';
@@ -124,6 +125,21 @@ export default function TeacherRequests() {
     return labels[status][language];
   };
 
+const statusFilterOptions = [
+  { value: 'all', label: language === 'ar' ? 'كل الحالات' : 'All Statuses' },
+  { value: 'pending', label: language === 'ar' ? 'معلق' : 'Pending' },
+  { value: 'approved', label: language === 'ar' ? 'مقبول' : 'Approved' },
+  { value: 'rejected', label: language === 'ar' ? 'مرفوض' : 'Rejected' },
+];
+
+const typeFilterOptions = [
+  { value: 'all', label: language === 'ar' ? 'كل الأنواع' : 'All Types' },
+  ...(Object.keys(REQUEST_TYPES) as RequestType[]).map((t) => ({
+    value: t,
+    label: REQUEST_TYPES[t][language],
+  })),
+];
+
   return (
     <div className="p-6 space-y-6" dir="rtl">
       <div className="flex items-center justify-between flex-wrap gap-4">
@@ -174,26 +190,18 @@ export default function TeacherRequests() {
             className="w-full px-4 py-3 pr-12 border border-gray-300 rounded-xl focus:ring-2 focus:ring-primary text-right"
           />
         </div>
-        <select
-          value={filterStatus}
-          onChange={e => setFilterStatus(e.target.value as any)}
-          className="px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-primary text-right bg-white appearance-none"
-        >
-          <option value="all">{language === 'ar' ? 'كل الحالات' : 'All Statuses'}</option>
-          <option value="pending">{language === 'ar' ? 'معلق' : 'Pending'}</option>
-          <option value="approved">{language === 'ar' ? 'مقبول' : 'Approved'}</option>
-          <option value="rejected">{language === 'ar' ? 'مرفوض' : 'Rejected'}</option>
-        </select>
-        <select
-          value={filterType}
-          onChange={e => setFilterType(e.target.value as any)}
-          className="px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-primary text-right bg-white appearance-none"
-        >
-          <option value="all">{language === 'ar' ? 'كل الأنواع' : 'All Types'}</option>
-          {(Object.keys(REQUEST_TYPES) as RequestType[]).map(t => (
-            <option key={t} value={t}>{REQUEST_TYPES[t][language]}</option>
-          ))}
-        </select>
+         
+       <CustomSelect
+    value={filterStatus}
+    options={statusFilterOptions}
+    onChange={(val) => setFilterStatus(val as 'all' | RequestStatus)}
+  />
+
+  <CustomSelect
+    value={filterType}
+    options={typeFilterOptions}
+    onChange={(val) => setFilterType(val as 'all' | RequestType)}
+  />
       </div>
 
       <div className="bg-white rounded-2xl border border-gray-200 overflow-hidden shadow-sm">
@@ -225,7 +233,7 @@ export default function TeacherRequests() {
                           <p className="text-xs text-gray-400">{request.teacherSubject}</p>
                         </div>
                         <div className="w-9 h-9 bg-primary-light rounded-full flex items-center justify-center flex-shrink-0">
-                          <User className="w-4 h-4 text-primary" />
+                          <User className="w-4 h-4 text-white" />
                         </div>
                       </div>
                     </td>
@@ -304,7 +312,7 @@ export default function TeacherRequests() {
                   <p className="text-sm text-gray-500">{selectedRequest.teacherSubject}</p>
                 </div>
                 <div className="w-12 h-12 bg-primary-light rounded-full flex items-center justify-center">
-                  <User className="w-6 h-6 text-primary" />
+                  <User className="w-6 h-6 text-white" />
                 </div>
               </div>
 

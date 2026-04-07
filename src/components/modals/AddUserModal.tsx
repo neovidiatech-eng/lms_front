@@ -1,18 +1,24 @@
 import { useState } from 'react';
 import { X } from 'lucide-react';
 import { useLanguage } from '../../contexts/LanguageContext';
+import CustomSelect from '../ui/CustomSelect';
+import { Controller, useForm } from 'react-hook-form';
+import { UserFormData, userSchema } from '../../lib/schemas/UserSchema';
+import { zodResolver } from '@hookform/resolvers/zod';
 
 interface AddUserModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSubmit: (userData: any) => void;
+  onSubmit: (userData: UserFormData) => void;
 }
 
-interface Permission {
-  id: string;
-  label: string;
-  labelEn: string;
-}
+// interface Permission {
+//   id: string;
+//   label: string;
+//   labelEn: string;
+// }
+
+
 
 const permissionGroups = {
   dashboard: {
@@ -152,42 +158,58 @@ const roles = [
 
 export default function AddUserModal({ isOpen, onClose, onSubmit }: AddUserModalProps) {
   const { language } = useLanguage();
-  const [formData, setFormData] = useState({
+  const [showPassword, setShowPassword] = useState(false);
+
+  const { control, handleSubmit, register, reset, setValue, watch, formState: { errors }} = useForm<UserFormData>({
+  resolver: zodResolver(userSchema),
+  defaultValues: {
     name: '',
     email: '',
     countryCode: '+20',
     phone: '',
     role: 'student',
     password: '',
-    permissions: [] as string[],
-  });
-
-  const [showPassword, setShowPassword] = useState(false);
-
+    permissions: [],
+  } as UserFormData 
+});
   if (!isOpen) return null;
 
+const selectedPermissions = watch('permissions') || [];
+
   const handlePermissionToggle = (permissionId: string) => {
-    setFormData((prev) => ({
-      ...prev,
-      permissions: prev.permissions.includes(permissionId)
-        ? prev.permissions.filter((id) => id !== permissionId)
-        : [...prev.permissions, permissionId],
-    }));
+    const nextPermissions = selectedPermissions.includes(permissionId)
+      ? selectedPermissions.filter((id) => id !== permissionId)
+      : [...selectedPermissions, permissionId];
+    
+    setValue('permissions', nextPermissions, { shouldValidate: true });
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    onSubmit(formData);
-    setFormData({
-      name: '',
-      email: '',
-      countryCode: '+20',
-      phone: '',
-      role: 'student',
-      password: '',
-      permissions: [],
-    });
+ const onFormSubmit = (data: UserFormData) => {
+    onSubmit(data);
+    reset(); 
+    onClose();
   };
+
+const countryOptions = countryCodes.map((c) => ({
+  value: c.code,
+  searchText: `${c.country} ${c.code}`, 
+  label: (
+    <div className="flex justify-between items-center flex-row-reverse w-full text-right">
+      <span>{c.flag} {c.country}</span>
+      <span className="text-gray-400 font-mono text-xs">{c.code}</span>
+    </div>
+  ),
+}));
+
+const roleOptions = roles.map((role) => ({
+  value: role.id,
+  searchText: language === 'ar' ? role.label : role.labelEn,
+  label: (
+    <div className="text-right w-full">
+      {language === 'ar' ? role.label : role.labelEn}
+    </div>
+  ),
+}));
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
@@ -206,8 +228,8 @@ export default function AddUserModal({ isOpen, onClose, onSubmit }: AddUserModal
         </div>
 
         {/* Body */}
-        <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto p-6">
-          <div className="space-y-6">
+<form id="add-user-form" onSubmit={handleSubmit(onFormSubmit)} className="flex-1 overflow-y-auto p-6">
+            <div className="space-y-6">
             {/* Name and Email */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
@@ -216,11 +238,11 @@ export default function AddUserModal({ isOpen, onClose, onSubmit }: AddUserModal
                 </label>
                 <input
                   type="text"
-                  value={formData.name}
-                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                  {...register('name')}
                   className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 text-right"
-                  required
+                  
                 />
+                {errors.name && <p className="text-red-500 text-xs mt-1 text-right">{errors.name.message}</p>}
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2 text-right">
@@ -228,32 +250,29 @@ export default function AddUserModal({ isOpen, onClose, onSubmit }: AddUserModal
                 </label>
                 <input
                   type="email"
-                  value={formData.email}
-                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                  {...register('email')}
                   className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 text-right"
-                  required
                 />
+                {errors.email && <p className="text-red-500 text-xs mt-1 text-right">{errors.email.message}</p>}
               </div>
             </div>
 
             {/* Country Code and Phone */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2 text-right">
-                  {language === 'ar' ? 'رمز الدولة' : 'Country Code'}
-                </label>
-                <select
-                  value={formData.countryCode}
-                  onChange={(e) => setFormData({ ...formData, countryCode: e.target.value })}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 text-right bg-white"
-                  required
-                >
-                  {countryCodes.map((country) => (
-                    <option key={country.code} value={country.code}>
-                      {country.flag} {country.country} ({country.code})
-                    </option>
-                  ))}
-                </select>
+     <Controller
+                name="countryCode"
+                control={control}
+                render={({ field }) => (
+                  <CustomSelect
+                    label={language === 'ar' ? 'رمز الدولة' : 'Country Code'}
+                    value={field.value}
+                    onChange={field.onChange}
+                    options={countryOptions}
+                    className="h-[48px]"
+                  />
+                )}
+              />
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2 text-right">
@@ -261,33 +280,34 @@ export default function AddUserModal({ isOpen, onClose, onSubmit }: AddUserModal
                 </label>
                 <input
                   type="tel"
-                  value={formData.phone}
-                  onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                  {...register('phone')}
                   className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 text-right"
                   placeholder="1234567890"
-                  required
+                  
                 />
+                {errors.phone && <p className="text-red-500 text-xs mt-1 text-right">{errors.phone.message}</p>}
+
               </div>
             </div>
 
             {/* Role and Password */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2 text-right">
-                  {language === 'ar' ? 'الدور' : 'Role'}
-                </label>
-                <select
-                  value={formData.role}
-                  onChange={(e) => setFormData({ ...formData, role: e.target.value })}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 text-right bg-white"
-                  required
-                >
-                  {roles.map((role) => (
-                    <option key={role.id} value={role.id}>
-                      {language === 'ar' ? role.label : role.labelEn}
-                    </option>
-                  ))}
-                </select>
+              
+               <Controller
+                name="role"
+                control={control}
+                render={({ field }) => (
+                  <CustomSelect
+                    label={language === 'ar' ? 'الدور' : 'Role'}
+                    value={field.value}
+                    onChange={field.onChange}
+                    options={roleOptions}
+                    className="h-[48px]"
+                  />
+                )}
+              />
+              
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2 text-right">
@@ -296,11 +316,11 @@ export default function AddUserModal({ isOpen, onClose, onSubmit }: AddUserModal
                 <div className="relative">
                   <input
                     type={showPassword ? 'text' : 'password'}
-                    value={formData.password}
-                    onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                    {...register('password')}
                     className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 text-right"
-                    required
+                    
                   />
+                  {errors.password && <p className="text-red-500 text-xs mt-1 text-right">{errors.password.message}</p>}
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
@@ -333,7 +353,7 @@ export default function AddUserModal({ isOpen, onClose, onSubmit }: AddUserModal
                         </span>
                         <input
                           type="checkbox"
-                          checked={formData.permissions.includes(permission.id)}
+                          checked={selectedPermissions.includes(permission.id)}
                           onChange={() => handlePermissionToggle(permission.id)}
                           className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
                         />
@@ -357,7 +377,7 @@ export default function AddUserModal({ isOpen, onClose, onSubmit }: AddUserModal
           </button>
           <button
             type="submit"
-            onClick={handleSubmit}
+            form="add-user-form"
             className="px-6 py-2.5 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-colors font-medium shadow-lg shadow-blue-600/30"
           >
             {language === 'ar' ? 'حفظ' : 'Save'}

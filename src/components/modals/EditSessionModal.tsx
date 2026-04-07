@@ -1,7 +1,7 @@
 import { X, Calendar, Clock, Link as LinkIcon } from 'lucide-react';
 import { useState } from 'react';
 import { useLanguage } from '../../contexts/LanguageContext';
-
+import CustomSelect from '../ui/CustomSelect';
 interface EditSessionModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -144,18 +144,14 @@ export default function EditSessionModal({ isOpen, onClose, session, onSave }: E
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     {text.day[language]}
                   </label>
-                  <select
+                  <CustomSelect
                     value={formData.day}
-                    onChange={(e) => handleChange('day', e.target.value)}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent text-right"
-                    dir="rtl"
-                  >
-                    {days.map((day, index) => (
-                      <option key={index} value={day}>
-                        {day}
-                      </option>
-                    ))}
-                  </select>
+                    onChange={(value) => handleChange('day', value as string)}
+                    options={days.map((day) => ({
+                      value: day,
+                      label: day
+                    }))}
+                  />
                 </div>
 
                 {/* Date */}

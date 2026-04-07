@@ -2,6 +2,7 @@ import { useState, useMemo } from 'react';
 import { CheckCircle, XCircle, ChevronLeft, ChevronRight, X, Eye, Calendar, Users, BookOpen, Clock } from 'lucide-react';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useSessions } from '../contexts/SessionsContext';
+import CustomSelect from '../components/ui/CustomSelect';
 
 const TEACHERS = [
   { id: '1', name: 'Mohammed', subject: 'الرياضيات', color: 'bg-blue-500' },
@@ -458,6 +459,18 @@ export default function TeacherAvailability() {
     });
   }, [sessions, weekDates]);
 
+  const teacherOptions = [
+  { 
+    value: 'all', 
+    label: language === 'ar' ? 'كل المعلمين' : 'All Teachers' 
+  },
+  ...TEACHERS.map((t) => ({
+    value: t.id,
+    label: t.name,
+    searchText: t.name, 
+  })),
+];
+
   return (
     <div className="p-6 space-y-6" dir="rtl">
       <div className="flex items-center justify-between flex-wrap gap-4">
@@ -553,27 +566,28 @@ export default function TeacherAvailability() {
         </div>
       ) : (
         <>
-          <div className="flex items-center gap-4 flex-wrap">
-            <div className="flex items-center gap-2 bg-white border border-gray-200 rounded-xl px-4 py-2">
-              <button onClick={() => setWeekOffset(w => w - 1)} className="p-1 hover:bg-gray-100 rounded-lg">
-                <ChevronRight className="w-4 h-4 text-gray-600" />
-              </button>
-              <span className="text-sm font-medium text-gray-800 px-2">
-                {weekDates[0].toLocaleDateString('ar-SA', { month: 'short', day: 'numeric' })} - {weekDates[6].toLocaleDateString('ar-SA', { month: 'short', day: 'numeric', year: 'numeric' })}
-              </span>
-              <button onClick={() => setWeekOffset(w => w + 1)} className="p-1 hover:bg-gray-100 rounded-lg">
-                <ChevronLeft className="w-4 h-4 text-gray-600" />
-              </button>
-            </div>
-            <select
-              value={selectedTeacherId}
-              onChange={e => setSelectedTeacherId(e.target.value)}
-              className="px-4 py-2.5 border border-gray-300 rounded-xl text-sm bg-white text-right appearance-none focus:ring-2 focus:ring-primary"
-            >
-              <option value="all">{language === 'ar' ? 'كل المعلمين' : 'All Teachers'}</option>
-              {TEACHERS.map(t => <option key={t.id} value={t.id}>{t.name}</option>)}
-            </select>
-          </div>
+          <div className="flex items-center gap-4">
+  <div className="flex items-center gap-2 bg-white border border-gray-200 rounded-xl px-4 py-2 shrink-0">
+    <button onClick={() => setWeekOffset(w => w - 1)} className="p-1 hover:bg-gray-100 rounded-lg">
+      <ChevronRight className="w-4 h-4 text-gray-600" />
+    </button>
+    <span className="text-sm font-medium text-gray-800 px-2 whitespace-nowrap">
+      {weekDates[0].toLocaleDateString('ar-SA', { month: 'short', day: 'numeric' })} - {weekDates[6].toLocaleDateString('ar-SA', { month: 'short', day: 'numeric', year: 'numeric' })}
+    </span>
+    <button onClick={() => setWeekOffset(w => w + 1)} className="p-1 hover:bg-gray-100 rounded-lg">
+      <ChevronLeft className="w-4 h-4 text-gray-600" />
+    </button>
+  </div>
+
+  <div className="w-64"> 
+    <CustomSelect
+      value={selectedTeacherId}
+      options={teacherOptions}
+      onChange={(val) => setSelectedTeacherId(val as string)}
+    />
+  </div>
+  
+</div>
 
           <div className="flex gap-4 text-xs">
             <div className="flex items-center gap-1.5">

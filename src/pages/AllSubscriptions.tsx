@@ -4,6 +4,7 @@ import { useLanguage } from '../contexts/LanguageContext';
 import Pagination from '../components/ui/Pagination';
 import ViewSubscriptionDetailsModal from '../components/modals/ViewSubscriptionDetailsModal';
 import EditSubscriptionModal from '../components/modals/EditSubscriptionModal';
+import CustomSelect from '../components/ui/CustomSelect';
 
 interface Subscription {
   id: string;
@@ -172,17 +173,20 @@ export default function AllSubscriptions() {
               className="w-full pr-10 pl-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent text-right"
             />
           </div>
-
-          <select
+<div className="w-full md:w-[220px]">
+         <CustomSelect
+         
             value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value as any)}
-            className="px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent text-right"
-          >
-            <option value="all">{text.all[language]}</option>
-            <option value="active">{text.active[language]}</option>
-            <option value="expired">{text.expired[language]}</option>
-            <option value="cancelled">{text.cancelled[language]}</option>
-          </select>
+onChange={(value) => setStatusFilter(value as "all" |"active" | "expired" | "cancelled")}
+            options={[
+              { value: 'all', label: text.all[language] },
+              { value: 'active', label: text.active[language] },
+              { value: 'expired', label: text.expired[language] },
+              { value: 'cancelled', label: text.cancelled[language] }
+            ]}
+            placeholder={text.filter[language]}
+            />
+            </div>
         </div>
 
         {paginatedSubscriptions.length === 0 ? (

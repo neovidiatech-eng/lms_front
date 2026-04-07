@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Search, Plus, Eye, Trash2, Filter, Edit2, FileText } from 'lucide-react';
+import { Search, Plus, Trash2, Filter, Edit2 } from 'lucide-react';
 import { useLanguage } from '../contexts/LanguageContext';
 import Pagination from '../components/ui/Pagination';
 import AddAssignmentModal from '../components/modals/AddAssignmentModal';
@@ -21,6 +21,8 @@ export default function Assignments() {
   const [currentPage, setCurrentPage] = useState(1);
   const [showFilters, setShowFilters] = useState(false);
   const [showAddModal, setShowAddModal] = useState(false);
+    const [editingAssignment, setEditingAssignment] = useState<Assignment | null>(null);
+  
   const [filters, setFilters] = useState({
     status: '',
     subject: '',
@@ -171,15 +173,17 @@ export default function Assignments() {
   };
 
   const handleAddAssignment = (newAssignment: Assignment) => {
+ if (editingAssignment) {
+    setAssignments(assignments.map(e => e.id === editingAssignment.id ? newAssignment : e));
+  } else {
     setAssignments([...assignments, newAssignment]);
-  };
+  }
+  handleCloseModal();  };
 
-  const handleViewAssignment = (assignmentId: string) => {
-    console.log('View assignment:', assignmentId);
-  };
 
-  const handleEditAssignment = (assignmentId: string) => {
-    console.log('Edit assignment:', assignmentId);
+  const handleEditAssignment = (assignment: Assignment) => {
+    setShowAddModal(true);
+    setEditingAssignment(assignment);
   };
 
   const handleDeleteAssignment = (assignmentId: string) => {
@@ -187,7 +191,10 @@ export default function Assignments() {
       setAssignments(assignments.filter(assignment => assignment.id !== assignmentId));
     }
   };
-
+const handleCloseModal = () => {
+  setShowAddModal(false);
+  setEditingAssignment(null);
+};
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -205,6 +212,7 @@ export default function Assignments() {
         isOpen={showAddModal}
         onClose={() => setShowAddModal(false)}
         onAdd={handleAddAssignment}
+        initialData={editingAssignment}
       />
 
       <div className="bg-white rounded-2xl shadow-sm border border-gray-200">
@@ -312,7 +320,7 @@ export default function Assignments() {
                   <td className="px-6 py-4">
                     <div className="flex items-center gap-2 justify-start">
                       <button
-                        onClick={() => handleEditAssignment(assignment.id)}
+                        onClick={() => handleEditAssignment(assignment)}
                         className="p-2 icon-btn-primary rounded-lg transition-colors"
                         title="تعديل"
                       >

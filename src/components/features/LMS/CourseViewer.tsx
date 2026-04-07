@@ -1,5 +1,6 @@
 import { ArrowRight, Download, FileText, Image, File, BookOpen, Tag, Layers } from 'lucide-react';
-import { Course, Level, AttachedFile, getVideoEmbed, getYoutubeThumbnail } from '../../../pages/LMSCourses';
+import {  getVideoEmbed, getYoutubeThumbnail } from '../../../pages/LMSCourses/LMSCourses';
+import { AttachedFile, Course, Level } from '../../../types/lmsCourses';
 
 interface Props {
   course: Course;

@@ -2,25 +2,13 @@ import { useState } from 'react';
 import { Plus, Edit, Trash2, Eye, DollarSign, Search, Filter } from 'lucide-react';
 import { useLanguage } from '../contexts/LanguageContext';
 import AddExpenseModal from '../components/modals/AddExpenseModal';
-import EditExpenseModal from '../components/modals/EditExpenseModal';
 import ViewExpenseModal from '../components/modals/ViewExpenseModal';
-
-interface Expense {
-  id: string;
-  description: string;
-  amount: number;
-  currency: string;
-  category: string;
-  date: string;
-  paymentMethod: string;
-  status: 'paid' | 'pending';
-}
+import { Expense } from '../lib/schemas/ExpenseSchema';
 
 export default function Expenses() {
   const { language } = useLanguage();
-  const [showAddModal, setShowAddModal] = useState(false);
+const [showModal, setShowModal] = useState(false);
   const [showViewModal, setShowViewModal] = useState(false);
-  const [showEditModal, setShowEditModal] = useState(false);
   const [selectedExpense, setSelectedExpense] = useState<Expense | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [filterCategory, setFilterCategory] = useState('all');
@@ -91,19 +79,17 @@ export default function Expenses() {
     }
   ]);
 
-  const handleAddExpense = (expense: Omit<Expense, 'id'>) => {
-    const newExpense = {
-      ...expense,
-      id: Date.now().toString()
-    };
-    setExpenses([...expenses, newExpense]);
-  };
-
-  const handleEditExpense = (updatedExpense: Expense) => {
-    setExpenses(expenses.map(exp =>
-      exp.id === updatedExpense.id ? updatedExpense : exp
-    ));
-  };
+const handleSaveExpense = (expenseData: Expense) => {
+  setExpenses(prev => {
+    const exists = prev.find(e => e.id === expenseData.id);
+    if (exists) {
+      return prev.map(e => e.id === expenseData.id ? expenseData : e);
+    }
+    return [...prev, expenseData];
+  });
+  setShowModal(false);
+  setSelectedExpense(null);
+};
 
   const handleDeleteExpense = (id: string) => {
     if (window.confirm(text.confirmDelete[language])) {
@@ -111,16 +97,12 @@ export default function Expenses() {
     }
   };
 
-  const handleViewExpense = (expense: Expense) => {
-    setSelectedExpense(expense);
-    setShowViewModal(true);
-  };
+  // const handleViewExpense = (expense: Expense) => {
+  //   setSelectedExpense(expense);
+  //   setShowViewModal(true);
+  // };
 
-  const handleEditClick = (expense: Expense) => {
-    setSelectedExpense(expense);
-    setShowEditModal(true);
-  };
-
+ 
   const filteredExpenses = expenses.filter(expense => {
     const matchesSearch =
       expense.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -144,7 +126,7 @@ export default function Expenses() {
       <div className="mb-6 flex items-center justify-between">
         <h1 className="text-3xl font-bold text-gray-900">{text.title[language]}</h1>
         <button
-          onClick={() => setShowAddModal(true)}
+onClick={() => { setSelectedExpense(null); setShowModal(true); }}
           className="flex items-center gap-2 px-6 py-3 btn-primary text-white rounded-xl transition-colors"
         >
           <Plus className="w-5 h-5" />
@@ -263,27 +245,9 @@ export default function Expenses() {
                     </td>
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-2 justify-start">
-                        <button
-                          onClick={() => handleViewExpense(expense)}
-                          className="p-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
-                          title={text.view[language]}
-                        >
-                          <Eye className="w-4 h-4" />
-                        </button>
-                        <button
-                          onClick={() => handleEditClick(expense)}
-                          className="p-2 icon-btn-primary rounded-lg transition-colors"
-                          title={text.edit[language]}
-                        >
-                          <Edit className="w-4 h-4" />
-                        </button>
-                        <button
-                          onClick={() => handleDeleteExpense(expense.id)}
-                          className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-                          title={text.delete[language]}
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </button>
+                       <button onClick={() => { setSelectedExpense(expense); setShowViewModal(true); }} className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"><Eye size={16} /></button>
+                       <button onClick={() => { setSelectedExpense(expense); setShowModal(true); }} className="p-2 text-amber-600 hover:bg-amber-50 rounded-lg transition-colors"><Edit size={16} /></button>
+                       <button onClick={() => handleDeleteExpense(expense.id)} className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"><Trash2 size={16} /></button>
                       </div>
                     </td>
                   </tr>
@@ -294,25 +258,14 @@ export default function Expenses() {
         </div>
       )}
 
-      {showAddModal && (
-        <AddExpenseModal
-          isOpen={showAddModal}
-          onClose={() => setShowAddModal(false)}
-          onSave={handleAddExpense}
-        />
-      )}
+      <AddExpenseModal
+        isOpen={showModal}
+        onClose={() => { setShowModal(false);
+        setSelectedExpense(null); }}
+        onSave={handleSaveExpense}
+        initialData={selectedExpense}
+      />
 
-      {showEditModal && selectedExpense && (
-        <EditExpenseModal
-          isOpen={showEditModal}
-          onClose={() => {
-            setShowEditModal(false);
-            setSelectedExpense(null);
-          }}
-          expense={selectedExpense}
-          onSave={handleEditExpense}
-        />
-      )}
 
       {showViewModal && selectedExpense && (
         <ViewExpenseModal

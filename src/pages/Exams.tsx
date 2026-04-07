@@ -1,8 +1,8 @@
 import { useState } from 'react';
-import { Search, Plus, Eye, Trash2, Filter, Edit2, FileText } from 'lucide-react';
+import { Search, Plus, Trash2, Filter, Edit2 } from 'lucide-react';
 import { useLanguage } from '../contexts/LanguageContext';
 import Pagination from '../components/ui/Pagination';
-import AddExamModal from '../components/modals/AddExamModal';
+import AddExamModal from '../components/modals/ExamModal';
 
 interface Exam {
   id: string;
@@ -22,6 +22,7 @@ export default function Exams() {
   const [currentPage, setCurrentPage] = useState(1);
   const [showFilters, setShowFilters] = useState(false);
   const [showAddModal, setShowAddModal] = useState(false);
+  const [editingExam, setEditingExam] = useState<Exam | null>(null);
   const [filters, setFilters] = useState({
     status: '',
     subject: '',
@@ -136,17 +137,28 @@ export default function Exams() {
     setCurrentPage(page);
   };
 
-  const handleAddExam = (newExam: Exam) => {
-    setExams([...exams, newExam]);
-  };
+const handleSaveExam = (examData: Exam) => {
+  if (editingExam) {
+    setExams(exams.map(e => e.id === editingExam.id ? examData : e));
+  } else {
+    setExams([...exams, examData]);
+  }
+  handleCloseModal();
+};
 
-  const handleViewExam = (examId: string) => {
-    console.log('View exam:', examId);
-  };
+  // const handleViewExam = (examId: string) => {
+  //   console.log('View exam:', examId);
+  // };
 
-  const handleEditExam = (examId: string) => {
-    console.log('Edit exam:', examId);
-  };
+  const handleEditExam = (exam: Exam) => {
+  setEditingExam(exam);
+  setShowAddModal(true);
+};
+
+const handleCloseModal = () => {
+  setShowAddModal(false);
+  setEditingExam(null);
+};
 
   const handleDeleteExam = (examId: string) => {
     if (window.confirm(language === 'ar' ? 'هل أنت متأكد من حذف هذا الامتحان؟' : 'Are you sure you want to delete this exam?')) {
@@ -170,7 +182,8 @@ export default function Exams() {
       <AddExamModal
         isOpen={showAddModal}
         onClose={() => setShowAddModal(false)}
-        onAdd={handleAddExam}
+        onAdd={handleSaveExam}
+        initialData={editingExam}
       />
 
       <div className="bg-white rounded-2xl shadow-sm border border-gray-200">
@@ -275,7 +288,7 @@ export default function Exams() {
                   <td className="px-6 py-4">
                     <div className="flex items-center gap-2 justify-start">
                       <button
-                        onClick={() => handleEditExam(exam.id)}
+                        onClick={() => handleEditExam(exam)}
                         className="p-2 icon-btn-primary rounded-lg transition-colors"
                         title="تعديل"
                       >

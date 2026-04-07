@@ -2,9 +2,9 @@ import { useState, useMemo } from 'react';
 import { Plus, TrendingUp, TrendingDown, DollarSign, Search, Edit, Trash2, Eye, RefreshCw } from 'lucide-react';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useSessions } from '../contexts/SessionsContext';
-import AddTransactionModal from '../components/modals/AddTransactionModal';
-import EditTransactionModal from '../components/modals/EditTransactionModal';
 import ViewTransactionModal from '../components/modals/ViewTransactionModal';
+import { TransactionFormData } from '../lib/schemas/TransactionSchema';
+import AddTransactionModal from '../components/modals/AddTransactionModal';
 
 export interface Transaction {
   id: string;
@@ -94,10 +94,10 @@ export default function Transactions() {
   const [filterStatus, setFilterStatus] = useState('all');
   const [filterType, setFilterType] = useState('all');
   const [selectedCurrency, setSelectedCurrency] = useState('SAR');
-  const [showAddModal, setShowAddModal] = useState(false);
-  const [showEditModal, setShowEditModal] = useState(false);
+const [isModalOpen, setIsModalOpen] = useState(false);
+const [selectedTransaction, setSelectedTransaction] = useState<Transaction | null>(null);
   const [showViewModal, setShowViewModal] = useState(false);
-  const [selectedTransaction, setSelectedTransaction] = useState<Transaction | null>(null);
+ 
 
   const text = {
     title: { ar: 'المعاملات المالية', en: 'Financial Transactions' },
@@ -175,7 +175,6 @@ export default function Transactions() {
   const filteredTransactions = useMemo(() => {
     return allTransactions.filter(t => {
       const matchesSearch =
-        (t.studentName || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
         t.teacherName.toLowerCase().includes(searchQuery.toLowerCase());
       const matchesStatus = filterStatus === 'all' || t.status === filterStatus;
       const matchesType = filterType === 'all' || t.type === filterType;
@@ -217,22 +216,52 @@ export default function Transactions() {
     }
   };
 
-  const handleEdit = (transaction: Transaction) => {
-    setSelectedTransaction(transaction);
-    setShowEditModal(true);
+const handleOpenAddModal = () => {
+  setSelectedTransaction(null); 
+  setIsModalOpen(true);
+};
+
+const handleEdit = (transaction: Transaction) => {
+  setSelectedTransaction(transaction);
+  setIsModalOpen(true);
+};
+
+
+
+const handleSaveTransaction = (data: TransactionFormData) => {
+  const transactionData = {
+    ...data,
+    paymentMethod: data.paymentMethod ?? '',
+    studentName: data.studentName ?? '',
+    notes: data.notes ?? '',
+    sessionCount: data.sessionCount ?? 0,
+    sessionDuration: data.sessionDuration ?? 60,
+    ratePerHour: data.ratePerHour ?? 0,
   };
+
+  if (selectedTransaction) {
+    setTransactions(prev =>
+      prev.map(t =>
+        t.id === selectedTransaction.id
+          ? { ...transactionData, id: selectedTransaction.id } as Transaction
+          : t
+      )
+    );
+  } else {
+    const newTransaction: Transaction = {
+      ...transactionData,
+      id: Date.now().toString(),
+    };
+    setTransactions(prev => [newTransaction, ...prev]);
+  }
+
+  setIsModalOpen(false);
+  setSelectedTransaction(null);
+};
 
   const handleView = (transaction: Transaction) => {
     setSelectedTransaction(transaction);
     setShowViewModal(true);
-  };
-
-  const handleSaveTransaction = (updated: Transaction) => {
-    setTransactions(prev => prev.map(t => t.id === updated.id ? updated : t));
-  };
-
-  const handleAddTransaction = (t: Omit<Transaction, 'id'>) => {
-    setTransactions(prev => [...prev, { ...t, id: Date.now().toString() }]);
   };
 
   const profitPercentage = stats.totalIncome > 0 ? ((stats.netProfit / stats.totalIncome) * 100).toFixed(1) : '0.0';
@@ -255,13 +284,13 @@ export default function Transactions() {
               ))}
             </select>
           </div>
-          <button
-            onClick={() => setShowAddModal(true)}
-            className="flex items-center gap-2 px-5 py-2.5 btn-primary text-white rounded-xl transition-colors"
-          >
-            <Plus className="w-5 h-5" />
-            <span className="font-medium">{text.addTransaction[language]}</span>
-          </button>
+         <button
+  onClick={handleOpenAddModal} 
+  className="flex items-center gap-2 px-5 py-2.5 btn-primary text-white rounded-xl transition-colors"
+>
+  <Plus className="w-5 h-5" />
+  <span className="font-medium">{text.addTransaction[language]}</span>
+</button>
         </div>
       </div>
 
@@ -479,24 +508,17 @@ export default function Transactions() {
         </div>
       )}
 
-      {showAddModal && (
-        <AddTransactionModal
-          isOpen={showAddModal}
-          onClose={() => setShowAddModal(false)}
-          onSave={handleAddTransaction}
-          currencies={CURRENCIES}
-        />
-      )}
+     <AddTransactionModal
+  isOpen={isModalOpen}
+  onClose={() => {
+    setIsModalOpen(false);
+    setSelectedTransaction(null);
+  }}
+  onSave={handleSaveTransaction}
+  currencies={CURRENCIES}
+  editingTransaction={selectedTransaction} 
+/>
 
-      {showEditModal && selectedTransaction && (
-        <EditTransactionModal
-          isOpen={showEditModal}
-          onClose={() => { setShowEditModal(false); setSelectedTransaction(null); }}
-          transaction={selectedTransaction}
-          onSave={handleSaveTransaction}
-          currencies={CURRENCIES}
-        />
-      )}
 
       {showViewModal && selectedTransaction && (
         <ViewTransactionModal

@@ -1,31 +1,31 @@
 import { X, GraduationCap } from 'lucide-react';
-import { useState } from 'react';
 import { useLanguage } from '../../contexts/LanguageContext';
+import CustomSelect from '../ui/CustomSelect';
+import { StudentFormData, studentSchema } from '../../lib/schemas/StudentSchema';
+import { Controller, useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
 
 interface AddStudentModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSubmit: (studentData: any) => void;
+  onSubmit: (studentData: StudentFormData) => void;
 }
 
 export default function AddStudentModal({ isOpen, onClose, onSubmit }: AddStudentModalProps) {
   const { language } = useLanguage();
-  const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    countryCode: '+20',
-    phone: '',
-    gender: '',
-    birthDate: '',
-    plan: '',
-    country: '',
-    status: 'active',
-    password: '',
+  const { register, handleSubmit, control, reset, formState: { errors } } = useForm<StudentFormData>({
+    resolver: zodResolver(studentSchema),
+    defaultValues: {
+      countryCode: '+20',
+      status: 'active',
+      gender: '',
+      plan: '',
+      country: 'مصر'
+    }
   });
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    onSubmit(formData);
+const onFormSubmit = (data: StudentFormData) => {
+      onSubmit(data);
+      reset();
     onClose();
   };
 
@@ -64,6 +64,37 @@ export default function AddStudentModal({ isOpen, onClose, onSubmit }: AddStuden
     { id: 'inactive', label: 'متوقف', labelEn: 'Inactive' },
   ];
 
+const countryCodeOptions = countryCodes.map((c) => ({
+  value: c.code,
+  searchText: `${c.country} ${c.countryEn} ${c.code}`,
+  label: (
+    <div className="flex justify-between items-center w-full">
+      <span className="font-mono">{c.code}</span>
+      <span className="text-gray-500 text-xs">{language === 'ar' ? c.country : c.countryEn}</span>
+    </div>
+  ),
+}));
+
+const genderOptions = genders.filter(g => g.id !== '').map((g) => ({
+  value: g.id,
+  label: language === 'ar' ? g.label : g.labelEn,
+}));
+
+const countryOptions = countries.filter(c => c.id !== '').map((c) => ({
+  value: c.id,
+  label: language === 'ar' ? c.label : c.labelEn,
+}));
+
+const planOptions = plans.map((p) => ({
+  value: p.id,
+  label: language === 'ar' ? p.label : p.labelEn,
+}));
+
+const statusOptions = statuses.map((s) => ({
+  value: s.id,
+  label: language === 'ar' ? s.label : s.labelEn,
+}));
+
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
       <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
@@ -82,7 +113,7 @@ export default function AddStudentModal({ isOpen, onClose, onSubmit }: AddStuden
         </div>
 
         {/* Form */}
-        <form onSubmit={handleSubmit} className="p-6">
+        <form onSubmit={handleSubmit(onFormSubmit)} className="p-6">
           <div className="space-y-6">
             {/* Row 1: Name and Email */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -93,13 +124,12 @@ export default function AddStudentModal({ isOpen, onClose, onSubmit }: AddStuden
                 </label>
                 <input
                   type="text"
-                  required
-                  value={formData.name}
-                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                  {...register('name')}
                   placeholder={language === 'ar' ? 'ex :- Mohamed' : 'ex :- Mohamed'}
                   className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary text-right"
                   dir="rtl"
                 />
+                {errors.name && <p className="text-red-500 text-xs mt-1">{errors.name.message}</p>}
               </div>
 
               {/* Email */}
@@ -110,12 +140,12 @@ export default function AddStudentModal({ isOpen, onClose, onSubmit }: AddStuden
                 <input
                   type="email"
                   required
-                  value={formData.email}
-                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                  {...register('email')}
                   placeholder="ex :- 6I6Tt@example.com"
                   className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary text-right"
                   dir="ltr"
                 />
+                {errors.email && <p className="text-red-500 text-xs mt-1">{errors.email.message}</p>}
               </div>
             </div>
 
@@ -128,33 +158,29 @@ export default function AddStudentModal({ isOpen, onClose, onSubmit }: AddStuden
                 </label>
                 <input
                   type="tel"
-                  required
-                  value={formData.phone}
-                  onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                  
+                  {...register('phone')}
                   placeholder="ex :- 01091536978"
                   className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary text-right"
                   dir="ltr"
                 />
+                {errors.phone && <p className="text-red-500 text-xs mt-1">{errors.phone.message}</p>}
               </div>
 
               {/* Country Code */}
-              <div className="text-right">
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  {language === 'ar' ? 'رمز الدولة' : 'Country Code'}
-                </label>
-                <select
-                  value={formData.countryCode}
-                  onChange={(e) => setFormData({ ...formData, countryCode: e.target.value })}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary text-right bg-white"
-                >
-                  {countryCodes.map((cc) => (
-                    <option key={cc.code} value={cc.code}>
-                      {cc.code}+
-                    </option>
-                  ))}
-                </select>
-              </div>
-            </div>
+<Controller
+              name="countryCode"
+              control={control}
+              render={({ field }) => (
+                <CustomSelect
+                  label={language === 'ar' ? 'رمز الدولة' : 'Code'}
+                  value={field.value}
+                  options={countryCodeOptions}
+                  onChange={field.onChange}
+                />
+              )}
+            />  
+                </div>
 
             {/* Row 3: Gender and Birth Date */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -165,69 +191,56 @@ export default function AddStudentModal({ isOpen, onClose, onSubmit }: AddStuden
                 </label>
                 <input
                   type="date"
-                  value={formData.birthDate}
-                  onChange={(e) => setFormData({ ...formData, birthDate: e.target.value })}
+                  {...register('birthDate')}
                   placeholder="dd/mm/yyyy"
                   className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary text-right"
                 />
+                
               </div>
 
               {/* Gender */}
-              <div className="text-right">
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  {language === 'ar' ? 'الجنس' : 'Gender'}
-                </label>
-                <select
-                  value={formData.gender}
-                  onChange={(e) => setFormData({ ...formData, gender: e.target.value })}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary text-right bg-white"
-                >
-                  {genders.map((gender) => (
-                    <option key={gender.id} value={gender.id}>
-                      {language === 'ar' ? gender.label : gender.labelEn}
-                    </option>
-                  ))}
-                </select>
-              </div>
+             <Controller
+              name="gender"
+              control={control}
+              render={({ field }) => (
+                <CustomSelect
+label={language === 'ar' ? 'الجنس' : 'Gender'}
+                  value={field.value}
+                  options={genderOptions}
+                  onChange={field.onChange}
+                />
+              )}
+            />
             </div>
 
             {/* Row 4: Plan and Country */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {/* Country */}
-              <div className="text-right">
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  {language === 'ar' ? 'الدولة' : 'Country'}
-                </label>
-                <select
-                  value={formData.country}
-                  onChange={(e) => setFormData({ ...formData, country: e.target.value })}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary text-right bg-white"
-                >
-                  {countries.map((country) => (
-                    <option key={country.id} value={country.id}>
-                      {language === 'ar' ? country.label : country.labelEn}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              {/* Plan */}
-              <div className="text-right">
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  {language === 'ar' ? 'الخطة' : 'Plan'}
-                </label>
-                <select
-                  value={formData.plan}
-                  onChange={(e) => setFormData({ ...formData, plan: e.target.value })}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary text-right bg-white"
-                >
-                  {plans.map((plan) => (
-                    <option key={plan.id} value={plan.id}>
-                      {language === 'ar' ? plan.label : plan.labelEn}
-                    </option>
-                  ))}
-                </select>
-              </div>
+      <Controller
+    name="country"
+    control={control}
+    render={({ field }) => (
+      <CustomSelect
+        label={language === 'ar' ? 'الدولة' : 'Country'}
+        value={field.value}
+        options={countryOptions}
+        placeholder={language === 'ar' ? 'اختر الدولة' : 'Select Country'}
+        onChange={field.onChange}
+      />
+    )}
+/>
+<Controller
+              name="plan"
+              control={control}
+              render={({ field }) => (
+                <CustomSelect
+                  label={language === 'ar' ? 'الخطة الدراسية' : 'Plan'}
+                  value={field.value}
+                  options={planOptions}
+                  onChange={field.onChange}
+                />
+              )}
+            />
             </div>
 
             {/* Row 5: Status and Password */}
@@ -239,32 +252,27 @@ export default function AddStudentModal({ isOpen, onClose, onSubmit }: AddStuden
                 </label>
                 <input
                   type="password"
-                  required
-                  value={formData.password}
-                  onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                  {...register('password')}
                   placeholder="••••••••"
                   className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary text-right bg-gray-50"
                   dir="ltr"
                 />
+                {errors.password && <p className="text-red-500 text-xs mt-1">{errors.password.message}</p>}
               </div>
 
               {/* Status */}
-              <div className="text-right">
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  {language === 'ar' ? 'الحالة' : 'Status'}
-                </label>
-                <select
-                  value={formData.status}
-                  onChange={(e) => setFormData({ ...formData, status: e.target.value })}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary text-right bg-white"
-                >
-                  {statuses.map((status) => (
-                    <option key={status.id} value={status.id}>
-                      {language === 'ar' ? status.label : status.labelEn}
-                    </option>
-                  ))}
-                </select>
-              </div>
+     <Controller
+              name="status"
+              control={control}
+              render={({ field }) => (
+                <CustomSelect
+                  label={language === 'ar' ? 'الحالة' : 'Status'}
+                  value={field.value}
+                  options={statusOptions}
+                  onChange={field.onChange}
+                />
+              )}
+            />
             </div>
           </div>
 
@@ -277,10 +285,7 @@ export default function AddStudentModal({ isOpen, onClose, onSubmit }: AddStuden
             >
               {language === 'ar' ? 'إلغاء' : 'Cancel'}
             </button>
-            <button
-              type="submit"
-              className="flex-1 px-6 py-3 btn-primary text-white rounded-xl transition-colors font-medium"
-            >
+           <button type="submit" className="flex-1 px-6 py-3 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-colors font-medium">
               {language === 'ar' ? 'حفظ' : 'Save'}
             </button>
           </div>

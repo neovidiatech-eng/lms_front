@@ -2,26 +2,23 @@ import { useState } from 'react';
 import { Plus, Edit, Trash2, Eye, DollarSign, Search, Star, TrendingUp } from 'lucide-react';
 import { useLanguage } from '../contexts/LanguageContext';
 import AddCurrencyModal from '../components/modals/AddCurrencyModal';
-import EditCurrencyModal from '../components/modals/EditCurrencyModal';
 import ViewCurrencyModal from '../components/modals/ViewCurrencyModal';
-
-interface Currency {
-  id: string;
-  code: string;
-  nameAr: string;
-  nameEn: string;
-  symbol: string;
-  exchangeRate: number;
-  isDefault: boolean;
-}
+import { useCurrency, useAddCurrency, useUpdateCurrency, useDeleteCurrency } from '../hooks/useCurrency';
+import { Currency } from '../types/currency';
+import { CurrencyFormData } from '../lib/schemas/CurrencySchema';
+import { TableSkeleton } from '../components/ui/CustomSkeleton';
 
 export default function Currencies() {
   const { language } = useLanguage();
   const [showAddModal, setShowAddModal] = useState(false);
   const [showViewModal, setShowViewModal] = useState(false);
-  const [showEditModal, setShowEditModal] = useState(false);
   const [selectedCurrency, setSelectedCurrency] = useState<Currency | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
+
+  const { data, isError, error, isLoading } = useCurrency();
+  const { mutate: addCurrency } = useAddCurrency();
+  const { mutate: updateCurrency } = useUpdateCurrency();
+  const { mutate: deleteCurrency } = useDeleteCurrency();
 
   const text = {
     title: { ar: 'إدارة العملات', en: 'Currency Management' },
@@ -45,79 +42,28 @@ export default function Currencies() {
     defaultCurrency: { ar: 'العملة الافتراضية', en: 'Default Currency' },
   };
 
-  const [currencies, setCurrencies] = useState<Currency[]>([
-    {
-      id: '1',
-      code: 'SAR',
-      nameAr: 'ر.س',
-      nameEn: 'Saudi Riyal',
-      symbol: 'ر.س',
-      exchangeRate: 1,
-      isDefault: true
-    },
-    {
-      id: '2',
-      code: 'EGP',
-      nameAr: 'ج.م',
-      nameEn: 'Egyptian Pound',
-      symbol: 'ج.م',
-      exchangeRate: 12.72,
-      isDefault: false
-    },
-    {
-      id: '3',
-      code: 'USD',
-      nameAr: 'دولار أمريكي',
-      nameEn: 'US Dollar',
-      symbol: '$',
-      exchangeRate: 0.27,
-      isDefault: false
-    }
-  ]);
+  const currencies = data?.currencies ?? [];
 
-  const recalculateExchangeRates = (oldDefaultRate: number, newDefaultId: string) => {
-    setCurrencies(prevCurrencies =>
-      prevCurrencies.map(curr => {
-        if (curr.id === newDefaultId) {
-          return { ...curr, isDefault: true, exchangeRate: 1 };
-        }
-        if (curr.isDefault) {
-          return { ...curr, isDefault: false, exchangeRate: oldDefaultRate };
-        }
-        const newRate = curr.exchangeRate / oldDefaultRate;
-        return { ...curr, exchangeRate: parseFloat(newRate.toFixed(4)) };
-      })
-    );
-  };
-
-  const handleAddCurrency = (currency: Omit<Currency, 'id'>) => {
-    const newCurrency = { ...currency, id: Date.now().toString() };
-    if (newCurrency.isDefault) {
-      const oldDefault = currencies.find(c => c.isDefault);
-      if (oldDefault) recalculateExchangeRates(newCurrency.exchangeRate, newCurrency.id);
-      setCurrencies([...currencies, { ...newCurrency, exchangeRate: 1 }]);
+  const handleSaveCurrency = (formData: CurrencyFormData & { id?: string }) => {
+    if (formData.id) {
+      const { id, ...rest } = formData;
+      updateCurrency({ id, data: rest });
     } else {
-      setCurrencies([...currencies, newCurrency]);
+      const { id: _id, ...rest } = formData as CurrencyFormData & { id?: string };
+      addCurrency(rest as Omit<Currency, 'id' | 'createdAt' | 'updatedAt'>);
     }
-  };
-
-  const handleEditCurrency = (updatedCurrency: Currency) => {
-    const oldCurrency = currencies.find(c => c.id === updatedCurrency.id);
-    if (updatedCurrency.isDefault && !oldCurrency?.isDefault) {
-      recalculateExchangeRates(updatedCurrency.exchangeRate, updatedCurrency.id);
-    } else {
-      setCurrencies(currencies.map(c => c.id === updatedCurrency.id ? updatedCurrency : c));
-    }
+    setShowAddModal(false);
+    setSelectedCurrency(null);
   };
 
   const handleDeleteCurrency = (id: string) => {
     const currency = currencies.find(c => c.id === id);
-    if (currency?.isDefault) {
+    if (currency?.default) {
       alert(text.cannotDeleteDefault[language]);
       return;
     }
     if (window.confirm(text.confirmDelete[language])) {
-      setCurrencies(currencies.filter(c => c.id !== id));
+      deleteCurrency(id);
     }
   };
 
@@ -126,18 +72,20 @@ export default function Currencies() {
     setShowViewModal(true);
   };
 
-  const handleEditClick = (currency: Currency) => {
-    setSelectedCurrency(currency);
-    setShowEditModal(true);
-  };
-
   const filteredCurrencies = currencies.filter(currency =>
     currency.code.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    currency.nameAr.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    currency.nameEn.toLowerCase().includes(searchQuery.toLowerCase())
+    currency.name_ar.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    currency.name_en.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  const defaultCurrency = currencies.find(c => c.isDefault);
+  const defaultCurrency = data?.default;
+  if (isError) {
+    return <h1>{error.message}</h1>
+  }
+
+  if (isLoading) {
+    return TableSkeleton({ rows: 4, columns: 5 })
+  }
 
   return (
     <div className="p-6" dir="rtl">
@@ -149,7 +97,7 @@ export default function Currencies() {
           </p>
         </div>
         <button
-          onClick={() => setShowAddModal(true)}
+          onClick={() => { setSelectedCurrency(null); setShowAddModal(true); }}
           className="flex items-center gap-2 px-5 py-2.5 btn-primary text-white rounded-xl font-medium"
         >
           <Plus className="w-4 h-4" />
@@ -174,7 +122,7 @@ export default function Currencies() {
           <div>
             <p className="text-sm text-gray-500">{text.defaultCurrency[language]}</p>
             <p className="text-lg font-bold text-gray-900">
-              {defaultCurrency ? (language === 'ar' ? defaultCurrency.nameAr : defaultCurrency.nameEn) : '-'}
+              {defaultCurrency ? (language === 'ar' ? defaultCurrency.name_ar : defaultCurrency.name_en) : '-'}
             </p>
           </div>
         </div>
@@ -216,7 +164,7 @@ export default function Currencies() {
                 {filteredCurrencies.map((currency) => (
                   <tr
                     key={currency.id}
-                    className={`hover:bg-gray-50 transition-colors ${currency.isDefault ? 'bg-green-50/40' : ''}`}
+                    className={`hover:bg-gray-50 transition-colors ${currency.default ? 'bg-green-50/40' : ''}`}
                   >
                     <td className="px-6 py-4 text-right">
                       <span className="inline-flex items-center px-2.5 py-1 rounded-lg bg-gray-100 text-gray-800 text-sm font-bold font-mono">
@@ -225,7 +173,7 @@ export default function Currencies() {
                     </td>
                     <td className="px-6 py-4 text-right">
                       <span className="text-sm font-medium text-gray-900">
-                        {language === 'ar' ? currency.nameAr : currency.nameEn}
+                        {language === 'ar' ? currency.name_ar : currency.name_en}
                       </span>
                     </td>
                     <td className="px-6 py-4 text-right">
@@ -238,7 +186,7 @@ export default function Currencies() {
                       </div>
                     </td>
                     <td className="px-6 py-4 text-right">
-                      {currency.isDefault ? (
+                      {currency.default ? (
                         <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-green-100 text-green-700 text-xs font-semibold">
                           <Star className="w-3 h-3" />
                           {text.yes[language]}
@@ -259,9 +207,8 @@ export default function Currencies() {
                           <Eye className="w-4 h-4" />
                         </button>
                         <button
-                          onClick={() => handleEditClick(currency)}
-                          className="p-1.5 icon-btn-primary rounded-lg transition-colors"
-                          title={text.edit[language]}
+                          onClick={() => { setSelectedCurrency(currency); setShowAddModal(true); }}
+                          className="p-1.5 text-blue-500 hover:bg-blue-50 rounded-lg"
                         >
                           <Edit className="w-4 h-4" />
                         </button>
@@ -285,17 +232,9 @@ export default function Currencies() {
       {showAddModal && (
         <AddCurrencyModal
           isOpen={showAddModal}
-          onClose={() => setShowAddModal(false)}
-          onSave={handleAddCurrency}
-        />
-      )}
-
-      {showEditModal && selectedCurrency && (
-        <EditCurrencyModal
-          isOpen={showEditModal}
-          onClose={() => { setShowEditModal(false); setSelectedCurrency(null); }}
-          currency={selectedCurrency}
-          onSave={handleEditCurrency}
+          onClose={() => { setShowAddModal(false); setSelectedCurrency(null); }}
+          onSave={handleSaveCurrency}
+          initialData={selectedCurrency}
         />
       )}
 

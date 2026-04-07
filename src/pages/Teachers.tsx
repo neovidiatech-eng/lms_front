@@ -6,6 +6,7 @@ import AddTeacherModal from '../components/modals/AddTeacherModal';
 import ViewTeacherModal from '../components/modals/ViewTeacherModal';
 import EditTeacherModal from '../components/modals/EditTeacherModal';
 import Pagination from '../components/ui/Pagination';
+import CustomSelect from '../components/ui/CustomSelect';
 
 interface Teacher {
   id: string;
@@ -266,34 +267,24 @@ export default function Teachers() {
           </div>
 
           {/* Status Filter */}
-          <div>
-            <select
-              value={selectedStatus}
-              onChange={(e) => setSelectedStatus(e.target.value)}
-              className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary text-right bg-white"
-            >
-              {statuses.map((status) => (
-                <option key={status.id} value={status.id}>
-                  {language === 'ar' ? status.label : status.labelEn}
-                </option>
-              ))}
-            </select>
-          </div>
+          <CustomSelect
+    value={selectedStatus}
+    options={statuses.map((c) =>{
+      return { value: c.id, label: language === 'ar' ? c.label : c.labelEn };
+    })}
+    onChange={(val) => setSelectedStatus(val as string)}
+    className="h-[46px]"
+  />
 
           {/* Country Filter */}
-          <div>
-            <select
-              value={selectedCountry}
-              onChange={(e) => setSelectedCountry(e.target.value)}
-              className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary text-right bg-white"
-            >
-              {countries.map((country) => (
-                <option key={country.id} value={country.id}>
-                  {language === 'ar' ? country.label : country.labelEn}
-                </option>
-              ))}
-            </select>
-          </div>
+         <CustomSelect
+             value={selectedCountry}
+             options={countries.map((c) =>{
+               return { value: c.id, label: language === 'ar' ? c.label : c.labelEn };
+             })}
+             onChange={(val) => setSelectedCountry(val as string)}
+             className="h-[46px]"
+           />
         </div>
       </div>
 
@@ -449,7 +440,6 @@ export default function Teachers() {
         }}
         onSubmit={(teacherData) => {
           console.log('Updated teacher data:', teacherData);
-          alert(language === 'ar' ? 'تم تحديث بيانات المعلم بنجاح' : 'Teacher updated successfully');
         }}
         teacher={selectedTeacher}
       />

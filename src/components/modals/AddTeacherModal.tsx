@@ -1,43 +1,27 @@
 import { X, Users } from 'lucide-react';
-import { useState } from 'react';
 import { useLanguage } from '../../contexts/LanguageContext';
+import CustomSelect from '../ui/CustomSelect';
+import { TeacherFormData, teacherSchema } from '../../lib/schemas/TeacherSchema';
+import { Controller, FieldPath, Resolver, useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { CustomCheckbox } from '../ui/CustomCheckbox';
 
 interface AddTeacherModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSubmit: (teacherData: any) => void;
+  onSubmit: (teacherData: TeacherFormData) => void;
 }
 
 export default function AddTeacherModal({ isOpen, onClose, onSubmit }: AddTeacherModalProps) {
   const { language } = useLanguage();
-  const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    phone: '',
-    password: '',
-    hourlyRate: '',
-    currency: 'EGP',
-    gender: 'male',
-    status: 'active',
-    subjects: {
-      quran: false,
-      math: false,
-      arabic: false,
-      math2: false,
-      science: false,
-    },
-  });
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    onSubmit(formData);
-    onClose();
-    setFormData({
+  const { register, handleSubmit, control, watch, setValue, reset, formState: { errors } } = useForm<TeacherFormData>({
+    resolver: zodResolver(teacherSchema) as Resolver<TeacherFormData>,
+    defaultValues: {
       name: '',
       email: '',
       phone: '',
       password: '',
-      hourlyRate: '',
+      hourlyRate: 0,
       currency: 'EGP',
       gender: 'male',
       status: 'active',
@@ -48,10 +32,17 @@ export default function AddTeacherModal({ isOpen, onClose, onSubmit }: AddTeache
         math2: false,
         science: false,
       },
-    });
+    }
+  });
+
+  const handleOnSubmit = (data: TeacherFormData) => {
+    onSubmit(data);
+    onClose();
+    reset();
   };
 
   if (!isOpen) return null;
+  const subjectsValue = watch('subjects');
 
   const currencies = [
     { id: 'EGP', label: 'EGP', labelEn: 'EGP' },
@@ -96,7 +87,7 @@ export default function AddTeacherModal({ isOpen, onClose, onSubmit }: AddTeache
         </div>
 
         {/* Form */}
-        <form onSubmit={handleSubmit} className="p-6">
+        <form onSubmit={handleSubmit(handleOnSubmit)} className="p-6">
           <div className="space-y-6">
             {/* Row 1: Name and Email */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -107,13 +98,13 @@ export default function AddTeacherModal({ isOpen, onClose, onSubmit }: AddTeache
                 </label>
                 <input
                   type="email"
-                  required
                   placeholder="example@email.com"
-                  value={formData.email}
-                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                  {...register('email')}
                   className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary text-right"
                   dir="ltr"
                 />
+                {errors.email && <p className="text-red-500 text-xs mt-1">{errors.email.message}</p>}
+
               </div>
 
               {/* Name */}
@@ -123,13 +114,13 @@ export default function AddTeacherModal({ isOpen, onClose, onSubmit }: AddTeache
                 </label>
                 <input
                   type="text"
-                  required
                   placeholder={language === 'ar' ? 'الاسم' : 'Name'}
-                  value={formData.name}
-                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                  {...register('name')}
                   className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary text-right"
                   dir="rtl"
                 />
+                {errors.name && <p className="text-red-500 text-xs mt-1">{errors.name.message}</p>}
+
               </div>
             </div>
 
@@ -142,13 +133,13 @@ export default function AddTeacherModal({ isOpen, onClose, onSubmit }: AddTeache
                 </label>
                 <input
                   type="password"
-                  required
                   placeholder="••••••••"
-                  value={formData.password}
-                  onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                  {...register('password')}
                   className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary text-left bg-gray-50"
                   dir="ltr"
                 />
+                {errors.password && <p className="text-red-500 text-xs mt-1">{errors.password.message}</p>}
+
               </div>
 
               {/* Phone */}
@@ -158,35 +149,31 @@ export default function AddTeacherModal({ isOpen, onClose, onSubmit }: AddTeache
                 </label>
                 <input
                   type="tel"
-                  required
                   placeholder="admin@admin.com"
-                  value={formData.phone}
-                  onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                  {...register('phone')}
                   className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary text-right"
                   dir="ltr"
                 />
+                {errors.phone && <p className="text-red-500 text-xs mt-1">{errors.phone.message}</p>}
+
               </div>
             </div>
 
             {/* Row 3: Hourly Rate and Currency */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {/* Currency */}
-              <div className="text-right">
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  {language === 'ar' ? 'العملة' : 'Currency'}
-                </label>
-                <select
-                  value={formData.currency}
-                  onChange={(e) => setFormData({ ...formData, currency: e.target.value })}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary text-right bg-white"
-                >
-                  {currencies.map((currency) => (
-                    <option key={currency.id} value={currency.id}>
-                      {currency.id}
-                    </option>
-                  ))}
-                </select>
-              </div>
+              <Controller
+                name="currency"
+                control={control}
+                render={({ field }) => (
+                  <CustomSelect
+                    label={language === 'ar' ? 'العملة' : 'Currency'}
+                    value={field.value}
+                    options={currencies.map(c => ({ value: c.id, label: language === 'ar' ? c.label : c.labelEn }))}
+                    onChange={field.onChange}
+                  />
+                )}
+              />
 
               {/* Hourly Rate */}
               <div className="text-right">
@@ -196,8 +183,7 @@ export default function AddTeacherModal({ isOpen, onClose, onSubmit }: AddTeache
                 <input
                   type="number"
                   placeholder="150"
-                  value={formData.hourlyRate}
-                  onChange={(e) => setFormData({ ...formData, hourlyRate: e.target.value })}
+                  {...register('hourlyRate', { valueAsNumber: true })}
                   className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary text-right"
                   dir="ltr"
                 />
@@ -207,40 +193,32 @@ export default function AddTeacherModal({ isOpen, onClose, onSubmit }: AddTeache
             {/* Row 4: Gender and Status */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {/* Status */}
-              <div className="text-right">
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  {language === 'ar' ? 'الحالة' : 'Status'}
-                </label>
-                <select
-                  value={formData.status}
-                  onChange={(e) => setFormData({ ...formData, status: e.target.value })}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary text-right bg-white"
-                >
-                  {statuses.map((status) => (
-                    <option key={status.id} value={status.id}>
-                      {language === 'ar' ? status.label : status.labelEn}
-                    </option>
-                  ))}
-                </select>
-              </div>
+              <Controller
+                name="status"
+                control={control}
+                render={({ field }) => (
+                  <CustomSelect
+                    label={language === 'ar' ? 'الحالة' : 'Status'}
+                    value={field.value}
+                    options={statuses.map(s => ({ value: s.id, label: language === 'ar' ? s.label : s.labelEn }))}
+                    onChange={field.onChange}
+                  />
+                )}
+              />
 
               {/* Gender */}
-              <div className="text-right">
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  {language === 'ar' ? 'الجنس' : 'Gender'}
-                </label>
-                <select
-                  value={formData.gender}
-                  onChange={(e) => setFormData({ ...formData, gender: e.target.value })}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary text-right bg-white"
-                >
-                  {genders.map((gender) => (
-                    <option key={gender.id} value={gender.id}>
-                      {language === 'ar' ? gender.label : gender.labelEn}
-                    </option>
-                  ))}
-                </select>
-              </div>
+              <Controller
+                name="gender"
+                control={control}
+                render={({ field }) => (
+                  <CustomSelect
+                    label={language === 'ar' ? 'الجنس' : 'Gender'}
+                    value={field.value}
+                    options={genders.map(g => ({ value: g.id, label: language === 'ar' ? g.label : g.labelEn }))}
+                    onChange={field.onChange}
+                  />
+                )}
+              />
             </div>
 
             {/* Subjects */}
@@ -255,19 +233,19 @@ export default function AddTeacherModal({ isOpen, onClose, onSubmit }: AddTeache
                       key={subject.id}
                       className="flex items-center gap-3 cursor-pointer hover:bg-white p-3 rounded-lg transition-colors"
                     >
-                      <input
+                      {/* <input
                         type="checkbox"
-                        checked={formData.subjects[subject.id as keyof typeof formData.subjects]}
-                        onChange={(e) =>
-                          setFormData({
-                            ...formData,
-                            subjects: {
-                              ...formData.subjects,
-                              [subject.id]: e.target.checked,
-                            },
-                          })
-                        }
-                        className="w-5 h-5 text-primary border-gray-300 rounded focus:ring-primary"
+                        checked={!!subjectsValue?.[subject.id as keyof typeof subjectsValue]}
+                        onChange={(e) => setValue(`subjects.${subject.id as keyof TeacherFormData['subjects']}`, e.target.checked, { shouldValidate: true })}
+                        className="w-5 h-5 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                      /> */}
+
+                      <CustomCheckbox
+                        checked={!!subjectsValue?.[subject.id as keyof typeof subjectsValue]}
+                        onChange={(checked) => {
+                          const name = `subjects.${subject.id}` as FieldPath<TeacherFormData>;
+                          setValue(name, checked, { shouldValidate: true });
+                        }}
                       />
                       <span className="text-sm text-gray-700 flex-1 text-right">
                         {language === 'ar' ? subject.label : subject.labelEn}
@@ -275,6 +253,8 @@ export default function AddTeacherModal({ isOpen, onClose, onSubmit }: AddTeache
                     </label>
                   ))}
                 </div>
+                {errors.subjects && <p className="text-red-500 text-xs mt-1">{errors.subjects.message}</p>}
+
               </div>
             </div>
           </div>

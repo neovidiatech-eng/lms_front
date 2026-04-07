@@ -1,19 +1,11 @@
 import { X, DollarSign, Calendar, Tag, CreditCard, CheckCircle } from 'lucide-react';
 import { useLanguage } from '../../contexts/LanguageContext';
+import { Expense } from '../../lib/schemas/ExpenseSchema';
 
 interface ViewExpenseModalProps {
   isOpen: boolean;
   onClose: () => void;
-  expense: {
-    id: string;
-    description: string;
-    amount: number;
-    currency: string;
-    category: string;
-    date: string;
-    paymentMethod: string;
-    status: 'paid' | 'pending';
-  };
+  expense: Expense;
 }
 
 export default function ViewExpenseModal({ isOpen, onClose, expense }: ViewExpenseModalProps) {
@@ -44,7 +36,7 @@ export default function ViewExpenseModal({ isOpen, onClose, expense }: ViewExpen
   };
 
   const getCategoryLabel = (categoryId: string) => {
-    const categories: any = {
+    const categories: Record<string, { ar: string; en: string }> = {
       salaries: text.salaries,
       utilities: text.utilities,
       supplies: text.supplies,

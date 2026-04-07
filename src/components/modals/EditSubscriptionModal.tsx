@@ -1,6 +1,10 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { X, Save, Bell, Send } from 'lucide-react';
 import { useLanguage } from '../../contexts/LanguageContext';
+import CustomSelect from '../ui/CustomSelect';
+import { useForm, Controller } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { editSubscriptionSchema, type EditSubscriptionFormData } from '../../lib/schemas/SubscriptionSchema';
 
 interface EditSubscriptionModalProps {
   isOpen: boolean;
@@ -26,17 +30,43 @@ export default function EditSubscriptionModal({
   onSave
 }: EditSubscriptionModalProps) {
   const { language } = useLanguage();
-  const [formData, setFormData] = useState({
-    planName: subscription.planName,
-    planPrice: subscription.planPrice,
-    startDate: subscription.startDate,
-    endDate: subscription.endDate,
-    status: subscription.status,
-    totalSessions: subscription.totalSessions,
-    sessionsRemaining: subscription.sessionsRemaining
-  });
   const [showNotificationBox, setShowNotificationBox] = useState(false);
   const [notificationMessage, setNotificationMessage] = useState('');
+
+  const {
+    register,
+    handleSubmit,
+    control,
+    formState: { errors },
+    reset
+  } = useForm<EditSubscriptionFormData>({
+    resolver: zodResolver(editSubscriptionSchema),
+    defaultValues: {
+      planName: subscription.planName,
+      planPrice: subscription.planPrice,
+      startDate: subscription.startDate,
+      endDate: subscription.endDate,
+      status: subscription.status,
+      totalSessions: subscription.totalSessions,
+      sessionsRemaining: subscription.sessionsRemaining
+    }
+  });
+
+  useEffect(() => {
+    if (isOpen) {
+      reset({
+        planName: subscription.planName,
+        planPrice: subscription.planPrice,
+        startDate: subscription.startDate,
+        endDate: subscription.endDate,
+        status: subscription.status,
+        totalSessions: subscription.totalSessions,
+        sessionsRemaining: subscription.sessionsRemaining
+      });
+      setShowNotificationBox(false);
+      setNotificationMessage('');
+    }
+  }, [isOpen, subscription, reset]);
 
   const text = {
     title: { ar: 'تعديل الاشتراك', en: 'Edit Subscription' },
@@ -62,9 +92,8 @@ export default function EditSubscriptionModal({
 
   if (!isOpen) return null;
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    onSave({ ...subscription, ...formData });
+  const onSubmitForm = (data: EditSubscriptionFormData) => {
+    onSave({ ...subscription, ...data });
     onClose();
   };
 
@@ -83,7 +112,7 @@ export default function EditSubscriptionModal({
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
       <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
-        <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between rounded-t-2xl">
+        <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between rounded-t-2xl z-10">
           <h2 className="text-2xl font-bold text-gray-900">{text.title[language]}</h2>
           <button
             onClick={onClose}
@@ -93,7 +122,7 @@ export default function EditSubscriptionModal({
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="p-6 space-y-6">
+        <form onSubmit={handleSubmit(onSubmitForm)} className="p-6 space-y-6">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2 text-right">
               {text.studentName[language]}
@@ -112,11 +141,10 @@ export default function EditSubscriptionModal({
             </label>
             <input
               type="text"
-              value={formData.planName}
-              onChange={(e) => setFormData({ ...formData, planName: e.target.value })}
-              className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-right"
-              required
+              {...register('planName')}
+              className={`w-full px-4 py-2.5 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-right ${errors.planName ? 'border-red-500' : 'border-gray-300'}`}
             />
+            {errors.planName && <p className="mt-1 text-sm text-red-500 text-right">{errors.planName.message}</p>}
           </div>
 
           <div>
@@ -125,11 +153,10 @@ export default function EditSubscriptionModal({
             </label>
             <input
               type="text"
-              value={formData.planPrice}
-              onChange={(e) => setFormData({ ...formData, planPrice: e.target.value })}
-              className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-right"
-              required
+              {...register('planPrice')}
+              className={`w-full px-4 py-2.5 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-right ${errors.planPrice ? 'border-red-500' : 'border-gray-300'}`}
             />
+            {errors.planPrice && <p className="mt-1 text-sm text-red-500 text-right">{errors.planPrice.message}</p>}
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -139,11 +166,10 @@ export default function EditSubscriptionModal({
               </label>
               <input
                 type="date"
-                value={formData.startDate}
-                onChange={(e) => setFormData({ ...formData, startDate: e.target.value })}
-                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-right"
-                required
+                {...register('startDate')}
+                className={`w-full px-4 py-2.5 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-right ${errors.startDate ? 'border-red-500' : 'border-gray-300'}`}
               />
+              {errors.startDate && <p className="mt-1 text-sm text-red-500 text-right">{errors.startDate.message}</p>}
             </div>
 
             <div>
@@ -152,27 +178,31 @@ export default function EditSubscriptionModal({
               </label>
               <input
                 type="date"
-                value={formData.endDate}
-                onChange={(e) => setFormData({ ...formData, endDate: e.target.value })}
-                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-right"
-                required
+                {...register('endDate')}
+                className={`w-full px-4 py-2.5 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-right ${errors.endDate ? 'border-red-500' : 'border-gray-300'}`}
               />
+              {errors.endDate && <p className="mt-1 text-sm text-red-500 text-right">{errors.endDate.message}</p>}
             </div>
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2 text-right">
-              {text.status[language]}
-            </label>
-            <select
-              value={formData.status}
-              onChange={(e) => setFormData({ ...formData, status: e.target.value as any })}
-              className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-right"
-            >
-              <option value="active">{text.active[language]}</option>
-              <option value="expired">{text.expired[language]}</option>
-              <option value="cancelled">{text.cancelled[language]}</option>
-            </select>
+            <Controller
+              name="status"
+              control={control}
+              render={({ field }) => (
+                <CustomSelect
+                  label={text.status[language]}
+                  value={field.value}
+                  onChange={field.onChange}
+                  options={[
+                    { value: 'active', label: text.active[language] },
+                    { value: 'expired', label: text.expired[language] },
+                    { value: 'cancelled', label: text.cancelled[language] }
+                  ]}
+                  error={errors.status?.message}
+                />
+              )}
+            />
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -182,12 +212,11 @@ export default function EditSubscriptionModal({
               </label>
               <input
                 type="number"
-                value={formData.totalSessions}
-                onChange={(e) => setFormData({ ...formData, totalSessions: parseInt(e.target.value) || 0 })}
-                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-right"
+                {...register('totalSessions', { valueAsNumber: true })}
+                className={`w-full px-4 py-2.5 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-right ${errors.totalSessions ? 'border-red-500' : 'border-gray-300'}`}
                 min="0"
-                required
               />
+              {errors.totalSessions && <p className="mt-1 text-sm text-red-500 text-right">{errors.totalSessions.message}</p>}
             </div>
 
             <div>
@@ -196,13 +225,11 @@ export default function EditSubscriptionModal({
               </label>
               <input
                 type="number"
-                value={formData.sessionsRemaining}
-                onChange={(e) => setFormData({ ...formData, sessionsRemaining: parseInt(e.target.value) || 0 })}
-                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-right"
+                {...register('sessionsRemaining', { valueAsNumber: true })}
+                className={`w-full px-4 py-2.5 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-right ${errors.sessionsRemaining ? 'border-red-500' : 'border-gray-300'}`}
                 min="0"
-                max={formData.totalSessions}
-                required
               />
+              {errors.sessionsRemaining && <p className="mt-1 text-sm text-red-500 text-right">{errors.sessionsRemaining.message}</p>}
             </div>
           </div>
 

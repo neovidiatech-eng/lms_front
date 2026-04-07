@@ -1,23 +1,34 @@
-import { useState, useEffect } from 'react';
+import { useEffect } from 'react';
 import { X, Save } from 'lucide-react';
 import { useLanguage } from '../../contexts/LanguageContext';
+import { Expense, ExpenseFormData, expenseSchema } from '../../lib/schemas/ExpenseSchema';
+import { Resolver, useForm, Controller } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import CustomSelect from '../ui/CustomSelect';
 
 interface AddExpenseModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSave: (expense: any) => void;
+  onSave: (expense: Expense) => void;
+  initialData?: Expense | null;
 }
 
-export default function AddExpenseModal({ isOpen, onClose, onSave }: AddExpenseModalProps) {
+export default function AddExpenseModal({ isOpen, onClose, onSave, initialData }: AddExpenseModalProps) {
   const { language } = useLanguage();
-  const [formData, setFormData] = useState({
-    description: '',
-    amount: '',
-    currency: 'SAR',
-    category: 'general',
-    date: new Date().toISOString().split('T')[0],
-    paymentMethod: '',
-    status: 'pending' as 'paid' | 'pending'
+  const {
+    register,
+    handleSubmit,
+    reset,
+    control,
+    formState: { errors },
+  } = useForm<ExpenseFormData>({
+    resolver: zodResolver(expenseSchema) as Resolver<ExpenseFormData>,
+    defaultValues: {
+      date: new Date().toISOString().split('T')[0],
+      status: 'pending',
+      currency: 'SAR',
+      category: 'general'
+    }
   });
 
   const text = {
@@ -60,29 +71,24 @@ export default function AddExpenseModal({ isOpen, onClose, onSave }: AddExpenseM
     { code: 'USD', symbol: '$' }
   ];
 
+  useEffect(() => {
+    if (isOpen) {
+      if (initialData) {
+        reset(initialData);
+      } else {
+        reset({
+          description: '', amount: 0, currency: 'SAR', category: 'general',
+          date: new Date().toISOString().split('T')[0], status: 'pending'
+        });
+      }
+    }
+  }, [isOpen, initialData, reset]);
+
   if (!isOpen) return null;
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    onSave({
-      description: formData.description,
-      amount: parseFloat(formData.amount),
-      currency: formData.currency,
-      category: formData.category,
-      date: formData.date,
-      paymentMethod: formData.paymentMethod,
-      status: formData.status
-    });
+  const onSubmit = (data: ExpenseFormData) => {
+    onSave({ ...data, id: initialData?.id || Date.now().toString() });
     onClose();
-    setFormData({
-      description: '',
-      amount: '',
-      currency: 'SAR',
-      category: 'general',
-      date: new Date().toISOString().split('T')[0],
-      paymentMethod: '',
-      status: 'pending'
-    });
   };
 
   return (
@@ -98,19 +104,16 @@ export default function AddExpenseModal({ isOpen, onClose, onSave }: AddExpenseM
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="p-6 space-y-6">
+        <form onSubmit={handleSubmit(onSubmit)} className="p-6 space-y-6">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2 text-right">
               {text.description[language]} *
             </label>
             <input
-              type="text"
-              value={formData.description}
-              onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-              placeholder={text.descriptionPlaceholder[language]}
-              className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent text-right"
-              required
+              {...register("description")}
+              className={`w-full p-2.5 border rounded-lg outline-none focus:ring-2 ${errors.description ? 'border-red-500' : 'border-gray-300 focus:ring-blue-500'}`}
             />
+            {errors.description && <p className="text-red-500 text-xs mt-1">{errors.description.message}</p>}
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -118,32 +121,38 @@ export default function AddExpenseModal({ isOpen, onClose, onSave }: AddExpenseM
               <label className="block text-sm font-medium text-gray-700 mb-2 text-right">
                 {text.category[language]} *
               </label>
-              <select
-                value={formData.category}
-                onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent text-right appearance-none bg-white"
-                required
-              >
-                {categories.map(cat => (
-                  <option key={cat.id} value={cat.id}>{cat.label[language]}</option>
-                ))}
-              </select>
+              <Controller
+                name="category"
+                control={control}
+                render={({ field }) => (
+                  <CustomSelect
+                    {...field}
+                    options={categories.map(cat => ({
+                      value: cat.id,
+                      label: cat.label[language]
+                    }))}
+                  />
+                )}
+              />
             </div>
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2 text-right">
                 {text.currency[language]} *
               </label>
-              <select
-                value={formData.currency}
-                onChange={(e) => setFormData({ ...formData, currency: e.target.value })}
-                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent text-right appearance-none bg-white"
-                required
-              >
-                {currencies.map(curr => (
-                  <option key={curr.code} value={curr.code}>{curr.symbol}</option>
-                ))}
-              </select>
+              <Controller
+                name="currency"
+                control={control}
+                render={({ field }) => (
+                  <CustomSelect
+                    {...field}
+                    options={currencies.map(curr => ({
+                      value: curr.code,
+                      label: curr.symbol
+                    }))}
+                  />
+                )}
+              />
             </div>
           </div>
 
@@ -154,54 +163,47 @@ export default function AddExpenseModal({ isOpen, onClose, onSave }: AddExpenseM
             <input
               type="number"
               step="0.01"
-              value={formData.amount}
-              onChange={(e) => setFormData({ ...formData, amount: e.target.value })}
+              {...register("amount", { valueAsNumber: true })}
               placeholder="0.00"
-              className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent text-right"
-              min="0"
-              required
+              className={`w-full px-4 py-2.5 border rounded-lg focus:ring-2 ${errors.amount ? 'border-red-500' : 'border-gray-300 focus:ring-primary'}`}
             />
+            {errors.amount && <p className="text-red-500 text-xs mt-1">{errors.amount.message}</p>}
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2 text-right">
-              {text.date[language]} *
-            </label>
+            <label className="block text-sm font-medium text-gray-700 mb-2">{text.date[language]} *</label>
             <input
               type="date"
-              value={formData.date}
-              onChange={(e) => setFormData({ ...formData, date: e.target.value })}
-              className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent text-right"
-              required
+              {...register("date")}
+              className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2 text-right">
-              {text.paymentMethod[language]}
-            </label>
+            <label className="block text-sm font-medium text-gray-700 mb-2">{text.paymentMethod[language]}</label>
             <input
               type="text"
-              value={formData.paymentMethod}
-              onChange={(e) => setFormData({ ...formData, paymentMethod: e.target.value })}
+              {...register("paymentMethod")}
               placeholder={text.paymentMethodPlaceholder[language]}
-              className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent text-right"
+              className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2 text-right">
-              {text.status[language]} *
-            </label>
-            <select
-              value={formData.status}
-              onChange={(e) => setFormData({ ...formData, status: e.target.value as 'paid' | 'pending' })}
-              className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent text-right appearance-none bg-white"
-              required
-            >
-              <option value="pending">{text.pending[language]}</option>
-              <option value="paid">{text.paid[language]}</option>
-            </select>
+            <label className="block text-sm font-medium text-gray-700 mb-2">{text.status[language]} *</label>
+            <Controller
+              name="status"
+              control={control}
+              render={({ field }) => (
+                <CustomSelect
+                  {...field}
+                  options={[
+                    { value: 'pending', label: text.pending[language] },
+                    { value: 'paid', label: text.paid[language] }
+                  ]}
+                />
+              )}
+            />
           </div>
 
           <div className="flex gap-3 pt-4">

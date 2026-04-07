@@ -3,16 +3,15 @@ import { Plus, Edit, Trash2, Eye, Package, CheckCircle } from 'lucide-react';
 import { useLanguage } from '../contexts/LanguageContext';
 import AddPlanModal from '../components/modals/AddPlanModal';
 import ViewPlanModal from '../components/modals/ViewPlanModal';
-import EditPlanModal from '../components/modals/EditPlanModal';
-
+type CurrencyCode = "EGP" | "USD" | "EUR" | "GBP" | "SAR" | "AED" | "KWD" | "QAR";
 interface Plan {
   id: string;
   name: string;
   nameEn: string;
   description: string;
-  price: string;
-  currency: string;
-  duration: string;
+  price: number; 
+  currency: CurrencyCode;
+  duration: number; 
   sessionsCount: number;
   features: string[];
   isPopular: boolean;
@@ -21,9 +20,8 @@ interface Plan {
 
 export default function Plans() {
   const { language } = useLanguage();
-  const [showAddModal, setShowAddModal] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const [showViewModal, setShowViewModal] = useState(false);
-  const [showEditModal, setShowEditModal] = useState(false);
   const [selectedPlan, setSelectedPlan] = useState<Plan | null>(null);
 
   const text = {
@@ -51,9 +49,9 @@ export default function Plans() {
       name: 'الباقة الأساسية',
       nameEn: 'Basic Plan',
       description: 'خطة مثالية للمبتدئين',
-      price: '500',
+      price: 500,
       currency: 'EGP',
-      duration: '1',
+      duration: 1,
       sessionsCount: 12,
       features: [
         '12 حصة شهرياً',
@@ -69,9 +67,9 @@ export default function Plans() {
       name: 'الباقة المتقدمة',
       nameEn: 'Advanced Plan',
       description: 'خطة شاملة مع مزايا إضافية',
-      price: '800',
+      price: 800,
       currency: 'EGP',
-      duration: '1',
+      duration: 1,
       sessionsCount: 20,
       features: [
         '20 حصة شهرياً',
@@ -89,9 +87,9 @@ export default function Plans() {
       name: 'الباقة البريميوم',
       nameEn: 'Premium Plan',
       description: 'أفضل خطة لأقصى استفادة',
-      price: '1200',
+      price: 1200,
       currency: 'EGP',
-      duration: '1',
+      duration: 1,
       sessionsCount: 30,
       features: [
         '30 حصة شهرياً',
@@ -108,23 +106,34 @@ export default function Plans() {
     }
   ]);
 
-  const handleAddPlan = (newPlan: Plan) => {
-    setPlans([...plans, newPlan]);
+ const handleOpenAdd = () => {
+    setSelectedPlan(null);
+    setIsModalOpen(true);
   };
 
+  const handleOpenEdit = (plan: Plan) => {
+    setSelectedPlan(plan); 
+    setIsModalOpen(true);
+  };
   const handleViewPlan = (plan: Plan) => {
     setSelectedPlan(plan);
     setShowViewModal(true);
   };
 
-  const handleEditPlan = (plan: Plan) => {
-    setSelectedPlan(plan);
-    setShowEditModal(true);
-  };
 
-  const handleSavePlan = (updatedPlan: Plan) => {
-    setPlans(plans.map(p => p.id === updatedPlan.id ? updatedPlan : p));
-  };
+const handleSavePlan = (planData: Omit<Plan, 'id'> & { id?: string }) => {
+  if (planData.id) {
+    setPlans(prev => prev.map(p => p.id === planData.id ? (planData as Plan) : p));
+  } else {
+    const newPlan: Plan = {
+      ...planData,
+      id: Math.random().toString(36).substr(2, 9), 
+    };
+    setPlans(prev => [...prev, newPlan]);
+  }
+  setIsModalOpen(false);
+  setSelectedPlan(null);
+};
 
   const handleDeletePlan = (id: string) => {
     if (confirm(text.confirmDelete[language])) {
@@ -137,7 +146,7 @@ export default function Plans() {
       <div className="flex items-center justify-between">
         <h1 className="text-3xl font-bold text-gray-900">{text.title[language]}</h1>
         <button
-          onClick={() => setShowAddModal(true)}
+          onClick={handleOpenAdd}
           className="flex items-center gap-2 px-6 py-3 btn-primary text-white rounded-xl transition-colors font-medium"
         >
           <Plus className="w-5 h-5" />
@@ -219,7 +228,7 @@ export default function Plans() {
                     {text.view[language]}
                   </button>
                   <button
-                    onClick={() => handleEditPlan(plan)}
+                    onClick={() => handleOpenEdit(plan)}
                     className="p-2.5 text-green-600 hover:bg-green-50 rounded-xl transition-colors border border-green-200"
                     title={text.edit[language]}
                   >
@@ -240,9 +249,13 @@ export default function Plans() {
       )}
 
       <AddPlanModal
-        isOpen={showAddModal}
-        onClose={() => setShowAddModal(false)}
-        onSave={handleAddPlan}
+        isOpen={isModalOpen}
+        onClose={()=> {
+          setIsModalOpen(false)
+        setSelectedPlan(null);
+        }}
+        onSave={handleSavePlan}
+        initialData={selectedPlan}
       />
 
       {selectedPlan && (
@@ -255,15 +268,7 @@ export default function Plans() {
             }}
             plan={selectedPlan}
           />
-          <EditPlanModal
-            isOpen={showEditModal}
-            onClose={() => {
-              setShowEditModal(false);
-              setSelectedPlan(null);
-            }}
-            plan={selectedPlan}
-            onSave={handleSavePlan}
-          />
+        
         </>
       )}
     </div>

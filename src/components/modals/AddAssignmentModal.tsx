@@ -1,23 +1,36 @@
-import { useState } from 'react';
+import { useEffect } from 'react';
 import { X } from 'lucide-react';
 import { useLanguage } from '../../contexts/LanguageContext';
+import CustomSelect from '../ui/CustomSelect';
+import { AssignmentFormData, assignmentSchema } from '../../lib/schemas/AssignmentSchema';
+import { Resolver, useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+
+interface Assignment extends AssignmentFormData{
+  id : string;
+}
 
 interface AddAssignmentModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onAdd: (assignment: any) => void;
+  onAdd: (assignment: Assignment) => void;
+  initialData? :Assignment | null;
 }
 
-export default function AddAssignmentModal({ isOpen, onClose, onAdd }: AddAssignmentModalProps) {
+export default function AddAssignmentModal({ isOpen, onClose, onAdd, initialData }: AddAssignmentModalProps) {
   const { language } = useLanguage();
-  const [formData, setFormData] = useState({
-    studentName: '',
-    teacher: '',
-    subject: '',
-    title: '',
-    description: '',
-    dueDate: '',
-    status: 'pending' as 'pending' | 'submitted' | 'graded'
+ const {
+    register,
+    handleSubmit,
+    reset,
+    setValue,
+    watch,
+    formState: { errors },
+  } = useForm<AssignmentFormData>({
+    resolver: zodResolver(assignmentSchema) as Resolver<AssignmentFormData>,
+    defaultValues: {
+      status: 'pending',
+    },
   });
 
   const text = {
@@ -36,21 +49,30 @@ export default function AddAssignmentModal({ isOpen, onClose, onAdd }: AddAssign
     add: { ar: 'إضافة', en: 'Add' }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
+  useEffect(() => {
+    if (isOpen) {
+      if (initialData) {
+        reset(initialData);
+      } else {
+        reset({
+          studentName: '',
+          teacher: '',
+          subject: '',
+          title: '',
+          description: '',
+          dueDate: '',
+          status: 'pending',
+        });
+      }
+    }
+  }, [initialData, reset, isOpen]);
+
+  const handleOnSubmit = (data:AssignmentFormData) => {
     onAdd({
       id: Date.now().toString(),
-      ...formData
+      ...data
     });
-    setFormData({
-      studentName: '',
-      teacher: '',
-      subject: '',
-      title: '',
-      description: '',
-      dueDate: '',
-      status: 'pending'
-    });
+   
     onClose();
   };
 
@@ -69,19 +91,18 @@ export default function AddAssignmentModal({ isOpen, onClose, onAdd }: AddAssign
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="p-6 space-y-4" dir="rtl">
+        <form onSubmit={handleSubmit(handleOnSubmit)} className="p-6 space-y-4" dir="rtl">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2 text-right">
               {text.student[language]}
             </label>
             <input
               type="text"
-              required
-              value={formData.studentName}
-              onChange={(e) => setFormData({ ...formData, studentName: e.target.value })}
+              {...register('studentName')}
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent text-right"
               dir="rtl"
             />
+            {errors.studentName && <p className="text-red-500 text-xs mt-1">{errors.studentName.message}</p>}
           </div>
 
           <div>
@@ -90,12 +111,11 @@ export default function AddAssignmentModal({ isOpen, onClose, onAdd }: AddAssign
             </label>
             <input
               type="text"
-              required
-              value={formData.teacher}
-              onChange={(e) => setFormData({ ...formData, teacher: e.target.value })}
+              {...register('teacher')}
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent text-right"
               dir="rtl"
             />
+            {errors.teacher && <p className="text-red-500 text-xs mt-1">{errors.teacher.message}</p>}
           </div>
 
           <div>
@@ -104,12 +124,11 @@ export default function AddAssignmentModal({ isOpen, onClose, onAdd }: AddAssign
             </label>
             <input
               type="text"
-              required
-              value={formData.subject}
-              onChange={(e) => setFormData({ ...formData, subject: e.target.value })}
+              {...register('subject')}
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent text-right"
               dir="rtl"
             />
+            {errors.subject && <p className="text-red-500 text-xs mt-1">{errors.subject.message}</p>}
           </div>
 
           <div>
@@ -118,12 +137,11 @@ export default function AddAssignmentModal({ isOpen, onClose, onAdd }: AddAssign
             </label>
             <input
               type="text"
-              required
-              value={formData.title}
-              onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent text-right"
+              {...register('title')}
+                            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent text-right"
               dir="rtl"
             />
+            {errors.title && <p className="text-red-500 text-xs mt-1">{errors.title.message}</p>}
           </div>
 
           <div>
@@ -131,13 +149,12 @@ export default function AddAssignmentModal({ isOpen, onClose, onAdd }: AddAssign
               {text.description[language]}
             </label>
             <textarea
-              required
               rows={3}
-              value={formData.description}
-              onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+              {...register('description')}
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent text-right resize-none"
               dir="rtl"
             />
+            {errors.description && <p className="text-red-500 text-xs mt-1">{errors.description.message}</p>}
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -147,29 +164,23 @@ export default function AddAssignmentModal({ isOpen, onClose, onAdd }: AddAssign
               </label>
               <input
                 type="date"
-                required
-                value={formData.dueDate}
-                onChange={(e) => setFormData({ ...formData, dueDate: e.target.value })}
+                {...register('dueDate')}
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent text-right"
                 dir="rtl"
               />
+              {errors.dueDate && <p className="text-red-500 text-xs mt-1">{errors.dueDate.message}</p>}
             </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2 text-right">
-                {text.status[language]}
-              </label>
-              <select
-                value={formData.status}
-                onChange={(e) => setFormData({ ...formData, status: e.target.value as 'pending' | 'submitted' | 'graded' })}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent text-right"
-                dir="rtl"
-              >
-                <option value="pending">{text.pending[language]}</option>
-                <option value="submitted">{text.submitted[language]}</option>
-                <option value="graded">{text.graded[language]}</option>
-              </select>
-            </div>
+<CustomSelect
+                label={text.status[language]}
+                value={watch('status')}
+                onChange={(val) => setValue('status', val as 'pending' | 'submitted' | 'graded', { shouldValidate: true })}
+                options={[
+                  { value: 'pending', label: text.pending[language] },
+                  { value: 'submitted', label: text.submitted[language] },
+                  { value: 'graded', label: text.graded[language] }
+                ]}
+              />
+           
           </div>
 
           <div className="flex gap-3 pt-4">

@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { X, Save, Plus, Trash2 } from 'lucide-react';
 import { useLanguage } from '../../contexts/LanguageContext';
-
+import CustomSelect from '../ui/CustomSelect';
 interface EditPlanModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -173,18 +173,14 @@ export default function EditPlanModal({ isOpen, onClose, plan, onSave }: EditPla
               <label className="block text-sm font-medium text-gray-700 mb-2 text-right">
                 {text.currency[language]}
               </label>
-              <select
+              <CustomSelect
                 value={formData.currency}
-                onChange={(e) => setFormData({ ...formData, currency: e.target.value })}
-                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-right"
-                required
-              >
-                {currencies.map((curr) => (
-                  <option key={curr.code} value={curr.code}>
-                    {curr.code} - {language === 'ar' ? curr.nameAr : curr.nameEn}
-                  </option>
-                ))}
-              </select>
+                onChange={(value) => setFormData({ ...formData, currency: value as string })}
+                options={currencies.map((curr) => ({
+                  value: curr.code,
+                  label: `${curr.code} - ${language === 'ar' ? curr.nameAr : curr.nameEn}`
+                }))}
+              />
             </div>
           </div>
 
@@ -272,14 +268,14 @@ export default function EditPlanModal({ isOpen, onClose, plan, onSave }: EditPla
               <label className="block text-sm font-medium text-gray-700 mb-2 text-right">
                 {text.status[language]}
               </label>
-              <select
+              <CustomSelect
                 value={formData.status}
-                onChange={(e) => setFormData({ ...formData, status: e.target.value as any })}
-                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-right"
-              >
-                <option value="active">{text.active[language]}</option>
-                <option value="inactive">{text.inactive[language]}</option>
-              </select>
+                onChange={(value) => setFormData({ ...formData, status: value as any })}
+                options={[
+                  { value: 'active', label: text.active[language] },
+                  { value: 'inactive', label: text.inactive[language] }
+                ]}
+              />
             </div>
           </div>
 

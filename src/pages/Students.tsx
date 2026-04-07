@@ -6,6 +6,7 @@ import AddStudentModal from '../components/modals/AddStudentModal';
 import ViewStudentModal from '../components/modals/ViewStudentModal';
 import EditStudentModal from '../components/modals/EditStudentModal';
 import Pagination from '../components/ui/Pagination';
+import CustomSelect from '../components/ui/CustomSelect';
 
 interface Student {
   id: string;
@@ -245,32 +246,30 @@ export default function Students() {
 
           {/* Country Filter */}
           <div>
-            <select
-              value={selectedCountry}
-              onChange={(e) => setSelectedCountry(e.target.value)}
-              className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary text-right bg-white"
-            >
-              {countries.map((country) => (
-                <option key={country.id} value={country.id}>
-                  {language === 'ar' ? country.label : country.labelEn}
-                </option>
-              ))}
-            </select>
+            <CustomSelect
+            value={selectedCountry}
+            options={countries.map((country) => ({
+              value: country.id,
+              label: language === 'ar' ? country.label : country.labelEn,
+              searchText: `${country.label} ${country.labelEn}`,
+            }))}
+            onChange={(val) => setSelectedCountry(val as string)}
+            className="h-[46px]"
+            />
           </div>
 
           {/* Grade Filter */}
           <div>
-            <select
-              value={selectedGrade}
-              onChange={(e) => setSelectedGrade(e.target.value)}
-              className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary text-right bg-white"
-            >
-              {grades.map((grade) => (
-                <option key={grade.id} value={grade.id}>
-                  {language === 'ar' ? grade.label : grade.labelEn}
-                </option>
-              ))}
-            </select>
+            <CustomSelect
+            value={selectedGrade}
+            options={grades.map((grade) => ({
+              value: grade.id,
+              label: language === 'ar' ? grade.label : grade.labelEn,
+              searchText: `${grade.label} ${grade.labelEn}`,
+            }))}
+            onChange={(val) => setSelectedGrade(val as string)}
+            className="h-[46px]"
+            />
           </div>
         </div>
       </div>
@@ -404,15 +403,30 @@ export default function Students() {
         studentData={selectedStudent}
       />
 
-      <EditStudentModal
-        isOpen={isEditModalOpen}
-        onClose={() => setIsEditModalOpen(false)}
-        studentData={selectedStudent}
-        onSubmit={(studentData) => {
-          console.log('Updated student data:', studentData);
-          alert(language === 'ar' ? 'تم تحديث بيانات الطالب بنجاح' : 'Student updated successfully');
-        }}
-      />
+ <EditStudentModal
+  isOpen={isEditModalOpen}
+  onClose={() => setIsEditModalOpen(false)}
+  studentData={
+    selectedStudent 
+      ? {
+          id: selectedStudent.id,
+          name: selectedStudent.name,
+          email: selectedStudent.email,
+          phone: selectedStudent.phone,
+          countryCode: selectedStudent.countryCode,
+          country: selectedStudent.country === 'مصر' ? 'egypt' : 'saudi', 
+          status: selectedStudent.status,
+          gender: 'male', 
+          plan: 'secondary_1',
+          birthDate: '', 
+        } 
+      : null
+  }
+  onSubmit={(updatedData) => {
+    console.log('Saved:', updatedData);
+    setIsEditModalOpen(false);
+  }}
+/>
     </div>
   );
 }

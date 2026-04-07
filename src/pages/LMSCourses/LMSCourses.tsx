@@ -1,32 +1,13 @@
 import { useState, useRef } from 'react';
-import { PlayCircle, Plus, Search, BookOpen, MoreVertical, Edit, Trash2, Eye, X, Layers, Upload, FileText, Image, File } from 'lucide-react';
-import CourseViewer from '../components/features/LMS/CourseViewer';
+import { PlayCircle, Plus, Search, BookOpen, MoreVertical, Edit, Trash2, Eye, X, Layers } from 'lucide-react';
+import CourseViewer from '../../components/features/LMS/CourseViewer';
+import {  Course, Level } from '../../types/lmsCourses';
+import CourseFormFields from './components/CourseFormFields';
+import { FormProvider, useForm } from 'react-hook-form';
+import { CourseFormData, courseSchema } from '../../lib/schemas/CourseSchema';
+import { zodResolver } from '@hookform/resolvers/zod';
 
-export interface AttachedFile {
-  id: number;
-  name: string;
-  size: number;
-  type: string;
-  url: string;
-}
 
-export interface Level {
-  id: number;
-  name: string;
-  color: string;
-}
-
-export interface Course {
-  id: number;
-  title: string;
-  description: string;
-  category: string;
-  levelId: number;
-  videoUrl: string;
-  thumbnailUrl: string;
-  attachments: AttachedFile[];
-  createdAt: string;
-}
 
 const subjectCategories = ['الكل', 'رياضيات', 'علوم', 'لغة عربية', 'لغة إنجليزية', 'فيزياء', 'كيمياء', 'أحياء', 'تاريخ', 'جغرافيا', 'تربية إسلامية'];
 
@@ -38,7 +19,7 @@ const levelColorOptions = [
   { label: 'برتقالي', value: 'bg-orange-100 text-orange-700' },
 ];
 
-export const defaultLevels: Level[] = [
+ const defaultLevels: Level[] = [
   { id: 1, name: 'مبتدئ', color: 'bg-green-100 text-green-700' },
   { id: 2, name: 'متوسط', color: 'bg-yellow-100 text-yellow-700' },
   { id: 3, name: 'متقدم', color: 'bg-red-100 text-red-700' },
@@ -100,38 +81,24 @@ export function getVideoEmbed(url: string): string | null {
   return null;
 }
 
-export function getYoutubeThumbnail(url: string): string | null {
+ export function getYoutubeThumbnail(url: string): string | null {
   const ytMatch = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
   if (ytMatch) return `https://img.youtube.com/vi/${ytMatch[1]}/hqdefault.jpg`;
   return null;
 }
 
-function formatFileSize(bytes: number): string {
-  if (bytes < 1024) return bytes + ' B';
-  if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
-  return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
-}
+// function formatFileSize(bytes: number): string {
+//   if (bytes < 1024) return bytes + ' B';
+//   if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+//   return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+// }
 
-function getFileIcon(type: string) {
-  if (type.startsWith('image/')) return Image;
-  if (type === 'application/pdf') return FileText;
-  return File;
-}
-
-const emptyForm = {
-  title: '',
-  description: '',
-  category: 'رياضيات',
-  levelId: 1,
-  videoUrl: '',
-  thumbnailFile: null as File | null,
-  thumbnailPreview: '',
-  attachments: [] as AttachedFile[],
-};
-
-type FormState = typeof emptyForm;
-
-let attachFileId = 1;
+// function getFileIcon(type: string) {
+//   if (type.startsWith('image/')) return Image;
+//   if (type === 'application/pdf') return FileText;
+//   return File;
+// }
+// let attachFileId = 1;
 
 export default function LMSCoursesPage() {
   const [courses, setCourses] = useState<Course[]>(mockCourses);
@@ -150,11 +117,27 @@ export default function LMSCoursesPage() {
   const [newLevelName, setNewLevelName] = useState('');
   const [newLevelColor, setNewLevelColor] = useState(levelColorOptions[0].value);
 
-  const [form, setForm] = useState<FormState>({ ...emptyForm });
   const [nextId, setNextId] = useState(mockCourses.length + 1);
 
   const thumbnailInputRef = useRef<HTMLInputElement>(null);
   const attachInputRef = useRef<HTMLInputElement>(null);
+
+const methods = useForm<CourseFormData>({
+  resolver: zodResolver(courseSchema),
+  defaultValues: {
+    title: '',
+    description: '',
+    category: '',
+    levelId: 1,
+    videoUrl: '',
+    thumbnailFile: null,
+    thumbnailPreview: '',
+    attachments: [], 
+  } as CourseFormData,
+});
+
+const {reset,handleSubmit } = methods;
+
 
   const filtered = courses.filter(c => {
     const matchSearch = c.title.includes(search) || c.description.includes(search);
@@ -176,13 +159,21 @@ export default function LMSCoursesPage() {
     setOpenMenuId(null);
   };
 
-  const openAdd = () => {
-    setForm({ ...emptyForm, levelId: levels[0]?.id ?? 1, attachments: [] });
+ const openAdd = () => {
+    reset({
+      title: '',
+      description: '',
+      category: 'رياضيات',
+      levelId: levels[0]?.id ?? 1,
+      videoUrl: '',
+      attachments: [],
+      thumbnailPreview: ''
+    });
     setShowAddModal(true);
   };
 
   const openEdit = (course: Course) => {
-    setForm({
+    reset({
       title: course.title,
       description: course.description,
       category: course.category,
@@ -196,63 +187,41 @@ export default function LMSCoursesPage() {
     setOpenMenuId(null);
   };
 
-  const handleThumbnailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    const url = URL.createObjectURL(file);
-    setForm(f => ({ ...f, thumbnailFile: file, thumbnailPreview: url }));
+ const onAddSubmit = (data: CourseFormData) => {
+  const newCourse: Course = {
+    id: nextId,
+    title: data.title,
+    description: data.description || '',
+    category: data.category,
+    levelId: data.levelId,
+    videoUrl: data.videoUrl || '',
+    thumbnailUrl: data.thumbnailPreview || '',
+    attachments: data.attachments || [],
+    createdAt: new Date().toISOString().slice(0, 10),
   };
 
-  const handleAttachFiles = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = Array.from(e.target.files ?? []);
-    const newAttachments: AttachedFile[] = files.map(file => ({
-      id: attachFileId++,
-      name: file.name,
-      size: file.size,
-      type: file.type,
-      url: URL.createObjectURL(file),
-    }));
-    setForm(f => ({ ...f, attachments: [...f.attachments, ...newAttachments] }));
-    e.target.value = '';
-  };
+  setCourses(prev => [...prev, newCourse]);
+  setNextId(n => n + 1);
+  setShowAddModal(false);
+  reset();
+};
+ const onEditSubmit = (data: CourseFormData) => {
+  if (!editCourse) return;
 
-  const removeAttachment = (id: number) => {
-    setForm(f => ({ ...f, attachments: f.attachments.filter(a => a.id !== id) }));
-  };
+  setCourses(prev => prev.map(c => c.id === editCourse.id ? {
+    ...c,
+    title: data.title,
+    description: data.description || '',
+    category: data.category,
+    levelId: data.levelId,
+    videoUrl: data.videoUrl || '',
+    thumbnailUrl: data.thumbnailPreview || c.thumbnailUrl, 
+    attachments: data.attachments || [],
+  } : c));
 
-  const handleSaveAdd = () => {
-    if (!form.title.trim()) return;
-    const newCourse: Course = {
-      id: nextId,
-      title: form.title,
-      description: form.description,
-      category: form.category,
-      levelId: form.levelId,
-      videoUrl: form.videoUrl,
-      thumbnailUrl: form.thumbnailPreview,
-      attachments: form.attachments,
-      createdAt: new Date().toISOString().slice(0, 10),
-    };
-    setCourses(prev => [...prev, newCourse]);
-    setNextId(n => n + 1);
-    setShowAddModal(false);
-  };
-
-  const handleSaveEdit = () => {
-    if (!editCourse || !form.title.trim()) return;
-    setCourses(prev => prev.map(c => c.id === editCourse.id ? {
-      ...c,
-      title: form.title,
-      description: form.description,
-      category: form.category,
-      levelId: form.levelId,
-      videoUrl: form.videoUrl,
-      thumbnailUrl: form.thumbnailPreview,
-      attachments: form.attachments,
-    } : c));
-    setEditCourse(null);
-  };
-
+  setEditCourse(null);
+  reset(); 
+ }
   const handleAddLevel = () => {
     if (!newLevelName.trim()) return;
     const newId = Math.max(0, ...levels.map(l => l.id)) + 1;
@@ -274,134 +243,6 @@ export default function LMSCoursesPage() {
       />
     );
   }
-
-  const CourseFormFields = () => (
-    <div className="space-y-4">
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1 text-right">عنوان الكورس <span className="text-red-500">*</span></label>
-        <input
-          type="text"
-          value={form.title}
-          onChange={e => setForm(f => ({ ...f, title: e.target.value }))}
-          className="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary text-right"
-          placeholder="أدخل عنوان الكورس"
-        />
-      </div>
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1 text-right">الوصف</label>
-        <textarea
-          rows={3}
-          value={form.description}
-          onChange={e => setForm(f => ({ ...f, description: e.target.value }))}
-          className="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary text-right resize-none"
-          placeholder="وصف الكورس"
-        />
-      </div>
-      <div className="grid grid-cols-2 gap-3">
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1 text-right">المادة</label>
-          <select
-            value={form.category}
-            onChange={e => setForm(f => ({ ...f, category: e.target.value }))}
-            className="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary bg-white text-right"
-          >
-            {subjectCategories.filter(c => c !== 'الكل').map(c => <option key={c} value={c}>{c}</option>)}
-          </select>
-        </div>
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1 text-right">المستوى</label>
-          <select
-            value={form.levelId}
-            onChange={e => setForm(f => ({ ...f, levelId: Number(e.target.value) }))}
-            className="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary bg-white text-right"
-          >
-            {levels.map(l => <option key={l.id} value={l.id}>{l.name}</option>)}
-          </select>
-        </div>
-      </div>
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1 text-right">لينك الفيديو</label>
-        <input
-          type="url"
-          value={form.videoUrl}
-          onChange={e => setForm(f => ({ ...f, videoUrl: e.target.value }))}
-          className="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary"
-          placeholder="https://www.youtube.com/watch?v=..."
-          dir="ltr"
-        />
-      </div>
-
-      {/* Thumbnail upload */}
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1 text-right">الصورة المصغرة</label>
-        <div
-          onClick={() => thumbnailInputRef.current?.click()}
-          className="border-2 border-dashed border-gray-200 rounded-xl overflow-hidden cursor-pointer hover:border-blue-400 transition-colors"
-        >
-          {form.thumbnailPreview ? (
-            <div className="relative h-36">
-              <img src={form.thumbnailPreview} alt="thumbnail" className="w-full h-full object-cover" />
-              <div className="absolute inset-0 bg-black/30 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity">
-                <p className="text-white text-sm font-medium">تغيير الصورة</p>
-              </div>
-            </div>
-          ) : (
-            <div className="h-28 flex flex-col items-center justify-center gap-2 text-gray-400">
-              <Upload className="w-6 h-6" />
-              <p className="text-sm">اضغط لرفع صورة</p>
-              <p className="text-xs text-gray-300">أو ستُأخذ من الفيديو تلقائياً</p>
-            </div>
-          )}
-        </div>
-        <input ref={thumbnailInputRef} type="file" accept="image/*" className="hidden" onChange={handleThumbnailChange} />
-        {form.thumbnailPreview && (
-          <button
-            onClick={() => setForm(f => ({ ...f, thumbnailFile: null, thumbnailPreview: '' }))}
-            className="mt-1 text-xs text-red-500 hover:text-red-700 transition-colors"
-          >
-            حذف الصورة
-          </button>
-        )}
-      </div>
-
-      {/* Attachments */}
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2 text-right">ملفات إضافية</label>
-        {form.attachments.length > 0 && (
-          <div className="space-y-2 mb-3">
-            {form.attachments.map(att => {
-              const Icon = getFileIcon(att.type);
-              return (
-                <div key={att.id} className="flex items-center justify-between bg-gray-50 rounded-lg px-3 py-2">
-                  <button onClick={() => removeAttachment(att.id)} className="p-0.5 hover:bg-red-50 text-red-400 hover:text-red-600 rounded transition-colors">
-                    <X className="w-3.5 h-3.5" />
-                  </button>
-                  <div className="flex items-center gap-2 text-right">
-                    <div>
-                      <p className="text-xs font-medium text-gray-700 line-clamp-1">{att.name}</p>
-                      <p className="text-xs text-gray-400">{formatFileSize(att.size)}</p>
-                    </div>
-                    <div className="bg-primary-light p-1.5 rounded-lg">
-                      <Icon className="w-4 h-4 text-primary" />
-                    </div>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        )}
-        <button
-          onClick={() => attachInputRef.current?.click()}
-          className="w-full flex items-center justify-center gap-2 border border-dashed border-gray-300 hover:border-blue-400 text-gray-500 hover:text-blue-600 py-2.5 rounded-xl text-sm transition-colors"
-        >
-          <Upload className="w-4 h-4" />
-          رفع ملفات
-        </button>
-        <input ref={attachInputRef} type="file" multiple className="hidden" onChange={handleAttachFiles} />
-      </div>
-    </div>
-  );
-
   return (
     <div className="space-y-6" dir="rtl">
       {/* Header */}
@@ -561,7 +402,7 @@ export default function LMSCoursesPage() {
 
                 <div className="p-4">
                   <div className="flex items-center gap-2 mb-2">
-                    <span className="text-xs bg-primary-light text-primary px-2 py-1 rounded-full font-medium">{course.category}</span>
+                    <span className="text-xs bg-primary-light text-white px-2 py-1 rounded-full font-medium">{course.category}</span>
                     {level && <span className={`text-xs px-2 py-1 rounded-full font-medium ${level.color}`}>{level.name}</span>}
                     {course.attachments.length > 0 && (
                       <span className="text-xs bg-gray-100 text-gray-500 px-2 py-1 rounded-full">{course.attachments.length} ملف</span>
@@ -574,7 +415,7 @@ export default function LMSCoursesPage() {
                   <div className="pt-3 border-t border-gray-100">
                     <button
                       onClick={() => setViewCourse(course)}
-                      className="w-full flex items-center justify-center gap-2 bg-primary-light hover:opacity-80 text-primary py-2 rounded-lg text-sm font-medium transition-colors"
+                      className="w-full flex items-center justify-center gap-2 bg-primary-light hover:opacity-80 text-white py-2 rounded-lg text-sm font-medium transition-colors"
                     >
                       <Eye className="w-4 h-4" />
                       عرض
@@ -622,7 +463,7 @@ export default function LMSCoursesPage() {
                       </div>
                     </td>
                     <td className="px-4 py-3">
-                      <span className="text-xs bg-primary-light text-primary px-2 py-1 rounded-full">{course.category}</span>
+                      <span className="text-xs bg-primary-light text-white px-2 py-1 rounded-full">{course.category}</span>
                     </td>
                     <td className="px-4 py-3">
                       {level && <span className={`text-xs px-2 py-1 rounded-full ${level.color}`}>{level.name}</span>}
@@ -669,11 +510,24 @@ export default function LMSCoursesPage() {
               </button>
               <h2 className="text-xl font-bold text-gray-900">إضافة كورس جديد</h2>
             </div>
-            <CourseFormFields />
+            <FormProvider {...methods}>
+              <form onSubmit={handleSubmit(onAddSubmit)}>
+            <CourseFormFields 
+              levels={levels}
+              subjectCategories={subjectCategories}
+              thumbnailInputRef={thumbnailInputRef}
+              attachInputRef={attachInputRef}
+            />
             <div className="flex gap-3 mt-6">
               <button onClick={() => setShowAddModal(false)} className="flex-1 px-4 py-2.5 border border-gray-200 rounded-xl text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors">إلغاء</button>
-              <button onClick={handleSaveAdd} disabled={!form.title.trim()} className="flex-1 px-4 py-2.5 btn-primary disabled:opacity-40 text-white rounded-xl text-sm font-medium transition-colors">إضافة</button>
-            </div>
+<button 
+              type="submit" 
+              className="flex-1 px-4 py-2.5 btn-primary text-white rounded-xl text-sm font-medium transition-colors"
+            >
+              إضافة
+            </button>            </div>
+            </form>
+            </FormProvider>
           </div>
         </div>
       )}
@@ -688,11 +542,23 @@ export default function LMSCoursesPage() {
               </button>
               <h2 className="text-xl font-bold text-gray-900">تعديل الكورس</h2>
             </div>
-            <CourseFormFields />
+             <FormProvider {...methods}>
+              <form onSubmit={handleSubmit(onEditSubmit)}>
+            <CourseFormFields
+              levels={levels}
+              subjectCategories={subjectCategories}
+              thumbnailInputRef={thumbnailInputRef}
+              attachInputRef={attachInputRef}/>
             <div className="flex gap-3 mt-6">
               <button onClick={() => setEditCourse(null)} className="flex-1 px-4 py-2.5 border border-gray-200 rounded-xl text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors">إلغاء</button>
-              <button onClick={handleSaveEdit} disabled={!form.title.trim()} className="flex-1 px-4 py-2.5 btn-primary disabled:opacity-40 text-white rounded-xl text-sm font-medium transition-colors">حفظ</button>
-            </div>
+<button 
+              type="submit" 
+              className="flex-1 px-4 py-2.5 btn-primary text-white rounded-xl text-sm font-medium transition-colors"
+            >
+              حفظ التعديلات
+            </button>            </div>
+            </form>
+            </FormProvider>
           </div>
         </div>
       )}
@@ -754,3 +620,4 @@ export default function LMSCoursesPage() {
     </div>
   );
 }
+

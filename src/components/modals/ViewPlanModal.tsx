@@ -1,4 +1,4 @@
-import { X, CheckCircle, Package, Calendar, CreditCard, Users } from 'lucide-react';
+import { X, CheckCircle, Package, CreditCard, Users } from 'lucide-react';
 import { useLanguage } from '../../contexts/LanguageContext';
 
 interface ViewPlanModalProps {
@@ -9,9 +9,9 @@ interface ViewPlanModalProps {
     name: string;
     nameEn: string;
     description: string;
-    price: string;
+    price: number;
     currency: string;
-    duration: string;
+    duration: number;
     sessionsCount: number;
     features: string[];
     isPopular: boolean;
@@ -122,7 +122,7 @@ export default function ViewPlanModal({ isOpen, onClose, plan }: ViewPlanModalPr
                 <div className="flex items-baseline justify-center gap-2">
                   <p className="text-4xl font-bold text-blue-600">{plan.duration}</p>
                   <span className="text-lg font-semibold text-gray-700">
-                    {parseInt(plan.duration) === 1 ? text.month[language] : text.months[language]}
+                    {plan.duration === 1 ? text.month[language] : text.months[language]}
                   </span>
                 </div>
               </div>

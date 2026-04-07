@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { X, Save } from 'lucide-react';
 import { useLanguage } from '../../contexts/LanguageContext';
-
+import CustomSelect from '../ui/CustomSelect';
 interface EditExpenseModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -120,32 +120,28 @@ export default function EditExpenseModal({ isOpen, onClose, expense, onSave }: E
               <label className="block text-sm font-medium text-gray-700 mb-2 text-right">
                 {text.category[language]} *
               </label>
-              <select
+              <CustomSelect
                 value={formData.category}
-                onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-right appearance-none bg-white"
-                required
-              >
-                {categories.map(cat => (
-                  <option key={cat.id} value={cat.id}>{cat.label[language]}</option>
-                ))}
-              </select>
+                onChange={(value) => setFormData({ ...formData, category: value as string })}
+                options={categories.map(cat => ({
+                  value: cat.id,
+                  label: cat.label[language]
+                }))}
+              />
             </div>
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2 text-right">
                 {text.currency[language]} *
               </label>
-              <select
+              <CustomSelect
                 value={formData.currency}
-                onChange={(e) => setFormData({ ...formData, currency: e.target.value })}
-                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-right appearance-none bg-white"
-                required
-              >
-                {currencies.map(curr => (
-                  <option key={curr.code} value={curr.code}>{curr.symbol}</option>
-                ))}
-              </select>
+                onChange={(value) => setFormData({ ...formData, currency: value as string })}
+                options={currencies.map(curr => ({
+                  value: curr.code,
+                  label: curr.symbol
+                }))}
+              />
             </div>
           </div>
 
@@ -195,15 +191,14 @@ export default function EditExpenseModal({ isOpen, onClose, expense, onSave }: E
             <label className="block text-sm font-medium text-gray-700 mb-2 text-right">
               {text.status[language]} *
             </label>
-            <select
+            <CustomSelect
               value={formData.status}
-              onChange={(e) => setFormData({ ...formData, status: e.target.value as 'paid' | 'pending' })}
-              className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-right appearance-none bg-white"
-              required
-            >
-              <option value="pending">{text.pending[language]}</option>
-              <option value="paid">{text.paid[language]}</option>
-            </select>
+              onChange={(value) => setFormData({ ...formData, status: value as 'paid' | 'pending' })}
+              options={[
+                { value: 'pending', label: text.pending[language] },
+                { value: 'paid', label: text.paid[language] }
+              ]}
+            />
           </div>
 
           <div className="flex gap-3 pt-4">

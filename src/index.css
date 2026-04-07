@@ -100,3 +100,24 @@
     background-color: color-mix(in srgb, var(--color-primary) 10%, transparent);
   }
 }
+
+/* Ant Design styles */
+.ant-select-dropdown {
+  padding: 8px !important;
+  border-radius: 12px !important;
+  box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1) !important;
+}
+
+.ant-select-item {
+  border-radius: 8px !important;
+  margin-bottom: 2px !important;
+  transition: all 0.2s !important;
+}
+
+.ant-select-selector {
+  background-color: #f9fafb !important; 
+  border-color: #e5e7eb !important;
+  height: 48px !important;
+  display: flex !important;
+  align-items: center !important;
+}

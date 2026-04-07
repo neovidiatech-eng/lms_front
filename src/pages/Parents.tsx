@@ -173,7 +173,7 @@ export default function Parents() {
                   <td className="px-6 py-4">
                     <div className="flex items-center gap-3">
                       <div className="w-10 h-10 bg-primary-light rounded-full flex items-center justify-center flex-shrink-0">
-                        <span className="text-primary font-semibold">{parent.name[0]}</span>
+                        <span className="text-white font-semibold">{parent.name[0]}</span>
                       </div>
                       <span className="font-medium text-gray-900">{parent.name}</span>
                     </div>
@@ -181,7 +181,7 @@ export default function Parents() {
                   <td className="px-6 py-4 text-gray-700 text-right">{parent.email}</td>
                   <td className="px-6 py-4 text-gray-700 text-right">{parent.phone}</td>
                   <td className="px-6 py-4 text-right">
-                    <span className="inline-flex items-center gap-2 px-3 py-1 bg-primary-light text-primary rounded-full text-sm font-medium">
+                    <span className="inline-flex items-center gap-2 px-3 py-1 bg-primary-light text-white rounded-full text-sm font-medium">
                       {parent.numberOfChildren} {text.students[language]}
                     </span>
                   </td>
@@ -239,7 +239,7 @@ export default function Parents() {
             setShowEditModal(false);
             setSelectedParent(null);
           }}
-          onSave={handleEditParent}
+          onSubmit={handleEditParent}
         />
       )}
 

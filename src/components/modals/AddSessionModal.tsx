@@ -1,53 +1,83 @@
 import { X } from 'lucide-react';
-import { useState } from 'react';
+import { useEffect, useMemo } from 'react';
 import { useLanguage } from '../../contexts/LanguageContext';
+import CustomSelect from '../ui/CustomSelect';
+import { SessionFormData, sessionSchema } from '../../lib/schemas/SessionSchema';
+import { Controller, useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
 
 interface AddSessionModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onAdd: (session: any) => void;
+  onAdd: (session: SessionFormData) => void;
+}
+
+interface SubjectOption {
+  id: string;
+  name: string;
 }
 
 export default function AddSessionModal({ isOpen, onClose, onAdd }: AddSessionModalProps) {
   const { language } = useLanguage();
-  const [formData, setFormData] = useState({
-    student: '',
-    teacher: '',
-    subject: '',
-    title: '',
-    sessionDate: '',
-    startTime: '',
-    endTime: '',
-    meetingLink: '',
-    notes: ''
+
+  const { register, handleSubmit, control, watch, setValue, reset, formState: { errors } } = useForm<SessionFormData>({
+    resolver: zodResolver(sessionSchema),
+    defaultValues: {
+      student: '', teacher: '', subject: '', title: '',
+      sessionDate: '', duration: '', startTime: '', endTime: '',
+      meetingLink: '', notes: ''
+    }
   });
 
-  const teacherSubjects: Record<string, { id: string; name: string }[]> = {
-    teacher1: [
-      { id: 'quran', name: 'القرآن الكريم' },
-      { id: 'tajweed', name: 'التجويد' }
-    ],
-    teacher2: [
-      { id: 'arabic', name: 'اللغة العربية' },
-      { id: 'grammar', name: 'النحو والصرف' }
-    ]
+  const selectedTeacher = watch('teacher');
+  const selectedStudent = watch('student');
+  const selectedDurationId = watch('duration');
+  const startTimeVal = watch('startTime');
+
+  useEffect(() => {
+    if (!isOpen) reset();
+  }, [isOpen, reset]);
+
+  const teacherSubjects: Record<string, SubjectOption[]> = {
+    teacher1: [{ id: 'quran', name: 'القرآن الكريم' }, { id: 'tajweed', name: 'التجويد' }],
+    teacher2: [{ id: 'arabic', name: 'اللغة العربية' }, { id: 'grammar', name: 'النحو والصرف' }]
   };
 
   const studentPackages: Record<string, { name: string; sessionsRemaining: number; totalSessions: number }> = {
-    student1: {
-      name: 'باقة القرآن الكريم',
-      sessionsRemaining: 8,
-      totalSessions: 12
-    },
-    student2: {
-      name: 'باقة اللغة العربية',
-      sessionsRemaining: 5,
-      totalSessions: 10
-    }
+    student1: { name: 'باقة القرآن الكريم', sessionsRemaining: 8, totalSessions: 12 },
+    student2: { name: 'باقة اللغة العربية', sessionsRemaining: 5, totalSessions: 10 }
   };
 
-  const availableSubjects = formData.teacher ? teacherSubjects[formData.teacher] || [] : [];
-  const selectedStudentPackage = formData.student ? studentPackages[formData.student] : null;
+  const durationPackages: Record<string, { name: string; duration: number }> = {
+    '1': { name: '30 دقيقة', duration: 30 },
+    '2': { name: '45 دقيقة', duration: 45 },
+    '3': { name: '60 دقيقة', duration: 60 },
+  };
+
+  useEffect(() => {
+    if (selectedDurationId && startTimeVal) {
+      const durationMins = durationPackages[selectedDurationId]?.duration || 0;
+      if (durationMins > 0) {
+        const [hours, minutes] = startTimeVal.split(':').map(Number);
+        if (!isNaN(hours) && !isNaN(minutes)) {
+          const date = new Date();
+          date.setHours(hours, minutes + durationMins, 0, 0);
+          const endH = String(date.getHours()).padStart(2, '0');
+          const endM = String(date.getMinutes()).padStart(2, '0');
+          setValue('endTime', `${endH}:${endM}`, { shouldValidate: true });
+        }
+      }
+    }
+  }, [selectedDurationId, startTimeVal, setValue]);
+
+  const availableSubjects = useMemo(() => {
+    return selectedTeacher ? (teacherSubjects[selectedTeacher] || []).map((s) => ({
+      value: s.id,
+      label: s.name
+    })) : [];
+  }, [selectedTeacher]);
+
+  const selectedStudentPackage = selectedStudent ? studentPackages[selectedStudent] : null;
 
   const text = {
     title: { ar: 'إضافة حصة واحدة', en: 'Add Single Session' },
@@ -63,6 +93,8 @@ export default function AddSessionModal({ isOpen, onClose, onAdd }: AddSessionMo
     sessionDate: { ar: 'تاريخ الحصة', en: 'Session Date' },
     description: { ar: 'الوصف', en: 'Description' },
     descriptionPlaceholder: { ar: 'وصف الحصة', en: 'Session Description' },
+    duration: { ar: 'مدة الحصة *', en: 'Session Duration *' },
+    selectDuration: { ar: 'اختر المدة', en: 'Select Duration' },
     startTime: { ar: 'وقت البداية', en: 'Start Time' },
     endTime: { ar: 'وقت النهاية', en: 'End Time' },
     meetingLink: { ar: 'رابط الاجتماع', en: 'Meeting Link' },
@@ -78,20 +110,8 @@ export default function AddSessionModal({ isOpen, onClose, onAdd }: AddSessionMo
     totalSessions: { ar: 'إجمالي الحصص', en: 'Total Sessions' }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    onAdd(formData);
-    setFormData({
-      student: '',
-      teacher: '',
-      subject: '',
-      title: '',
-      sessionDate: '',
-      startTime: '',
-      endTime: '',
-      meetingLink: '',
-      notes: ''
-    });
+  const onFormSubmit = (data: SessionFormData) => {
+    onAdd(data);
     onClose();
   };
 
@@ -100,52 +120,64 @@ export default function AddSessionModal({ isOpen, onClose, onAdd }: AddSessionMo
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
       <div className="bg-white rounded-2xl shadow-xl w-full max-w-4xl max-h-[90vh] overflow-y-auto">
-        <div className="sticky top-0 bg-white border-b border-gray-100 px-6 py-4 flex items-center justify-between">
+        <div className="sticky top-0 bg-white border-b border-gray-100 px-6 py-4 flex items-center justify-between z-10">
           <h2 className="text-2xl font-bold text-gray-900">{text.title[language]}</h2>
-          <button
-            onClick={onClose}
-            className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
-          >
+          <button onClick={onClose} className="p-2 hover:bg-gray-100 rounded-lg transition-colors">
             <X className="w-6 h-6" />
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="p-6">
+        <form onSubmit={handleSubmit(onFormSubmit)} className="p-6">
           <div className="space-y-6">
+            {/* الطالب والمعلم */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="space-y-2">
-                <label className="block text-sm font-medium text-gray-700 text-right">
-                  {text.student[language]} <span className="text-red-500">{text.required[language]}</span>
-                </label>
-                <select
-                  value={formData.student}
-                  onChange={(e) => setFormData({ ...formData, student: e.target.value })}
-                  className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent text-right"
-                  required
-                >
-                  <option value="">{text.selectStudent[language]}</option>
-                  <option value="student1">أحمد محمد</option>
-                  <option value="student2">سارة علي</option>
-                </select>
+              <div>
+                <Controller
+                  name="student"
+                  control={control}
+                  render={({ field }) => (
+                    <CustomSelect
+                      label={text.student[language]}
+                      value={field.value}
+                      options={[
+                        { value: 'student1', label: language === 'ar' ? 'أحمد محمد' : 'Ahmed Mohammed' },
+                        { value: 'student2', label: language === 'ar' ? 'سارة علي' : 'Sara Ali' },
+                      ]}
+                      onChange={field.onChange}
+                      placeholder={text.selectStudent[language]}
+                      className="h-[46px]"
+                    />
+                  )}
+                />
+                {errors.student && <span className="text-red-500 text-xs mt-1 block text-right">{errors.student.message}</span>}
               </div>
 
-              <div className="space-y-2">
-                <label className="block text-sm font-medium text-gray-700 text-right">
-                  {text.teacher[language]} <span className="text-red-500">{text.required[language]}</span>
-                </label>
-                <select
-                  value={formData.teacher}
-                  onChange={(e) => setFormData({ ...formData, teacher: e.target.value, subject: '' })}
-                  className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent text-right"
-                  required
-                >
-                  <option value="">{text.selectTeacher[language]}</option>
-                  <option value="teacher1">Ahmed Qandil</option>
-                  <option value="teacher2">Ahmed Gamal</option>
-                </select>
+              <div>
+                <Controller
+                  name="teacher"
+                  control={control}
+                  render={({ field }) => (
+                    <CustomSelect
+                      label={text.teacher[language]}
+                      value={field.value}
+                      options={[
+                        { value: 'teacher1', label: 'Ahmed Qandil' },
+                        { value: 'teacher2', label: 'Ahmed Gamal' },
+                      ]}
+                      onChange={(val) => {
+                        field.onChange(val);
+                        setValue('subject', ''); // إعادة تعيين المادة عند تغيير المعلم
+                      }}
+                      placeholder={text.selectTeacher[language]}
+                      className="h-[46px]"
+                    />
+                  )}
+                />
+                {errors.teacher && <span className="text-red-500 text-xs mt-1 block text-right">{errors.teacher.message}</span>}
               </div>
             </div>
 
+            {/* تفاصيل الباقة */}
             {selectedStudentPackage && (
               <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
                 <h3 className="text-sm font-semibold text-blue-900 mb-3 text-right">{text.packageInfo[language]}</h3>
@@ -166,136 +198,133 @@ export default function AddSessionModal({ isOpen, onClose, onAdd }: AddSessionMo
               </div>
             )}
 
+            {/* المادة */}
             <div className="space-y-2">
-              <label className="block text-sm font-medium text-gray-700 text-right">
-                {text.subject[language]} <span className="text-red-500">{text.required[language]}</span>
-              </label>
-              <select
-                value={formData.subject}
-                onChange={(e) => setFormData({ ...formData, subject: e.target.value })}
-                className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent text-right disabled:bg-gray-50 disabled:text-gray-500"
-                required
-                disabled={!formData.teacher}
-              >
-                <option value="">{formData.teacher ? text.selectSubject[language] : text.teacherQuestion[language]}</option>
-                {availableSubjects.map((subject) => (
-                  <option key={subject.id} value={subject.id}>
-                    {subject.name}
-                  </option>
-                ))}
-              </select>
+              <Controller
+                name="subject"
+                control={control}
+                render={({ field }) => (
+                  <CustomSelect
+                    label={text.subject[language]}
+                    value={field.value}
+                    options={availableSubjects}
+                    onChange={field.onChange}
+                    placeholder={selectedTeacher ? text.selectSubject[language] : text.teacherQuestion[language]}
+                    className="h-[46px]"
+                    disabled={!selectedTeacher}
+                  />
+                )}
+              />
+              {errors.subject && <span className="text-red-500 text-xs block text-right">{errors.subject.message}</span>}
             </div>
 
+            {/* التاريخ والعنوان */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="space-y-2">
-                <label className="block text-sm font-medium text-gray-700 text-right">
-                  تاريخ الحصة <span className="text-red-500">{text.required[language]}</span>
+              <div className="space-y-2 text-right">
+                <label className="block text-sm font-medium text-gray-700">
+                  {text.sessionDate[language]} <span className="text-red-500">{text.required[language]}</span>
                 </label>
                 <input
                   type="date"
-                  value={formData.sessionDate}
-                  onChange={(e) => setFormData({ ...formData, sessionDate: e.target.value })}
+                  {...register('sessionDate')}
                   className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent text-right"
-                  required
                 />
+                {errors.sessionDate && <span className="text-red-500 text-xs">{errors.sessionDate.message}</span>}
               </div>
 
-              <div className="space-y-2">
-                <label className="block text-sm font-medium text-gray-700 text-right">
+              <div className="space-y-2 text-right">
+                <label className="block text-sm font-medium text-gray-700">
                   {text.sessionTitle[language]} <span className="text-red-500">{text.required[language]}</span>
                 </label>
                 <input
                   type="text"
-                  value={formData.title}
-                  onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                  {...register('title')}
                   placeholder={text.sessionTitlePlaceholder[language]}
                   className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent text-right"
-                  required
                 />
+                {errors.title && <span className="text-red-500 text-xs">{errors.title.message}</span>}
               </div>
             </div>
 
-            <div className="space-y-2">
-              <label className="block text-sm font-medium text-gray-700 text-right">
-                {text.description[language]}
-              </label>
-              <textarea
-                value={formData.notes}
-                onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
-                placeholder={text.descriptionPlaceholder[language]}
-                rows={3}
-                className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent text-right resize-none"
-              />
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* المدة والوقت */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <div className="space-y-2">
-                <label className="block text-sm font-medium text-gray-700 text-right">
+                <Controller
+                  name="duration"
+                  control={control}
+                  render={({ field }) => (
+                    <CustomSelect
+                      label={text.duration[language]}
+                      value={field.value}
+                      options={Object.entries(durationPackages).map(([id, pkg]) => ({
+                        value: id,
+                        label: pkg.name
+                      }))}
+                      onChange={field.onChange}
+                      placeholder={text.selectDuration[language]}
+                      className="h-[46px]"
+                    />
+                  )}
+                />
+                {errors.duration && <span className="text-red-500 text-xs block text-right">{errors.duration.message}</span>}
+              </div>
+
+              <div className="space-y-2 text-right">
+                <label className="block text-sm font-medium text-gray-700">
                   {text.startTime[language]} <span className="text-red-500">{text.required[language]}</span>
                 </label>
                 <input
                   type="time"
-                  value={formData.startTime}
-                  onChange={(e) => setFormData({ ...formData, startTime: e.target.value })}
+                  {...register('startTime')}
                   className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent text-right"
-                  required
                 />
+                {errors.startTime && <span className="text-red-500 text-xs">{errors.startTime.message}</span>}
               </div>
 
-              <div className="space-y-2">
-                <label className="block text-sm font-medium text-gray-700 text-right">
+              <div className="space-y-2 text-right">
+                <label className="block text-sm font-medium text-gray-700">
                   {text.endTime[language]} <span className="text-red-500">{text.required[language]}</span>
                 </label>
                 <input
                   type="time"
-                  value={formData.endTime}
-                  onChange={(e) => setFormData({ ...formData, endTime: e.target.value })}
+                  disabled
+                  {...register('endTime')}
                   className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent text-right"
-                  required
                 />
+                {errors.endTime && <span className="text-red-500 text-xs">{errors.endTime.message}</span>}
               </div>
             </div>
 
-            <div className="space-y-2">
-              <label className="block text-sm font-medium text-gray-700 text-right">
-                {text.meetingLink[language]}
-              </label>
-              <input
-                type="url"
-                value={formData.meetingLink}
-                onChange={(e) => setFormData({ ...formData, meetingLink: e.target.value })}
-                placeholder={text.meetingLinkPlaceholder[language]}
-                className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent text-right"
-                dir="ltr"
-              />
-            </div>
-
-            <div className="space-y-2">
-              <label className="block text-sm font-medium text-gray-700 text-right">
-                {text.notes[language]}
-              </label>
-              <textarea
-                value={formData.notes}
-                onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
-                placeholder={text.notesPlaceholder[language]}
-                rows={3}
-                className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent text-right resize-none"
-              />
+            {/* الرابط والملاحظات */}
+            <div className="space-y-4">
+              <div className="space-y-2 text-right">
+                <label className="block text-sm font-medium text-gray-700">{text.meetingLink[language]}</label>
+                <input
+                  type="url"
+                  {...register('meetingLink')}
+                  placeholder={text.meetingLinkPlaceholder[language]}
+                  className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent text-right"
+                  dir="ltr"
+                />
+              </div>
+              <div className="space-y-2 text-right">
+                <label className="block text-sm font-medium text-gray-700">{text.notes[language]}</label>
+                <textarea
+                  {...register('notes')}
+                  placeholder={text.notesPlaceholder[language]}
+                  rows={3}
+                  className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent text-right resize-none"
+                />
+              </div>
             </div>
           </div>
 
+          {/* الأزرار */}
           <div className="flex gap-3 mt-8">
-            <button
-              type="submit"
-              className="flex-1 px-6 py-3 btn-primary text-white rounded-xl transition-colors font-medium"
-            >
+            <button type="submit" className="flex-1 px-6 py-3 bg-blue-600 text-white rounded-xl transition-colors font-medium hover:bg-blue-700">
               {text.add[language]}
             </button>
-            <button
-              type="button"
-              onClick={onClose}
-              className="flex-1 px-6 py-3 border border-gray-200 text-gray-700 rounded-xl hover:bg-gray-50 transition-colors font-medium"
-            >
+            <button type="button" onClick={onClose} className="flex-1 px-6 py-3 border border-gray-200 text-gray-700 rounded-xl hover:bg-gray-50 transition-colors font-medium">
               {text.cancel[language]}
             </button>
           </div>
