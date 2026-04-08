@@ -60,7 +60,7 @@ export default function ViewUserModal({ isOpen, onClose, userData }: ViewUserMod
         </div>
 
         {/* Body */}
-        <div className="flex-1 overflow-y-auto p-6">
+        <div className="flex-1  overflow-y-auto no-scrollbar p-6">
           <div className="space-y-6">
             {/* User Avatar and Basic Info */}
             <div className="flex flex-col items-center gap-4 pb-6 border-b border-gray-200">
@@ -115,19 +115,18 @@ export default function ViewUserModal({ isOpen, onClose, userData }: ViewUserMod
                 </label>
                 <div className="flex items-center justify-end gap-2">
                   <span
-                    className={`px-3 py-1 rounded-full text-sm font-medium ${
-                      userData.status === 'active'
+                    className={`px-3 py-1 rounded-full text-sm font-medium ${userData.status === 'active'
                         ? 'bg-green-100 text-green-700'
                         : 'bg-red-100 text-red-700'
-                    }`}
+                      }`}
                   >
                     {userData.status === 'active'
                       ? language === 'ar'
                         ? 'نشط'
                         : 'Active'
                       : language === 'ar'
-                      ? 'غير نشط'
-                      : 'Inactive'}
+                        ? 'غير نشط'
+                        : 'Inactive'}
                   </span>
                 </div>
               </div>

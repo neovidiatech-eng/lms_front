@@ -98,7 +98,7 @@ export default function EditSessionModal({ isOpen, onClose, session, onSave }: E
           <h2 className="text-2xl font-bold text-white">{text.title[language]}</h2>
         </div>
 
-        <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto">
+        <form onSubmit={handleSubmit} className="flex-1  overflow-y-auto no-scrollbar">
           <div className="p-6 space-y-6">
             {/* Session Info (Read-only) */}
             <div className="bg-gray-50 rounded-xl p-6 border border-gray-200">

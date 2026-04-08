@@ -20,11 +20,11 @@ export default function EditStudentModal({
   studentData,
 }: EditStudentModalProps) {
   const { language } = useLanguage();
-  
+
   // نستخدم values للتحديث التلقائي عند تغير studentData
   const { control, handleSubmit, register, reset, formState: { errors } } = useForm<StudentFormData>({
     resolver: zodResolver(studentSchema),
-    defaultValues: studentData || undefined, 
+    defaultValues: studentData || undefined,
   });
 
   // التأكد من عمل reset عند فتح المودال ببيانات جديدة
@@ -34,18 +34,18 @@ export default function EditStudentModal({
     }
   }, [isOpen, studentData, reset]);
 
-if (!isOpen || !studentData) return null;
+  if (!isOpen || !studentData) return null;
 
 
-const handleEditSubmit = (data: StudentFormData) => {
-  const cleanedData = { ...data };
-  if (!cleanedData.password) {
-    delete cleanedData.password;
-  }
-  
-  onSubmit({ ...cleanedData, id: studentData!.id } );
-  onClose();
-};
+  const handleEditSubmit = (data: StudentFormData) => {
+    const cleanedData = { ...data };
+    if (!cleanedData.password) {
+      delete cleanedData.password;
+    }
+
+    onSubmit({ ...cleanedData, id: studentData!.id });
+    onClose();
+  };
   const countryCodes = [
     { code: '+20', country: 'مصر', countryEn: 'Egypt' },
     { code: '+966', country: 'السعودية', countryEn: 'Saudi Arabia' },
@@ -85,7 +85,7 @@ const handleEditSubmit = (data: StudentFormData) => {
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 backdrop-blur-sm">
-      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh]  overflow-y-auto no-scrollbar">
         <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between z-10">
           <button onClick={onClose} className="p-2 hover:bg-gray-100 rounded-lg transition-colors">
             <X className="w-5 h-5 text-gray-500" />

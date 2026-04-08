@@ -26,13 +26,13 @@ interface EditTeacherModalProps {
 
 export default function EditTeacherModal({ isOpen, onClose, onSubmit, teacher }: EditTeacherModalProps) {
   const { language } = useLanguage();
-  const {register ,handleSubmit, setValue, watch, control, reset,formState: { errors },} = useForm<TeacherFormData>({
-    resolver:zodResolver(teacherSchema) as Resolver<TeacherFormData>,
+  const { register, handleSubmit, setValue, watch, control, reset, formState: { errors }, } = useForm<TeacherFormData>({
+    resolver: zodResolver(teacherSchema) as Resolver<TeacherFormData>,
 
   })
- 
 
-useEffect(() => {
+
+  useEffect(() => {
     if (teacher) {
       const subjectsArray = teacher.subject.split('،').map(s => s.trim());
       reset({
@@ -42,7 +42,7 @@ useEffect(() => {
         password: '',
         hourlyRate: teacher.amount,
         currency: teacher.currency,
-        gender: 'male', 
+        gender: 'male',
         status: teacher.status,
         subjects: {
           quran: subjectsArray.some(s => s.includes('القرآن')),
@@ -55,13 +55,13 @@ useEffect(() => {
     }
   }, [teacher, reset]);
 
-  const handleOnSubmit = (data:TeacherFormData) => {
+  const handleOnSubmit = (data: TeacherFormData) => {
     onSubmit(data);
     onClose();
   };
 
   if (!isOpen || !teacher) return null;
-const subjectsValue = watch('subjects');
+  const subjectsValue = watch('subjects');
   const currencies = [
     { id: 'EGP', label: 'EGP', labelEn: 'EGP' },
     { id: 'SAR', label: 'ر.س', labelEn: 'SAR' },
@@ -89,7 +89,7 @@ const subjectsValue = watch('subjects');
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh]  overflow-y-auto no-scrollbar">
         {/* Header */}
         <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between rounded-t-2xl">
           <button
@@ -150,7 +150,7 @@ const subjectsValue = watch('subjects');
                 <input
                   type="password"
                   placeholder="••••••••"
-                  {...register('password')}                 
+                  {...register('password')}
                   className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 text-left bg-gray-50"
                   dir="ltr"
                 />
@@ -168,7 +168,7 @@ const subjectsValue = watch('subjects');
                 <input
                   type="tel"
                   placeholder="01012345678"
-                 {...register('phone')}
+                  {...register('phone')}
                   className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 text-right"
                   dir="ltr"
                 />
@@ -179,7 +179,7 @@ const subjectsValue = watch('subjects');
             {/* Row 3: Hourly Rate and Currency */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {/* Currency */}
-             <Controller
+              <Controller
                 name="currency"
                 control={control}
                 render={({ field }) => (
@@ -211,7 +211,7 @@ const subjectsValue = watch('subjects');
             {/* Row 4: Gender and Status */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {/* Status */}
-          <Controller
+              <Controller
                 name="status"
                 control={control}
                 render={({ field }) => (

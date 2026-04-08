@@ -6,20 +6,20 @@ import { AssignmentFormData, assignmentSchema } from '../../lib/schemas/Assignme
 import { Resolver, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 
-interface Assignment extends AssignmentFormData{
-  id : string;
+interface Assignment extends AssignmentFormData {
+  id: string;
 }
 
 interface AddAssignmentModalProps {
   isOpen: boolean;
   onClose: () => void;
   onAdd: (assignment: Assignment) => void;
-  initialData? :Assignment | null;
+  initialData?: Assignment | null;
 }
 
 export default function AddAssignmentModal({ isOpen, onClose, onAdd, initialData }: AddAssignmentModalProps) {
   const { language } = useLanguage();
- const {
+  const {
     register,
     handleSubmit,
     reset,
@@ -67,12 +67,12 @@ export default function AddAssignmentModal({ isOpen, onClose, onAdd, initialData
     }
   }, [initialData, reset, isOpen]);
 
-  const handleOnSubmit = (data:AssignmentFormData) => {
+  const handleOnSubmit = (data: AssignmentFormData) => {
     onAdd({
       id: Date.now().toString(),
       ...data
     });
-   
+
     onClose();
   };
 
@@ -80,7 +80,7 @@ export default function AddAssignmentModal({ isOpen, onClose, onAdd, initialData
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-2xl shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+      <div className="bg-white rounded-2xl shadow-xl max-w-2xl w-full max-h-[90vh]  overflow-y-auto no-scrollbar">
         <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between rounded-t-2xl">
           <h2 className="text-2xl font-bold text-gray-900">{text.title[language]}</h2>
           <button
@@ -138,7 +138,7 @@ export default function AddAssignmentModal({ isOpen, onClose, onAdd, initialData
             <input
               type="text"
               {...register('title')}
-                            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent text-right"
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent text-right"
               dir="rtl"
             />
             {errors.title && <p className="text-red-500 text-xs mt-1">{errors.title.message}</p>}
@@ -170,17 +170,17 @@ export default function AddAssignmentModal({ isOpen, onClose, onAdd, initialData
               />
               {errors.dueDate && <p className="text-red-500 text-xs mt-1">{errors.dueDate.message}</p>}
             </div>
-<CustomSelect
-                label={text.status[language]}
-                value={watch('status')}
-                onChange={(val) => setValue('status', val as 'pending' | 'submitted' | 'graded', { shouldValidate: true })}
-                options={[
-                  { value: 'pending', label: text.pending[language] },
-                  { value: 'submitted', label: text.submitted[language] },
-                  { value: 'graded', label: text.graded[language] }
-                ]}
-              />
-           
+            <CustomSelect
+              label={text.status[language]}
+              value={watch('status')}
+              onChange={(val) => setValue('status', val as 'pending' | 'submitted' | 'graded', { shouldValidate: true })}
+              options={[
+                { value: 'pending', label: text.pending[language] },
+                { value: 'submitted', label: text.submitted[language] },
+                { value: 'graded', label: text.graded[language] }
+              ]}
+            />
+
           </div>
 
           <div className="flex gap-3 pt-4">

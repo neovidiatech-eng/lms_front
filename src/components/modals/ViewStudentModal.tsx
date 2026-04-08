@@ -30,7 +30,7 @@ export default function ViewStudentModal({ isOpen, onClose, studentData }: ViewS
         </div>
 
         {/* Content */}
-        <div className="flex-1 overflow-y-auto p-6">
+        <div className="flex-1  overflow-y-auto no-scrollbar p-6">
           <div className="space-y-6">
             {/* Profile Section */}
             <div className="flex items-center gap-4 pb-6 border-b border-gray-200">
@@ -90,19 +90,18 @@ export default function ViewStudentModal({ isOpen, onClose, studentData }: ViewS
                   {language === 'ar' ? 'الحالة' : 'Status'}
                 </label>
                 <span
-                  className={`inline-flex px-3 py-1 rounded-full text-sm font-medium ${
-                    studentData.status === 'active'
+                  className={`inline-flex px-3 py-1 rounded-full text-sm font-medium ${studentData.status === 'active'
                       ? 'bg-green-100 text-green-700'
                       : 'bg-red-100 text-red-700'
-                  }`}
+                    }`}
                 >
                   {studentData.status === 'active'
                     ? language === 'ar'
                       ? 'نشط'
                       : 'Active'
                     : language === 'ar'
-                    ? 'متوقف'
-                    : 'Inactive'}
+                      ? 'متوقف'
+                      : 'Inactive'}
                 </span>
               </div>
 

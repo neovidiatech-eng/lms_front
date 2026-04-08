@@ -13,10 +13,10 @@ interface AddPlanModalProps {
   initialData?: (PlanFormData & { id: string }) | null;
 }
 
-export default function AddPlanModal({ isOpen, onClose, onSave , initialData }: AddPlanModalProps) {
+export default function AddPlanModal({ isOpen, onClose, onSave, initialData }: AddPlanModalProps) {
   const { language } = useLanguage();
 
-  const {  register, handleSubmit, reset , setValue, watch, control,  formState: { errors }} = useForm<PlanFormData>({
+  const { register, handleSubmit, reset, setValue, watch, control, formState: { errors } } = useForm<PlanFormData>({
     resolver: zodResolver(planSchema) as Resolver<PlanFormData>,
     defaultValues: {
       name: '',
@@ -31,23 +31,23 @@ export default function AddPlanModal({ isOpen, onClose, onSave , initialData }: 
       status: 'active',
     },
   });
-const features = watch('features');
- const addFeature = () => {
-  setValue('features', [...features, '']);
-};
+  const features = watch('features');
+  const addFeature = () => {
+    setValue('features', [...features, '']);
+  };
 
-const removeFeature = (index: number) => {
-  const updated = features.filter((_, i) => i !== index);
-  setValue('features', updated);
-};
+  const removeFeature = (index: number) => {
+    const updated = features.filter((_, i) => i !== index);
+    setValue('features', updated);
+  };
 
-const updateFeature = (index: number, value: string) => {
-  const updated = [...features];
-  updated[index] = value;
-  setValue('features', updated);
-};
+  const updateFeature = (index: number, value: string) => {
+    const updated = [...features];
+    updated[index] = value;
+    setValue('features', updated);
+  };
 
-useEffect(() => {
+  useEffect(() => {
     if (isOpen) {
       if (initialData) {
         reset(initialData);
@@ -68,7 +68,7 @@ useEffect(() => {
     }
   }, [initialData, reset, isOpen]);
 
-  
+
   const text = {
     title: { ar: initialData ? 'تعديل خطة' : 'إضافة خطة جديدة', en: initialData ? 'Edit Plan' : 'Add New Plan' },
     nameAr: { ar: 'اسم الخطة (عربي)', en: 'Plan Name (Arabic)' },
@@ -103,7 +103,7 @@ useEffect(() => {
   const onSubmit = (data: PlanFormData) => {
     onSave({
       ...data,
-      id:initialData?.id
+      id: initialData?.id
     });
     reset();
     onClose();
@@ -113,7 +113,7 @@ useEffect(() => {
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-3xl max-h-[90vh] overflow-y-auto">
+      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-3xl max-h-[90vh]  overflow-y-auto no-scrollbar">
         <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between rounded-t-2xl">
           <h2 className="text-2xl font-bold text-gray-900">{text.title[language]}</h2>
           <button onClick={onClose} className="p-2 hover:bg-gray-100 rounded-lg transition-colors">
@@ -131,22 +131,22 @@ useEffect(() => {
               </label>
               <input {...register('name')} className="w-full px-4 py-2.5 border rounded-lg text-right" />
               {errors.name && (<p className="text-red-500 text-sm mt-1 text-right"> {errors.name.message}</p>
-)}
+              )}
             </div>
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2 text-right">
                 {text.nameEn[language]}
               </label>
-             <input {...register('nameEn')} className="w-full px-4 py-2.5 border rounded-lg" />
+              <input {...register('nameEn')} className="w-full px-4 py-2.5 border rounded-lg" />
 
-{errors.nameEn && (
-  <p className="text-red-500 text-sm mt-1 text-right">
-    {errors.nameEn.message}
-  </p>
-)}
+              {errors.nameEn && (
+                <p className="text-red-500 text-sm mt-1 text-right">
+                  {errors.nameEn.message}
+                </p>
+              )}
             </div>
-            </div>
+          </div>
           {/* Description */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2 text-right">
@@ -154,141 +154,141 @@ useEffect(() => {
             </label>
             <textarea {...register('description')} rows={3} className="w-full px-4 py-2.5 border rounded-lg text-right resize-none" />
             {errors.description && (<p className="text-red-500 text-sm mt-1 text-right"> {errors.description.message}</p>
-)}
+            )}
           </div>
 
           {/* Price + Currency */}
-<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
 
-  <div>
-    <label className="block text-sm font-medium text-gray-700 mb-2 text-right">
-      {text.price[language]}
-    </label>
-    <input
-      type="number"
-      {...register('price', { valueAsNumber: true })}
-      className="w-full px-4 py-2.5 border rounded-lg text-right"
-    />
-    {errors.price && (
-  <p className="text-red-500 text-sm mt-1 text-right">
-    {errors.price.message}
-  </p>
-)}
-  </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2 text-right">
+                {text.price[language]}
+              </label>
+              <input
+                type="number"
+                {...register('price', { valueAsNumber: true })}
+                className="w-full px-4 py-2.5 border rounded-lg text-right"
+              />
+              {errors.price && (
+                <p className="text-red-500 text-sm mt-1 text-right">
+                  {errors.price.message}
+                </p>
+              )}
+            </div>
 
-  <div>
-    <label className="block text-sm font-medium text-gray-700 mb-2 text-right">
-      {text.currency[language]}
-    </label>
-    <Controller
-      name="currency"
-      control={control}
-      render={({ field }) => (
-        <CustomSelect
-          {...field}
-          options={currencies.map((curr) => ({
-            value: curr.code,
-            label: `${curr.code} - ${language === 'ar' ? curr.nameAr : curr.nameEn}`
-          }))}
-        />
-      )}
-    />
-    {errors.currency && (
-  <p className="text-red-500 text-sm mt-1 text-right">
-    {errors.currency.message}
-  </p>
-)}
-  </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2 text-right">
+                {text.currency[language]}
+              </label>
+              <Controller
+                name="currency"
+                control={control}
+                render={({ field }) => (
+                  <CustomSelect
+                    {...field}
+                    options={currencies.map((curr) => ({
+                      value: curr.code,
+                      label: `${curr.code} - ${language === 'ar' ? curr.nameAr : curr.nameEn}`
+                    }))}
+                  />
+                )}
+              />
+              {errors.currency && (
+                <p className="text-red-500 text-sm mt-1 text-right">
+                  {errors.currency.message}
+                </p>
+              )}
+            </div>
 
-</div>
+          </div>
           {/* Duration + Sessions */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
 
-  <div>
-    <label className="block text-sm font-medium text-gray-700 mb-2 text-right">
-      {text.duration[language]}
-    </label>
-    <input
-      type="number"
-      {...register('duration', { valueAsNumber: true })}
-      className="w-full px-4 py-2.5 border rounded-lg text-right"
-    />
-    {errors.duration && (
-  <p className="text-red-500 text-sm mt-1 text-right">
-    {errors.duration.message}
-  </p>
-)}
-  </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2 text-right">
+                {text.duration[language]}
+              </label>
+              <input
+                type="number"
+                {...register('duration', { valueAsNumber: true })}
+                className="w-full px-4 py-2.5 border rounded-lg text-right"
+              />
+              {errors.duration && (
+                <p className="text-red-500 text-sm mt-1 text-right">
+                  {errors.duration.message}
+                </p>
+              )}
+            </div>
 
-  <div>
-    <label className="block text-sm font-medium text-gray-700 mb-2 text-right">
-      {text.sessionsCount[language]}
-    </label>
-    <input
-      type="number"
-      {...register('sessionsCount', { valueAsNumber: true })}
-      className="w-full px-4 py-2.5 border rounded-lg text-right"
-    />
-    {errors.sessionsCount && (
-  <p className="text-red-500 text-sm mt-1 text-right">
-    {errors.sessionsCount.message}
-  </p>
-)}
-  </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2 text-right">
+                {text.sessionsCount[language]}
+              </label>
+              <input
+                type="number"
+                {...register('sessionsCount', { valueAsNumber: true })}
+                className="w-full px-4 py-2.5 border rounded-lg text-right"
+              />
+              {errors.sessionsCount && (
+                <p className="text-red-500 text-sm mt-1 text-right">
+                  {errors.sessionsCount.message}
+                </p>
+              )}
+            </div>
 
-</div>
+          </div>
 
           {/* Features */}
           <div>
             <div className="flex justify-between mb-3">
-             <button type="button" onClick={addFeature} 
-             className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-sm font-medium"
->
-  <Plus className="w-4 h-4" />
-  {text.addFeature[language]}
-</button>
+              <button type="button" onClick={addFeature}
+                className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-sm font-medium"
+              >
+                <Plus className="w-4 h-4" />
+                {text.addFeature[language]}
+              </button>
               <label className="text-sm font-medium">{text.features[language]}</label>
             </div>
 
             <div className="space-y-3">
-  {features.map((feature, index) => (
-    <div key={index} className="flex items-center gap-2">
-      
-      <button
-        type="button"
-        onClick={() => removeFeature(index)}
-        className="p-2 text-red-600 hover:bg-red-50 rounded-lg"
-        disabled={features.length === 1}
-      >
-        <Trash2 className="w-4 h-4" />
-      </button>
+              {features.map((feature, index) => (
+                <div key={index} className="flex items-center gap-2">
 
-      <div className="flex-1 flex flex-col gap-1">
-        <input
-          value={feature}
-          onChange={(e) => updateFeature(index, e.target.value)}
-          placeholder={text.featurePlaceholder[language]}
-          className={`px-4 py-2.5 border rounded-lg ${errors.features?.[index] ? 'border-red-500' : 'border-gray-300'}`}
-        />
-        {errors.features?.[index] && <span className="text-red-500 text-xs text-right">هذا الحقل مطلوب</span>}
-      </div>
+                  <button
+                    type="button"
+                    onClick={() => removeFeature(index)}
+                    className="p-2 text-red-600 hover:bg-red-50 rounded-lg"
+                    disabled={features.length === 1}
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </button>
 
-    </div>
-  ))}
-</div>
+                  <div className="flex-1 flex flex-col gap-1">
+                    <input
+                      value={feature}
+                      onChange={(e) => updateFeature(index, e.target.value)}
+                      placeholder={text.featurePlaceholder[language]}
+                      className={`px-4 py-2.5 border rounded-lg ${errors.features?.[index] ? 'border-red-500' : 'border-gray-300'}`}
+                    />
+                    {errors.features?.[index] && <span className="text-red-500 text-xs text-right">هذا الحقل مطلوب</span>}
+                  </div>
+
+                </div>
+              ))}
+            </div>
           </div>
 
           {/* Boolean + Status */}
-<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="flex items-center justify-end gap-3"> 
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="flex items-center justify-end gap-3">
               <label className="text-sm font-medium text-gray-700">
                 {text.isPopular[language]}
               </label>
-                         <input type="checkbox" {...register('isPopular')} 
-                            className="w-5 h-5 text-blue-600 border-gray-300 rounded focus:ring-2 focus:ring-blue-500"
+              <input type="checkbox" {...register('isPopular')}
+                className="w-5 h-5 text-blue-600 border-gray-300 rounded focus:ring-2 focus:ring-blue-500"
 
-            />
-          </div>
+              />
+            </div>
 
             <div className="flex flex-col gap-1">
               <label className="block text-sm font-medium text-gray-700 text-right mb-1">

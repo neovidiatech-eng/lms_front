@@ -23,9 +23,9 @@ export default function AddStudentModal({ isOpen, onClose, onSubmit }: AddStuden
       country: 'مصر'
     }
   });
-const onFormSubmit = (data: StudentFormData) => {
-      onSubmit(data);
-      reset();
+  const onFormSubmit = (data: StudentFormData) => {
+    onSubmit(data);
+    reset();
     onClose();
   };
 
@@ -64,40 +64,40 @@ const onFormSubmit = (data: StudentFormData) => {
     { id: 'inactive', label: 'متوقف', labelEn: 'Inactive' },
   ];
 
-const countryCodeOptions = countryCodes.map((c) => ({
-  value: c.code,
-  searchText: `${c.country} ${c.countryEn} ${c.code}`,
-  label: (
-    <div className="flex justify-between items-center w-full">
-      <span className="font-mono">{c.code}</span>
-      <span className="text-gray-500 text-xs">{language === 'ar' ? c.country : c.countryEn}</span>
-    </div>
-  ),
-}));
+  const countryCodeOptions = countryCodes.map((c) => ({
+    value: c.code,
+    searchText: `${c.country} ${c.countryEn} ${c.code}`,
+    label: (
+      <div className="flex justify-between items-center w-full">
+        <span className="font-mono">{c.code}</span>
+        <span className="text-gray-500 text-xs">{language === 'ar' ? c.country : c.countryEn}</span>
+      </div>
+    ),
+  }));
 
-const genderOptions = genders.filter(g => g.id !== '').map((g) => ({
-  value: g.id,
-  label: language === 'ar' ? g.label : g.labelEn,
-}));
+  const genderOptions = genders.filter(g => g.id !== '').map((g) => ({
+    value: g.id,
+    label: language === 'ar' ? g.label : g.labelEn,
+  }));
 
-const countryOptions = countries.filter(c => c.id !== '').map((c) => ({
-  value: c.id,
-  label: language === 'ar' ? c.label : c.labelEn,
-}));
+  const countryOptions = countries.filter(c => c.id !== '').map((c) => ({
+    value: c.id,
+    label: language === 'ar' ? c.label : c.labelEn,
+  }));
 
-const planOptions = plans.map((p) => ({
-  value: p.id,
-  label: language === 'ar' ? p.label : p.labelEn,
-}));
+  const planOptions = plans.map((p) => ({
+    value: p.id,
+    label: language === 'ar' ? p.label : p.labelEn,
+  }));
 
-const statusOptions = statuses.map((s) => ({
-  value: s.id,
-  label: language === 'ar' ? s.label : s.labelEn,
-}));
+  const statusOptions = statuses.map((s) => ({
+    value: s.id,
+    label: language === 'ar' ? s.label : s.labelEn,
+  }));
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh]  overflow-y-auto no-scrollbar">
         {/* Header */}
         <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between rounded-t-2xl">
           <button
@@ -158,7 +158,7 @@ const statusOptions = statuses.map((s) => ({
                 </label>
                 <input
                   type="tel"
-                  
+
                   {...register('phone')}
                   placeholder="ex :- 01091536978"
                   className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary text-right"
@@ -168,19 +168,19 @@ const statusOptions = statuses.map((s) => ({
               </div>
 
               {/* Country Code */}
-<Controller
-              name="countryCode"
-              control={control}
-              render={({ field }) => (
-                <CustomSelect
-                  label={language === 'ar' ? 'رمز الدولة' : 'Code'}
-                  value={field.value}
-                  options={countryCodeOptions}
-                  onChange={field.onChange}
-                />
-              )}
-            />  
-                </div>
+              <Controller
+                name="countryCode"
+                control={control}
+                render={({ field }) => (
+                  <CustomSelect
+                    label={language === 'ar' ? 'رمز الدولة' : 'Code'}
+                    value={field.value}
+                    options={countryCodeOptions}
+                    onChange={field.onChange}
+                  />
+                )}
+              />
+            </div>
 
             {/* Row 3: Gender and Birth Date */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -195,52 +195,52 @@ const statusOptions = statuses.map((s) => ({
                   placeholder="dd/mm/yyyy"
                   className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary text-right"
                 />
-                
+
               </div>
 
               {/* Gender */}
-             <Controller
-              name="gender"
-              control={control}
-              render={({ field }) => (
-                <CustomSelect
-label={language === 'ar' ? 'الجنس' : 'Gender'}
-                  value={field.value}
-                  options={genderOptions}
-                  onChange={field.onChange}
-                />
-              )}
-            />
+              <Controller
+                name="gender"
+                control={control}
+                render={({ field }) => (
+                  <CustomSelect
+                    label={language === 'ar' ? 'الجنس' : 'Gender'}
+                    value={field.value}
+                    options={genderOptions}
+                    onChange={field.onChange}
+                  />
+                )}
+              />
             </div>
 
             {/* Row 4: Plan and Country */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {/* Country */}
-      <Controller
-    name="country"
-    control={control}
-    render={({ field }) => (
-      <CustomSelect
-        label={language === 'ar' ? 'الدولة' : 'Country'}
-        value={field.value}
-        options={countryOptions}
-        placeholder={language === 'ar' ? 'اختر الدولة' : 'Select Country'}
-        onChange={field.onChange}
-      />
-    )}
-/>
-<Controller
-              name="plan"
-              control={control}
-              render={({ field }) => (
-                <CustomSelect
-                  label={language === 'ar' ? 'الخطة الدراسية' : 'Plan'}
-                  value={field.value}
-                  options={planOptions}
-                  onChange={field.onChange}
-                />
-              )}
-            />
+              <Controller
+                name="country"
+                control={control}
+                render={({ field }) => (
+                  <CustomSelect
+                    label={language === 'ar' ? 'الدولة' : 'Country'}
+                    value={field.value}
+                    options={countryOptions}
+                    placeholder={language === 'ar' ? 'اختر الدولة' : 'Select Country'}
+                    onChange={field.onChange}
+                  />
+                )}
+              />
+              <Controller
+                name="plan"
+                control={control}
+                render={({ field }) => (
+                  <CustomSelect
+                    label={language === 'ar' ? 'الخطة الدراسية' : 'Plan'}
+                    value={field.value}
+                    options={planOptions}
+                    onChange={field.onChange}
+                  />
+                )}
+              />
             </div>
 
             {/* Row 5: Status and Password */}
@@ -261,18 +261,18 @@ label={language === 'ar' ? 'الجنس' : 'Gender'}
               </div>
 
               {/* Status */}
-     <Controller
-              name="status"
-              control={control}
-              render={({ field }) => (
-                <CustomSelect
-                  label={language === 'ar' ? 'الحالة' : 'Status'}
-                  value={field.value}
-                  options={statusOptions}
-                  onChange={field.onChange}
-                />
-              )}
-            />
+              <Controller
+                name="status"
+                control={control}
+                render={({ field }) => (
+                  <CustomSelect
+                    label={language === 'ar' ? 'الحالة' : 'Status'}
+                    value={field.value}
+                    options={statusOptions}
+                    onChange={field.onChange}
+                  />
+                )}
+              />
             </div>
           </div>
 
@@ -285,7 +285,7 @@ label={language === 'ar' ? 'الجنس' : 'Gender'}
             >
               {language === 'ar' ? 'إلغاء' : 'Cancel'}
             </button>
-           <button type="submit" className="flex-1 px-6 py-3 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-colors font-medium">
+            <button type="submit" className="flex-1 px-6 py-3 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-colors font-medium">
               {language === 'ar' ? 'حفظ' : 'Save'}
             </button>
           </div>

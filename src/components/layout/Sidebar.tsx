@@ -44,9 +44,8 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
 
       {/* Sidebar */}
       <aside
-        className={`fixed top-0 ${language === 'ar' ? 'right-0' : 'left-0'} h-full bg-white border-${language === 'ar' ? 'l' : 'r'} border-gray-200 w-72 transform transition-transform duration-300 z-50 lg:translate-x-0 ${
-          isOpen ? 'translate-x-0' : language === 'ar' ? 'translate-x-full' : '-translate-x-full'
-        }`}
+        className={`fixed top-0 ${language === 'ar' ? 'right-0' : 'left-0'} h-full bg-white border-${language === 'ar' ? 'l' : 'r'} border-gray-200 w-72 transform transition-transform duration-300 z-50 lg:translate-x-0 ${isOpen ? 'translate-x-0' : language === 'ar' ? 'translate-x-full' : '-translate-x-full'
+          }`}
       >
         {/* Close button for mobile */}
         <button
@@ -74,7 +73,7 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
         </div>
 
         {/* Menu Items */}
-        <nav className="p-4 overflow-y-auto h-[calc(100vh-120px)]">
+        <nav className="p-4 overflow-y-auto  no-scrollbar h-[calc(100vh-120px)]">
           <div className="space-y-1">
             {dashboardRoutes.map((item) => (
               <div key={item.id}>
@@ -89,9 +88,8 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
                         {item.label[language]}
                       </span>
                       <ChevronDown
-                        className={`w-4 h-4 flex-shrink-0 transition-transform ${
-                          expandedItems.includes(item.id) ? 'rotate-180' : ''
-                        }`}
+                        className={`w-4 h-4 flex-shrink-0 transition-transform ${expandedItems.includes(item.id) ? 'rotate-180' : ''
+                          }`}
                       />
                     </button>
                     {expandedItems.includes(item.id) && (

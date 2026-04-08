@@ -1,17 +1,18 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
-import { addCurrency, deleteCurrency, getCurrencies, getCurrencyById, updateCurrency } from "../services/CurruncyServices"
-import { Currency } from "../types/currency";
+import { addCurrency, deleteCurrency, getCurrencies, getCurrencyById, searchCurrency, updateCurrency } from "../services/CurruncyServices"
+import { CurrenciesData, Currency } from "../types/currency";
 
-export const useCurrency = () => {
-    return useQuery({
-        queryKey: ["currencies"],
-        queryFn: getCurrencies,
+export const useCurrency = (search?: string) => {
+    return useQuery<CurrenciesData>({
+        queryKey: ["currencies", search],
+        queryFn: () => search ? searchCurrency(search) : getCurrencies(),
     });
 }
-export const useCurrencyById = (id: string) => {
+export const useCurrencyById = (id: string | undefined) => {
     return useQuery({
         queryKey: ["currencies", id],
-        queryFn: () => getCurrencyById(id)
+        queryFn: () => getCurrencyById(id!),
+        enabled: !!id,
     });
 }
 

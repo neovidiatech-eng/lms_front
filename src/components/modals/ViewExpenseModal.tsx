@@ -52,7 +52,7 @@ export default function ViewExpenseModal({ isOpen, onClose, expense }: ViewExpen
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-3xl max-h-[90vh] overflow-y-auto">
+      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-3xl max-h-[90vh]  overflow-y-auto no-scrollbar no-scrollbar">
         <div className="sticky top-0 bg-gradient-to-r from-red-600 to-pink-700 text-white px-6 py-5 flex items-center justify-between rounded-t-2xl">
           <div className="flex items-center gap-3">
             <div className="p-2 bg-white bg-opacity-20 rounded-lg">
@@ -69,11 +69,10 @@ export default function ViewExpenseModal({ isOpen, onClose, expense }: ViewExpen
         </div>
 
         <div className="p-6 space-y-6">
-          <div className={`rounded-xl p-4 ${
-            expense.status === 'paid'
-              ? 'bg-gradient-to-r from-green-50 to-emerald-50 border-2 border-green-500'
-              : 'bg-gradient-to-r from-yellow-50 to-amber-50 border-2 border-yellow-500'
-          }`}>
+          <div className={`rounded-xl p-4 ${expense.status === 'paid'
+            ? 'bg-gradient-to-r from-green-50 to-emerald-50 border-2 border-green-500'
+            : 'bg-gradient-to-r from-yellow-50 to-amber-50 border-2 border-yellow-500'
+            }`}>
             <div className="flex items-center justify-center gap-2">
               <CheckCircle className={`w-5 h-5 ${expense.status === 'paid' ? 'text-green-600' : 'text-yellow-600'}`} />
               <span className={`font-bold text-lg ${expense.status === 'paid' ? 'text-green-700' : 'text-yellow-700'}`}>

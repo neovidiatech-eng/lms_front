@@ -8,6 +8,8 @@ import ErrorBoundary from './components/layout/ErrorBoundary';
 import ErrorService from './utils/ErrorService';
 import LanguageSwitcher from './components/ui/LanguageSwitcher';
 import { dashboardRoutes } from './components/constants/dashboardRoutes';
+import { GoogleOAuthProvider } from '@react-oauth/google';
+import { googleClientId } from './components/constants';
 
 // --- Lazy Loading Core Layouts & Pages ---
 const AuthLayout = lazy(() => import('./pages/AuthLayout/AuthLayout'));
@@ -45,44 +47,47 @@ function App() {
     setIsAuthenticated(true);
   };
 
+
   return (
     <ErrorBoundary>
-      <QueryClientProvider client={queryClient}>
-        <SettingsProvider>
-          <LanguageProvider>
-            <SessionsProvider>
-              <Router>
-                {!isAuthenticated && <LanguageSwitcher />}
-                <Suspense fallback={<LoadingFallback />}>
-                  <Routes>
-                    <Route element={!isAuthenticated ? <AuthLayout /> : <Navigate to="/dashboard" replace />}>
-                      <Route path="/login" element={<Login onLoginSuccess={handleLogin} />} />
-                      <Route path="/register" element={<Register onRegisterSuccess={handleLogin} />} />
-                    </Route>
-                    <Route
-                      path="/dashboard"
-                      element={isAuthenticated ? <Dashboard /> : <Navigate to="/login" replace />}
-                    >
-                      <Route index element={null} />
-                      {dashboardRoutes.flatMap(route => {
-                        if (route.subItems) {
-                          return route.subItems.map(subItem => (
-                            <Route key={subItem.id} path={subItem.path} element={subItem.element} />
-                          ));
-                        }
-                        return route.element ? [<Route key={route.id} path={route.path} element={route.element} />] : [];
-                      })}
-                    </Route>
+      <GoogleOAuthProvider clientId={googleClientId}>
+        <QueryClientProvider client={queryClient}>
+          <SettingsProvider>
+            <LanguageProvider>
+              <SessionsProvider>
+                <Router>
+                  {!isAuthenticated && <LanguageSwitcher />}
+                  <Suspense fallback={<LoadingFallback />}>
+                    <Routes>
+                      <Route element={!isAuthenticated ? <AuthLayout /> : <Navigate to="/dashboard" replace />}>
+                        <Route path="/login" element={<Login onLoginSuccess={handleLogin} />} />
+                        <Route path="/register" element={<Register onRegisterSuccess={handleLogin} />} />
+                      </Route>
+                      <Route
+                        path="/dashboard"
+                        element={isAuthenticated ? <Dashboard /> : <Navigate to="/login" replace />}
+                      >
+                        <Route index element={null} />
+                        {dashboardRoutes.flatMap(route => {
+                          if (route.subItems) {
+                            return route.subItems.map(subItem => (
+                              <Route key={subItem.id} path={subItem.path} element={subItem.element} />
+                            ));
+                          }
+                          return route.element ? [<Route key={route.id} path={route.path} element={route.element} />] : [];
+                        })}
+                      </Route>
 
-                    <Route path="/" element={<Navigate to="/login" replace />} />
-                    <Route path="*" element={<Navigate to="/login" replace />} />
-                  </Routes>
-                </Suspense>
-              </Router>
-            </SessionsProvider>
-          </LanguageProvider>
-        </SettingsProvider>
-      </QueryClientProvider>
+                      <Route path="/" element={<Navigate to="/login" replace />} />
+                      <Route path="*" element={<Navigate to="/login" replace />} />
+                    </Routes>
+                  </Suspense>
+                </Router>
+              </SessionsProvider>
+            </LanguageProvider>
+          </SettingsProvider>
+        </QueryClientProvider>
+      </GoogleOAuthProvider>
     </ErrorBoundary>
   );
 }

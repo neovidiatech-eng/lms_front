@@ -11,7 +11,7 @@ interface AddTransactionModalProps {
   onClose: () => void;
   onSave: (transaction: TransactionFormData | Transaction) => void;
   currencies: { code: string; symbol: string; rate: number }[];
-  editingTransaction?: Transaction | null; 
+  editingTransaction?: Transaction | null;
 }
 
 export default function AddTransactionModal({ isOpen, onClose, onSave, currencies, editingTransaction }: AddTransactionModalProps) {
@@ -42,11 +42,11 @@ export default function AddTransactionModal({ isOpen, onClose, onSave, currencie
   useEffect(() => {
     if (isOpen) {
       if (editingTransaction) {
-reset({
-        ...editingTransaction,
-        sessionDuration: Number(editingTransaction.sessionDuration) || 60
-      });
-          } else {
+        reset({
+          ...editingTransaction,
+          sessionDuration: Number(editingTransaction.sessionDuration) || 60
+        });
+      } else {
         reset({
           type: 'income',
           currency: 'SAR',
@@ -94,23 +94,23 @@ reset({
     const total = sessions * (duration / 60) * rate;
     setValue('amount', Number(total.toFixed(2)));
   };
-console.log(errors)
- const onSubmit = (data: TransactionFormData) => {
-  if (editingTransaction) {
-    onSave({ ...data, id: editingTransaction.id } as Transaction);
-    console.log(data)
-  } else {
-    onSave(data);
-        console.log(data)
+  console.log(errors)
+  const onSubmit = (data: TransactionFormData) => {
+    if (editingTransaction) {
+      onSave({ ...data, id: editingTransaction.id } as Transaction);
+      console.log(data)
+    } else {
+      onSave(data);
+      console.log(data)
 
-  }
-  onClose(); 
-};
+    }
+    onClose();
+  };
   if (!isOpen) return null;
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh]  overflow-y-auto no-scrollbar">
         <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between rounded-t-2xl">
           <h2 className="text-xl font-bold text-gray-900">{text.title[language]}</h2>
           <button onClick={onClose} className="p-2 hover:bg-gray-100 rounded-lg">
@@ -150,7 +150,7 @@ console.log(errors)
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2 text-right">{text.teacher[language]} *</label>
-           <input
+            <input
               type="text"
               {...register('teacherName')}
               className={`w-full px-4 py-2.5 border rounded-lg text-right ${errors.teacherName ? 'border-red-500' : 'border-gray-300'}`}
@@ -158,7 +158,7 @@ console.log(errors)
             {errors.teacherName && <p className="text-red-500 text-xs mt-1 text-right">{errors.teacherName.message}</p>}
           </div>
 
-        {watchType === 'teacher_expense' && (
+          {watchType === 'teacher_expense' && (
             <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 space-y-4">
               <div className="grid grid-cols-3 gap-3">
                 <input type="number" placeholder="الحصص" {...register('sessionCount')} className="px-3 py-2 border rounded-lg text-right text-sm" />
@@ -187,7 +187,7 @@ console.log(errors)
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2 text-right">{text.amount[language]} *</label>
-             <input
+              <input
                 type="number"
                 step="0.01"
                 {...register('amount', { valueAsNumber: true })}
@@ -197,7 +197,7 @@ console.log(errors)
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2 text-right">{text.currency[language]}</label>
-             <Controller
+              <Controller
                 name="currency"
                 control={control}
                 render={({ field }) => (
@@ -213,7 +213,7 @@ console.log(errors)
             </div>
           </div>
 
-         <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2 text-right">{text.date[language]} *</label>
               <input type="date" {...register('date')} className="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-right" />
@@ -243,7 +243,7 @@ console.log(errors)
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2 text-right">{text.notes[language]}</label>
-           <textarea
+            <textarea
               {...register('notes')}
               className="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-right resize-none"
               rows={3}

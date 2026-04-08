@@ -30,7 +30,7 @@ export default function ViewCurrencyModal({ isOpen, onClose, currency }: ViewCur
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-3xl max-h-[90vh] overflow-y-auto">
+      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-3xl max-h-[90vh]  overflow-y-auto no-scrollbar no-scrollbar">
         <div className="sticky top-0 bg-gradient-to-r from-blue-600 to-blue-700 text-white px-6 py-5 flex items-center justify-between rounded-t-2xl">
           <div className="flex items-center gap-3">
             <div className="p-2 bg-white bg-opacity-20 rounded-lg">
@@ -111,8 +111,8 @@ export default function ViewCurrencyModal({ isOpen, onClose, currency }: ViewCur
               <div className="bg-white rounded-lg p-6 border border-emerald-200 text-center">
                 <p className="text-sm text-gray-600 mb-3">{text.isDefault[language]}</p>
                 <span className={`inline-flex px-6 py-3 rounded-full text-lg font-bold ${currency.default
-                    ? 'bg-green-100 text-green-700'
-                    : 'bg-gray-100 text-gray-700'
+                  ? 'bg-green-100 text-green-700'
+                  : 'bg-gray-100 text-gray-700'
                   }`}>
                   {currency.default ? text.yes[language] : text.no[language]}
                 </span>

@@ -6,7 +6,7 @@ import { useLanguage } from '../../contexts/LanguageContext';
 import CustomSelect from '../ui/CustomSelect';
 // تأكدي من استيراد الـ Schema الصحيح للمتعدد
 import { multipleSessionsSchema, MultipleSessionsFormData } from '../../lib/schemas/SessionSchema';
- export interface SessionPreviewItem {
+export interface SessionPreviewItem {
   date: string;
   day: string;
   time: string;
@@ -14,7 +14,7 @@ import { multipleSessionsSchema, MultipleSessionsFormData } from '../../lib/sche
 interface AddMultipleSessionsModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onAdd: (data: { formData: MultipleSessionsFormData; sessions:SessionPreviewItem [] }) => void;
+  onAdd: (data: { formData: MultipleSessionsFormData; sessions: SessionPreviewItem[] }) => void;
 }
 
 export default function AddMultipleSessionsModal({ isOpen, onClose, onAdd }: AddMultipleSessionsModalProps) {
@@ -63,9 +63,9 @@ export default function AddMultipleSessionsModal({ isOpen, onClose, onAdd }: Add
     teacher2: [{ id: 'arabic', name: 'اللغة العربية' }, { id: 'grammar', name: 'النحو والصرف' }]
   };
 
-  const availableSubjects = useMemo(() => 
+  const availableSubjects = useMemo(() =>
     watchedTeacher ? teacherSubjects[watchedTeacher]?.map(s => ({ value: s.id, label: s.name })) || [] : []
-  , [watchedTeacher]);
+    , [watchedTeacher]);
 
   // منطق الباقات
   const studentPackages: Record<string, { name: string; sessionsRemaining: number; totalSessions: number }> = {
@@ -86,7 +86,7 @@ export default function AddMultipleSessionsModal({ isOpen, onClose, onAdd }: Add
     for (let date = 1; date <= daysInMonth; date++) {
       const currentDate = new Date(year, month - 1, date);
       const dayOfWeek = currentDate.getDay();
-      const matchingDay = selectedDays.find(day => 
+      const matchingDay = selectedDays.find(day =>
         ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'].indexOf(day.id) === dayOfWeek
       );
 
@@ -120,7 +120,7 @@ export default function AddMultipleSessionsModal({ isOpen, onClose, onAdd }: Add
       alert('عدد الحصص أكبر من المتبقي في الباقة');
       return;
     }
-    
+
     onAdd({ formData: data, sessions: sessionPreview });
     reset();
     setWeekDays(prev => prev.map(d => ({ ...d, checked: false })));
@@ -131,7 +131,7 @@ export default function AddMultipleSessionsModal({ isOpen, onClose, onAdd }: Add
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-2xl shadow-xl w-full max-w-6xl max-h-[90vh] overflow-y-auto">
+      <div className="bg-white rounded-2xl shadow-xl w-full max-w-6xl max-h-[90vh]  overflow-y-auto no-scrollbar">
         <div className="sticky top-0 bg-white border-b px-6 py-4 flex items-center justify-between z-10">
           <h2 className="text-2xl font-bold text-gray-900">إضافة حصص متعددة</h2>
           <button onClick={onClose} className="p-2 hover:bg-gray-100 rounded-lg"><X /></button>
@@ -174,7 +174,7 @@ export default function AddMultipleSessionsModal({ isOpen, onClose, onAdd }: Add
                   value={field.value}
                   onChange={(val) => {
                     field.onChange(val);
-                    setValue('subject', ''); 
+                    setValue('subject', '');
                   }}
                   error={errors.teacher?.message}
                 />
@@ -276,7 +276,7 @@ export default function AddMultipleSessionsModal({ isOpen, onClose, onAdd }: Add
           {sessionPreview.length > 0 && (
             <div className="bg-gray-50 rounded-xl p-4 space-y-3">
               <h3 className="font-bold text-right">معاينة الجدول ({sessionPreview.length} حصة)</h3>
-              <div className="max-h-40 overflow-y-auto space-y-2 px-2">
+              <div className="max-h-40  overflow-y-auto no-scrollbar space-y-2 px-2">
                 {sessionPreview.map((s, i) => (
                   <div key={i} className="flex justify-between bg-white p-2 rounded border text-sm">
                     <span dir="ltr">{s.time}</span>

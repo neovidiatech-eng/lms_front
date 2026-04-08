@@ -1,7 +1,7 @@
 import { useState, useRef } from 'react';
 import { PlayCircle, Plus, Search, BookOpen, MoreVertical, Edit, Trash2, Eye, X, Layers } from 'lucide-react';
 import CourseViewer from '../../components/features/LMS/CourseViewer';
-import {  Course, Level } from '../../types/lmsCourses';
+import { Course, Level } from '../../types/lmsCourses';
 import CourseFormFields from './components/CourseFormFields';
 import { FormProvider, useForm } from 'react-hook-form';
 import { CourseFormData, courseSchema } from '../../lib/schemas/CourseSchema';
@@ -19,7 +19,7 @@ const levelColorOptions = [
   { label: 'برتقالي', value: 'bg-orange-100 text-orange-700' },
 ];
 
- const defaultLevels: Level[] = [
+const defaultLevels: Level[] = [
   { id: 1, name: 'مبتدئ', color: 'bg-green-100 text-green-700' },
   { id: 2, name: 'متوسط', color: 'bg-yellow-100 text-yellow-700' },
   { id: 3, name: 'متقدم', color: 'bg-red-100 text-red-700' },
@@ -81,7 +81,7 @@ export function getVideoEmbed(url: string): string | null {
   return null;
 }
 
- export function getYoutubeThumbnail(url: string): string | null {
+export function getYoutubeThumbnail(url: string): string | null {
   const ytMatch = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
   if (ytMatch) return `https://img.youtube.com/vi/${ytMatch[1]}/hqdefault.jpg`;
   return null;
@@ -122,21 +122,21 @@ export default function LMSCoursesPage() {
   const thumbnailInputRef = useRef<HTMLInputElement>(null);
   const attachInputRef = useRef<HTMLInputElement>(null);
 
-const methods = useForm<CourseFormData>({
-  resolver: zodResolver(courseSchema),
-  defaultValues: {
-    title: '',
-    description: '',
-    category: '',
-    levelId: 1,
-    videoUrl: '',
-    thumbnailFile: null,
-    thumbnailPreview: '',
-    attachments: [], 
-  } as CourseFormData,
-});
+  const methods = useForm<CourseFormData>({
+    resolver: zodResolver(courseSchema),
+    defaultValues: {
+      title: '',
+      description: '',
+      category: '',
+      levelId: 1,
+      videoUrl: '',
+      thumbnailFile: null,
+      thumbnailPreview: '',
+      attachments: [],
+    } as CourseFormData,
+  });
 
-const {reset,handleSubmit } = methods;
+  const { reset, handleSubmit } = methods;
 
 
   const filtered = courses.filter(c => {
@@ -159,7 +159,7 @@ const {reset,handleSubmit } = methods;
     setOpenMenuId(null);
   };
 
- const openAdd = () => {
+  const openAdd = () => {
     reset({
       title: '',
       description: '',
@@ -187,41 +187,41 @@ const {reset,handleSubmit } = methods;
     setOpenMenuId(null);
   };
 
- const onAddSubmit = (data: CourseFormData) => {
-  const newCourse: Course = {
-    id: nextId,
-    title: data.title,
-    description: data.description || '',
-    category: data.category,
-    levelId: data.levelId,
-    videoUrl: data.videoUrl || '',
-    thumbnailUrl: data.thumbnailPreview || '',
-    attachments: data.attachments || [],
-    createdAt: new Date().toISOString().slice(0, 10),
+  const onAddSubmit = (data: CourseFormData) => {
+    const newCourse: Course = {
+      id: nextId,
+      title: data.title,
+      description: data.description || '',
+      category: data.category,
+      levelId: data.levelId,
+      videoUrl: data.videoUrl || '',
+      thumbnailUrl: data.thumbnailPreview || '',
+      attachments: data.attachments || [],
+      createdAt: new Date().toISOString().slice(0, 10),
+    };
+
+    setCourses(prev => [...prev, newCourse]);
+    setNextId(n => n + 1);
+    setShowAddModal(false);
+    reset();
   };
+  const onEditSubmit = (data: CourseFormData) => {
+    if (!editCourse) return;
 
-  setCourses(prev => [...prev, newCourse]);
-  setNextId(n => n + 1);
-  setShowAddModal(false);
-  reset();
-};
- const onEditSubmit = (data: CourseFormData) => {
-  if (!editCourse) return;
+    setCourses(prev => prev.map(c => c.id === editCourse.id ? {
+      ...c,
+      title: data.title,
+      description: data.description || '',
+      category: data.category,
+      levelId: data.levelId,
+      videoUrl: data.videoUrl || '',
+      thumbnailUrl: data.thumbnailPreview || c.thumbnailUrl,
+      attachments: data.attachments || [],
+    } : c));
 
-  setCourses(prev => prev.map(c => c.id === editCourse.id ? {
-    ...c,
-    title: data.title,
-    description: data.description || '',
-    category: data.category,
-    levelId: data.levelId,
-    videoUrl: data.videoUrl || '',
-    thumbnailUrl: data.thumbnailPreview || c.thumbnailUrl, 
-    attachments: data.attachments || [],
-  } : c));
-
-  setEditCourse(null);
-  reset(); 
- }
+    setEditCourse(null);
+    reset();
+  }
   const handleAddLevel = () => {
     if (!newLevelName.trim()) return;
     const newId = Math.max(0, ...levels.map(l => l.id)) + 1;
@@ -303,9 +303,8 @@ const {reset,handleSubmit } = methods;
             <button
               key={cat}
               onClick={() => setSelectedCategory(cat)}
-              className={`px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition-colors ${
-                selectedCategory === cat ? 'btn-primary text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-              }`}
+              className={`px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition-colors ${selectedCategory === cat ? 'btn-primary text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                }`}
             >
               {cat}
             </button>
@@ -316,9 +315,8 @@ const {reset,handleSubmit } = methods;
           <div className="flex gap-2 overflow-x-auto pb-1">
             <button
               onClick={() => setSelectedLevelId(null)}
-              className={`px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition-colors ${
-                selectedLevelId === null ? 'bg-gray-700 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-              }`}
+              className={`px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition-colors ${selectedLevelId === null ? 'bg-gray-700 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                }`}
             >
               كل المستويات
             </button>
@@ -326,9 +324,8 @@ const {reset,handleSubmit } = methods;
               <button
                 key={l.id}
                 onClick={() => setSelectedLevelId(selectedLevelId === l.id ? null : l.id)}
-                className={`px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition-colors ${
-                  selectedLevelId === l.id ? l.color + ' ring-2 ring-offset-1 ring-gray-400' : l.color + ' opacity-60 hover:opacity-100'
-                }`}
+                className={`px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition-colors ${selectedLevelId === l.id ? l.color + ' ring-2 ring-offset-1 ring-gray-400' : l.color + ' opacity-60 hover:opacity-100'
+                  }`}
               >
                 {l.name}
               </button>
@@ -503,7 +500,7 @@ const {reset,handleSubmit } = methods;
       {/* Add Modal */}
       {showAddModal && (
         <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4" onClick={() => setShowAddModal(false)}>
-          <div className="bg-white rounded-2xl max-w-md w-full p-6 max-h-[90vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
+          <div className="bg-white rounded-2xl max-w-md w-full p-6 max-h-[90vh] overflow-y-auto  no-scrollbar" onClick={e => e.stopPropagation()}>
             <div className="flex items-center justify-between mb-5">
               <button onClick={() => setShowAddModal(false)} className="p-1 hover:bg-gray-100 rounded-lg transition-colors">
                 <X className="w-5 h-5 text-gray-500" />
@@ -512,21 +509,21 @@ const {reset,handleSubmit } = methods;
             </div>
             <FormProvider {...methods}>
               <form onSubmit={handleSubmit(onAddSubmit)}>
-            <CourseFormFields 
-              levels={levels}
-              subjectCategories={subjectCategories}
-              thumbnailInputRef={thumbnailInputRef}
-              attachInputRef={attachInputRef}
-            />
-            <div className="flex gap-3 mt-6">
-              <button onClick={() => setShowAddModal(false)} className="flex-1 px-4 py-2.5 border border-gray-200 rounded-xl text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors">إلغاء</button>
-<button 
-              type="submit" 
-              className="flex-1 px-4 py-2.5 btn-primary text-white rounded-xl text-sm font-medium transition-colors"
-            >
-              إضافة
-            </button>            </div>
-            </form>
+                <CourseFormFields
+                  levels={levels}
+                  subjectCategories={subjectCategories}
+                  thumbnailInputRef={thumbnailInputRef}
+                  attachInputRef={attachInputRef}
+                />
+                <div className="flex gap-3 mt-6">
+                  <button onClick={() => setShowAddModal(false)} className="flex-1 px-4 py-2.5 border border-gray-200 rounded-xl text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors">إلغاء</button>
+                  <button
+                    type="submit"
+                    className="flex-1 px-4 py-2.5 btn-primary text-white rounded-xl text-sm font-medium transition-colors"
+                  >
+                    إضافة
+                  </button>            </div>
+              </form>
             </FormProvider>
           </div>
         </div>
@@ -535,29 +532,29 @@ const {reset,handleSubmit } = methods;
       {/* Edit Modal */}
       {editCourse && (
         <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4" onClick={() => setEditCourse(null)}>
-          <div className="bg-white rounded-2xl max-w-md w-full p-6 max-h-[90vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
+          <div className="bg-white rounded-2xl max-w-md w-full p-6 max-h-[90vh] overflow-y-auto  no-scrollbar" onClick={e => e.stopPropagation()}>
             <div className="flex items-center justify-between mb-5">
               <button onClick={() => setEditCourse(null)} className="p-1 hover:bg-gray-100 rounded-lg transition-colors">
                 <X className="w-5 h-5 text-gray-500" />
               </button>
               <h2 className="text-xl font-bold text-gray-900">تعديل الكورس</h2>
             </div>
-             <FormProvider {...methods}>
+            <FormProvider {...methods}>
               <form onSubmit={handleSubmit(onEditSubmit)}>
-            <CourseFormFields
-              levels={levels}
-              subjectCategories={subjectCategories}
-              thumbnailInputRef={thumbnailInputRef}
-              attachInputRef={attachInputRef}/>
-            <div className="flex gap-3 mt-6">
-              <button onClick={() => setEditCourse(null)} className="flex-1 px-4 py-2.5 border border-gray-200 rounded-xl text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors">إلغاء</button>
-<button 
-              type="submit" 
-              className="flex-1 px-4 py-2.5 btn-primary text-white rounded-xl text-sm font-medium transition-colors"
-            >
-              حفظ التعديلات
-            </button>            </div>
-            </form>
+                <CourseFormFields
+                  levels={levels}
+                  subjectCategories={subjectCategories}
+                  thumbnailInputRef={thumbnailInputRef}
+                  attachInputRef={attachInputRef} />
+                <div className="flex gap-3 mt-6">
+                  <button onClick={() => setEditCourse(null)} className="flex-1 px-4 py-2.5 border border-gray-200 rounded-xl text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors">إلغاء</button>
+                  <button
+                    type="submit"
+                    className="flex-1 px-4 py-2.5 btn-primary text-white rounded-xl text-sm font-medium transition-colors"
+                  >
+                    حفظ التعديلات
+                  </button>            </div>
+              </form>
             </FormProvider>
           </div>
         </div>

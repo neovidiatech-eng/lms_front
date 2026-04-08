@@ -1,9 +1,9 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Plus, Edit, Trash2, Eye, DollarSign, Search, Star, TrendingUp } from 'lucide-react';
 import { useLanguage } from '../contexts/LanguageContext';
 import AddCurrencyModal from '../components/modals/AddCurrencyModal';
 import ViewCurrencyModal from '../components/modals/ViewCurrencyModal';
-import { useCurrency, useAddCurrency, useUpdateCurrency, useDeleteCurrency } from '../hooks/useCurrency';
+import { useCurrency, useAddCurrency, useUpdateCurrency, useDeleteCurrency, useCurrencyById } from '../hooks/useCurrency';
 import { Currency } from '../types/currency';
 import { CurrencyFormData } from '../lib/schemas/CurrencySchema';
 import { TableSkeleton } from '../components/ui/CustomSkeleton';
@@ -14,11 +14,18 @@ export default function Currencies() {
   const [showViewModal, setShowViewModal] = useState(false);
   const [selectedCurrency, setSelectedCurrency] = useState<Currency | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
+  const [debouncedSearch, setDebouncedSearch] = useState('');
 
-  const { data, isError, error, isLoading } = useCurrency();
+  useEffect(() => {
+    const timer = setTimeout(() => setDebouncedSearch(searchQuery), 1000);
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
+
+  const { data, isError, error, isLoading } = useCurrency(debouncedSearch);
   const { mutate: addCurrency } = useAddCurrency();
   const { mutate: updateCurrency } = useUpdateCurrency();
   const { mutate: deleteCurrency } = useDeleteCurrency();
+  const { data: currencyDetails } = useCurrencyById(selectedCurrency?.id);
 
   const text = {
     title: { ar: 'إدارة العملات', en: 'Currency Management' },
@@ -72,13 +79,12 @@ export default function Currencies() {
     setShowViewModal(true);
   };
 
-  const filteredCurrencies = currencies.filter(currency =>
-    currency.code.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    currency.name_ar.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    currency.name_en.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const filteredCurrencies = currencies;
 
   const defaultCurrency = data?.default;
+  const searchResult = searchQuery.toUpperCase();
+
+
   if (isError) {
     return <h1>{error.message}</h1>
   }
@@ -135,7 +141,7 @@ export default function Currencies() {
             <input
               type="text"
               placeholder={text.search[language]}
-              value={searchQuery}
+              value={searchResult}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="w-full max-w-xs pr-9 pl-4 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent text-right"
             />
@@ -180,7 +186,7 @@ export default function Currencies() {
                       <span className="text-base font-bold text-gray-700">{currency.symbol}</span>
                     </td>
                     <td className="px-6 py-4 text-right">
-                      <div className="flex items-center justify-end gap-1.5">
+                      <div className="flex items-center justify-start gap-1.5">
                         <TrendingUp className="w-3.5 h-3.5 text-gray-400" />
                         <span className="text-sm font-semibold text-gray-900">{currency.exchangeRate}</span>
                       </div>
@@ -198,7 +204,7 @@ export default function Currencies() {
                       )}
                     </td>
                     <td className="px-6 py-4">
-                      <div className="flex items-center justify-end gap-1">
+                      <div className="flex items-center justify-start gap-1">
                         <button
                           onClick={() => handleViewCurrency(currency)}
                           className="p-1.5 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
@@ -242,7 +248,7 @@ export default function Currencies() {
         <ViewCurrencyModal
           isOpen={showViewModal}
           onClose={() => { setShowViewModal(false); setSelectedCurrency(null); }}
-          currency={selectedCurrency}
+          currency={currencyDetails || selectedCurrency}
         />
       )}
     </div>

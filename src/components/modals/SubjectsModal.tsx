@@ -26,14 +26,14 @@ export const COLORS = [
 
 interface SubjectFormProps {
   initial?: Partial<Subject>;
-  onSave: (data:SubjectFormData) => void;
+  onSave: (data: SubjectFormData) => void;
   onCancel: () => void;
   title: string;
 }
 
 export default function SubjectForm({ initial, onSave, onCancel, title }: SubjectFormProps) {
   const { language } = useLanguage();
-const { register, handleSubmit, setValue, watch, reset, formState: { errors } } = useForm<SubjectFormData>({
+  const { register, handleSubmit, setValue, watch, reset, formState: { errors } } = useForm<SubjectFormData>({
     resolver: zodResolver(subjectSchema),
     defaultValues: {
       nameAr: initial?.nameAr || '',
@@ -62,7 +62,7 @@ const { register, handleSubmit, setValue, watch, reset, formState: { errors } } 
         </div>
 
         {/* Form Body */}
-        <form onSubmit={handleSubmit(onSave)} className="p-6 space-y-5 max-h-[80vh] overflow-y-auto">
+        <form onSubmit={handleSubmit(onSave)} className="p-6 space-y-5 max-h-[80vh]  overflow-y-auto no-scrollbar">
           <div>
             <label className="block text-sm font-medium text-gray-700 text-right mb-1.5">
               {language === 'ar' ? 'اسم المادة (عربي)' : 'Subject Name (Arabic)'}
@@ -70,7 +70,7 @@ const { register, handleSubmit, setValue, watch, reset, formState: { errors } } 
             </label>
             <input
               type="text"
-             {...register('nameAr')}
+              {...register('nameAr')}
               dir="rtl"
               className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 text-right"
             />
@@ -83,7 +83,7 @@ const { register, handleSubmit, setValue, watch, reset, formState: { errors } } 
             </label>
             <input
               type="text"
-            {...register('nameEn')}
+              {...register('nameEn')}
               className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500"
             />
             {errors.nameEn && <p className="text-red-500 text-xs mt-1 text-right">{errors.nameEn.message}</p>}
@@ -99,9 +99,8 @@ const { register, handleSubmit, setValue, watch, reset, formState: { errors } } 
                   key={c.id}
                   type="button"
                   onClick={() => setValue('color', c.id)}
-                  className={`flex flex-col items-center gap-1.5 p-2 rounded-xl border-2 transition-all ${
-                    selectedColor === c.id ? `${c.border} ring-2 ring-blue-400` : 'border-transparent hover:border-gray-200'
-                  }`}
+                  className={`flex flex-col items-center gap-1.5 p-2 rounded-xl border-2 transition-all ${selectedColor === c.id ? `${c.border} ring-2 ring-blue-400` : 'border-transparent hover:border-gray-200'
+                    }`}
                 >
                   <div className={`w-8 h-8 rounded-lg ${c.bg} flex items-center justify-center`}>
                     <BookOpen className={`w-4 h-4 ${c.icon}`} />
@@ -118,15 +117,14 @@ const { register, handleSubmit, setValue, watch, reset, formState: { errors } } 
             </label>
             <div className="flex gap-3">
               {(['active', 'inactive'] as const).map(s => (
-               <button
+                <button
                   key={s}
                   type="button"
                   onClick={() => setValue('status', s)}
-                  className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl border-2 text-sm font-medium transition-all ${
-                    selectedStatus === s 
+                  className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl border-2 text-sm font-medium transition-all ${selectedStatus === s
                       ? (s === 'active' ? 'border-green-400 bg-green-50 text-green-700' : 'border-gray-400 bg-gray-50 text-gray-700')
                       : 'border-gray-200 text-gray-500 hover:border-gray-300'
-                  }`}
+                    }`}
                 >
                   {status === s && <Check className="w-4 h-4" />}
                   {s === 'active' ? (language === 'ar' ? 'نشط' : 'Active') : (language === 'ar' ? 'غير نشط' : 'Inactive')}

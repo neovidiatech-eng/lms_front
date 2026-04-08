@@ -160,56 +160,56 @@ export default function AddUserModal({ isOpen, onClose, onSubmit }: AddUserModal
   const { language } = useLanguage();
   const [showPassword, setShowPassword] = useState(false);
 
-  const { control, handleSubmit, register, reset, setValue, watch, formState: { errors }} = useForm<UserFormData>({
-  resolver: zodResolver(userSchema),
-  defaultValues: {
-    name: '',
-    email: '',
-    countryCode: '+20',
-    phone: '',
-    role: 'student',
-    password: '',
-    permissions: [],
-  } as UserFormData 
-});
+  const { control, handleSubmit, register, reset, setValue, watch, formState: { errors } } = useForm<UserFormData>({
+    resolver: zodResolver(userSchema),
+    defaultValues: {
+      name: '',
+      email: '',
+      countryCode: '+20',
+      phone: '',
+      role: 'student',
+      password: '',
+      permissions: [],
+    } as UserFormData
+  });
   if (!isOpen) return null;
 
-const selectedPermissions = watch('permissions') || [];
+  const selectedPermissions = watch('permissions') || [];
 
   const handlePermissionToggle = (permissionId: string) => {
     const nextPermissions = selectedPermissions.includes(permissionId)
       ? selectedPermissions.filter((id) => id !== permissionId)
       : [...selectedPermissions, permissionId];
-    
+
     setValue('permissions', nextPermissions, { shouldValidate: true });
   };
 
- const onFormSubmit = (data: UserFormData) => {
+  const onFormSubmit = (data: UserFormData) => {
     onSubmit(data);
-    reset(); 
+    reset();
     onClose();
   };
 
-const countryOptions = countryCodes.map((c) => ({
-  value: c.code,
-  searchText: `${c.country} ${c.code}`, 
-  label: (
-    <div className="flex justify-between items-center flex-row-reverse w-full text-right">
-      <span>{c.flag} {c.country}</span>
-      <span className="text-gray-400 font-mono text-xs">{c.code}</span>
-    </div>
-  ),
-}));
+  const countryOptions = countryCodes.map((c) => ({
+    value: c.code,
+    searchText: `${c.country} ${c.code}`,
+    label: (
+      <div className="flex justify-between items-center flex-row-reverse w-full text-right">
+        <span>{c.flag} {c.country}</span>
+        <span className="text-gray-400 font-mono text-xs">{c.code}</span>
+      </div>
+    ),
+  }));
 
-const roleOptions = roles.map((role) => ({
-  value: role.id,
-  searchText: language === 'ar' ? role.label : role.labelEn,
-  label: (
-    <div className="text-right w-full">
-      {language === 'ar' ? role.label : role.labelEn}
-    </div>
-  ),
-}));
+  const roleOptions = roles.map((role) => ({
+    value: role.id,
+    searchText: language === 'ar' ? role.label : role.labelEn,
+    label: (
+      <div className="text-right w-full">
+        {language === 'ar' ? role.label : role.labelEn}
+      </div>
+    ),
+  }));
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
@@ -228,8 +228,8 @@ const roleOptions = roles.map((role) => ({
         </div>
 
         {/* Body */}
-<form id="add-user-form" onSubmit={handleSubmit(onFormSubmit)} className="flex-1 overflow-y-auto p-6">
-            <div className="space-y-6">
+        <form id="add-user-form" onSubmit={handleSubmit(onFormSubmit)} className="flex-1  overflow-y-auto no-scrollbar p-6">
+          <div className="space-y-6">
             {/* Name and Email */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
@@ -240,7 +240,7 @@ const roleOptions = roles.map((role) => ({
                   type="text"
                   {...register('name')}
                   className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 text-right"
-                  
+
                 />
                 {errors.name && <p className="text-red-500 text-xs mt-1 text-right">{errors.name.message}</p>}
               </div>
@@ -260,19 +260,19 @@ const roleOptions = roles.map((role) => ({
             {/* Country Code and Phone */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-     <Controller
-                name="countryCode"
-                control={control}
-                render={({ field }) => (
-                  <CustomSelect
-                    label={language === 'ar' ? 'رمز الدولة' : 'Country Code'}
-                    value={field.value}
-                    onChange={field.onChange}
-                    options={countryOptions}
-                    className="h-[48px]"
-                  />
-                )}
-              />
+                <Controller
+                  name="countryCode"
+                  control={control}
+                  render={({ field }) => (
+                    <CustomSelect
+                      label={language === 'ar' ? 'رمز الدولة' : 'Country Code'}
+                      value={field.value}
+                      onChange={field.onChange}
+                      options={countryOptions}
+                      className="h-[48px]"
+                    />
+                  )}
+                />
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2 text-right">
@@ -283,7 +283,7 @@ const roleOptions = roles.map((role) => ({
                   {...register('phone')}
                   className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 text-right"
                   placeholder="1234567890"
-                  
+
                 />
                 {errors.phone && <p className="text-red-500 text-xs mt-1 text-right">{errors.phone.message}</p>}
 
@@ -293,21 +293,21 @@ const roleOptions = roles.map((role) => ({
             {/* Role and Password */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-              
-               <Controller
-                name="role"
-                control={control}
-                render={({ field }) => (
-                  <CustomSelect
-                    label={language === 'ar' ? 'الدور' : 'Role'}
-                    value={field.value}
-                    onChange={field.onChange}
-                    options={roleOptions}
-                    className="h-[48px]"
-                  />
-                )}
-              />
-              
+
+                <Controller
+                  name="role"
+                  control={control}
+                  render={({ field }) => (
+                    <CustomSelect
+                      label={language === 'ar' ? 'الدور' : 'Role'}
+                      value={field.value}
+                      onChange={field.onChange}
+                      options={roleOptions}
+                      className="h-[48px]"
+                    />
+                  )}
+                />
+
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2 text-right">
@@ -318,7 +318,7 @@ const roleOptions = roles.map((role) => ({
                     type={showPassword ? 'text' : 'password'}
                     {...register('password')}
                     className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 text-right"
-                    
+
                   />
                   {errors.password && <p className="text-red-500 text-xs mt-1 text-right">{errors.password.message}</p>}
                   <button

@@ -7,6 +7,11 @@ export const login = async (data: LoginInput) => {
     return response.data;
 }
 
+export const googleLogin = async (data: { idToken: string, provider: string }) => {
+    const response = await api.post("/auth/google-login", data);
+    return response.data;
+}
+
 export const register = async (data: RegisterInput) => {
     const response = await api.post("/auth/sign-up", data);
     return response.data;

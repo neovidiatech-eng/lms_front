@@ -10,9 +10,10 @@ import { useLanguage } from "../contexts/LanguageContext";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { LoginInput, LoginSchema } from "../lib/schemas/LoginSchema";
-import { login } from "../services/AuthServices";
+import { login, googleLogin } from "../services/AuthServices";
 import { useNavigate } from "react-router-dom";
 import { CustomCheckbox } from "../components/ui/CustomCheckbox";
+import { GoogleLogin } from "@react-oauth/google";
 
 interface LoginProps {
   onLoginSuccess: () => void;
@@ -138,7 +139,6 @@ export default function Login({ onLoginSuccess }: LoginProps) {
           >
             {t("forgotPassword")}
           </a>
-
           <div className="flex items-center justify-between">
             <Controller
               name="rememberMe"
@@ -167,10 +167,23 @@ export default function Login({ onLoginSuccess }: LoginProps) {
         <p className="text-center text-gray-500">{t("or")}</p>
         <div className="space-y-4 mb-6">
           <div className="flex justify-center">
-            {/* <GoogleLogin
-              onSuccess={(credentialResponse) => {
+            <GoogleLogin
+              onSuccess={async (credentialResponse) => {
                 const idToken = credentialResponse.credential;
-                console.log("ID Token:", idToken);
+                if (idToken) {
+                  try {
+                    const result = await googleLogin({ idToken, provider: "google" });
+                    const token = result.data?.accessToken || result.accessToken;
+
+                    if (token) {
+                      localStorage.setItem("token", token);
+                      onLoginSuccess();
+                      navigate("/dashboard");
+                    }
+                  } catch (error) {
+                    console.error("Google Login failed:", error);
+                  }
+                }
               }}
               onError={() => {
                 console.log("Login Failed");
@@ -180,20 +193,9 @@ export default function Login({ onLoginSuccess }: LoginProps) {
               size="large"
               shape="circle"
               width="384px"
-            /> */}
+            />
           </div>
-
-          {/* <div className="flex items-center gap-3">
-                <div className="flex-1 h-px bg-gray-200"></div>
-                <span className="text-sm text-gray-400">
-                  {language === "ar" ? "أو" : "OR"}
-                </span>
-                <div className="flex-1 h-px bg-gray-200"></div>
-              </div> */}
         </div>
-
-        {/* Register */}
-
       </form>
     </div>
 

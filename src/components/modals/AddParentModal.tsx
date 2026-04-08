@@ -12,17 +12,17 @@ interface AddParentModalProps {
 
 export default function AddParentModal({ onClose, onAdd }: AddParentModalProps) {
   const { language } = useLanguage();
-  
+
   const { register, handleSubmit, control, formState: { errors } } = useForm<ParentFormData>({
-resolver: zodResolver(parentSchema) as Resolver<ParentFormData>,
-   defaultValues: {
-     name: '',
-    email: '',
-    phone: '',
-    username: '',
-    password: '',
-    numberOfChildren: 0,
-    studentNames: []
+    resolver: zodResolver(parentSchema) as Resolver<ParentFormData>,
+    defaultValues: {
+      name: '',
+      email: '',
+      phone: '',
+      username: '',
+      password: '',
+      numberOfChildren: 0,
+      studentNames: []
     },
   });
 
@@ -47,7 +47,7 @@ resolver: zodResolver(parentSchema) as Resolver<ParentFormData>,
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+      <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh]  overflow-y-auto no-scrollbar">
         <div className="sticky top-0 bg-white border-b border-gray-100 px-6 py-4 flex items-center justify-between z-10">
           <h2 className="text-2xl font-bold text-gray-900">{text.title[language]}</h2>
           <button onClick={onClose} className="p-2 hover:bg-gray-100 rounded-lg transition-colors">
@@ -57,7 +57,7 @@ resolver: zodResolver(parentSchema) as Resolver<ParentFormData>,
 
         <form onSubmit={handleSubmit(handleOnSubmit)} className="p-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            
+
             {/* الاسم */}
             <div className="md:col-span-2">
               <label className="block text-sm font-semibold text-gray-700 mb-2 text-right">{text.name[language]}</label>

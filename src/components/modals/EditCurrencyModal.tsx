@@ -65,7 +65,7 @@ export default function EditCurrencyModal({ isOpen, onClose, currency, onSave }:
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh]  overflow-y-auto no-scrollbar">
         <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between rounded-t-2xl">
           <h2 className="text-2xl font-bold text-gray-900">{text.title[language]}</h2>
           <button
@@ -97,22 +97,20 @@ export default function EditCurrencyModal({ isOpen, onClose, currency, onSave }:
               <button
                 type="button"
                 onClick={() => setActiveTab('ar')}
-                className={`flex-1 px-4 py-3 text-sm font-medium transition-colors ${
-                  activeTab === 'ar'
+                className={`flex-1 px-4 py-3 text-sm font-medium transition-colors ${activeTab === 'ar'
                     ? 'bg-blue-50 text-blue-600 border-b-2 border-blue-600'
                     : 'bg-gray-50 text-gray-600 hover:bg-gray-100'
-                }`}
+                  }`}
               >
                 {text.arabic[language]}
               </button>
               <button
                 type="button"
                 onClick={() => setActiveTab('en')}
-                className={`flex-1 px-4 py-3 text-sm font-medium transition-colors ${
-                  activeTab === 'en'
+                className={`flex-1 px-4 py-3 text-sm font-medium transition-colors ${activeTab === 'en'
                     ? 'bg-blue-50 text-blue-600 border-b-2 border-blue-600'
                     : 'bg-gray-50 text-gray-600 hover:bg-gray-100'
-                }`}
+                  }`}
               >
                 {text.english[language]}
               </button>

@@ -94,7 +94,7 @@ export default function ViewSubscriptionDetailsModal({
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-y-auto">
+      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh]  overflow-y-auto no-scrollbar">
         <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between rounded-t-2xl">
           <h2 className="text-2xl font-bold text-gray-900">{text.title[language]}</h2>
           <button
@@ -192,7 +192,7 @@ export default function ViewSubscriptionDetailsModal({
                   <h4 className="text-base font-semibold text-gray-900">{text.completed[language]}</h4>
                   <span className="text-sm text-gray-600">({completedSessions.length})</span>
                 </div>
-                <div className="space-y-2 max-h-64 overflow-y-auto">
+                <div className="space-y-2 max-h-64  overflow-y-auto no-scrollbar">
                   {completedSessions.map(session => (
                     <div key={session.id} className="bg-green-50 border border-green-200 rounded-lg p-3 flex items-center justify-between">
                       <div>
@@ -222,7 +222,7 @@ export default function ViewSubscriptionDetailsModal({
                   <h4 className="text-base font-semibold text-gray-900">{text.upcoming[language]}</h4>
                   <span className="text-sm text-gray-600">({upcomingSessions.length})</span>
                 </div>
-                <div className="space-y-2 max-h-64 overflow-y-auto">
+                <div className="space-y-2 max-h-64  overflow-y-auto no-scrollbar">
                   {upcomingSessions.map(session => (
                     <div key={session.id} className="bg-blue-50 border border-blue-200 rounded-lg p-3 flex items-center justify-between">
                       <div>

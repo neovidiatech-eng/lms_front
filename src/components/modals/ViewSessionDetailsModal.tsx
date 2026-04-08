@@ -93,7 +93,7 @@ export default function ViewSessionDetailsModal({ isOpen, onClose, sessionGroup,
           </button>
         </div>
 
-        <div className="flex-1 overflow-y-auto p-6">
+        <div className="flex-1  overflow-y-auto no-scrollbar p-6">
           <div className="space-y-6">
             <div className="bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-200 rounded-2xl p-6">
               <h3 className="text-2xl font-bold text-gray-900 text-right mb-6">{sessionGroup.sessionName}</h3>
@@ -194,7 +194,7 @@ export default function ViewSessionDetailsModal({ isOpen, onClose, sessionGroup,
                 <h3 className="text-lg font-bold text-gray-900 text-right">{text.schedule[language]}</h3>
               </div>
 
-              <div className="p-4 max-h-96 overflow-y-auto">
+              <div className="p-4 max-h-96  overflow-y-auto no-scrollbar">
                 <div className="space-y-3">
                   {sessionGroup.sessions.map((session, index) => (
                     <div

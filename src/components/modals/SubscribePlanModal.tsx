@@ -100,7 +100,7 @@ export default function SubscribePlanModal({ isOpen, onClose }: SubscribePlanMod
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-[9999] bg-white overflow-y-auto">
+    <div className="fixed inset-0 z-[9999] bg-white  overflow-y-auto no-scrollbar">
       <div className="min-h-screen p-6 sm:p-12 relative flex flex-col">
         <button
           onClick={onClose}
@@ -127,11 +127,10 @@ export default function SubscribePlanModal({ isOpen, onClose }: SubscribePlanMod
               {plans.map((plan) => (
                 <div
                   key={plan.id}
-                  className={`bg-white rounded-3xl shadow-lg transition-all hover:-translate-y-2 hover:shadow-xl relative flex flex-col h-full bg-clip-padding border-2 ${
-                    plan.isPopular
+                  className={`bg-white rounded-3xl shadow-lg transition-all hover:-translate-y-2 hover:shadow-xl relative flex flex-col h-full bg-clip-padding border-2 ${plan.isPopular
                       ? 'border-blue-500 scale-105 z-10'
                       : 'border-gray-100'
-                  }`}
+                    }`}
                 >
                   {plan.isPopular && (
                     <div className="absolute -top-5 left-1/2 -translate-x-1/2 w-max px-4 py-1.5 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-full font-bold text-sm shadow-sm z-20">
@@ -170,11 +169,10 @@ export default function SubscribePlanModal({ isOpen, onClose }: SubscribePlanMod
                     </div>
 
                     <button
-                      className={`w-full py-4 rounded-xl font-bold text-lg transition-all flex items-center justify-center gap-2 ${
-                        plan.isPopular
+                      className={`w-full py-4 rounded-xl font-bold text-lg transition-all flex items-center justify-center gap-2 ${plan.isPopular
                           ? 'bg-blue-600 text-white hover:bg-blue-700 shadow-md hover:shadow-lg'
                           : 'bg-gray-100 text-gray-900 hover:bg-gray-200'
-                      }`}
+                        }`}
                     >
                       {text.subscribe[language]}
                     </button>
