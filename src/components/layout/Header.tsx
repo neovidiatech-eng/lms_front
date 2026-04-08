@@ -16,6 +16,8 @@ export default function Header({ onMenuClick, userRole, userName, userEmail }: H
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
   const [showProfileMenu, setShowProfileMenu] = useState(false);
+  const isRtl = language === 'ar';
+
 
   const roleSubtitle = {
     admin: { ar: 'لوحة التحكم', en: 'Control Panel' },
@@ -60,7 +62,7 @@ export default function Header({ onMenuClick, userRole, userName, userEmail }: H
         </div>
         <div className="flex items-center gap-2">
           <button onClick={toggleLanguage} className="px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-lg transition-colors">
-            {language === 'ar' ? 'العربية' : 'English'}
+            {language === 'ar' ? 'English' : 'العربية'}
           </button>
           <button onClick={() => setIsDarkMode(!isDarkMode)} className="p-2 hover:bg-gray-100 rounded-lg transition-colors">
             {isDarkMode ? <Sun className="w-5 h-5 text-gray-600" /> : <Moon className="w-5 h-5 text-gray-600" />}
@@ -101,18 +103,18 @@ export default function Header({ onMenuClick, userRole, userName, userEmail }: H
             {showProfileMenu && (
               <>
                 <div className="fixed inset-0 z-40" onClick={() => setShowProfileMenu(false)}></div>
-                <div className="absolute left-0 mt-2 w-56 bg-white rounded-xl shadow-lg border border-gray-200 py-2 z-50">
+                <div className={`absolute ${isRtl ? 'left-0' : 'right-0'} mt-2 w-56 bg-white rounded-xl shadow-lg border border-gray-200 py-2 z-50`}>
                   <div className="px-4 py-3 border-b border-gray-100">
                     <p className="text-sm font-semibold text-gray-900 text-right">{userName}</p>
                     <p className="text-xs text-gray-500 text-right">{userRole}</p>
                   </div>
                   <div className="py-2">
                     <button className="w-full px-4 py-2 text-right hover:bg-gray-50 transition-colors flex items-center justify-end gap-2">
-                      <span className="text-sm text-gray-700">الملف الشخصي</span>
+                      <span className="text-sm text-gray-700"> {t('profile')}</span>
                       <User className="w-4 h-4 text-gray-500" />
                     </button>
                     <button onClick={handleLogout} className="w-full px-4 py-2 text-right hover:bg-red-50 transition-colors flex items-center justify-end gap-2 text-red-600">
-                      <span className="text-sm font-medium">تسجيل الخروج</span>
+                      <span className="text-sm font-medium"> {t('logout')}</span>
                       <LogOut className="w-4 h-4" />
                     </button>
                   </div>

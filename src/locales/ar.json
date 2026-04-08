@@ -246,5 +246,7 @@
     "courses_table_files": "ملفات",
     "courses_table_actions": "إجراءات",
     "courses_empty": "لا توجد كورسات حالياً",
-    "courses_filter": " جرب تغيير فلتر البحث"
+    "courses_filter": " جرب تغيير فلتر البحث",
+    "profile": "الملف الشخصى",
+    "logout": "تسجيل الخروج"
 }

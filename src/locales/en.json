@@ -243,5 +243,7 @@
     "courses_table_level": "Level",
     "courses_table_files": "Files",
     "courses_table_actions": "Actions",
-    "courses_empty": "No courses available at the moment"
+    "courses_empty": "No courses available at the moment",
+    "profile": "profile",
+    "logout": "logout"
 }

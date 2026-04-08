@@ -7,18 +7,9 @@ import EditStudentModal from '../components/modals/EditStudentModal';
 import Pagination from '../components/ui/Pagination';
 import CustomSelect from '../components/ui/CustomSelect';
 import { useTranslation } from 'react-i18next';
+import { useStudents } from '../hooks/useStudents';
+import { Student } from '../types/student';
 
-interface Student {
-  id: string;
-  name: string;
-  email: string;
-  phone: string;
-  countryCode: string;
-  country: string;
-  grade: string;
-  status: 'active' | 'inactive';
-  avatar?: string;
-}
 
 export default function Students() {
   const { t, i18n } = useTranslation();
@@ -33,64 +24,14 @@ export default function Students() {
   const [selectedStudent, setSelectedStudent] = useState<Student | null>(null);
   const itemsPerPage = 7;
 
-  const students: Student[] = [
-    {
-      id: '1',
-      name: 'محمد ذكر',
-      email: 'Mohamed@gmail.com',
-      phone: '01101646637',
-      countryCode: '+20',
-      country: 'مصر',
-      grade: 'ثانية القصيرة',
-      status: 'active',
-    },
-    {
-      id: '2',
-      name: 'أحمد ذكر',
-      email: 'Ahmed@gmail.com',
-      phone: '01101236635',
-      countryCode: '+20',
-      country: 'مصر',
-      grade: 'ثانية القصيرة',
-      status: 'active',
-    },
-    {
-      id: '3',
-      name: 'Ahmed ذكر',
-      email: 'Ahmed.hegazy@gmail.com',
-      phone: '01102394475',
-      countryCode: '+20',
-      country: 'مصر',
-      grade: 'ثانية القصيرة',
-      status: 'active',
-    },
-    {
-      id: '4',
-      name: 'mohamed ذكر',
-      email: 'mohamed123@gmail.com',
-      phone: '01234567898',
-      countryCode: '+20',
-      country: 'مصر',
-      grade: 'ثانية القصيرة',
-      status: 'active',
-    },
-    {
-      id: '5',
-      name: 'Ahmed Gamal ذكر',
-      email: 'engahmedgamal01086@gmail.com',
-      phone: '01091530978',
-      countryCode: '+20',
-      country: 'مصر',
-      grade: 'ثانية التفاضلية',
-      status: 'active',
-    },
-  ];
+  const { data: apiResponse } = useStudents();
+  const studentsList = apiResponse?.data || [];
 
   const stats = [
     {
       id: 'total',
       label: t('totalStudents'),
-      value: 22,
+      value: studentsList.length,
       icon: Users,
       bgColor: 'bg-blue-50',
       iconColor: 'text-blue-600',
@@ -99,7 +40,7 @@ export default function Students() {
     {
       id: 'active',
       label: t('activeStudents'),
-      value: 5,
+      value: studentsList.filter(student => student.status === 'pending').length,
       icon: UserCheck,
       bgColor: 'bg-green-50',
       iconColor: 'text-green-600',
@@ -137,19 +78,21 @@ export default function Students() {
     { id: 'saudi', label: t('saudiArabia'), labelEn: 'Saudi Arabia' },
   ];
 
-  const filteredStudents = students.filter(student => {
-    const matchesSearch = student.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+  const filteredStudents = studentsList.filter(student => {
+    const matchesSearch =
+      student.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       student.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
       student.phone.includes(searchTerm);
-    const matchesGrade = selectedGrade === 'all' || student.grade === selectedGrade;
+
+    const matchesGrade = selectedGrade === 'all' || student.planId === selectedGrade;
     const matchesCountry = selectedCountry === 'all' || student.country === selectedCountry;
+
     return matchesSearch && matchesGrade && matchesCountry;
   });
-
-  const totalPages = Math.ceil(filteredStudents.length / itemsPerPage);
+  const totalPages = Math.ceil(filteredStudents?.length || 0 / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
   const endIndex = startIndex + itemsPerPage;
-  const currentStudents = filteredStudents.slice(startIndex, endIndex);
+  const currentStudents = filteredStudents?.slice(startIndex, endIndex);
 
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
@@ -319,13 +262,13 @@ export default function Students() {
                   </td>
                   <td className="px-6 py-4">
                     <WhatsAppPhone
-                      phone={`${student.countryCode} ${student.phone}`}
+                      phone={`${student.code_country} ${student.phone}`}
                       className="text-sm text-gray-900"
                     />
                   </td>
                   <td className="px-6 py-4">
                     <span className="inline-flex px-3 py-1 badge-primary rounded-full text-xs font-medium">
-                      {student.grade}
+                      {student.planId}
                     </span>
                   </td>
                   <td className="px-6 py-4">
@@ -333,9 +276,9 @@ export default function Students() {
                   </td>
                   <td className="px-6 py-4">
                     <span
-                      className={`inline-flex px-3 py-1 rounded-full text-xs font-medium ${student.status === 'active'
-                          ? 'bg-green-100 text-green-700'
-                          : 'bg-red-100 text-red-700'
+                      className={`inline-flex px-3 py-1 rounded-full text-xs font-medium ${student.status === 'pending'
+                        ? 'bg-green-100 text-green-700'
+                        : 'bg-red-100 text-red-700'
                         }`}
                     >
                       ✓ {t('activeLabel')}
@@ -407,9 +350,9 @@ export default function Students() {
               name: selectedStudent.name,
               email: selectedStudent.email,
               phone: selectedStudent.phone,
-              countryCode: selectedStudent.countryCode,
+              countryCode: selectedStudent.code_country,
               country: selectedStudent.country === 'مصر' ? 'egypt' : 'saudi',
-              status: selectedStudent.status,
+              status: (selectedStudent.status === 'pending' ? 'inactive' : 'active') as 'active' | 'inactive',
               gender: 'male',
               plan: 'secondary_1',
               birthDate: '',
