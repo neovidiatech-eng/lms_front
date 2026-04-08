@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
-import { addCurrency, deleteCurrency, getCurrencies, getCurrencyById, searchCurrency, updateCurrency } from "../services/CurruncyServices"
+import { addCurrency, deleteCurrency, getCurrencies, getCurrencyById, searchCurrency, updateCurrency } from "../services/CurrencyServices"
 import { CurrenciesData, Currency } from "../types/currency";
 
 export const useCurrency = (search?: string) => {

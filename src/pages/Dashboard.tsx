@@ -2,12 +2,12 @@ import { DollarSign, Calendar, Users, GraduationCap, Clock, FileText, CheckCircl
 import { useState } from 'react';
 import { Outlet, useLocation } from 'react-router-dom';
 import DashboardLayout from '../components/layout/DashboardLayout';
-import { useLanguage } from '../contexts/LanguageContext';
 import { useSettings } from '../contexts/SettingsContext';
 import SubscribePlanModal from '../components/modals/SubscribePlanModal';
+import { useTranslation } from 'react-i18next';
 
 export default function Dashboard() {
-  const { language } = useLanguage();
+  const { t } = useTranslation();
   const location = useLocation();
   const { settings } = useSettings();
   const [showSubscribeModal, setShowSubscribeModal] = useState(false);
@@ -30,9 +30,9 @@ export default function Dashboard() {
   };
 
   const alerts = [
-    { type: 'warning', title: 'التنبيهات', message: 'لا توجد تنبيهات حالياً', icon: AlertCircle },
-    { type: 'success', title: 'الحالة', message: 'جميع الأنظمة تعمل بشكل طبيعي', icon: CheckCircle },
-    { type: 'info', title: 'الاحتياجات', message: 'تتم تحديث البيانات تلقائياً كل 5 دقائق', icon: FileText }
+    { type: 'warning', title: t('alerts'), message: t('noAlerts'), icon: AlertCircle },
+    { type: 'success', title: t('status'), message: t('allSystemsNormal'), icon: CheckCircle },
+    { type: 'info', title: t('needs'), message: t('dataAutoUpdate'), icon: FileText }
   ];
 
   const StatCard = ({ title, value, subtitle, icon: Icon, color, hexColor, details }: any) => (
@@ -132,15 +132,15 @@ export default function Dashboard() {
       <div className="rounded-2xl p-8 text-white relative overflow-hidden" style={{ background: `linear-gradient(to right, ${settings.primaryColor}, ${settings.accentColor})` }}>
         <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-4">
           <div>
-            <h1 className="text-3xl font-bold mb-2 text-right">مرحباً بك في لوحة التحكم</h1>
-            <p className="text-right opacity-80">نظرة شاملة على إحصائيات المنصة</p>
+            <h1 className="text-3xl font-bold mb-2 text-right">{t('welcomeDashboard')}</h1>
+            <p className="text-right opacity-80">{t('dashboardSubtitle')}</p>
           </div>
           <button
             onClick={() => setShowSubscribeModal(true)}
             className="bg-white text-blue-600 hover:bg-blue-50 px-6 py-3 rounded-xl font-bold flex items-center gap-2 transition-all shadow-lg hover:-translate-y-1"
           >
             <Sparkles className="w-5 h-5" />
-            {language === 'ar' ? 'اشترك الآن لفتح كل الميزات' : 'Subscribe Now to unlock all features'}
+            {t('subscribeToUnlock')}
           </button>
         </div>
       </div>
@@ -148,40 +148,40 @@ export default function Dashboard() {
       {/* Main Stats */}
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
         <StatCard
-          title="الطلاب"
+          title={t('students')}
           value={stats.students.total}
           icon={GraduationCap}
           color="border-pink-500"
           details={[
-            { label: 'نشط', value: stats.students.active },
-            { label: 'جديد', value: stats.students.new, color: 'text-green-600' }
+            { label: t('activeLabel'), value: stats.students.active },
+            { label: t('newLabel'), value: stats.students.new, color: 'text-green-600' }
           ]}
         />
         <StatCard
-          title="المعلمين"
+          title={t('teachers')}
           value={stats.teachers.total}
           icon={Users}
           color="border-orange-500"
           details={[
-            { label: 'نشط', value: stats.teachers.active },
-            { label: 'جديد', value: stats.teachers.new, color: 'text-green-600' }
+            { label: t('activeLabel'), value: stats.teachers.active },
+            { label: t('newLabel'), value: stats.teachers.new, color: 'text-green-600' }
           ]}
         />
         <StatCard
-          title="الحصص"
+          title={t('sessions')}
           value={stats.sessions.total}
           icon={Calendar}
           color=""
           hexColor={settings.primaryColor}
           details={[
-            { label: 'اليوم', value: stats.sessions.today },
-            { label: 'هذا الأسبوع', value: stats.sessions.thisWeek }
+            { label: t('today'), value: stats.sessions.today },
+            { label: t('thisWeek'), value: stats.sessions.thisWeek }
           ]}
         />
         <StatCard
-          title="المصاريف"
-          value={`${stats.expenses.total} ر.س`}
-          subtitle="هذا الشهر"
+          title={t('expenses')}
+          value={`${stats.expenses.total} ${t('currencySAR')}`}
+          subtitle={t('thisMonth')}
           icon={DollarSign}
           color="border-green-500"
         />
@@ -190,44 +190,44 @@ export default function Dashboard() {
       {/* Secondary Stats */}
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
         <SmallStatCard
-          title="الواجبات"
+          title={t('assignments')}
           value={secondaryStats.assignments.total}
           icon={FileText}
           color="bg-green-500"
           details={[
-            { label: 'معلق', value: secondaryStats.assignments.pending, color: 'text-orange-600' },
-            { label: 'مكتملة', value: secondaryStats.assignments.completed }
+            { label: t('pending'), value: secondaryStats.assignments.pending, color: 'text-orange-600' },
+            { label: t('completed'), value: secondaryStats.assignments.completed }
           ]}
         />
         <SmallStatCard
-          title="الامتحانات"
+          title={t('exams')}
           value={secondaryStats.exams.total}
           icon={FileText}
           color="bg-red-500"
           details={[
-            { label: 'مكتملة', value: secondaryStats.exams.completed },
-            { label: 'Common upcoming', value: secondaryStats.exams.upcoming, color: 'text-orange-600' }
+            { label: t('completed'), value: secondaryStats.exams.completed },
+            { label: t('upcoming'), value: secondaryStats.exams.upcoming, color: 'text-orange-600' }
           ]}
         />
         <SmallStatCard
-          title="الاشتراكات"
+          title={t('subscriptions')}
           value={secondaryStats.subscriptions.total}
           icon={Clock}
           color=""
           hexColor={settings.primaryColor}
           details={[
-            { label: 'نشط', value: secondaryStats.subscriptions.active },
-            { label: 'معلق', value: secondaryStats.subscriptions.suspended, color: 'text-orange-600' }
+            { label: t('activeLabel'), value: secondaryStats.subscriptions.active },
+            { label: t('pending'), value: secondaryStats.subscriptions.suspended, color: 'text-orange-600' }
           ]}
         />
         <SmallStatCard
-          title="معدل عام"
+          title={t('generalRate')}
           value={secondaryStats.completionRate.totalTasks}
           icon={Users}
           color="bg-purple-500"
           details={[
-            { label: 'الواجبات + الامتحانات', value: '' },
-            { label: 'معدل الإنجاز', value: `${secondaryStats.completionRate.rate}%` }
+            { label: t('assignmentsExams'), value: '' },
+            { label: t('completionRate'), value: `${secondaryStats.completionRate.rate}%` }
           ]}
         />
       </div>

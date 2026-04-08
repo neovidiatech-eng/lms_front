@@ -1,18 +1,31 @@
 import { lazy, ReactNode } from 'react';
-import { 
-  Home, 
-  Users, 
-  BookOpen, 
-  DollarSign, 
-  PlayCircle, 
-  Settings, 
-  CreditCard, 
-  GraduationCap 
+import {
+  Home,
+  Users,
+  BookOpen,
+  DollarSign,
+  PlayCircle,
+  Settings,
+  CreditCard,
+  GraduationCap,
+  Play,
+  UserCheck,
+  FileQuestion,
+  Clock,
+  Book,
+  Calendar,
+  FileText,
+  ClipboardList,
+  AlertCircle,
+  Layers,
+  Package,
+  Coins,
+  Repeat
 } from 'lucide-react';
 
 export interface RouteConfig {
   id: string;
-  label: { ar: string; en: string };
+  label: string;
   icon?: any;
   path: string; // The relative path for routing
   fullPath?: string; // Optional for Sidebar grouping cases
@@ -44,79 +57,79 @@ const SettingsPage = lazy(() => import('../../pages/Settings'));
 export const dashboardRoutes: RouteConfig[] = [
   {
     id: 'dashboard',
-    label: { ar: 'الرئيسية', en: 'Dashboard' },
+    label: 'sidebar_dashboard',
     icon: Home,
-    path: '', // Maps to /dashboard
+    path: '',
   },
   {
     id: 'lms',
-    label: { ar: 'LMS', en: 'LMS' },
+    label: 'sidebar_lms',
     icon: PlayCircle,
     path: 'lms',
     subItems: [
-      { id: 'lms-courses', label: { ar: 'الكورسات', en: 'Courses' }, path: 'lms-courses', element: <LMSCoursesPage /> }
+      { id: 'lms-courses', label: 'sidebar_courses', icon: Play, path: 'lms-courses', element: <LMSCoursesPage /> }
     ]
   },
   {
     id: 'users',
-    label: { ar: 'إدارة المستخدمين', en: 'User Management' },
+    label: 'sidebar_user_management',
     icon: Users,
     path: 'users',
     subItems: [
-      { id: 'admins', label: { ar: 'المسؤولين', en: 'Admins' }, path: 'admins', element: <UsersPage /> },
-      { id: 'students', label: { ar: 'الطلاب', en: 'Students' }, path: 'students', element: <StudentsPage /> },
-      { id: 'parents', label: { ar: 'أولياء الأمور', en: 'Parents' }, path: 'parents', element: <ParentsPage /> }
+      { id: 'admins', label: 'sidebar_admins', icon: UserCheck, path: 'admins', element: <UsersPage /> },
+      { id: 'students', label: 'sidebar_students', icon: GraduationCap, path: 'students', element: <StudentsPage /> },
+      { id: 'parents', label: 'sidebar_parents', icon: Users, path: 'parents', element: <ParentsPage /> }
     ]
   },
   {
     id: 'teachers-section',
-    label: { ar: 'المعلمين', en: 'Teachers' },
+    label: 'sidebar_teachers',
     icon: GraduationCap,
     path: 'teachers-group',
     subItems: [
-      { id: 'teachers', label: { ar: 'المعلمين', en: 'Teachers' }, path: 'teachers', element: <TeachersPage /> },
-      { id: 'teacher-requests', label: { ar: 'طلبات المعلمين', en: 'Requests' }, path: 'teacher-requests', element: <TeacherRequestsPage /> },
-      { id: 'teacher-availability', label: { ar: 'المتاحين', en: 'Available' }, path: 'teacher-availability', element: <TeacherAvailabilityPage /> },
-      { id: 'subjects', label: { ar: 'المواد', en: 'Subjects' }, path: 'subjects', element: <SubjectsPage /> }
+      { id: 'teachers', label: 'sidebar_teachers', icon: GraduationCap, path: 'teachers', element: <TeachersPage /> },
+      { id: 'teacher-requests', label: 'sidebar_requests', icon: FileQuestion, path: 'teacher-requests', element: <TeacherRequestsPage /> },
+      { id: 'teacher-availability', label: 'sidebar_available', icon: Clock, path: 'teacher-availability', element: <TeacherAvailabilityPage /> },
+      { id: 'subjects', label: 'sidebar_subjects', icon: Book, path: 'subjects', element: <SubjectsPage /> }
     ]
   },
   {
     id: 'content',
-    label: { ar: 'المحتوى الأكاديمي', en: 'Academic Content' },
+    label: 'sidebar_academic_content',
     icon: BookOpen,
     path: 'content',
     subItems: [
-      { id: 'sessions', label: { ar: 'الحصص', en: 'Sessions' }, path: 'sessions', element: <SessionsPage /> },
-      { id: 'agenda', label: { ar: 'الأجندة', en: 'Agenda' }, path: 'agenda', element: <AgendaPage /> },
-      { id: 'exams', label: { ar: 'الامتحانات', en: 'Exams' }, path: 'exams', element: <ExamsPage /> },
-      { id: 'assignments', label: { ar: 'الواجبات', en: 'Assignments' }, path: 'assignments', element: <AssignmentsPage /> }
+      { id: 'sessions', label: 'sidebar_sessions', icon: Play, path: 'sessions', element: <SessionsPage /> },
+      { id: 'agenda', label: 'sidebar_agenda', icon: Calendar, path: 'agenda', element: <AgendaPage /> },
+      { id: 'exams', label: 'sidebar_exams', icon: FileText, path: 'exams', element: <ExamsPage /> },
+      { id: 'assignments', label: 'sidebar_assignments', icon: ClipboardList, path: 'assignments', element: <AssignmentsPage /> }
     ]
   },
   {
     id: 'subscriptions',
-    label: { ar: 'الاشتراكات', en: 'Subscriptions' },
+    label: 'sidebar_subscriptions',
     icon: CreditCard,
     path: 'subscriptions-group',
     subItems: [
-      { id: 'subscription-requests', label: { ar: 'طلبات الاشتراك', en: 'Requests' }, path: 'subscription-requests', element: <SubscriptionRequestsPage /> },
-      { id: 'all-subscriptions', label: { ar: 'كل الاشتراكات', en: 'All' }, path: 'all-subscriptions', element: <AllSubscriptionsPage /> },
-      { id: 'plans', label: { ar: 'الخطط', en: 'Plans' }, path: 'plans', element: <PlansPage /> }
+      { id: 'subscription-requests', label: 'sidebar_subscription_requests', icon: AlertCircle, path: 'subscription-requests', element: <SubscriptionRequestsPage /> },
+      { id: 'all-subscriptions', label: 'sidebar_all_subscriptions', icon: Layers, path: 'all-subscriptions', element: <AllSubscriptionsPage /> },
+      { id: 'plans', label: 'sidebar_plans', icon: Package, path: 'plans', element: <PlansPage /> }
     ]
   },
   {
     id: 'finance',
-    label: { ar: 'الماليات', en: 'Finance' },
+    label: 'sidebar_finance',
     icon: DollarSign,
     path: 'finance-group',
     subItems: [
-      { id: 'currencies', label: { ar: 'العملات', en: 'Currencies' }, path: 'currencies', element: <CurrenciesPage /> },
-      { id: 'expenses', label: { ar: 'المصروفات', en: 'Expenses' }, path: 'expenses', element: <ExpensesPage /> },
-      { id: 'transactions', label: { ar: 'المعاملات', en: 'Transactions' }, path: 'transactions', element: <TransactionsPage /> }
+      { id: 'currencies', label: 'sidebar_currencies', icon: Coins, path: 'currencies', element: <CurrenciesPage /> },
+      { id: 'expenses', label: 'sidebar_expenses', icon: CreditCard, path: 'expenses', element: <ExpensesPage /> },
+      { id: 'transactions', label: 'sidebar_transactions', icon: Repeat, path: 'transactions', element: <TransactionsPage /> }
     ]
   },
   {
     id: 'settings',
-    label: { ar: 'الإعدادات', en: 'Settings' },
+    label: 'sidebar_settings',
     icon: Settings,
     path: 'settings',
     element: <SettingsPage />

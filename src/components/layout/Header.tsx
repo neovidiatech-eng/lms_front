@@ -1,6 +1,6 @@
 import { Bell, Menu, Moon, Sun, User, LogOut, ChevronDown } from 'lucide-react';
 import { useState } from 'react';
-import { useLanguage, LanguageContextType, Language } from '../../contexts/LanguageContext';
+import { useLanguage } from '../../contexts/LanguageContext';
 import { useSettings } from '../../contexts/SettingsContext';
 
 interface HeaderProps {
@@ -11,7 +11,7 @@ interface HeaderProps {
 }
 
 export default function Header({ onMenuClick, userRole, userName, userEmail }: HeaderProps) {
-  const { language, toggleLanguage, t } = useLanguage() as LanguageContextType;
+  const { language, toggleLanguage, t } = useLanguage();
   const { settings } = useSettings();
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
@@ -54,7 +54,7 @@ export default function Header({ onMenuClick, userRole, userName, userEmail }: H
             )}
             <div className="hidden sm:block text-right">
               <h1 className="text-lg font-bold text-gray-900">{settings.name}</h1>
-              <p className="text-xs text-gray-500">{(roleSubtitle[userRole] as any)[language as string]}</p>
+              <p className="text-xs text-gray-500">{roleSubtitle[userRole][language]}</p>
             </div>
           </div>
         </div>

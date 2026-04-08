@@ -1,8 +1,10 @@
 import { ChevronDown } from 'lucide-react';
-import { useLanguage } from '../../contexts/LanguageContext';
+import { useTranslation } from 'react-i18next';
 
 export default function LanguageSwitcher() {
-  const { language, setLanguage, t } = useLanguage();
+  const { i18n, t } = useTranslation();
+  const language = i18n.language.split('-')[0];
+  const setLanguage = (lang: string) => i18n.changeLanguage(lang);
 
   return (
     <div className="fixed top-6 right-6 z-50">

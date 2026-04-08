@@ -1,9 +1,10 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { useState, lazy, Suspense } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { LanguageProvider } from './contexts/LanguageContext';
 import { SessionsProvider } from './contexts/SessionsContext';
 import { SettingsProvider } from './contexts/SettingsContext';
+import { useTranslation } from 'react-i18next';
+import { useEffect } from 'react';
 import ErrorBoundary from './components/layout/ErrorBoundary';
 import ErrorService from './utils/ErrorService';
 import LanguageSwitcher from './components/ui/LanguageSwitcher';
@@ -43,6 +44,15 @@ function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(() => {
     return !!localStorage.getItem("token") || !!sessionStorage.getItem("token");
   });
+  const { i18n } = useTranslation();
+
+  useEffect(() => {
+    const lang = i18n.language.split('-')[0];
+    const dir = lang === 'ar' ? 'rtl' : 'ltr';
+    document.documentElement.dir = dir;
+    document.documentElement.lang = lang;
+  }, [i18n.language]);
+
   const handleLogin = () => {
     setIsAuthenticated(true);
   };
@@ -53,38 +63,36 @@ function App() {
       <GoogleOAuthProvider clientId={googleClientId}>
         <QueryClientProvider client={queryClient}>
           <SettingsProvider>
-            <LanguageProvider>
-              <SessionsProvider>
-                <Router>
-                  {!isAuthenticated && <LanguageSwitcher />}
-                  <Suspense fallback={<LoadingFallback />}>
-                    <Routes>
-                      <Route element={!isAuthenticated ? <AuthLayout /> : <Navigate to="/dashboard" replace />}>
-                        <Route path="/login" element={<Login onLoginSuccess={handleLogin} />} />
-                        <Route path="/register" element={<Register onRegisterSuccess={handleLogin} />} />
-                      </Route>
-                      <Route
-                        path="/dashboard"
-                        element={isAuthenticated ? <Dashboard /> : <Navigate to="/login" replace />}
-                      >
-                        <Route index element={null} />
-                        {dashboardRoutes.flatMap(route => {
-                          if (route.subItems) {
-                            return route.subItems.map(subItem => (
-                              <Route key={subItem.id} path={subItem.path} element={subItem.element} />
-                            ));
-                          }
-                          return route.element ? [<Route key={route.id} path={route.path} element={route.element} />] : [];
-                        })}
-                      </Route>
+            <SessionsProvider>
+              <Router>
+                {!isAuthenticated && <LanguageSwitcher />}
+                <Suspense fallback={<LoadingFallback />}>
+                  <Routes>
+                    <Route element={!isAuthenticated ? <AuthLayout /> : <Navigate to="/dashboard" replace />}>
+                      <Route path="/login" element={<Login onLoginSuccess={handleLogin} />} />
+                      <Route path="/register" element={<Register onRegisterSuccess={handleLogin} />} />
+                    </Route>
+                    <Route
+                      path="/dashboard"
+                      element={isAuthenticated ? <Dashboard /> : <Navigate to="/login" replace />}
+                    >
+                      <Route index element={null} />
+                      {dashboardRoutes.flatMap(route => {
+                        if (route.subItems) {
+                          return route.subItems.map(subItem => (
+                            <Route key={subItem.id} path={subItem.path} element={subItem.element} />
+                          ));
+                        }
+                        return route.element ? [<Route key={route.id} path={route.path} element={route.element} />] : [];
+                      })}
+                    </Route>
 
-                      <Route path="/" element={<Navigate to="/login" replace />} />
-                      <Route path="*" element={<Navigate to="/login" replace />} />
-                    </Routes>
-                  </Suspense>
-                </Router>
-              </SessionsProvider>
-            </LanguageProvider>
+                    <Route path="/" element={<Navigate to="/login" replace />} />
+                    <Route path="*" element={<Navigate to="/login" replace />} />
+                  </Routes>
+                </Suspense>
+              </Router>
+            </SessionsProvider>
           </SettingsProvider>
         </QueryClientProvider>
       </GoogleOAuthProvider>

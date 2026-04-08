@@ -1,12 +1,12 @@
 import { useState } from 'react';
 import { Search, Eye, Pencil, Trash2, Plus, Users, UserCheck, UserX, ClipboardList } from 'lucide-react';
-import { useLanguage } from '../contexts/LanguageContext';
 import WhatsAppPhone from '../components/ui/WhatsAppPhone';
 import AddStudentModal from '../components/modals/AddStudentModal';
 import ViewStudentModal from '../components/modals/ViewStudentModal';
 import EditStudentModal from '../components/modals/EditStudentModal';
 import Pagination from '../components/ui/Pagination';
 import CustomSelect from '../components/ui/CustomSelect';
+import { useTranslation } from 'react-i18next';
 
 interface Student {
   id: string;
@@ -21,7 +21,8 @@ interface Student {
 }
 
 export default function Students() {
-  const { language } = useLanguage();
+  const { t, i18n } = useTranslation();
+  const language = i18n.language.split('-')[0];
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedGrade, setSelectedGrade] = useState('all');
   const [selectedCountry, setSelectedCountry] = useState('all');
@@ -88,7 +89,7 @@ export default function Students() {
   const stats = [
     {
       id: 'total',
-      label: language === 'ar' ? 'إجمالي الطلاب' : 'Total Students',
+      label: t('totalStudents'),
       value: 22,
       icon: Users,
       bgColor: 'bg-blue-50',
@@ -97,7 +98,7 @@ export default function Students() {
     },
     {
       id: 'active',
-      label: language === 'ar' ? 'الطلاب النشطون' : 'Active Students',
+      label: t('activeStudents'),
       value: 5,
       icon: UserCheck,
       bgColor: 'bg-green-50',
@@ -106,7 +107,7 @@ export default function Students() {
     },
     {
       id: 'suspended',
-      label: language === 'ar' ? 'الطلاب المتوقفون' : 'Suspended Students',
+      label: t('suspendedStudents'),
       value: 0,
       icon: UserX,
       bgColor: 'bg-red-50',
@@ -115,7 +116,7 @@ export default function Students() {
     },
     {
       id: 'plans',
-      label: language === 'ar' ? 'عدد الخطط' : 'Number of Plans',
+      label: t('numberOfPlans'),
       value: 5,
       icon: ClipboardList,
       bgColor: 'bg-purple-50',
@@ -125,21 +126,21 @@ export default function Students() {
   ];
 
   const grades = [
-    { id: 'all', label: 'كل الخطط', labelEn: 'All Plans' },
-    { id: 'secondary_1', label: 'ثانية القصيرة', labelEn: 'Secondary 1' },
-    { id: 'secondary_2', label: 'ثانية التفاضلية', labelEn: 'Secondary 2' },
+    { id: 'all', label: t('allPlans'), labelEn: 'All Plans' },
+    { id: 'secondary_1', label: t('secondary1'), labelEn: 'Secondary 1' },
+    { id: 'secondary_2', label: t('secondary2'), labelEn: 'Secondary 2' },
   ];
 
   const countries = [
-    { id: 'all', label: 'اختر الدولة', labelEn: 'Select Country' },
-    { id: 'egypt', label: 'مصر', labelEn: 'Egypt' },
-    { id: 'saudi', label: 'السعودية', labelEn: 'Saudi Arabia' },
+    { id: 'all', label: t('selectCountry'), labelEn: 'Select Country' },
+    { id: 'egypt', label: t('egypt'), labelEn: 'Egypt' },
+    { id: 'saudi', label: t('saudiArabia'), labelEn: 'Saudi Arabia' },
   ];
 
   const filteredStudents = students.filter(student => {
     const matchesSearch = student.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         student.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         student.phone.includes(searchTerm);
+      student.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      student.phone.includes(searchTerm);
     const matchesGrade = selectedGrade === 'all' || student.grade === selectedGrade;
     const matchesCountry = selectedCountry === 'all' || student.country === selectedCountry;
     return matchesSearch && matchesGrade && matchesCountry;
@@ -167,15 +168,15 @@ export default function Students() {
   const handleDeleteStudent = async (studentId: string) => {
     if (
       window.confirm(
-        language === 'ar' ? 'هل أنت متأكد من حذف هذا الطالب؟' : 'Are you sure you want to delete this student?'
+        t('deleteConfirmStudent')
       )
     ) {
       try {
         console.log('Deleting student:', studentId);
-        alert(language === 'ar' ? 'تم حذف الطالب بنجاح' : 'Student deleted successfully');
+        alert(t('studentDeletedSuccess'));
       } catch (error) {
         console.error('Error deleting student:', error);
-        alert(language === 'ar' ? 'حدث خطأ أثناء حذف الطالب' : 'Error deleting student');
+        alert(t('errorDeletingStudent'));
       }
     }
   };
@@ -186,12 +187,10 @@ export default function Students() {
       <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-8">
         <div className="text-right">
           <h1 className="text-3xl font-bold text-gray-900">
-            {language === 'ar' ? 'إدارة الطلاب' : 'Student Management'}
+            {t('studentManagement')}
           </h1>
           <p className="text-gray-600 mt-1">
-            {language === 'ar'
-              ? 'إدارة بيانات جميع الطلاب والخطط الدراسية'
-              : 'Manage all student data and study plans'}
+            {t('manageStudentsDescription')}
           </p>
         </div>
         <button
@@ -200,7 +199,7 @@ export default function Students() {
         >
           <Plus className="w-5 h-5" />
           <span className="font-medium">
-            {language === 'ar' ? 'إضافة طالب جديد' : 'Add New Student'}
+            {t('addNewStudent')}
           </span>
         </button>
       </div>
@@ -233,11 +232,7 @@ export default function Students() {
             <Search className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
             <input
               type="text"
-              placeholder={
-                language === 'ar'
-                  ? 'ابحث بالاسم أو البريد الإلكتروني...'
-                  : 'Search by name or email...'
-              }
+              placeholder={t('searchUsersPlaceholder')}
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="w-full pr-12 pl-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary text-right"
@@ -247,28 +242,28 @@ export default function Students() {
           {/* Country Filter */}
           <div>
             <CustomSelect
-            value={selectedCountry}
-            options={countries.map((country) => ({
-              value: country.id,
-              label: language === 'ar' ? country.label : country.labelEn,
-              searchText: `${country.label} ${country.labelEn}`,
-            }))}
-            onChange={(val) => setSelectedCountry(val as string)}
-            className="h-[46px]"
+              value={selectedCountry}
+              options={countries.map((country) => ({
+                value: country.id,
+                label: language === 'ar' ? country.label : country.labelEn,
+                searchText: `${country.label} ${country.labelEn}`,
+              }))}
+              onChange={(val) => setSelectedCountry(val as string)}
+              className="h-[46px]"
             />
           </div>
 
           {/* Grade Filter */}
           <div>
             <CustomSelect
-            value={selectedGrade}
-            options={grades.map((grade) => ({
-              value: grade.id,
-              label: language === 'ar' ? grade.label : grade.labelEn,
-              searchText: `${grade.label} ${grade.labelEn}`,
-            }))}
-            onChange={(val) => setSelectedGrade(val as string)}
-            className="h-[46px]"
+              value={selectedGrade}
+              options={grades.map((grade) => ({
+                value: grade.id,
+                label: language === 'ar' ? grade.label : grade.labelEn,
+                searchText: `${grade.label} ${grade.labelEn}`,
+              }))}
+              onChange={(val) => setSelectedGrade(val as string)}
+              className="h-[46px]"
             />
           </div>
         </div>
@@ -281,25 +276,25 @@ export default function Students() {
             <thead className="bg-gray-50 border-b border-gray-200">
               <tr>
                 <th className="px-6 py-4 text-right text-sm font-semibold text-gray-700">
-                  {language === 'ar' ? 'الطالب' : 'Student'}
+                  {t('studentLabel')}
                 </th>
                 <th className="px-6 py-4 text-right text-sm font-semibold text-gray-700">
-                  {language === 'ar' ? 'البريد الإلكتروني' : 'Email'}
+                  {t('email')}
                 </th>
                 <th className="px-6 py-4 text-right text-sm font-semibold text-gray-700">
-                  {language === 'ar' ? 'الهاتف' : 'Phone'}
+                  {t('phoneNumber')}
                 </th>
                 <th className="px-6 py-4 text-right text-sm font-semibold text-gray-700">
-                  {language === 'ar' ? 'الخطة' : 'Plan'}
+                  {t('plan')}
                 </th>
                 <th className="px-6 py-4 text-right text-sm font-semibold text-gray-700">
-                  {language === 'ar' ? 'الدولة' : 'Country'}
+                  {t('country')}
                 </th>
                 <th className="px-6 py-4 text-right text-sm font-semibold text-gray-700">
-                  {language === 'ar' ? 'الحالة' : 'Status'}
+                  {t('status')}
                 </th>
                 <th className="px-6 py-4 text-right text-sm font-semibold text-gray-700">
-                  {language === 'ar' ? 'الإجراءات' : 'Actions'}
+                  {t('actions')}
                 </th>
               </tr>
             </thead>
@@ -338,13 +333,12 @@ export default function Students() {
                   </td>
                   <td className="px-6 py-4">
                     <span
-                      className={`inline-flex px-3 py-1 rounded-full text-xs font-medium ${
-                        student.status === 'active'
+                      className={`inline-flex px-3 py-1 rounded-full text-xs font-medium ${student.status === 'active'
                           ? 'bg-green-100 text-green-700'
                           : 'bg-red-100 text-red-700'
-                      }`}
+                        }`}
                     >
-                      ✓ {language === 'ar' ? 'نشط' : 'Active'}
+                      ✓ {t('activeLabel')}
                     </span>
                   </td>
                   <td className="px-6 py-4">
@@ -352,21 +346,21 @@ export default function Students() {
                       <button
                         onClick={() => handleViewStudent(student)}
                         className="p-2 hover:bg-gray-100 rounded-lg transition-colors group"
-                        title={language === 'ar' ? 'عرض' : 'View'}
+                        title={t('view')}
                       >
                         <Eye className="w-4 h-4 text-gray-400 group-hover:text-gray-600" />
                       </button>
                       <button
                         onClick={() => handleEditStudent(student)}
                         className="p-2 hover:bg-primary-light rounded-lg transition-colors group"
-                        title={language === 'ar' ? 'تعديل' : 'Edit'}
+                        title={t('edit')}
                       >
                         <Pencil className="w-4 h-4 text-gray-400 group-hover:text-blue-600" />
                       </button>
                       <button
                         onClick={() => handleDeleteStudent(student.id)}
                         className="p-2 hover:bg-red-50 rounded-lg transition-colors group"
-                        title={language === 'ar' ? 'حذف' : 'Delete'}
+                        title={t('delete')}
                       >
                         <Trash2 className="w-4 h-4 text-gray-400 group-hover:text-red-600" />
                       </button>
@@ -393,7 +387,7 @@ export default function Students() {
         onClose={() => setIsAddModalOpen(false)}
         onSubmit={(studentData) => {
           console.log('New student data:', studentData);
-          alert(language === 'ar' ? 'تم إضافة الطالب بنجاح' : 'Student added successfully');
+          alert(t('studentAddedSuccess'));
         }}
       />
 
@@ -403,30 +397,30 @@ export default function Students() {
         studentData={selectedStudent}
       />
 
- <EditStudentModal
-  isOpen={isEditModalOpen}
-  onClose={() => setIsEditModalOpen(false)}
-  studentData={
-    selectedStudent 
-      ? {
-          id: selectedStudent.id,
-          name: selectedStudent.name,
-          email: selectedStudent.email,
-          phone: selectedStudent.phone,
-          countryCode: selectedStudent.countryCode,
-          country: selectedStudent.country === 'مصر' ? 'egypt' : 'saudi', 
-          status: selectedStudent.status,
-          gender: 'male', 
-          plan: 'secondary_1',
-          birthDate: '', 
-        } 
-      : null
-  }
-  onSubmit={(updatedData) => {
-    console.log('Saved:', updatedData);
-    setIsEditModalOpen(false);
-  }}
-/>
+      <EditStudentModal
+        isOpen={isEditModalOpen}
+        onClose={() => setIsEditModalOpen(false)}
+        studentData={
+          selectedStudent
+            ? {
+              id: selectedStudent.id,
+              name: selectedStudent.name,
+              email: selectedStudent.email,
+              phone: selectedStudent.phone,
+              countryCode: selectedStudent.countryCode,
+              country: selectedStudent.country === 'مصر' ? 'egypt' : 'saudi',
+              status: selectedStudent.status,
+              gender: 'male',
+              plan: 'secondary_1',
+              birthDate: '',
+            }
+            : null
+        }
+        onSubmit={(updatedData) => {
+          console.log('Saved:', updatedData);
+          setIsEditModalOpen(false);
+        }}
+      />
     </div>
   );
 }

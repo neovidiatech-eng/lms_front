@@ -1,67 +1,75 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { BookOpen, Plus, Pencil, Trash2, Search } from 'lucide-react';
 import { useLanguage } from '../contexts/LanguageContext';
 import SubjectForm, { COLORS } from '../components/modals/SubjectsModal';
+import { Subject } from '../types/subject';
+import { useSubjects, useAddSubject, useUpdateSubject, useDeleteSubject } from '../hooks/useSubjects';
+import { SubjectFormData } from '../lib/schemas/SubjectsSchema';
+import { TableSkeleton } from '../components/ui/CustomSkeleton';
 
-interface Subject {
-  id: string;
-  nameAr: string;
-  nameEn?: string;
-  status: 'active' | 'inactive';
-  color: string;
-}
 function getColorClasses(colorId: string) {
   return COLORS.find(c => c.id === colorId) || COLORS[0];
 }
 
-const INITIAL_SUBJECTS: Subject[] = [
-  { id: '1', nameAr: 'الرياضيات', nameEn: 'Math', status: 'active', color: 'green' },
-  { id: '2', nameAr: 'اللغة العربية', nameEn: 'Arabic', status: 'active', color: 'orange' },
-  { id: '3', nameAr: 'القرآن الكريم', nameEn: 'Quran', status: 'active', color: 'green' },
-  { id: '4', nameAr: 'الفيزياء', nameEn: 'Physics', status: 'active', color: 'blue' },
-  { id: '5', nameAr: 'الكيمياء', nameEn: 'Chemistry', status: 'active', color: 'teal' },
-];
-
 export default function Subjects() {
   const { language } = useLanguage();
-  const [subjects, setSubjects] = useState<Subject[]>(INITIAL_SUBJECTS);
   const [searchQuery, setSearchQuery] = useState('');
   const [showAddModal, setShowAddModal] = useState(false);
   const [editingSubject, setEditingSubject] = useState<Subject | null>(null);
-  const [filterStatus, setFilterStatus] = useState<'all' | 'active' | 'inactive'>('all');
+  const [filterActive, setFilterActive] = useState<'all' | 'active' | 'inactive'>('all');
+  const [debouncedSearch, setDebouncedSearch] = useState('');
+
+  const { data, isLoading, isError, error, isFetching } = useSubjects(debouncedSearch);
+  const { mutate: addSubject } = useAddSubject();
+  const { mutate: updateSubject } = useUpdateSubject();
+  const { mutate: deleteSubject } = useDeleteSubject();
+
+  const subjects = data?.subjects ?? [];
+
+  useEffect(() => {
+    if (searchQuery.length >= 3) {
+      setDebouncedSearch(searchQuery);
+    } else if (searchQuery.length === 0) {
+      setDebouncedSearch('');
+    }
+  }, [searchQuery]);
 
   const filtered = subjects.filter(s => {
-    const matchSearch =
-      s.nameAr.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      (s.nameEn && s.nameEn.toLowerCase().includes(searchQuery.toLowerCase()));
-    const matchStatus = filterStatus === 'all' || s.status === filterStatus;
-    return matchSearch && matchStatus;
+    if (filterActive === 'all') return true;
+    return s.active === (filterActive === 'active');
   });
 
-  const handleAdd = (data: Omit<Subject, 'id'>) => {
-    setSubjects(prev => [...prev, { ...data, id: Date.now().toString() }]);
+  const handleAdd = (formData: SubjectFormData) => {
+    addSubject(formData);
     setShowAddModal(false);
   };
 
-  const handleEdit = (data: Omit<Subject, 'id'>) => {
+  const handleEdit = (formData: SubjectFormData) => {
     if (!editingSubject) return;
-    setSubjects(prev => prev.map(s => s.id === editingSubject.id ? { ...data, id: s.id } : s));
+    updateSubject({ id: editingSubject.id, data: formData });
     setEditingSubject(null);
   };
 
   const handleDelete = (id: string) => {
     const subject = subjects.find(s => s.id === id);
-    const name = subject ? subject.nameAr : '';
+    const name = subject ? (language === 'ar' ? subject.name_ar : subject.name_en) : '';
     if (window.confirm(language === 'ar' ? `هل أنت متأكد من حذف "${name}"؟` : `Delete "${name}"?`)) {
-      setSubjects(prev => prev.filter(s => s.id !== id));
+      deleteSubject(id);
     }
   };
 
-  const toggleStatus = (id: string) => {
-    setSubjects(prev => prev.map(s =>
-      s.id === id ? { ...s, status: s.status === 'active' ? 'inactive' : 'active' } : s
-    ));
+  const toggleStatus = (subject: Subject) => {
+    updateSubject({ id: subject.id, data: { active: !subject.active } });
   };
+
+  if (isError) {
+    return (
+      <div className="p-6 lg:p-8 text-center text-red-500" dir="rtl">
+        <h2 className="text-xl font-bold">Error</h2>
+        <p>{error instanceof Error ? error.message : 'Something went wrong'}</p>
+      </div>
+    );
+  }
 
   return (
     <div className="p-6 lg:p-8" dir="rtl">
@@ -95,7 +103,7 @@ export default function Subjects() {
           </div>
           <div>
             <p className="text-sm text-gray-500">{language === 'ar' ? 'نشطة' : 'Active'}</p>
-            <p className="text-3xl font-bold text-green-600">{subjects.filter(s => s.status === 'active').length}</p>
+            <p className="text-3xl font-bold text-green-600">{subjects.filter(s => s.active).length}</p>
           </div>
         </div>
         <div className="bg-white rounded-2xl border border-gray-200 p-5 flex items-center gap-4 shadow-sm">
@@ -104,7 +112,7 @@ export default function Subjects() {
           </div>
           <div>
             <p className="text-sm text-gray-500">{language === 'ar' ? 'غير نشطة' : 'Inactive'}</p>
-            <p className="text-3xl font-bold text-gray-500">{subjects.filter(s => s.status === 'inactive').length}</p>
+            <p className="text-3xl font-bold text-gray-500">{subjects.filter(s => !s.active).length}</p>
           </div>
         </div>
       </div>
@@ -126,12 +134,11 @@ export default function Subjects() {
             {(['all', 'active', 'inactive'] as const).map(s => (
               <button
                 key={s}
-                onClick={() => setFilterStatus(s)}
-                className={`px-4 py-2 rounded-xl text-sm font-medium transition-colors ${
-                  filterStatus === s
-                    ? 'bg-blue-600 text-white'
-                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                }`}
+                onClick={() => setFilterActive(s)}
+                className={`px-4 py-2 rounded-xl text-sm font-medium transition-colors ${filterActive === s
+                  ? 'bg-blue-600 text-white'
+                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                  }`}
               >
                 {s === 'all' ? (language === 'ar' ? 'الكل' : 'All') : s === 'active' ? (language === 'ar' ? 'نشط' : 'Active') : (language === 'ar' ? 'غير نشط' : 'Inactive')}
               </button>
@@ -140,11 +147,21 @@ export default function Subjects() {
         </div>
       </div>
 
-      {filtered.length === 0 ? (
+      {(isLoading || isFetching) ? (
+        <TableSkeleton rows={6} columns={4} />
+      ) : filtered.length === 0 ? (
         <div className="bg-white rounded-2xl border border-gray-200 p-16 text-center shadow-sm">
           <BookOpen className="w-16 h-16 text-gray-200 mx-auto mb-4" />
           <p className="text-gray-500 text-lg font-medium">{language === 'ar' ? 'لا توجد مواد' : 'No subjects found'}</p>
-          <p className="text-gray-400 text-sm mt-1">{language === 'ar' ? 'اضغط على "إضافة مادة جديدة" للبدء' : 'Click "Add Subject" to get started'}</p>
+          <p className="text-gray-400 text-sm mt-1 mb-4">{language === 'ar' ? 'اضغط على "إضافة مادة جديدة" للبدء' : 'Click "Add Subject" to get started'}</p>
+          {searchQuery && (
+            <button
+              onClick={() => setSearchQuery('')}
+              className="text-blue-600 hover:underline font-medium text-sm"
+            >
+              {language === 'ar' ? 'مسح البحث' : 'Clear Search'}
+            </button>
+          )}
         </div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
@@ -179,18 +196,17 @@ export default function Subjects() {
                   </div>
 
                   <div className="text-right">
-                    <h3 className="text-lg font-bold text-gray-900 mb-0.5">{subject.nameAr}</h3>
-                    {subject.nameEn && <p className="text-sm text-gray-400 mb-3">{subject.nameEn}</p>}
+                    <h3 className="text-lg font-bold text-gray-900 mb-0.5">{subject.name_ar}</h3>
+                    {subject.name_en && <p className="text-sm text-gray-400 mb-3">{subject.name_en}</p>}
                     <div className="flex items-center justify-end gap-2">
                       <button
-                        onClick={() => toggleStatus(subject.id)}
-                        className={`inline-flex px-3 py-1 rounded-full text-xs font-medium transition-colors cursor-pointer ${
-                          subject.status === 'active'
-                            ? 'bg-green-100 text-green-700 hover:bg-green-200'
-                            : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
-                        }`}
+                        onClick={() => toggleStatus(subject)}
+                        className={`inline-flex px-3 py-1 rounded-full text-xs font-medium transition-colors cursor-pointer ${subject.active
+                          ? 'bg-green-100 text-green-700 hover:bg-green-200'
+                          : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
+                          }`}
                       >
-                        {subject.status === 'active' ? (language === 'ar' ? 'نشط' : 'Active') : (language === 'ar' ? 'غير نشط' : 'Inactive')}
+                        {subject.active ? (language === 'ar' ? 'نشط' : 'Active') : (language === 'ar' ? 'غير نشط' : 'Inactive')}
                       </button>
                     </div>
                   </div>

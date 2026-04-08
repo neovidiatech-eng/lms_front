@@ -55,15 +55,15 @@ export default function Register({ onRegisterSuccess }: RegisterProps) {
   const selectedPackage = watch("plan_id");
 
   const countries = [
-    { value: "egypt", label: language === "ar" ? "مصر" : "Egypt" },
-    { value: "saudi", label: language === "ar" ? "السعودية" : "Saudi Arabia" },
-    { value: "uae", label: language === "ar" ? "الإمارات" : "UAE" },
-    { value: "kuwait", label: language === "ar" ? "الكويت" : "Kuwait" },
+    { value: "egypt", label: t("egypt") },
+    { value: "saudi", label: t("saudiArabia") },
+    { value: "uae", label: t("uae") },
+    { value: "kuwait", label: t("kuwait") },
   ];
 
   const genders = [
-    { value: "male", label: language === "ar" ? "ذكر" : "Male" },
-    { value: "female", label: language === "ar" ? "أنثى" : "Female" },
+    { value: "male", label: t("male") },
+    { value: "female", label: t("female") },
   ];
 
   const countryCodes = [
@@ -77,7 +77,7 @@ export default function Register({ onRegisterSuccess }: RegisterProps) {
     try {
       const result = await registerService(data);
       if (result.status === 201 || result.status === 200) {
-        message.success(language === "ar" ? "تم التسجيل بنجاح" : "Registered successfully");
+        message.success(t("registeredSuccess"));
         onRegisterSuccess();
         navigate("/dashboard");
       }
@@ -127,9 +127,7 @@ export default function Register({ onRegisterSuccess }: RegisterProps) {
 
         <div className="bg-gray-50 rounded-2xl shadow-lg py-8 px-5">
           <div className="text-center text-gray-400 text-sm my-4 mb-8">
-            {language === "ar"
-              ? "سجل بياناتك للبدء"
-              : "Register your data to start"}
+            {t("registerDataToStart")}
           </div>
 
           <form onSubmit={handleFormSubmit(onSubmit)} className="space-y-6 ">
@@ -202,7 +200,7 @@ export default function Register({ onRegisterSuccess }: RegisterProps) {
               {/* Birth Date */}
               <div className="text-right">
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  {language === "ar" ? "تاريخ الميلاد" : "Birth Date"} *
+                  {t("birthDate")} *
                 </label>
                 <Controller
                   name="birth_date"
@@ -211,7 +209,7 @@ export default function Register({ onRegisterSuccess }: RegisterProps) {
                     <DatePicker
                       className="px-2 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:shadow-none h-[48px] w-full"
                       status={errors.birth_date ? "error" : ""}
-                      placeholder={language === "ar" ? "اختر التاريخ" : "Select Date"}
+                      placeholder={t("selectDate")}
                       value={value ? dayjs(value) : null}
                       onChange={(date) => onChange(date ? date.format("YYYY-MM-DD") : "")}
                     />
@@ -223,7 +221,7 @@ export default function Register({ onRegisterSuccess }: RegisterProps) {
               {/* Gender */}
               <div className="text-right">
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  {language === "ar" ? "الجنس" : "Gender"} *
+                  {t("gender")} *
                 </label>
                 <Controller
                   name="gender"
@@ -231,7 +229,7 @@ export default function Register({ onRegisterSuccess }: RegisterProps) {
                   render={({ field }) => (
                     <Select
                       {...field}
-                      placeholder={language === "ar" ? "اختر الجنس" : "Select Gender"}
+                      placeholder={t("selectGender")}
                       options={genders}
                       className="w-full h-[48px]"
                       status={errors.gender ? "error" : ""}
@@ -245,7 +243,7 @@ export default function Register({ onRegisterSuccess }: RegisterProps) {
               {/* Country */}
               <div className="text-right">
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  {language === "ar" ? "الدولة" : "Country"} *
+                  {t("country")} *
                 </label>
                 <Controller
                   name="country"
@@ -254,7 +252,7 @@ export default function Register({ onRegisterSuccess }: RegisterProps) {
                     <Select
                       {...field}
                       showSearch
-                      placeholder={language === "ar" ? "اختر الدولة" : "Select Country"}
+                      placeholder={t("selectCountry")}
                       options={countries}
                       className="w-full h-[48px]"
                       status={errors.country ? "error" : ""}
@@ -299,13 +297,13 @@ export default function Register({ onRegisterSuccess }: RegisterProps) {
               <div className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4`}>
                 {!plansData && (
                   <div className="col-span-full py-8 text-center text-gray-500 bg-white rounded-xl border border-dashed border-gray-300 animate-pulse">
-                    {language === "ar" ? "جاري تحميل الباقات..." : "Loading plans..."}
+                    {t("loadingPlans")}
                   </div>
                 )}
 
                 {plansData?.data?.length === 0 && (
                   <div className="col-span-full py-8 text-center text-gray-500 bg-white rounded-xl border border-dashed border-gray-300">
-                    {language === "ar" ? "لا توجد باقات متاحة حالياً" : "No plans available at the moment."}
+                    {t("noPlansAvailable")}
                   </div>
                 )}
 
@@ -325,7 +323,7 @@ export default function Register({ onRegisterSuccess }: RegisterProps) {
                           {language === "ar" ? pkg.name_ar : pkg.name_en}
                         </div>
                         <div className="text-gray-600 text-sm">
-                          {pkg.duration} {language === "ar" ? "حصة" : "sessions"} • {pkg.currency.symbol} {pkg.price}
+                          {pkg.duration} {t("sessionsCount")} • {pkg.currency.symbol} {pkg.price}
                         </div>
                       </div>
                       {selectedPackage === pkg.id && (

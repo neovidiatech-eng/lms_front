@@ -1,9 +1,9 @@
 import { ChevronDown, X } from 'lucide-react';
 import { useState } from 'react';
 import { NavLink } from 'react-router-dom';
-import { useLanguage } from '../../contexts/LanguageContext';
 import { useSettings } from '../../contexts/SettingsContext';
 import { dashboardRoutes } from '../constants/dashboardRoutes';
+import { useTranslation } from 'react-i18next';
 
 interface SidebarProps {
   isOpen: boolean;
@@ -11,7 +11,8 @@ interface SidebarProps {
 }
 
 export default function Sidebar({ isOpen, onClose }: SidebarProps) {
-  const { language } = useLanguage();
+  const { t, i18n } = useTranslation();
+  const language = i18n.language.split('-')[0];
   const { settings } = useSettings();
   const [expandedItems, setExpandedItems] = useState<string[]>(['users']);
 
@@ -85,7 +86,7 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
                     >
                       {item.icon && <item.icon className="w-5 h-5 flex-shrink-0" />}
                       <span className={`text-sm font-medium flex-1 ${language === 'ar' ? 'text-right' : 'text-left'}`}>
-                        {item.label[language]}
+                        {t(item.label)}
                       </span>
                       <ChevronDown
                         className={`w-4 h-4 flex-shrink-0 transition-transform ${expandedItems.includes(item.id) ? 'rotate-180' : ''
@@ -100,12 +101,13 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
                             to={resolvePath(subItem.path)}
                             onClick={onClose}
                             className={({ isActive }) => `
-                              w-full block ${language === 'ar' ? 'text-right' : 'text-left'} px-4 py-2 rounded-lg text-sm transition-all
+                              w-full flex items-center gap-3 px-4 py-2 rounded-lg text-sm transition-all
                               ${isActive ? 'font-medium' : 'text-gray-600 hover:bg-gray-50'}
                             `}
                             style={({ isActive }) => isActive ? { backgroundColor: settings.primaryColor + '15', color: settings.primaryColor } : {}}
                           >
-                            {subItem.label[language]}
+                            {subItem.icon && <subItem.icon className="w-4 h-4 flex-shrink-0" />}
+                            <span>{t(subItem.label)}</span>
                           </NavLink>
                         ))}
                       </div>
@@ -123,7 +125,7 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
                   >
                     {item.icon && <item.icon className="w-5 h-5 flex-shrink-0" />}
                     <span className={`text-sm font-medium flex-1 ${language === 'ar' ? 'text-right' : 'text-left'}`}>
-                      {item.label[language]}
+                      {t(item.label)}
                     </span>
                   </NavLink>
                 )}

@@ -1,11 +1,11 @@
 import { useState } from 'react';
 import { Search, Eye, Pencil, Trash2, Plus } from 'lucide-react';
-import { useLanguage } from '../contexts/LanguageContext';
 import WhatsAppPhone from '../components/ui/WhatsAppPhone';
 import AddUserModal from '../components/modals/AddUserModal';
 import EditUserModal from '../components/modals/EditUserModal';
 import ViewUserModal from '../components/modals/ViewUserModal';
 import Pagination from '../components/ui/Pagination';
+import { useTranslation } from 'react-i18next';
 
 interface User {
   id: string;
@@ -20,7 +20,7 @@ interface User {
 }
 
 export default function Users() {
-  const { language } = useLanguage();
+  const { t } = useTranslation();
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
@@ -125,13 +125,13 @@ export default function Users() {
   };
 
   const handleDeleteUser = async (userId: string) => {
-    if (window.confirm(language === 'ar' ? 'هل أنت متأكد من حذف هذا المستخدم؟' : 'Are you sure you want to delete this user?')) {
+    if (window.confirm(t('deleteConfirmUser'))) {
       try {
         console.log('Deleting user:', userId);
-        alert(language === 'ar' ? 'تم حذف المستخدم بنجاح' : 'User deleted successfully');
+        alert(t('userDeletedSuccess'));
       } catch (error) {
         console.error('Error deleting user:', error);
-        alert(language === 'ar' ? 'حدث خطأ أثناء حذف المستخدم' : 'Error deleting user');
+        alert(t('userDeletedError'));
       }
     }
   };
@@ -150,15 +150,15 @@ export default function Users() {
     <div className="p-6 lg:p-8">
       {/* Breadcrumb */}
       <div className="flex items-center gap-2 text-sm text-gray-600 mb-6">
-        <span>{language === 'ar' ? 'الرئيسية' : 'Home'}</span>
+        <span>{t('home')}</span>
         <span>/</span>
-        <span>{language === 'ar' ? 'المستخدمين' : 'Users'}</span>
+        <span>{t('users')}</span>
       </div>
 
       {/* Header */}
       <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-8">
         <h1 className="text-3xl font-bold text-gray-900">
-          {language === 'ar' ? 'إدارة المستخدمين' : 'User Management'}
+          {t('userManagement')}
         </h1>
         <button
           onClick={() => setIsAddModalOpen(true)}
@@ -166,7 +166,7 @@ export default function Users() {
         >
           <Plus className="w-5 h-5" />
           <span className="font-medium">
-            {language === 'ar' ? 'إضافة مستخدم جديد' : 'Add New User'}
+            {t('addNewUser')}
           </span>
         </button>
       </div>
@@ -177,7 +177,7 @@ export default function Users() {
           <Search className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
           <input
             type="text"
-            placeholder={language === 'ar' ? 'بحث...' : 'Search...'}
+            placeholder={t('search')}
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className="w-full pr-12 pl-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent text-right"
@@ -192,22 +192,22 @@ export default function Users() {
             <thead className="bg-gray-50 border-b border-gray-200">
               <tr>
                 <th className="px-6 py-4 text-right text-sm font-semibold text-gray-700">
-                  {language === 'ar' ? 'الإسم' : 'Name'}
+                  {t('name')}
                 </th>
                 <th className="px-6 py-4 text-right text-sm font-semibold text-gray-700">
-                  {language === 'ar' ? 'البريد الإلكتروني' : 'Email'}
+                  {t('email')}
                 </th>
                 <th className="px-6 py-4 text-right text-sm font-semibold text-gray-700">
-                  {language === 'ar' ? 'الهاتف' : 'Phone'}
+                  {t('phone')}
                 </th>
                 <th className="px-6 py-4 text-right text-sm font-semibold text-gray-700">
-                  {language === 'ar' ? 'الدور' : 'Role'}
+                  {t('role')}
                 </th>
                 <th className="px-6 py-4 text-right text-sm font-semibold text-gray-700">
-                  {language === 'ar' ? 'الحالة' : 'Status'}
+                  {t('status')}
                 </th>
                 <th className="px-6 py-4 text-right text-sm font-semibold text-gray-700">
-                  {language === 'ar' ? 'الإجراءات' : 'Actions'}
+                  {t('actions')}
                 </th>
               </tr>
             </thead>
@@ -241,19 +241,14 @@ export default function Users() {
                   </td>
                   <td className="px-6 py-4">
                     <span
-                      className={`inline-flex px-3 py-1 rounded-full text-xs font-medium ${
-                        user.status === 'active'
-                          ? 'bg-green-100 text-green-700'
-                          : 'bg-purple-100 text-purple-700'
-                      }`}
+                      className={`inline-flex px-3 py-1 rounded-full text-xs font-medium ${user.status === 'active'
+                        ? 'bg-green-100 text-green-700'
+                        : 'bg-purple-100 text-purple-700'
+                        }`}
                     >
                       {user.status === 'active'
-                        ? language === 'ar'
-                          ? 'نشط'
-                          : 'Active'
-                        : language === 'ar'
-                        ? 'مسؤول'
-                        : 'Inactive'}
+                        ? t('active')
+                        : t('inactive')}
                     </span>
                   </td>
                   <td className="px-6 py-4">
@@ -261,21 +256,21 @@ export default function Users() {
                       <button
                         onClick={() => handleViewUser(user)}
                         className="p-2 hover:bg-gray-100 rounded-lg transition-colors group"
-                        title={language === 'ar' ? 'عرض' : 'View'}
+                        title={t('view')}
                       >
                         <Eye className="w-4 h-4 text-gray-400 group-hover:text-gray-600" />
                       </button>
                       <button
                         onClick={() => handleEditClick(user)}
                         className="p-2 hover:bg-primary-light rounded-lg transition-colors group"
-                        title={language === 'ar' ? 'تعديل' : 'Edit'}
+                        title={t('edit')}
                       >
                         <Pencil className="w-4 h-4 text-gray-400 group-hover:text-blue-600" />
                       </button>
                       <button
                         onClick={() => handleDeleteUser(user.id)}
                         className="p-2 hover:bg-red-50 rounded-lg transition-colors group"
-                        title={language === 'ar' ? 'حذف' : 'Delete'}
+                        title={t('delete')}
                       >
                         <Trash2 className="w-4 h-4 text-gray-400 group-hover:text-red-600" />
                       </button>
@@ -304,25 +299,38 @@ export default function Users() {
       />
 
       {/* Edit User Modal */}
-      <EditUserModal
-        isOpen={isEditModalOpen}
-        onClose={() => {
-          setIsEditModalOpen(false);
-          setSelectedUser(null);
-        }}
-        onSubmit={handleEditUser}
-        userData={selectedUser}
-      />
+      {selectedUser && (
+        <EditUserModal
+          isOpen={isEditModalOpen}
+          onClose={() => {
+            setIsEditModalOpen(false);
+            setSelectedUser(null);
+          }}
+          onSubmit={handleEditUser}
+          userData={{
+            name: selectedUser.name,
+            email: selectedUser.email,
+            phone: selectedUser.phone,
+            countryCode: selectedUser.countryCode || '+20',
+            role: selectedUser.role,
+            permissions: selectedUser.permissions || [],
+            password: '',
+            id: selectedUser.id
+          }}
+        />
+      )}
 
       {/* View User Modal */}
-      <ViewUserModal
-        isOpen={isViewModalOpen}
-        onClose={() => {
-          setIsViewModalOpen(false);
-          setSelectedUser(null);
-        }}
-        userData={selectedUser}
-      />
+      {selectedUser && (
+        <ViewUserModal
+          isOpen={isViewModalOpen}
+          onClose={() => {
+            setIsViewModalOpen(false);
+            setSelectedUser(null);
+          }}
+          userData={selectedUser}
+        />
+      )}
     </div>
   );
 }

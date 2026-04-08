@@ -21,7 +21,7 @@ export default function Currencies() {
     return () => clearTimeout(timer);
   }, [searchQuery]);
 
-  const { data, isError, error, isLoading } = useCurrency(debouncedSearch);
+  const { data, isError, error, isLoading, isFetching } = useCurrency(debouncedSearch);
   const { mutate: addCurrency } = useAddCurrency();
   const { mutate: updateCurrency } = useUpdateCurrency();
   const { mutate: deleteCurrency } = useDeleteCurrency();
@@ -47,6 +47,7 @@ export default function Currencies() {
     cannotDeleteDefault: { ar: 'لا يمكن حذف العملة الافتراضية', en: 'Cannot delete default currency' },
     totalCurrencies: { ar: 'إجمالي العملات', en: 'Total Currencies' },
     defaultCurrency: { ar: 'العملة الافتراضية', en: 'Default Currency' },
+    clearSearch: { ar: 'مسح البحث', en: 'Clear Search' },
   };
 
   const currencies = data?.currencies ?? [];
@@ -82,15 +83,13 @@ export default function Currencies() {
   const filteredCurrencies = currencies;
 
   const defaultCurrency = data?.default;
-  const searchResult = searchQuery.toUpperCase();
-
 
   if (isError) {
-    return <h1>{error.message}</h1>
-  }
-
-  if (isLoading) {
-    return TableSkeleton({ rows: 4, columns: 5 })
+    return (
+      <div className="p-6 text-center text-red-500" dir="rtl">
+        <h1 className="text-xl font-bold">{error instanceof Error ? error.message : 'Something went wrong'}</h1>
+      </div>
+    );
   }
 
   return (
@@ -141,17 +140,27 @@ export default function Currencies() {
             <input
               type="text"
               placeholder={text.search[language]}
-              value={searchResult}
+              value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="w-full max-w-xs pr-9 pl-4 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent text-right"
             />
           </div>
         </div>
 
-        {filteredCurrencies.length === 0 ? (
+        {(isLoading || isFetching) ? (
+          <TableSkeleton rows={4} columns={6} />
+        ) : filteredCurrencies.length === 0 ? (
           <div className="py-20 text-center">
-            <DollarSign className="w-12 h-12 text-gray-200 mx-auto mb-3" />
-            <p className="text-gray-400 text-sm">{text.noCurrencies[language]}</p>
+            <DollarSign className="w-12 h-12 text-gray-100 mx-auto mb-3" />
+            <p className="text-gray-400 text-sm mb-4">{text.noCurrencies[language]}</p>
+            {searchQuery && (
+              <button
+                onClick={() => setSearchQuery('')}
+                className="text-primary hover:underline font-medium text-sm"
+              >
+                {text.clearSearch[language]}
+              </button>
+            )}
           </div>
         ) : (
           <div className="overflow-x-auto">

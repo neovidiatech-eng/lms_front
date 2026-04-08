@@ -1,27 +1,20 @@
 import { BookOpen, X, Check } from 'lucide-react';
-import { useLanguage } from '../../contexts/LanguageContext'; // تأكدي من مسار الـ context
+import { useLanguage } from '../../contexts/LanguageContext';
 import { SubjectFormData, subjectSchema } from '../../lib/schemas/SubjectsSchema';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useForm } from 'react-hook-form';
+import { Resolver, useForm } from 'react-hook-form';
 import { useEffect } from 'react';
-
-interface Subject {
-  id: string;
-  nameAr: string;
-  nameEn: string;
-  status: 'active' | 'inactive';
-  color: string;
-}
+import { Subject } from '../../types/subject';
 
 export const COLORS = [
-  { id: 'green', bg: 'bg-green-100', icon: 'text-green-600', border: 'border-green-200', label: { ar: 'أخضر', en: 'Green' } },
-  { id: 'blue', bg: 'bg-blue-100', icon: 'text-blue-600', border: 'border-blue-200', label: { ar: 'أزرق', en: 'Blue' } },
-  { id: 'orange', bg: 'bg-orange-100', icon: 'text-orange-600', border: 'border-orange-200', label: { ar: 'برتقالي', en: 'Orange' } },
-  { id: 'red', bg: 'bg-red-100', icon: 'text-red-600', border: 'border-red-200', label: { ar: 'أحمر', en: 'Red' } },
-  { id: 'teal', bg: 'bg-teal-100', icon: 'text-teal-600', border: 'border-teal-200', label: { ar: 'أزرق مخضر', en: 'Teal' } },
-  { id: 'yellow', bg: 'bg-yellow-100', icon: 'text-yellow-600', border: 'border-yellow-200', label: { ar: 'أصفر', en: 'Yellow' } },
-  { id: 'pink', bg: 'bg-pink-100', icon: 'text-pink-600', border: 'border-pink-200', label: { ar: 'وردي', en: 'Pink' } },
-  { id: 'gray', bg: 'bg-gray-100', icon: 'text-gray-600', border: 'border-gray-200', label: { ar: 'رمادي', en: 'Gray' } },
+  { id: '#10b981', bg: 'bg-green-100', icon: 'text-green-600', border: 'border-green-200', label: { ar: 'أخضر', en: 'Green' } },
+  { id: '#3b82f6', bg: 'bg-blue-100', icon: 'text-blue-600', border: 'border-blue-200', label: { ar: 'أزرق', en: 'Blue' } },
+  { id: '#f97316', bg: 'bg-orange-100', icon: 'text-orange-600', border: 'border-orange-200', label: { ar: 'برتقالي', en: 'Orange' } },
+  { id: '#ef4444', bg: 'bg-red-100', icon: 'text-red-600', border: 'border-red-200', label: { ar: 'أحمر', en: 'Red' } },
+  { id: '#14b8a6', bg: 'bg-teal-100', icon: 'text-teal-600', border: 'border-teal-200', label: { ar: 'أزرق مخضر', en: 'Teal' } },
+  { id: '#eab308', bg: 'bg-yellow-100', icon: 'text-yellow-600', border: 'border-yellow-200', label: { ar: 'أصفر', en: 'Yellow' } },
+  { id: '#ec4899', bg: 'bg-pink-100', icon: 'text-pink-600', border: 'border-pink-200', label: { ar: 'وردي', en: 'Pink' } },
+  { id: '#6b7280', bg: 'bg-gray-100', icon: 'text-gray-600', border: 'border-gray-200', label: { ar: 'رمادي', en: 'Gray' } },
 ];
 
 interface SubjectFormProps {
@@ -34,26 +27,32 @@ interface SubjectFormProps {
 export default function SubjectForm({ initial, onSave, onCancel, title }: SubjectFormProps) {
   const { language } = useLanguage();
   const { register, handleSubmit, setValue, watch, reset, formState: { errors } } = useForm<SubjectFormData>({
-    resolver: zodResolver(subjectSchema),
+    resolver: zodResolver(subjectSchema) as Resolver<SubjectFormData>,
     defaultValues: {
-      nameAr: initial?.nameAr || '',
-      nameEn: initial?.nameEn || '',
-      status: initial?.status || 'active',
-      color: initial?.color || 'green',
+      name_ar: initial?.name_ar || '',
+      name_en: initial?.name_en || '',
+      active: initial?.active ?? true,
+      color: initial?.color || '#10b981',
     }
   });
 
   const selectedColor = watch('color');
-  const selectedStatus = watch('status');
+  const selectedActive = watch('active');
 
   useEffect(() => {
-    if (initial) reset(initial);
+    if (initial) {
+      reset({
+        name_ar: initial.name_ar || '',
+        name_en: initial.name_en || '',
+        active: initial.active ?? true,
+        color: initial.color || '#10b981',
+      });
+    }
   }, [initial, reset]);
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4" onClick={onCancel}>
       <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden" onClick={e => e.stopPropagation()}>
-        {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200">
           <button onClick={onCancel} className="p-2 hover:bg-gray-100 rounded-lg transition-colors">
             <X className="w-5 h-5 text-gray-500" />
@@ -61,8 +60,7 @@ export default function SubjectForm({ initial, onSave, onCancel, title }: Subjec
           <h2 className="text-lg font-bold text-gray-900">{title}</h2>
         </div>
 
-        {/* Form Body */}
-        <form onSubmit={handleSubmit(onSave)} className="p-6 space-y-5 max-h-[80vh]  overflow-y-auto no-scrollbar">
+        <form onSubmit={handleSubmit(onSave)} className="p-6 space-y-5 max-h-[80vh] overflow-y-auto no-scrollbar">
           <div>
             <label className="block text-sm font-medium text-gray-700 text-right mb-1.5">
               {language === 'ar' ? 'اسم المادة (عربي)' : 'Subject Name (Arabic)'}
@@ -70,11 +68,11 @@ export default function SubjectForm({ initial, onSave, onCancel, title }: Subjec
             </label>
             <input
               type="text"
-              {...register('nameAr')}
+              {...register('name_ar')}
               dir="rtl"
               className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 text-right"
             />
-            {errors.nameAr && <p className="text-red-500 text-xs mt-1 text-right">{errors.nameAr.message}</p>}
+            {errors.name_ar && <p className="text-red-500 text-xs mt-1 text-right">{errors.name_ar.message}</p>}
           </div>
 
           <div>
@@ -83,10 +81,10 @@ export default function SubjectForm({ initial, onSave, onCancel, title }: Subjec
             </label>
             <input
               type="text"
-              {...register('nameEn')}
+              {...register('name_en')}
               className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500"
             />
-            {errors.nameEn && <p className="text-red-500 text-xs mt-1 text-right">{errors.nameEn.message}</p>}
+            {errors.name_en && <p className="text-red-500 text-xs mt-1 text-right">{errors.name_en.message}</p>}
           </div>
 
           <div>
@@ -116,18 +114,18 @@ export default function SubjectForm({ initial, onSave, onCancel, title }: Subjec
               {language === 'ar' ? 'الحالة' : 'Status'}
             </label>
             <div className="flex gap-3">
-              {(['active', 'inactive'] as const).map(s => (
+              {[true, false].map(val => (
                 <button
-                  key={s}
+                  key={val.toString()}
                   type="button"
-                  onClick={() => setValue('status', s)}
-                  className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl border-2 text-sm font-medium transition-all ${selectedStatus === s
-                      ? (s === 'active' ? 'border-green-400 bg-green-50 text-green-700' : 'border-gray-400 bg-gray-50 text-gray-700')
-                      : 'border-gray-200 text-gray-500 hover:border-gray-300'
+                  onClick={() => setValue('active', val)}
+                  className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl border-2 text-sm font-medium transition-all ${selectedActive === val
+                    ? (val ? 'border-green-400 bg-green-50 text-green-700' : 'border-gray-400 bg-gray-50 text-gray-700')
+                    : 'border-gray-200 text-gray-500 hover:border-gray-300'
                     }`}
                 >
-                  {status === s && <Check className="w-4 h-4" />}
-                  {s === 'active' ? (language === 'ar' ? 'نشط' : 'Active') : (language === 'ar' ? 'غير نشط' : 'Inactive')}
+                  {selectedActive === val && <Check className="w-4 h-4" />}
+                  {val ? (language === 'ar' ? 'نشط' : 'Active') : (language === 'ar' ? 'غير نشط' : 'Inactive')}
                 </button>
               ))}
             </div>

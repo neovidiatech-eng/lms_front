@@ -1,6 +1,5 @@
 import { useState, useMemo } from 'react';
 import { Search, Plus, Eye, Trash2, Filter } from 'lucide-react';
-import { useLanguage } from '../contexts/LanguageContext';
 import { useSessions } from '../contexts/SessionsContext';
 import Pagination from '../components/ui/Pagination';
 import AddSessionModal from '../components/modals/AddSessionModal';
@@ -9,6 +8,7 @@ import ViewSessionDetailsModal from '../components/modals/ViewSessionDetailsModa
 import EditSessionModal from '../components/modals/EditSessionModal';
 import { ContextSession, SessionDisplay, SessionGroupDetails, SingleSessionInput } from '../types/sessions';
 import { MultipleSessionsFormData } from '../lib/schemas/SessionSchema';
+import { useTranslation } from 'react-i18next';
 
 interface Session {
   id: string;
@@ -23,7 +23,8 @@ interface Session {
 }
 
 export default function Sessions() {
-  const { language } = useLanguage();
+  const { t, i18n } = useTranslation();
+  const language = i18n.language.split('-')[0];
   const { sessions: allSessionsFromContext, addSession, addMultipleSessions, updateSession, deleteSession } = useSessions();
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
@@ -32,8 +33,8 @@ export default function Sessions() {
   const [showAddMultipleModal, setShowAddMultipleModal] = useState(false);
   const [showViewModal, setShowViewModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
-  const [selectedSessionGroup, setSelectedSessionGroup] = useState<SessionGroupDetails | null >(null);
-  const [selectedSessionToEdit, setSelectedSessionToEdit] = useState<ContextSession | null >(null);
+  const [selectedSessionGroup, setSelectedSessionGroup] = useState<SessionGroupDetails | null>(null);
+  const [selectedSessionToEdit, setSelectedSessionToEdit] = useState<ContextSession | null>(null);
   const [filters, setFilters] = useState({
     status: '',
     dateFrom: '',
@@ -45,32 +46,32 @@ export default function Sessions() {
   const itemsPerPage = 7;
 
   // Convert context sessions to display format and group by student/teacher/subject
-const sessions = useMemo<SessionDisplay[]>(() => {
-  const grouped = new Map<string, Session>();
+  const sessions = useMemo<SessionDisplay[]>(() => {
+    const grouped = new Map<string, Session>();
 
-  allSessionsFromContext.forEach(session => {
-    const key = `${session.studentName}-${session.teacherName}-${session.subject}`;
-    if (!grouped.has(key)) {
-      grouped.set(key, {
-        id: key,
-        title: session.sessionName || '',
-        teacher: session.teacherName || '',
-        subject: session.studentName || '', 
-        grade: session.subject || '',      
-        date: session.date || '',
-        time: `${session.time || ''} - ${session.endTime || ''}`,
-        duration: 60,
-        status: 'scheduled' as const
-      });
-    }
-  });
+    allSessionsFromContext.forEach(session => {
+      const key = `${session.studentName}-${session.teacherName}-${session.subject}`;
+      if (!grouped.has(key)) {
+        grouped.set(key, {
+          id: key,
+          title: session.sessionName || '',
+          teacher: session.teacherName || '',
+          subject: session.studentName || '',
+          grade: session.subject || '',
+          date: session.date || '',
+          time: `${session.time || ''} - ${session.endTime || ''}`,
+          duration: 60,
+          status: 'scheduled' as const
+        });
+      }
+    });
 
-  return Array.from(grouped.values());
-}, [allSessionsFromContext]);
+    return Array.from(grouped.values());
+  }, [allSessionsFromContext]);
 
   // Build session group details from context
   const sessionGroupDetails = useMemo(() => {
-const grouped: Record<string, SessionGroupDetails> = {};
+    const grouped: Record<string, SessionGroupDetails> = {};
     allSessionsFromContext.forEach(session => {
       const key = `${session.studentName}-${session.teacherName}-${session.subject}`;
 
@@ -112,46 +113,19 @@ const grouped: Record<string, SessionGroupDetails> = {};
     return grouped;
   }, [allSessionsFromContext]);
 
-  const text = {
-    title: { ar: 'الحصص', en: 'Sessions' },
-    search: { ar: 'بحث عن الطالب أو المعلم أو المادة...', en: 'Search for student, teacher or subject...' },
-    addSession: { ar: 'حصة واحدة', en: 'Single Session' },
-    addMultipleSessions: { ar: 'حصص متعددة', en: 'Multiple Sessions' },
-    filters: { ar: 'تصفية', en: 'Filters' },
-    sessionTitle: { ar: 'العنوان', en: 'Title' },
-    teacher: { ar: 'الطالب', en: 'Student' },
-    subject: { ar: 'المعلم', en: 'Teacher' },
-    grade: { ar: 'المادة', en: 'Subject' },
-    date: { ar: 'التاريخ والوقت', en: 'Date & Time' },
-    duration: { ar: 'المدة', en: 'Duration' },
-    status: { ar: 'الحالة', en: 'Status' },
-    actions: { ar: 'الإجراءات', en: 'Actions' },
-    minutes: { ar: 'دقيقة', en: 'minutes' },
-    scheduled: { ar: 'مجدولة', en: 'Scheduled' },
-    completed: { ar: 'مكتملة', en: 'Completed' },
-    cancelled: { ar: 'ملغية', en: 'Cancelled' },
-    filterStatus: { ar: 'الحالة', en: 'Status' },
-    filterDateFrom: { ar: 'من تاريخ', en: 'From Date' },
-    filterDateTo: { ar: 'إلى تاريخ', en: 'To Date' },
-    filterTeacher: { ar: 'فلترة المعلم', en: 'Filter Teacher' },
-    filterStudent: { ar: 'فلترة الطالب', en: 'Filter Student' },
-    filterSubject: { ar: 'فلترة المواد', en: 'Filter Subject' },
-    filterPeriod: { ar: 'فلترة الحصص', en: 'Filter Period' },
-    all: { ar: 'الكل', en: 'All' }
-  };
 
- const filteredSessions = sessions.filter(session => {
-  const title = (session.title || "").toLowerCase();
-  const teacher = (session.teacher || "").toLowerCase();
-  const subject = (session.subject || "").toLowerCase();
-  const grade = (session.grade || "").toLowerCase();
-  const search = searchTerm.toLowerCase();
+  const filteredSessions = sessions.filter(session => {
+    const title = (session.title || "").toLowerCase();
+    const teacher = (session.teacher || "").toLowerCase();
+    const subject = (session.subject || "").toLowerCase();
+    const grade = (session.grade || "").toLowerCase();
+    const search = searchTerm.toLowerCase();
 
-  return title.includes(search) || 
-         teacher.includes(search) || 
-         subject.includes(search) || 
-         grade.includes(search);
-});
+    return title.includes(search) ||
+      teacher.includes(search) ||
+      subject.includes(search) ||
+      grade.includes(search);
+  });
 
   const totalPages = Math.ceil(filteredSessions.length / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
@@ -164,56 +138,56 @@ const grouped: Record<string, SessionGroupDetails> = {};
 
   const handleAddSession = (sessionData: SingleSessionInput) => {
     const dayName = new Date(sessionData.sessionDate).toLocaleDateString(
-    language === 'ar' ? 'ar-EG' : 'en-US', 
-    { weekday: 'long' }
-  );
+      language === 'ar' ? 'ar-EG' : 'en-US',
+      { weekday: 'long' }
+    );
     const newSession = {
       id: Date.now().toString(),
       sessionName: sessionData.title,
       studentName: sessionData.student,
       teacherName: sessionData.teacher,
       subject: sessionData.subject,
-     day:dayName,                    // القيمة المحسوبة
-    date: sessionData.sessionDate,   // القيمة القادمة من المودال
-    time: sessionData.startTime,
+      day: dayName,                    // القيمة المحسوبة
+      date: sessionData.sessionDate,   // القيمة القادمة من المودال
+      time: sessionData.startTime,
       endTime: sessionData.endTime,
       meetingLink: sessionData.meetingLink
     };
     addSession(newSession);
     console.log(newSession)
   };
-const calculateEndTime = (startTime: string, durationMinutes: string | number) => {
-  if (!startTime) return '';
-  const [hours, minutes] = startTime.split(':').map(Number);
-  const date = new Date();
-  date.setHours(hours);
-  date.setMinutes(minutes + Number(durationMinutes));
-  return date.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', hour12: false });
-};
+  const calculateEndTime = (startTime: string, durationMinutes: string | number) => {
+    if (!startTime) return '';
+    const [hours, minutes] = startTime.split(':').map(Number);
+    const date = new Date();
+    date.setHours(hours);
+    date.setMinutes(minutes + Number(durationMinutes));
+    return date.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', hour12: false });
+  };
 
-const handleAddMultipleSessions = (data: { 
-  formData: MultipleSessionsFormData; 
-  sessions: SessionPreviewItem[] 
-}) => {
-  const { formData, sessions } = data;
+  const handleAddMultipleSessions = (data: {
+    formData: MultipleSessionsFormData;
+    sessions: SessionPreviewItem[]
+  }) => {
+    const { formData, sessions } = data;
 
-  const newSessions = sessions.map((session, index) => ({
-    id: `${Date.now()}-${index}`,
-    sessionName: formData.title, 
-    studentName: formData.student,
-    teacherName: formData.teacher,
-    subject: formData.subject,
-    day: session.day,
-    date: session.date,
-    time: session.time,
-    endTime: calculateEndTime(session.time, formData.duration),
-    meetingLink: formData.meetingLink
-  }));
+    const newSessions = sessions.map((session, index) => ({
+      id: `${Date.now()}-${index}`,
+      sessionName: formData.title,
+      studentName: formData.student,
+      teacherName: formData.teacher,
+      subject: formData.subject,
+      day: session.day,
+      date: session.date,
+      time: session.time,
+      endTime: calculateEndTime(session.time, formData.duration),
+      meetingLink: formData.meetingLink
+    }));
 
-  addMultipleSessions(newSessions);
-  setShowAddMultipleModal(false);
-  console.log(newSessions); 
-};
+    addMultipleSessions(newSessions);
+    setShowAddMultipleModal(false);
+    console.log(newSessions);
+  };
 
   const handleViewSession = (sessionId: string) => {
     const groupDetails = sessionGroupDetails[sessionId as keyof typeof sessionGroupDetails];
@@ -224,7 +198,7 @@ const handleAddMultipleSessions = (data: {
   };
 
   const handleDeleteSession = (sessionId: string) => {
-    if (window.confirm(language === 'ar' ? 'هل أنت متأكد من حذف هذه الحصة؟' : 'Are you sure you want to delete this session?')) {
+    if (window.confirm(t('deleteConfirmSession'))) {
       // Delete all sessions in this group
       const sessionsToDelete = allSessionsFromContext.filter(s => {
         const key = `${s.studentName}-${s.teacherName}-${s.subject}`;
@@ -271,7 +245,7 @@ const handleAddMultipleSessions = (data: {
         endTime: updatedSession.endTime,
         meetingLink: updatedSession.meetingLink
       });
-      alert(language === 'ar' ? 'تم حفظ التعديلات بنجاح!' : 'Changes saved successfully!');
+      alert(t('changesSavedSuccess'));
     }
   };
 
@@ -300,7 +274,7 @@ const handleAddMultipleSessions = (data: {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">{text.title[language]}</h1>
+          <h1 className="text-3xl font-bold text-gray-900">{t('sessionsTitle')}</h1>
         </div>
       </div>
 
@@ -312,13 +286,13 @@ const handleAddMultipleSessions = (data: {
               className="flex items-center gap-2 px-4 py-2.5 border border-gray-200 rounded-xl text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
             >
               <Filter className="w-4 h-4" />
-              {text.filters[language]}
+              {t('filters')}
             </button>
             <div className="flex-1 relative">
               <Search className={`absolute ${language === 'ar' ? 'right-4' : 'left-4'} top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5`} />
               <input
                 type="text"
-                placeholder={text.search[language]}
+                placeholder={t('searchSessionsPlaceholder')}
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className={`w-full ${language === 'ar' ? 'pr-12 text-right' : 'pl-12'} py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent`}
@@ -329,14 +303,14 @@ const handleAddMultipleSessions = (data: {
               className="flex items-center gap-2 px-6 py-3 btn-primary text-white rounded-xl transition-colors font-medium"
             >
               <Plus className="w-5 h-5" />
-              {text.addSession[language]}
+              {t('singleSession')}
             </button>
             <button
               onClick={() => setShowAddMultipleModal(true)}
               className="flex items-center gap-2 px-6 py-3 btn-primary text-white rounded-xl transition-colors font-medium"
             >
               <Plus className="w-5 h-5" />
-              {text.addMultipleSessions[language]}
+              {t('multipleSessions')}
             </button>
           </div>
 
@@ -344,23 +318,23 @@ const handleAddMultipleSessions = (data: {
             <div className="grid grid-cols-3 gap-4 pt-4 border-t border-gray-100">
               <div className="space-y-2">
                 <label className="block text-sm font-medium text-gray-700 text-right">
-                  {text.filterStatus[language]}
+                  {t('status')}
                 </label>
                 <select
                   value={filters.status}
                   onChange={(e) => setFilters({ ...filters, status: e.target.value })}
                   className="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent text-right"
                 >
-                  <option value="">{text.all[language]}</option>
-                  <option value="scheduled">{text.scheduled[language]}</option>
-                  <option value="completed">{text.completed[language]}</option>
-                  <option value="cancelled">{text.cancelled[language]}</option>
+                  <option value="">{t('all')}</option>
+                  <option value="scheduled">{t('scheduled')}</option>
+                  <option value="completed">{t('completed')}</option>
+                  <option value="cancelled">{t('cancelled')}</option>
                 </select>
               </div>
 
               <div className="space-y-2">
                 <label className="block text-sm font-medium text-gray-700 text-right">
-                  {text.filterDateFrom[language]}
+                  {t('fromDate')}
                 </label>
                 <input
                   type="date"
@@ -372,7 +346,7 @@ const handleAddMultipleSessions = (data: {
 
               <div className="space-y-2">
                 <label className="block text-sm font-medium text-gray-700 text-right">
-                  {text.filterDateTo[language]}
+                  {t('toDate')}
                 </label>
                 <input
                   type="date"
@@ -384,14 +358,14 @@ const handleAddMultipleSessions = (data: {
 
               <div className="space-y-2">
                 <label className="block text-sm font-medium text-gray-700 text-right">
-                  {text.filterTeacher[language]}
+                  {t('filterTeacher')}
                 </label>
                 <select
                   value={filters.teacher}
                   onChange={(e) => setFilters({ ...filters, teacher: e.target.value })}
                   className="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent text-right"
                 >
-                  <option value="">{text.all[language]}</option>
+                  <option value="">{t('all')}</option>
                   <option value="Ahmed Qandil">Ahmed Qandil</option>
                   <option value="Ahmed Gamal">Ahmed Gamal</option>
                 </select>
@@ -399,27 +373,27 @@ const handleAddMultipleSessions = (data: {
 
               <div className="space-y-2">
                 <label className="block text-sm font-medium text-gray-700 text-right">
-                  {text.filterStudent[language]}
+                  {t('filterStudent')}
                 </label>
                 <select
                   value={filters.student}
                   onChange={(e) => setFilters({ ...filters, student: e.target.value })}
                   className="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent text-right"
                 >
-                  <option value="">{text.all[language]}</option>
+                  <option value="">{t('all')}</option>
                 </select>
               </div>
 
               <div className="space-y-2">
                 <label className="block text-sm font-medium text-gray-700 text-right">
-                  {text.filterSubject[language]}
+                  {t('filterSubject')}
                 </label>
                 <select
                   value={filters.subject}
                   onChange={(e) => setFilters({ ...filters, subject: e.target.value })}
                   className="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent text-right"
                 >
-                  <option value="">{text.all[language]}</option>
+                  <option value="">{t('all')}</option>
                   <option value="القرآن الكريم">القرآن الكريم</option>
                   <option value="اللغة العربية">اللغة العربية</option>
                 </select>
@@ -432,14 +406,14 @@ const handleAddMultipleSessions = (data: {
           <table className="w-full">
             <thead className="bg-gray-50 border-b border-gray-100">
               <tr>
-                <th className="px-6 py-4 text-right text-sm font-semibold text-gray-700">{text.sessionTitle[language]}</th>
-                <th className="px-6 py-4 text-right text-sm font-semibold text-gray-700">{text.teacher[language]}</th>
-                <th className="px-6 py-4 text-right text-sm font-semibold text-gray-700">{text.subject[language]}</th>
-                <th className="px-6 py-4 text-right text-sm font-semibold text-gray-700">{text.grade[language]}</th>
-                <th className="px-6 py-4 text-right text-sm font-semibold text-gray-700">{text.date[language]}</th>
-                <th className="px-6 py-4 text-right text-sm font-semibold text-gray-700">{text.duration[language]}</th>
-                <th className="px-6 py-4 text-right text-sm font-semibold text-gray-700">{text.status[language]}</th>
-                <th className="px-6 py-4 text-right text-sm font-semibold text-gray-700">{text.actions[language]}</th>
+                <th className="px-6 py-4 text-right text-sm font-semibold text-gray-700">{t('sessionTitleLabel')}</th>
+                <th className="px-6 py-4 text-right text-sm font-semibold text-gray-700">{t('studentLabel')}</th>
+                <th className="px-6 py-4 text-right text-sm font-semibold text-gray-700">{t('teacherLabel')}</th>
+                <th className="px-6 py-4 text-right text-sm font-semibold text-gray-700">{t('subjectLabel')}</th>
+                <th className="px-6 py-4 text-right text-sm font-semibold text-gray-700">{t('dateTime')}</th>
+                <th className="px-6 py-4 text-right text-sm font-semibold text-gray-700">{t('duration')}</th>
+                <th className="px-6 py-4 text-right text-sm font-semibold text-gray-700">{t('status')}</th>
+                <th className="px-6 py-4 text-right text-sm font-semibold text-gray-700">{t('actions')}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">
@@ -460,11 +434,11 @@ const handleAddMultipleSessions = (data: {
                     </div>
                   </td>
                   <td className="px-6 py-4 text-gray-700 text-right">
-                    {session.duration} {text.minutes[language]}
+                    {session.duration} {t('minutes')}
                   </td>
                   <td className="px-6 py-4 text-right">
                     <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium border ${getStatusStyle(session.status)}`}>
-                      {text[session.status][language]}
+                      {t(session.status)}
                     </span>
                   </td>
                   <td className="px-6 py-4">
@@ -472,14 +446,14 @@ const handleAddMultipleSessions = (data: {
                       <button
                         onClick={() => handleViewSession(session.id)}
                         className="p-2 icon-btn-primary rounded-lg transition-colors"
-                        title={language === 'ar' ? 'عرض' : 'View'}
+                        title={t('view')}
                       >
                         <Eye className="w-4 h-4" />
                       </button>
                       <button
                         onClick={() => handleDeleteSession(session.id)}
                         className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-                        title={language === 'ar' ? 'حذف' : 'Delete'}
+                        title={t('delete')}
                       >
                         <Trash2 className="w-4 h-4" />
                       </button>

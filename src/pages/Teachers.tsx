@@ -1,12 +1,12 @@
 import { useState } from 'react';
 import { Search, Eye, Pencil, Trash2, Plus, Users, UserCheck, UserX } from 'lucide-react';
-import { useLanguage } from '../contexts/LanguageContext';
 import WhatsAppPhone from '../components/ui/WhatsAppPhone';
 import AddTeacherModal from '../components/modals/AddTeacherModal';
 import ViewTeacherModal from '../components/modals/ViewTeacherModal';
 import EditTeacherModal from '../components/modals/EditTeacherModal';
 import Pagination from '../components/ui/Pagination';
 import CustomSelect from '../components/ui/CustomSelect';
+import { useTranslation } from 'react-i18next';
 
 interface Teacher {
   id: string;
@@ -22,7 +22,8 @@ interface Teacher {
 }
 
 export default function Teachers() {
-  const { language } = useLanguage();
+  const { t, i18n } = useTranslation();
+  const language = i18n.language.split('-')[0];
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedStatus, setSelectedStatus] = useState('all');
   const [selectedCountry, setSelectedCountry] = useState('all');
@@ -116,7 +117,7 @@ export default function Teachers() {
   const statsCards = [
     {
       id: 'total',
-      label: language === 'ar' ? 'إجمالي المعلمين' : 'Total Teachers',
+      label: t('totalTeachers'),
       value: teachers.length,
       icon: Users,
       bgColor: 'bg-blue-50',
@@ -125,7 +126,7 @@ export default function Teachers() {
     },
     {
       id: 'active',
-      label: language === 'ar' ? 'نشط' : 'Active',
+      label: t('active'),
       value: teachers.filter((t) => t.status === 'active').length,
       icon: UserCheck,
       bgColor: 'bg-green-50',
@@ -134,7 +135,7 @@ export default function Teachers() {
     },
     {
       id: 'inactive',
-      label: language === 'ar' ? 'غير نشط' : 'Inactive',
+      label: t('inactive'),
       value: teachers.filter((t) => t.status === 'inactive').length,
       icon: UserX,
       bgColor: 'bg-orange-50',
@@ -159,8 +160,8 @@ export default function Teachers() {
 
   const filteredTeachers = teachers.filter(teacher => {
     const matchesSearch = teacher.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         teacher.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         teacher.phone.includes(searchTerm);
+      teacher.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      teacher.phone.includes(searchTerm);
     const matchesStatus = selectedStatus === 'all' || teacher.status === selectedStatus;
     const matchesCountry = selectedCountry === 'all';
     return matchesSearch && matchesStatus && matchesCountry;
@@ -186,17 +187,13 @@ export default function Teachers() {
   };
 
   const handleDeleteTeacher = async (teacherId: string) => {
-    if (
-      window.confirm(
-        language === 'ar' ? 'هل أنت متأكد من حذف هذا المعلم؟' : 'Are you sure you want to delete this teacher?'
-      )
-    ) {
+    if (window.confirm(t('deleteConfirmTeacher'))) {
       try {
         console.log('Deleting teacher:', teacherId);
-        alert(language === 'ar' ? 'تم حذف المعلم بنجاح' : 'Teacher deleted successfully');
+        alert(t('teacherDeletedSuccess'));
       } catch (error) {
         console.error('Error deleting teacher:', error);
-        alert(language === 'ar' ? 'حدث خطأ أثناء حذف المعلم' : 'Error deleting teacher');
+        alert(t('teacherDeletedError'));
       }
     }
   };
@@ -207,12 +204,10 @@ export default function Teachers() {
       <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-8">
         <div className="text-right">
           <h1 className="text-3xl font-bold text-gray-900">
-            {language === 'ar' ? 'إدارة المعلمين' : 'Teacher Management'}
+            {t('teacherManagement')}
           </h1>
           <p className="text-gray-600 mt-1">
-            {language === 'ar'
-              ? 'إدارة بيانات جميع المعلمين والمواد الدراسية'
-              : 'Manage all teacher data and subjects'}
+            {t('teacherManagementSubtitle')}
           </p>
         </div>
         <button
@@ -221,7 +216,7 @@ export default function Teachers() {
         >
           <Plus className="w-5 h-5" />
           <span className="font-medium">
-            {language === 'ar' ? 'إضافة معلم جديد' : 'Add New Teacher'}
+            {t('addNewTeacher')}
           </span>
         </button>
       </div>
@@ -253,11 +248,7 @@ export default function Teachers() {
           <div className="relative">
             <input
               type="text"
-              placeholder={
-                language === 'ar'
-                  ? 'ابحث بالاسم أو البريد الإلكتروني...'
-                  : 'Search by name or email...'
-              }
+              placeholder={t('searchTeachersPlaceholder')}
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="w-full pl-12 pr-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary text-right"
@@ -268,23 +259,23 @@ export default function Teachers() {
 
           {/* Status Filter */}
           <CustomSelect
-    value={selectedStatus}
-    options={statuses.map((c) =>{
-      return { value: c.id, label: language === 'ar' ? c.label : c.labelEn };
-    })}
-    onChange={(val) => setSelectedStatus(val as string)}
-    className="h-[46px]"
-  />
+            value={selectedStatus}
+            options={statuses.map((c) => {
+              return { value: c.id, label: language === 'ar' ? c.label : c.labelEn };
+            })}
+            onChange={(val) => setSelectedStatus(val as string)}
+            className="h-[46px]"
+          />
 
           {/* Country Filter */}
-         <CustomSelect
-             value={selectedCountry}
-             options={countries.map((c) =>{
-               return { value: c.id, label: language === 'ar' ? c.label : c.labelEn };
-             })}
-             onChange={(val) => setSelectedCountry(val as string)}
-             className="h-[46px]"
-           />
+          <CustomSelect
+            value={selectedCountry}
+            options={countries.map((c) => {
+              return { value: c.id, label: language === 'ar' ? c.label : c.labelEn };
+            })}
+            onChange={(val) => setSelectedCountry(val as string)}
+            className="h-[46px]"
+          />
         </div>
       </div>
 
@@ -295,25 +286,25 @@ export default function Teachers() {
             <thead className="bg-gray-50 border-b border-gray-200">
               <tr>
                 <th className="px-6 py-4 text-right text-sm font-semibold text-gray-700">
-                  {language === 'ar' ? 'بيانات المعلم' : 'Teacher Info'}
+                  {t('teacherInfo')}
                 </th>
                 <th className="px-6 py-4 text-right text-sm font-semibold text-gray-700">
-                  {language === 'ar' ? 'البريد الإلكتروني' : 'Email'}
+                  {t('email')}
                 </th>
                 <th className="px-6 py-4 text-right text-sm font-semibold text-gray-700">
-                  {language === 'ar' ? 'الهاتف' : 'Phone'}
+                  {t('phone')}
                 </th>
                 <th className="px-6 py-4 text-right text-sm font-semibold text-gray-700">
-                  {language === 'ar' ? 'المبلغ' : 'Amount'}
+                  {t('amount')}
                 </th>
                 <th className="px-6 py-4 text-right text-sm font-semibold text-gray-700">
-                  {language === 'ar' ? 'الحالة' : 'Status'}
+                  {t('status')}
                 </th>
                 <th className="px-6 py-4 text-right text-sm font-semibold text-gray-700">
-                  {language === 'ar' ? 'المادة' : 'Subject'}
+                  {t('subject')}
                 </th>
                 <th className="px-6 py-4 text-right text-sm font-semibold text-gray-700">
-                  {language === 'ar' ? 'الإجراءات' : 'Actions'}
+                  {t('actions')}
                 </th>
               </tr>
             </thead>
@@ -344,19 +335,14 @@ export default function Teachers() {
                   </td>
                   <td className="px-6 py-4">
                     <span
-                      className={`inline-flex px-3 py-1 rounded-full text-xs font-medium ${
-                        teacher.status === 'active'
-                          ? 'bg-green-100 text-green-700'
-                          : 'bg-orange-100 text-orange-700'
-                      }`}
+                      className={`inline-flex px-3 py-1 rounded-full text-xs font-medium ${teacher.status === 'active'
+                        ? 'bg-green-100 text-green-700'
+                        : 'bg-orange-100 text-orange-700'
+                        }`}
                     >
                       {teacher.status === 'active'
-                        ? language === 'ar'
-                          ? 'نشط'
-                          : 'Active'
-                        : language === 'ar'
-                        ? 'غير نشط'
-                        : 'Inactive'}
+                        ? t('active')
+                        : t('inactive')}
                     </span>
                   </td>
                   <td className="px-6 py-4">
@@ -376,21 +362,21 @@ export default function Teachers() {
                       <button
                         onClick={() => handleViewTeacher(teacher)}
                         className="p-2 hover:bg-gray-100 rounded-lg transition-colors group"
-                        title={language === 'ar' ? 'عرض' : 'View'}
+                        title={t('view')}
                       >
                         <Eye className="w-4 h-4 text-gray-400 group-hover:text-gray-600" />
                       </button>
                       <button
                         onClick={() => handleEditTeacher(teacher)}
                         className="p-2 hover:bg-primary-light rounded-lg transition-colors group"
-                        title={language === 'ar' ? 'تعديل' : 'Edit'}
+                        title={t('edit')}
                       >
                         <Pencil className="w-4 h-4 text-gray-400 group-hover:text-blue-600" />
                       </button>
                       <button
                         onClick={() => handleDeleteTeacher(teacher.id)}
                         className="p-2 hover:bg-red-50 rounded-lg transition-colors group"
-                        title={language === 'ar' ? 'حذف' : 'Delete'}
+                        title={t('delete')}
                       >
                         <Trash2 className="w-4 h-4 text-gray-400 group-hover:text-red-600" />
                       </button>
@@ -417,7 +403,7 @@ export default function Teachers() {
         onClose={() => setIsAddModalOpen(false)}
         onSubmit={(teacherData) => {
           console.log('New teacher data:', teacherData);
-          alert(language === 'ar' ? 'تم إضافة المعلم بنجاح' : 'Teacher added successfully');
+          alert(t('teacherAddedSuccess'));
         }}
       />
 
