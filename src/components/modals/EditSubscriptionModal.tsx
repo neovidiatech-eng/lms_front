@@ -4,7 +4,7 @@ import { useLanguage } from '../../contexts/LanguageContext';
 import CustomSelect from '../ui/CustomSelect';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { editSubscriptionSchema, type EditSubscriptionFormData } from '../../lib/schemas/SubscriptionSchema';
+import { getEditSubscriptionSchema, type EditSubscriptionFormData } from '../../lib/schemas/SubscriptionSchema';
 
 interface EditSubscriptionModalProps {
   isOpen: boolean;
@@ -29,7 +29,7 @@ export default function EditSubscriptionModal({
   subscription,
   onSave
 }: EditSubscriptionModalProps) {
-  const { language } = useLanguage();
+  const { language, t } = useLanguage();
   const [showNotificationBox, setShowNotificationBox] = useState(false);
   const [notificationMessage, setNotificationMessage] = useState('');
 
@@ -40,7 +40,7 @@ export default function EditSubscriptionModal({
     formState: { errors },
     reset
   } = useForm<EditSubscriptionFormData>({
-    resolver: zodResolver(editSubscriptionSchema),
+    resolver: zodResolver(getEditSubscriptionSchema(t)),
     defaultValues: {
       planName: subscription.planName,
       planPrice: subscription.planPrice,

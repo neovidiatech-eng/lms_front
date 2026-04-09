@@ -2,7 +2,7 @@ import { useEffect } from 'react';
 import { X, Save } from 'lucide-react';
 import { useLanguage } from '../../contexts/LanguageContext';
 import type { Transaction } from '../../pages/Transactions';
-import { TransactionFormData, transactionSchema } from '../../lib/schemas/TransactionSchema';
+import { TransactionFormData, getTransactionSchema } from '../../lib/schemas/TransactionSchema';
 import { Resolver, useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import CustomSelect from '../ui/CustomSelect';
@@ -15,7 +15,7 @@ interface AddTransactionModalProps {
 }
 
 export default function AddTransactionModal({ isOpen, onClose, onSave, currencies, editingTransaction }: AddTransactionModalProps) {
-  const { language } = useLanguage();
+  const { language, t } = useLanguage();
   const {
     register,
     handleSubmit,
@@ -25,7 +25,7 @@ export default function AddTransactionModal({ isOpen, onClose, onSave, currencie
     control,
     formState: { errors }
   } = useForm<TransactionFormData>({
-    resolver: zodResolver(transactionSchema) as Resolver<TransactionFormData>,
+    resolver: zodResolver(getTransactionSchema(t)) as Resolver<TransactionFormData>,
     defaultValues: {
       type: 'income',
       currency: 'SAR',

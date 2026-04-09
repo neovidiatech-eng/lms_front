@@ -1,20 +1,23 @@
 import { z } from 'zod';
 
-export const teacherSchema = z.object({
-  name: z.string().min(3, "الاسم يجب أن يكون 3 أحرف على الأقل"),
-  email: z.string().email("البريد الإلكتروني غير صحيح"),
-  phone: z.string().min(8, "رقم الهاتف غير صحيح"),
+type TFunc = (key: string, options?: any) => string;
+
+export const getTeacherSchema = (t: TFunc) => z.object({
+  name: z.string().min(3, t("validation.min", { count: 3 })),
+  email: z.string().email(t("validation.email")),
+  phone: z.string().min(8, t("validation.min", { count: 8 })),
   
   password: z.string().optional().refine((val) => !val || val.length >= 6, {
-    message: "كلمة المرور يجب أن تكون 6 أحرف على الأقل",
+    message: t("validation.min", { count: 6 }),
   }),
 
-  hourlyRate: z.coerce.number().min(0, "سعر الساعة لا يمكن أن يكون سالباً"),
+  hourlyRate: z.coerce.number().min(0, t("validation.required")),
   
-  currency: z.string().min(1, "العملة مطلوبة"),
+  currency: z.string().min(1, t("validation.required")),
   gender: z.enum(['male', 'female'], {
-  message: "يرجى اختيار الجنس",
-}),
+    required_error: t("validation.required"),
+    invalid_type_error: t("validation.required"),
+  }),
   status: z.enum(['active', 'inactive']),
 
   subjects: z.object({
@@ -24,8 +27,8 @@ export const teacherSchema = z.object({
     math2: z.boolean().default(false),
     science: z.boolean().default(false),
   }).refine((data) => Object.values(data).some(val => val === true), {
-    message: "يجب اختيار مادة واحدة على الأقل",
+    message: t("validation.required"), // Or a more specific 'please select at least one subject'
   }),
 });
 
-export type TeacherFormData = z.infer<typeof teacherSchema>;
+export type TeacherFormData = z.infer<ReturnType<typeof getTeacherSchema>>;

@@ -1,33 +1,33 @@
 import { z } from 'zod';
 
-const baseSession = z.object({
-  student: z.string().min(1, { message: 'يجب اختيار الطالب' }),
-  teacher: z.string().min(1, { message: 'يجب اختيار المعلم' }),
-  subject: z.string().min(1, { message: 'يجب اختيار المادة' }),
-  title: z.string().min(3, { message: 'العنوان يجب أن يكون 3 أحرف على الأقل' }),
-  meetingLink: z.string().url({ message: 'رابط غير صحيح' }).optional().or(z.literal('')),
+type TFunc = (key: string, options?: any) => string;
+
+const getBaseSession = (t: TFunc) => z.object({
+  student: z.string().min(1, t("validation.required")),
+  teacher: z.string().min(1, t("validation.required")),
+  subject: z.string().min(1, t("validation.required")),
+  title: z.string().min(3, t("validation.min", { count: 3 })),
+  meetingLink: z.string().url(t("validation.email")).optional().or(z.literal('')), // Adjust key if 'url' specific exists
   notes: z.string().optional(),
 });
-// single session
-export const sessionSchema = baseSession.extend({
-  sessionDate: z.string().min(1, { message: 'يجب تحديد التاريخ' }),
-  duration: z.string().min(1, { message: 'يجب اختيار مدة الحصة' }),
-  startTime: z.string().min(1, { message: 'وقت البداية مطلوب' }),
-  endTime: z.string().min(1, { message: 'وقت النهاية مطلوب' }),
+
+export const getSessionSchema = (t: TFunc) => getBaseSession(t).extend({
+  sessionDate: z.string().min(1, t("validation.required")),
+  duration: z.string().min(1, t("validation.required")),
+  startTime: z.string().min(1, t("validation.required")),
+  endTime: z.string().min(1, t("validation.required")),
 }).refine((data) => data.endTime > data.startTime, {
-  message: "وقت النهاية يجب أن يكون بعد وقت البداية",
+  message: t("validation.required"), // Ideally 'end time must be after start time'
   path: ["endTime"],
 });
 
-
-// multiple sessions
-export const multipleSessionsSchema = baseSession.extend({
-  monthYear: z.string().min(1, { message: 'يجب اختيار الشهر والسنة' }),
-  duration: z.string().min(1, { message: 'يجب تحديد مدة الحصة' }),
+export const getMultipleSessionsSchema = (t: TFunc) => getBaseSession(t).extend({
+  monthYear: z.string().min(1, t("validation.required")),
+  duration: z.string().min(1, t("validation.required")),
 });
 
-export type SessionFormData = z.infer<typeof sessionSchema>;
-export type MultipleSessionsFormData = z.infer<typeof multipleSessionsSchema>;
+export type SessionFormData = z.infer<ReturnType<typeof getSessionSchema>>;
+export type MultipleSessionsFormData = z.infer<ReturnType<typeof getMultipleSessionsSchema>>;
 
 export interface MultipleSessionsPayload {
   formData: MultipleSessionsFormData;

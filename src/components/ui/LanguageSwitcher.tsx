@@ -1,24 +1,27 @@
-import { ChevronDown } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
 export default function LanguageSwitcher() {
-  const { i18n, t } = useTranslation();
-  const language = i18n.language.split('-')[0];
-  const setLanguage = (lang: string) => i18n.changeLanguage(lang);
+  const { i18n } = useTranslation();
+  const currentLang = i18n.language.split('-')[0];
+
+  const toggleLanguage = () => {
+    const nextLang = currentLang === 'ar' ? 'en' : 'ar';
+    i18n.changeLanguage(nextLang);
+  };
 
   return (
     <div className="fixed top-6 right-6 z-50">
-      <div className="relative inline-block">
-        <select
-          value={language}
-          onChange={(e) => setLanguage(e.target.value as 'ar' | 'en')}
-          className="appearance-none bg-white border border-gray-200 rounded-lg px-4 py-2 pr-10 cursor-pointer hover:border-gray-300 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all shadow-sm"
-        >
-          <option value="ar">{t('arabic')}</option>
-          <option value="en">{t('english')}</option>
-        </select>
-        <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500 pointer-events-none" />
-      </div>
+      <button
+        onClick={toggleLanguage}
+        className="flex items-center gap-2 px-4 py-2 bg-white/80 backdrop-blur border border-gray-200 
+                   rounded-xl shadow-sm hover:shadow-md hover:border-primary transition-all duration-200 
+                   group overflow-hidden relative"
+      >
+        <div className="flex items-center gap-2 font-semibold text-gray-700 group-hover:text-primary">
+          <span className="text-sm ">{currentLang === 'ar' ? 'English' : 'عربي'}</span>
+        </div>
+        <div className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
+      </button>
     </div>
   );
 }

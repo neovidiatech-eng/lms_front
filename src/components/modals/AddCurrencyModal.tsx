@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { X, Save } from 'lucide-react';
 import { useLanguage } from '../../contexts/LanguageContext';
-import { CurrencyFormData, CurrencySchema } from '../../lib/schemas/CurrencySchema';
+import { CurrencyFormData, getCurrencySchema } from '../../lib/schemas/CurrencySchema';
 import { Controller, Resolver, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Currency } from '../../types/currency';
@@ -15,7 +15,7 @@ interface AddCurrencyModalProps {
 }
 
 export default function AddCurrencyModal({ isOpen, onClose, onSave, initialData }: AddCurrencyModalProps) {
-  const { language } = useLanguage();
+  const { language, t } = useLanguage();
   const [activeTab, setActiveTab] = useState<'ar' | 'en'>('ar');
   const [isDefault, setIsDefault] = useState(false);
 
@@ -26,7 +26,7 @@ export default function AddCurrencyModal({ isOpen, onClose, onSave, initialData 
     control,
     formState: { errors }
   } = useForm<CurrencyFormData>({
-    resolver: zodResolver(CurrencySchema) as Resolver<CurrencyFormData>,
+    resolver: zodResolver(getCurrencySchema(t)) as Resolver<CurrencyFormData>,
     defaultValues: initialData || {
       name_en: '',
       symbol: '',

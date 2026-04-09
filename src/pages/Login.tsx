@@ -9,9 +9,9 @@ import {
 import { useLanguage } from "../contexts/LanguageContext";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { LoginInput, LoginSchema } from "../lib/schemas/LoginSchema";
+import { LoginInput, getLoginSchema } from "../lib/schemas/LoginSchema";
 import { login, googleLogin } from "../services/AuthServices";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { CustomCheckbox } from "../components/ui/CustomCheckbox";
 import { GoogleLogin } from "@react-oauth/google";
 
@@ -30,7 +30,7 @@ export default function Login({ onLoginSuccess }: LoginProps) {
     formState: { errors },
     control,
   } = useForm<LoginInput>({
-    resolver: zodResolver(LoginSchema),
+    resolver: zodResolver(getLoginSchema(t)),
     defaultValues: {
       email: "",
       password: "",
@@ -131,14 +131,14 @@ export default function Login({ onLoginSuccess }: LoginProps) {
           </div>
         </div>
 
-        {/* Remember + For  got */}
+        {/* Remember + Forgot */}
         <div className="flex items-center justify-between">
-          <a
-            href="#"
+          <Link
+            to="/forgot-password"
             className="text-sm text-primary hover:text-primary-dark font-medium transition-colors"
           >
             {t("forgotPassword")}
-          </a>
+          </Link>
           <div className="flex items-center justify-between">
             <Controller
               name="rememberMe"
@@ -166,35 +166,36 @@ export default function Login({ onLoginSuccess }: LoginProps) {
         </button>
         <p className="text-center text-gray-500">{t("or")}</p>
         <div className="space-y-4 mb-6">
-          <div className="flex justify-center">
-            <GoogleLogin
-              onSuccess={async (credentialResponse) => {
-                const idToken = credentialResponse.credential;
-                if (idToken) {
-                  try {
-                    const result = await googleLogin({ idToken, provider: "google" });
-                    const token = result.data?.accessToken || result.accessToken;
+        <div className="flex justify-center w-full">
+          <GoogleLogin
+            onSuccess={async (credentialResponse) => {
+              const idToken = credentialResponse.credential;
+              console.log(idToken);
+              if (idToken) {
+                try {
+                  const result = await googleLogin({ idToken, provider: "google" });
+                  const token = result.data?.accessToken || result.accessToken;
 
-                    if (token) {
-                      localStorage.setItem("token", token);
-                      onLoginSuccess();
-                      navigate("/dashboard");
-                    }
-                  } catch (error) {
-                    console.error("Google Login failed:", error);
+                  if (token) {
+                    localStorage.setItem("token", token);
+                    onLoginSuccess();
+                    navigate("/dashboard");
                   }
+                } catch (error) {
+                  console.error("Google Login failed:", error);
                 }
-              }}
-              onError={() => {
-                console.log("Login Failed");
-              }}
-              useOneTap
-              theme="outline"
-              size="large"
-              shape="circle"
-              width="384px"
-            />
-          </div>
+              }
+            }}
+            onError={() => {
+              console.log("Login Failed");
+            }}
+            useOneTap
+            theme="outline"
+            size="large"
+            shape="circle"
+            width="384px"
+          />
+        </div>
         </div>
       </form>
     </div>

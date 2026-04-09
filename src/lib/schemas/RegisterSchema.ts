@@ -1,35 +1,22 @@
 import { z } from "zod";
 
-export const registerSchema = z.object({
-  name: z
-    .string()
-    .min(3, { message: "Full name must be at least 3 characters" }),
-  email: z
-    .string()
-    .email({ message: "Invalid email address" }),
-  codeCountry: z.string().min(1, { message: "Country code is required" }),
-  phone: z
-    .string()
-    .min(7, { message: "Phone number is too short" })
-    .max(15, { message: "Phone number is too long" })
-    .regex(/^[0-9]+$/, { message: "Phone number must contain digits only" }),
+export const getRegisterSchema = (t: (key: string, options?: any) => string) =>
+  z.object({
+    name: z.string().min(3, t("validation.min", { count: 3 })),
+    email: z.string().email(t("validation.email")),
+    codeCountry: z.string().min(1, t("validation.required")),
+    phone: z
+      .string()
+      .min(7, t("validation.min", { count: 7 }))
+      .max(15, t("validation.max", { count: 15 }))
+      .regex(/^[0-9]+$/, t("validation.invalidPhone")),
+    birth_date: z
+      .string()
+      .refine((val) => val !== "", { message: t("validation.required") }),
+    gender: z.string().min(1, t("validation.required")),
+    country: z.string().min(1, t("validation.required")),
+    password: z.string().min(8, t("validation.min", { count: 8 })),
+    plan_id: z.string().min(1, t("validation.required")),
+  });
 
-
-  birth_date: z
-    .string()
-    .refine((val) => val !== "", { message: "Birth date is required" }),
-  gender: z
-    .string()
-    .nonempty({ message: "Please select gender" }),
-  country: z
-    .string()
-    .nonempty({ message: "Please select country" }),
-  password: z
-    .string()
-    .min(8, { message: "Password must be at least 8 characters" }),
-  plan_id: z
-    .string()
-    .nonempty({ message: "Please select a package to verify" }),
-});
-
-export type RegisterInput = z.infer<typeof registerSchema>;
+export type RegisterInput = z.infer<ReturnType<typeof getRegisterSchema>>;

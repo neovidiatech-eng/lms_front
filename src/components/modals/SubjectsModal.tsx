@@ -1,6 +1,6 @@
 import { BookOpen, X, Check } from 'lucide-react';
 import { useLanguage } from '../../contexts/LanguageContext';
-import { SubjectFormData, subjectSchema } from '../../lib/schemas/SubjectsSchema';
+import { getSubjectSchema, SubjectFormData } from '../../lib/schemas/SubjectsSchema';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Resolver, useForm } from 'react-hook-form';
 import { useEffect } from 'react';
@@ -25,9 +25,9 @@ interface SubjectFormProps {
 }
 
 export default function SubjectForm({ initial, onSave, onCancel, title }: SubjectFormProps) {
-  const { language } = useLanguage();
+  const { language, t } = useLanguage();
   const { register, handleSubmit, setValue, watch, reset, formState: { errors } } = useForm<SubjectFormData>({
-    resolver: zodResolver(subjectSchema) as Resolver<SubjectFormData>,
+    resolver: zodResolver(getSubjectSchema(t)) as Resolver<SubjectFormData>,
     defaultValues: {
       name_ar: initial?.name_ar || '',
       name_en: initial?.name_en || '',

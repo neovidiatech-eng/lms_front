@@ -1,20 +1,21 @@
 import { X, User, Mail, Phone, Lock, Users, Hash } from 'lucide-react'; // أضفت أيقونات جديدة
 import { useLanguage } from '../../contexts/LanguageContext';
 import { useForm, Controller, Resolver } from 'react-hook-form'; // أضفت Controller
-import { ParentFormData, parentSchema } from '../../lib/schemas/ParentSchema';
+import { ParentFormData, getParentSchema } from '../../lib/schemas/ParentSchema';
 import { zodResolver } from '@hookform/resolvers/zod';
 import CustomSelect from '../ui/CustomSelect';
 
 interface AddParentModalProps {
+  isOpen: boolean;
   onClose: () => void;
   onAdd: (parent: ParentFormData) => void;
 }
 
-export default function AddParentModal({ onClose, onAdd }: AddParentModalProps) {
-  const { language } = useLanguage();
+export default function AddParentModal({ isOpen, onClose, onAdd }: AddParentModalProps) {
+  const { language, t } = useLanguage();
 
   const { register, handleSubmit, control, formState: { errors } } = useForm<ParentFormData>({
-    resolver: zodResolver(parentSchema) as Resolver<ParentFormData>,
+    resolver: zodResolver(getParentSchema(t)) as Resolver<ParentFormData>,
     defaultValues: {
       name: '',
       email: '',

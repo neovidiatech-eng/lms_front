@@ -2,7 +2,7 @@ import { X, Users } from 'lucide-react';
 import { useEffect } from 'react';
 import { useLanguage } from '../../contexts/LanguageContext';
 import CustomSelect from '../ui/CustomSelect';
-import { TeacherFormData, teacherSchema } from '../../lib/schemas/TeacherSchema';
+import { TeacherFormData, getTeacherSchema } from '../../lib/schemas/TeacherSchema';
 import { Controller, Resolver, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 
@@ -25,9 +25,9 @@ interface EditTeacherModalProps {
 }
 
 export default function EditTeacherModal({ isOpen, onClose, onSubmit, teacher }: EditTeacherModalProps) {
-  const { language } = useLanguage();
+  const { language, t } = useLanguage();
   const { register, handleSubmit, setValue, watch, control, reset, formState: { errors }, } = useForm<TeacherFormData>({
-    resolver: zodResolver(teacherSchema) as Resolver<TeacherFormData>,
+    resolver: zodResolver(getTeacherSchema(t)) as Resolver<TeacherFormData>,
 
   })
 

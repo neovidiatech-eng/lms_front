@@ -5,7 +5,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useLanguage } from '../../contexts/LanguageContext';
 import CustomSelect from '../ui/CustomSelect';
 // تأكدي من استيراد الـ Schema الصحيح للمتعدد
-import { multipleSessionsSchema, MultipleSessionsFormData } from '../../lib/schemas/SessionSchema';
+import { getMultipleSessionsSchema, MultipleSessionsFormData } from '../../lib/schemas/SessionSchema';
 export interface SessionPreviewItem {
   date: string;
   day: string;
@@ -18,7 +18,7 @@ interface AddMultipleSessionsModalProps {
 }
 
 export default function AddMultipleSessionsModal({ isOpen, onClose, onAdd }: AddMultipleSessionsModalProps) {
-  const { language } = useLanguage();
+  const { language, t } = useLanguage();
 
   // 1. إعداد React Hook Form
   const {
@@ -30,7 +30,7 @@ export default function AddMultipleSessionsModal({ isOpen, onClose, onAdd }: Add
     reset,
     formState: { errors }
   } = useForm<MultipleSessionsFormData>({
-    resolver: zodResolver(multipleSessionsSchema),
+    resolver: zodResolver(getMultipleSessionsSchema(t)),
     defaultValues: {
       duration: '60',
       student: '',

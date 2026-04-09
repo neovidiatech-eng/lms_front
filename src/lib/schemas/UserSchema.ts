@@ -1,14 +1,15 @@
-// lib/schemas/UserSchema.ts
 import { z } from 'zod';
 
-export const userSchema = z.object({
-  name: z.string().min(1, "الاسم مطلوب"),
-  email: z.string().email("بريد غير صحيح"),
+type TFunc = (key: string, options?: any) => string;
+
+export const getUserSchema = (t: TFunc) => z.object({
+  name: z.string().min(1, t("validation.required")),
+  email: z.string().email(t("validation.email")),
   countryCode: z.string(),
-  phone: z.string().min(1, "الهاتف مطلوب"),
+  phone: z.string().min(1, t("validation.required")),
   role: z.string(),
-  password: z.string().min(6),
-permissions: z.array(z.string()),
+  password: z.string().min(6, t("validation.min", { count: 6 })),
+  permissions: z.array(z.string()),
 });
 
-export type UserFormData = z.infer<typeof userSchema>;
+export type UserFormData = z.infer<ReturnType<typeof getUserSchema>>;

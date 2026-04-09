@@ -98,8 +98,8 @@ export default function EditCurrencyModal({ isOpen, onClose, currency, onSave }:
                 type="button"
                 onClick={() => setActiveTab('ar')}
                 className={`flex-1 px-4 py-3 text-sm font-medium transition-colors ${activeTab === 'ar'
-                    ? 'bg-blue-50 text-blue-600 border-b-2 border-blue-600'
-                    : 'bg-gray-50 text-gray-600 hover:bg-gray-100'
+                  ? 'bg-blue-50 text-blue-600 border-b-2 border-blue-600'
+                  : 'bg-gray-50 text-gray-600 hover:bg-gray-100'
                   }`}
               >
                 {text.arabic[language]}
@@ -108,8 +108,8 @@ export default function EditCurrencyModal({ isOpen, onClose, currency, onSave }:
                 type="button"
                 onClick={() => setActiveTab('en')}
                 className={`flex-1 px-4 py-3 text-sm font-medium transition-colors ${activeTab === 'en'
-                    ? 'bg-blue-50 text-blue-600 border-b-2 border-blue-600'
-                    : 'bg-gray-50 text-gray-600 hover:bg-gray-100'
+                  ? 'bg-blue-50 text-blue-600 border-b-2 border-blue-600'
+                  : 'bg-gray-50 text-gray-600 hover:bg-gray-100'
                   }`}
               >
                 {text.english[language]}

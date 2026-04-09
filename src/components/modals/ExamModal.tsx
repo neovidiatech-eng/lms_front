@@ -3,7 +3,7 @@ import { useLanguage } from '../../contexts/LanguageContext';
 import CustomSelect from '../ui/CustomSelect';
 import { Resolver, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { ExamFormData, examSchema } from '../../lib/schemas/ExamSchema';
+import { ExamFormData, getExamSchema } from '../../lib/schemas/ExamSchema';
 import { useEffect } from 'react';
 
 interface Exam extends ExamFormData {
@@ -18,7 +18,7 @@ interface AddExamModalProps {
 }
 
 export default function AddExamModal({ isOpen, onClose, onAdd, initialData }: AddExamModalProps) {
-  const { language } = useLanguage();
+  const { language, t } = useLanguage();
 
   const {
     register,
@@ -28,7 +28,7 @@ export default function AddExamModal({ isOpen, onClose, onAdd, initialData }: Ad
     watch,
     formState: { errors },
   } = useForm<ExamFormData>({
-    resolver: zodResolver(examSchema) as Resolver<ExamFormData>,
+    resolver: zodResolver(getExamSchema(t)) as Resolver<ExamFormData>,
     defaultValues: {
       grade: 100,
       status: 'upcoming'

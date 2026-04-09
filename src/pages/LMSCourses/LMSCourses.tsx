@@ -4,9 +4,9 @@ import CourseViewer from '../../components/features/LMS/CourseViewer';
 import { Course, Level } from '../../types/lmsCourses';
 import CourseFormFields from './components/CourseFormFields';
 import { FormProvider, useForm } from 'react-hook-form';
-import { CourseFormData, courseSchema } from '../../lib/schemas/CourseSchema';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useLanguage } from '../../contexts/LanguageContext';
+import { CourseFormData, getCourseSchema } from '../../lib/schemas/CourseSchema';
 
 
 
@@ -122,9 +122,9 @@ export default function LMSCoursesPage() {
 
   const thumbnailInputRef = useRef<HTMLInputElement>(null);
   const attachInputRef = useRef<HTMLInputElement>(null);
-
+  const { t, language } = useLanguage()
   const methods = useForm<CourseFormData>({
-    resolver: zodResolver(courseSchema),
+    resolver: zodResolver(getCourseSchema(t)),
     defaultValues: {
       title: '',
       description: '',
@@ -245,7 +245,6 @@ export default function LMSCoursesPage() {
     );
   }
 
-  const { t, language } = useLanguage();
   const isRtl = language === 'ar';
   return (
     <div className="space-y-6" dir={isRtl ? 'rtl' : 'ltr'}>

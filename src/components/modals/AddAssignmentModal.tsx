@@ -2,7 +2,7 @@ import { useEffect } from 'react';
 import { X } from 'lucide-react';
 import { useLanguage } from '../../contexts/LanguageContext';
 import CustomSelect from '../ui/CustomSelect';
-import { AssignmentFormData, assignmentSchema } from '../../lib/schemas/AssignmentSchema';
+import { AssignmentFormData, getAssignmentSchema } from '../../lib/schemas/AssignmentSchema';
 import { Resolver, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 
@@ -18,7 +18,7 @@ interface AddAssignmentModalProps {
 }
 
 export default function AddAssignmentModal({ isOpen, onClose, onAdd, initialData }: AddAssignmentModalProps) {
-  const { language } = useLanguage();
+  const { language, t } = useLanguage();
   const {
     register,
     handleSubmit,
@@ -27,7 +27,7 @@ export default function AddAssignmentModal({ isOpen, onClose, onAdd, initialData
     watch,
     formState: { errors },
   } = useForm<AssignmentFormData>({
-    resolver: zodResolver(assignmentSchema) as Resolver<AssignmentFormData>,
+    resolver: zodResolver(getAssignmentSchema(t)) as Resolver<AssignmentFormData>,
     defaultValues: {
       status: 'pending',
     },

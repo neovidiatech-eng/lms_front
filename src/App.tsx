@@ -16,6 +16,9 @@ import { googleClientId } from './components/constants';
 const AuthLayout = lazy(() => import('./pages/AuthLayout/AuthLayout'));
 const Login = lazy(() => import('./pages/Login'));
 const Register = lazy(() => import('./pages/Register'));
+const ForgotPassword = lazy(() => import('./pages/ForgotPassword'));
+const ResetPassword = lazy(() => import('./pages/ResetPassword'));
+const VerifyAccount = lazy(() => import('./pages/VerifyAccount'));
 const Dashboard = lazy(() => import('./pages/Dashboard'));
 
 // Centralized Loading Fallback UI
@@ -71,6 +74,9 @@ function App() {
                     <Route element={!isAuthenticated ? <AuthLayout /> : <Navigate to="/dashboard" replace />}>
                       <Route path="/login" element={<Login onLoginSuccess={handleLogin} />} />
                       <Route path="/register" element={<Register onRegisterSuccess={handleLogin} />} />
+                      <Route path="/forgot-password" element={<ForgotPassword />} />
+                      <Route path="/reset-password" element={<ResetPassword />} />
+                      <Route path="/verify-account" element={<VerifyAccount onVerifySuccess={handleLogin} />} />
                     </Route>
                     <Route
                       path="/dashboard"

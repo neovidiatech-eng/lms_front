@@ -1,6 +1,6 @@
 import { X, User, Mail, Phone, Users, Lock, Hash } from 'lucide-react';
 import { useLanguage } from '../../contexts/LanguageContext';
-import { ParentFormData, parentSchema } from '../../lib/schemas/ParentSchema';
+import { ParentFormData, getParentSchema } from '../../lib/schemas/ParentSchema';
 import { Resolver, useForm, Controller } from 'react-hook-form'; // أضفت Controller
 import { zodResolver } from '@hookform/resolvers/zod';
 import CustomSelect from '../ui/CustomSelect'; // تأكد من المسار
@@ -12,10 +12,10 @@ interface EditParentModalProps {
 }
 
 export default function EditParentModal({ parent, onClose, onSubmit }: EditParentModalProps) {
-  const { language } = useLanguage();
+  const { language, t } = useLanguage();
 
   const { register, handleSubmit, control, formState: { errors } } = useForm<ParentFormData>({
-    resolver: zodResolver(parentSchema) as Resolver<ParentFormData>,
+    resolver: zodResolver(getParentSchema(t)) as Resolver<ParentFormData>,
     defaultValues: {
       name: parent.name,
       email: parent.email,

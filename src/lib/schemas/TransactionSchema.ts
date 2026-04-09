@@ -1,34 +1,26 @@
-import * as z from "zod";
+import { z } from "zod";
 
-export const TransactionTypeEnum = z.enum(['income', 'teacher_expense']);
-export const TransactionStatusEnum = z.enum(['completed', 'pending']);
+type TFunc = (key: string, options?: any) => string;
 
-export const transactionSchema = z.object({
-  type: TransactionTypeEnum,
-  
+export const getTransactionTypeEnum = () => z.enum(['income', 'teacher_expense']);
+export const getTransactionStatusEnum = () => z.enum(['completed', 'pending']);
+
+export const getTransactionSchema = (t: TFunc) => z.object({
+  type: getTransactionTypeEnum(),
   studentName: z.string().optional().or(z.literal('')),
-  
   teacherName: z
     .string()
-    .min(3, { ar: "اسم المعلم يجب أن يكون 3 أحرف على الأقل", en: "Teacher name must be at least 3 characters" }[ 'ar' ]),
-    
+    .min(3, t("validation.min", { count: 3 })),
   amount: z.coerce
     .number()
-    .positive("المبلغ يجب أن يكون أكبر من صفر")
-    .min(0),
-    
-  currency: z.string().min(1, "العملة مطلوبة"),
-  
+    .min(0, t("validation.required")),
+  currency: z.string().min(1, t("validation.required")),
   paymentMethod: z.string().optional().or(z.literal('')),
-  
   date: z.string().refine((val) => !isNaN(Date.parse(val)), {
-    message: "تاريخ غير صالح",
+    message: t("validation.required"),
   }),
-  
-  status: TransactionStatusEnum.default('pending'),
-  
+  status: getTransactionStatusEnum().default('pending'),
   notes: z.string().optional().or(z.literal('')),
-
   sessionCount: z.coerce.number().int().positive().optional(),
   sessionDuration: z.coerce.number().positive().optional(),
   ratePerHour: z.coerce.number().positive().optional(),
@@ -36,13 +28,13 @@ export const transactionSchema = z.object({
   if (data.type === 'income' && (!data.studentName || data.studentName.trim() === '')) {
     ctx.addIssue({
       code: z.ZodIssueCode.custom,
-      message: "اسم الطالب مطلوب في حالة الإيرادات",
+      message: t("validation.required"),
       path: ['studentName'],
     });
   }
 });
 
-export type TransactionFormData = z.infer<typeof transactionSchema>;
+export type TransactionFormData = z.infer<ReturnType<typeof getTransactionSchema>>;
 
 export interface Transaction extends TransactionFormData {
   id: string;

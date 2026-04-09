@@ -14,8 +14,9 @@ import { usePlans } from "../hooks/usePlans";
 import { useNavigate } from "react-router-dom";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { registerSchema, RegisterInput } from "../lib/schemas/RegisterSchema";
-import { register as registerService } from "../services/AuthServices";
+import { getRegisterSchema, RegisterInput } from "../lib/schemas/RegisterSchema";
+import { googleRegister, register as registerService } from "../services/AuthServices";
+import { GoogleLogin } from "@react-oauth/google";
 
 interface RegisterProps {
   onRegisterSuccess: () => void;
@@ -35,7 +36,7 @@ export default function Register({ onRegisterSuccess }: RegisterProps) {
     watch,
     formState: { errors, isSubmitting },
   } = useForm<RegisterInput>({
-    resolver: zodResolver(registerSchema),
+    resolver: zodResolver(getRegisterSchema(t)),
     mode: "onChange",
     defaultValues: {
       name: "",
@@ -78,8 +79,9 @@ export default function Register({ onRegisterSuccess }: RegisterProps) {
       const result = await registerService(data);
       if (result.status === 201 || result.status === 200) {
         message.success(t("registeredSuccess"));
-        onRegisterSuccess();
-        navigate("/dashboard");
+        // Store email for verification step
+        sessionStorage.setItem("verify_email", data.email);
+        navigate("/verify-account");
       }
     } catch (error: any) {
       console.error("Registration error:", error);
@@ -157,7 +159,7 @@ export default function Register({ onRegisterSuccess }: RegisterProps) {
                   type="email"
                   {...register("email")}
                   placeholder="admin@example.com"
-                  className={`w-full px-4 py-3 bg-gray-50 border ${errors.email ? "border-red-500" : "border-gray-200"} rounded-xl focus:outline-none focus:ring-2 focus:ring-primary text-right transition-all duration-300`}
+                  className={`w-full px-4 py-3 bg-gray-50 border `}
                   dir="ltr"
                 />
                 {errors.email && <p className="text-red-500 text-xs mt-1">{errors.email.message}</p>}
@@ -356,7 +358,39 @@ export default function Register({ onRegisterSuccess }: RegisterProps) {
             <p className="text-center text-sm text-gray-500 leading-relaxed">
               {t("afterRegistration")}
             </p>
+
+            <div className="flex justify-center">
+              <GoogleLogin
+                onSuccess={async (credentialResponse) => {
+                  const idToken = credentialResponse.credential;
+                  console.log(idToken);
+                  if (idToken) {
+                    try {
+                      const result = await googleRegister({ idToken });
+                      const token = result.data?.accessToken || result.accessToken;
+
+                      if (token) {
+                        localStorage.setItem("token", token);
+                        onRegisterSuccess();
+                        navigate("/login");
+                      }
+                    } catch (error) {
+                      console.error("Google Login failed:", error);
+                    }
+                  }
+                }}
+                onError={() => {
+                  console.log("Login Failed");
+                }}
+                useOneTap
+                theme="outline"
+                size="large"
+                shape="circle"
+                width="384px"
+              />
+            </div>
           </form>
+
         </div>
       </div>
     </ConfigProvider>

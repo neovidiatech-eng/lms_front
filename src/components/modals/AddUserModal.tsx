@@ -3,7 +3,7 @@ import { X } from 'lucide-react';
 import { useLanguage } from '../../contexts/LanguageContext';
 import CustomSelect from '../ui/CustomSelect';
 import { Controller, useForm } from 'react-hook-form';
-import { UserFormData, userSchema } from '../../lib/schemas/UserSchema';
+import { UserFormData, getUserSchema } from '../../lib/schemas/UserSchema';
 import { zodResolver } from '@hookform/resolvers/zod';
 
 interface AddUserModalProps {
@@ -157,11 +157,11 @@ const roles = [
 ];
 
 export default function AddUserModal({ isOpen, onClose, onSubmit }: AddUserModalProps) {
-  const { language } = useLanguage();
+  const { language, t } = useLanguage();
   const [showPassword, setShowPassword] = useState(false);
 
   const { control, handleSubmit, register, reset, setValue, watch, formState: { errors } } = useForm<UserFormData>({
-    resolver: zodResolver(userSchema),
+    resolver: zodResolver(getUserSchema(t)),
     defaultValues: {
       name: '',
       email: '',

@@ -1,7 +1,7 @@
 import { X, Users } from 'lucide-react';
 import { useLanguage } from '../../contexts/LanguageContext';
 import CustomSelect from '../ui/CustomSelect';
-import { TeacherFormData, teacherSchema } from '../../lib/schemas/TeacherSchema';
+import { TeacherFormData, getTeacherSchema } from '../../lib/schemas/TeacherSchema';
 import { Controller, FieldPath, Resolver, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { CustomCheckbox } from '../ui/CustomCheckbox';
@@ -13,9 +13,9 @@ interface AddTeacherModalProps {
 }
 
 export default function AddTeacherModal({ isOpen, onClose, onSubmit }: AddTeacherModalProps) {
-  const { language } = useLanguage();
-  const { register, handleSubmit, control, watch, setValue, reset, formState: { errors } } = useForm<TeacherFormData>({
-    resolver: zodResolver(teacherSchema) as Resolver<TeacherFormData>,
+  const { language, t } = useLanguage();
+  const { register, handleSubmit, control, watch, reset, formState: { errors } } = useForm<TeacherFormData>({
+    resolver: zodResolver(getTeacherSchema(t)) as Resolver<TeacherFormData>,
     defaultValues: {
       name: '',
       email: '',

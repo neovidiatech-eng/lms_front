@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { X } from 'lucide-react';
 import { useLanguage } from '../../contexts/LanguageContext';
 import CustomSelect from '../ui/CustomSelect';
-import { UserFormData, userSchema } from '../../lib/schemas/UserSchema';
+import { UserFormData, getUserSchema } from '../../lib/schemas/UserSchema';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Controller, useForm } from 'react-hook-form';
 
@@ -152,9 +152,9 @@ const roles = [
 ];
 
 export default function EditUserModal({ isOpen, onClose, onSubmit, userData }: EditUserModalProps) {
-  const { language } = useLanguage();
+  const { language, t } = useLanguage();
   const { control, handleSubmit, register, reset, setValue, watch, formState: { errors } } = useForm<UserFormData>({
-    resolver: zodResolver(userSchema),
+    resolver: zodResolver(getUserSchema(t)),
     defaultValues: userData,
   });
 
@@ -221,7 +221,7 @@ export default function EditUserModal({ isOpen, onClose, onSubmit, userData }: E
         </div>
 
         {/* Body */}
-        <form onSubmit={handleSubmit(onFormSubmit)} className="flex-1  overflow-y-auto no-scrollbar p-6">
+        <form id="edit-user-form" onSubmit={handleSubmit(onFormSubmit)} className="flex-1  overflow-y-auto no-scrollbar p-6">
           <div className="space-y-6">
             {/* Name and Email */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 import { X, Save } from 'lucide-react';
 import { useLanguage } from '../../contexts/LanguageContext';
-import { Expense, ExpenseFormData, expenseSchema } from '../../lib/schemas/ExpenseSchema';
+import { Expense, ExpenseFormData, getExpenseSchema } from '../../lib/schemas/ExpenseSchema';
 import { Resolver, useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import CustomSelect from '../ui/CustomSelect';
@@ -14,7 +14,7 @@ interface AddExpenseModalProps {
 }
 
 export default function AddExpenseModal({ isOpen, onClose, onSave, initialData }: AddExpenseModalProps) {
-  const { language } = useLanguage();
+  const { language, t } = useLanguage();
   const {
     register,
     handleSubmit,
@@ -22,7 +22,7 @@ export default function AddExpenseModal({ isOpen, onClose, onSave, initialData }
     control,
     formState: { errors },
   } = useForm<ExpenseFormData>({
-    resolver: zodResolver(expenseSchema) as Resolver<ExpenseFormData>,
+    resolver: zodResolver(getExpenseSchema(t)) as Resolver<ExpenseFormData>,
     defaultValues: {
       date: new Date().toISOString().split('T')[0],
       status: 'pending',

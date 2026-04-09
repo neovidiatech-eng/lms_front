@@ -1,16 +1,73 @@
 import { z } from 'zod';
 
-export const studentSchema = z.object({
-  name: z.string().min(3, 'الاسم يجب أن يكون 3 أحرف على الأقل'),
-  email: z.string().email('بريد إلكتروني غير صحيح'),
-  countryCode: z.string().min(1, 'رمز الدولة مطلوب'),
-  phone: z.string().regex(/^01[0125][0-9]{8}$/, 'Please enter a valid Egyptian phone number (e.g. 01012345678)'),
-  gender: z.string().min(1, 'يرجى اختيار الجنس'),
+type TFunc = (key: string, options?: any) => string;
+
+export const getStudentSchema = (t: TFunc) => z.object({
+  name: z.string().min(3, t("validation.min", { count: 3 })),
+  email: z.string().email(t("validation.email")),
+  countryCode: z.string().min(1, t("validation.required")),
+  phone: z.string().min(1, t("validation.required")),
+  gender: z.string().min(1, t("validation.required")),
   birthDate: z.string().optional().or(z.literal('')),
   plan: z.string().optional().or(z.literal('')),
-  country: z.string().min(1, 'يرجى اختيار الدولة'),
+  country: z.string().min(1, t("validation.required")),
   status: z.enum(['active', 'inactive']),
-  password: z.string().min(6, 'كلمة المرور يجب أن تكون 6 أحرف على الأقل').optional().or(z.literal('')),
+  password: z.string().min(6, t("validation.min", { count: 6 })).optional().or(z.literal('')),
+}).superRefine((data, ctx) => {
+  const { countryCode, phone } = data;
+  
+  if (!phone) return;
+
+  // Egypt
+  if (countryCode === "+20") {
+    if (!/^1[0125][0-9]{8}$/.test(phone)) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: t("validation.invalidPhone"),
+        path: ["phone"],
+      });
+    }
+  }
+  // Saudi Arabia
+  else if (countryCode === "+966") {
+    if (!/^5[0-9]{8}$/.test(phone)) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: t("validation.invalidPhone"),
+        path: ["phone"],
+      });
+    }
+  }
+  // UAE
+  else if (countryCode === "+971") {
+    if (!/^5[0124568][0-9]{7}$/.test(phone)) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: t("validation.invalidPhone"),
+        path: ["phone"],
+      });
+    }
+  }
+  // Kuwait
+  else if (countryCode === "+965") {
+    if (!/^[569][0-9]{7}$/.test(phone)) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: t("validation.invalidPhone"),
+        path: ["phone"],
+      });
+    }
+  }
+  // Fallback for other countries
+  else {
+    if (!/^[0-9]{7,15}$/.test(phone)) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: t("validation.invalidPhone"),
+        path: ["phone"],
+      });
+    }
+  }
 });
 
-export type StudentFormData = z.infer<typeof studentSchema>;
+export type StudentFormData = z.infer<ReturnType<typeof getStudentSchema>>;

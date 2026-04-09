@@ -1,7 +1,7 @@
 import { X, GraduationCap } from 'lucide-react';
 import { useLanguage } from '../../contexts/LanguageContext';
 import CustomSelect from '../ui/CustomSelect';
-import { StudentFormData, studentSchema } from '../../lib/schemas/StudentSchema';
+import { StudentFormData, getStudentSchema } from '../../lib/schemas/StudentSchema';
 import { Controller, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { usePlans } from '../../hooks/usePlans';
@@ -13,10 +13,10 @@ interface AddStudentModalProps {
 }
 
 export default function AddStudentModal({ isOpen, onClose, onSubmit }: AddStudentModalProps) {
-  const { language } = useLanguage();
+  const { language, t } = useLanguage();
   const { data: plansData } = usePlans();
   const { register, handleSubmit, control, reset, formState: { errors } } = useForm<StudentFormData>({
-    resolver: zodResolver(studentSchema),
+    resolver: zodResolver(getStudentSchema(t)),
     defaultValues: {
       countryCode: '+20',
       status: 'active',

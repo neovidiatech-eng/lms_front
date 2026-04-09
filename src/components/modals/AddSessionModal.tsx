@@ -2,7 +2,7 @@ import { X } from 'lucide-react';
 import { useEffect, useMemo } from 'react';
 import { useLanguage } from '../../contexts/LanguageContext';
 import CustomSelect from '../ui/CustomSelect';
-import { SessionFormData, sessionSchema } from '../../lib/schemas/SessionSchema';
+import { SessionFormData, getSessionSchema } from '../../lib/schemas/SessionSchema';
 import { Controller, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 
@@ -18,10 +18,10 @@ interface SubjectOption {
 }
 
 export default function AddSessionModal({ isOpen, onClose, onAdd }: AddSessionModalProps) {
-  const { language } = useLanguage();
+  const { language, t } = useLanguage();
 
   const { register, handleSubmit, control, watch, setValue, reset, formState: { errors } } = useForm<SessionFormData>({
-    resolver: zodResolver(sessionSchema),
+    resolver: zodResolver(getSessionSchema(t)),
     defaultValues: {
       student: '', teacher: '', subject: '', title: '',
       sessionDate: '', duration: '', startTime: '', endTime: '',

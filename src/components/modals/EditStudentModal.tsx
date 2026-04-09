@@ -2,7 +2,7 @@ import { X, GraduationCap } from 'lucide-react';
 import { useEffect } from 'react';
 import { useLanguage } from '../../contexts/LanguageContext';
 import CustomSelect from '../ui/CustomSelect';
-import { StudentFormData, studentSchema } from '../../lib/schemas/StudentSchema';
+import { StudentFormData, getStudentSchema } from '../../lib/schemas/StudentSchema';
 import { Controller, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { usePlans } from '../../hooks/usePlans';
@@ -20,12 +20,12 @@ export default function EditStudentModal({
   onSubmit,
   studentData,
 }: EditStudentModalProps) {
-  const { language } = useLanguage();
+  const { language, t } = useLanguage();
   const { data: plansData } = usePlans();
 
   // نستخدم values للتحديث التلقائي عند تغير studentData
   const { control, handleSubmit, register, reset, formState: { errors } } = useForm<StudentFormData>({
-    resolver: zodResolver(studentSchema),
+    resolver: zodResolver(getStudentSchema(t)),
     defaultValues: studentData || undefined,
   });
 

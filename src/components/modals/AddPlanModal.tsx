@@ -1,6 +1,6 @@
 import { X, Save, Plus, Trash2 } from 'lucide-react';
 import { useLanguage } from '../../contexts/LanguageContext';
-import { PlanFormData, planSchema } from '../../lib/schemas/PlanSchema';
+import { PlanFormData, getPlanSchema } from '../../lib/schemas/PlanSchema';
 import { Resolver, useForm, Controller } from 'react-hook-form';
 import CustomSelect from '../ui/CustomSelect';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -14,10 +14,10 @@ interface AddPlanModalProps {
 }
 
 export default function AddPlanModal({ isOpen, onClose, onSave, initialData }: AddPlanModalProps) {
-  const { language } = useLanguage();
+  const { language, t } = useLanguage();
 
   const { register, handleSubmit, reset, setValue, watch, control, formState: { errors } } = useForm<PlanFormData>({
-    resolver: zodResolver(planSchema) as Resolver<PlanFormData>,
+    resolver: zodResolver(getPlanSchema(t)) as Resolver<PlanFormData>,
     defaultValues: {
       name: '',
       nameEn: '',

@@ -1,6 +1,8 @@
-import * as z from "zod";
+import { z } from "zod";
 
-export const ExpenseCategoryEnum = z.enum([
+type TFunc = (key: string, options?: any) => string;
+
+export const getExpenseCategoryEnum = () => z.enum([
   'salaries', 
   'utilities', 
   'supplies', 
@@ -10,33 +12,32 @@ export const ExpenseCategoryEnum = z.enum([
   'other'
 ]);
 
-export const ExpenseStatusEnum = z.enum(['paid', 'pending']);
+export const getExpenseStatusEnum = () => z.enum(['paid', 'pending']);
 
-export const expenseSchema = z.object({
+export const getExpenseSchema = (t: TFunc) => z.object({
   description: z
     .string()
-    .min(3, { ar: "الوصف يجب أن يكون 3 أحرف على الأقل", en: "Description must be at least 3 characters" }[ 'ar' ]) // يمكنك تخصيص الرسالة حسب اللغة
-    .max(200),
+    .min(3, t("validation.min", { count: 3 }))
+    .max(200, t("validation.max", { count: 200 })),
     
   amount: z.coerce
     .number()
-    .positive("المبلغ يجب أن يكون أكبر من صفر")
-    .min(0.01),
+    .min(0.01, t("validation.required")),
     
-  currency: z.string().min(1, "العملة مطلوبة"),
+  currency: z.string().min(1, t("validation.required")),
   
-  category: ExpenseCategoryEnum,
+  category: getExpenseCategoryEnum(),
   
   date: z.string().refine((val) => !isNaN(Date.parse(val)), {
-    message: "تاريخ غير صالح",
+    message: t("validation.required"),
   }),
   
   paymentMethod: z.string().optional().or(z.literal('')),
   
-  status: ExpenseStatusEnum.default('pending'),
+  status: getExpenseStatusEnum().default('pending'),
 });
 
-export type ExpenseFormData = z.infer<typeof expenseSchema>;
+export type ExpenseFormData = z.infer<ReturnType<typeof getExpenseSchema>>;
 
 export interface Expense extends ExpenseFormData {
   id: string;

@@ -1,9 +1,13 @@
 import { z } from "zod";
 
-export const LoginSchema = z.object({
-    email: z.string().min(1, "Email is required").email("Invalid email format"),
-    password: z.string().min(6, { message: "Password must be at least 6 characters" }),
-    rememberMe: z.boolean().optional(),
+export const getLoginSchema = (t: (key: string, options?: any) => string) => z.object({
+  email: z.string()
+    .min(1, t("validation.required"))
+    .email(t("validation.email")),
+  password: z.string()
+    .min(6, t("validation.min", { count: 6 })),
+  rememberMe: z.boolean().optional(),
 });
 
-export type LoginInput = z.infer<typeof LoginSchema>;
+// For type safety, we can use a dummy translation for inference or export a type helper
+export type LoginInput = z.infer<ReturnType<typeof getLoginSchema>>;
