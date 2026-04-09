@@ -5,6 +5,7 @@ import { Course, Level } from '../../types/lmsCourses';
 import CourseFormFields from './components/CourseFormFields';
 import { FormProvider, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { useLocation } from 'react-router-dom';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { CourseFormData, getCourseSchema } from '../../lib/schemas/CourseSchema';
 
@@ -139,6 +140,9 @@ export default function LMSCoursesPage() {
 
   const { reset, handleSubmit } = methods;
 
+  const location = useLocation();
+  const isStudent = location.pathname.includes('/student-dashboard') || location.pathname.includes('/teacher-dashboard');
+
 
   const filtered = courses.filter(c => {
     const matchSearch = c.title.includes(search) || c.description.includes(search);
@@ -254,22 +258,24 @@ export default function LMSCoursesPage() {
           <h1 className="text-2xl font-bold text-gray-900">{t('courses_title')} </h1>
           <p className="text-gray-500 text-sm mt-1">{t('courses_subtitle')}</p>
         </div>
-        <div className="flex gap-2">
-          <button
-            onClick={() => setShowLevelsModal(true)}
-            className="flex items-center gap-2 border border-gray-200 bg-white hover:bg-gray-50 text-gray-700 px-4 py-2.5 rounded-xl font-medium transition-colors text-sm"
-          >
-            <Layers className="w-4 h-4" />
-            {t('courses_manage_levels')}
-          </button>
-          <button
-            onClick={openAdd}
-            className="flex items-center gap-2 btn-primary text-white px-5 py-2.5 rounded-xl font-medium transition-colors shadow-sm text-sm"
-          >
-            <Plus className="w-4 h-4" />
-            {t('courses_add')}
-          </button>
-        </div>
+        {!isStudent && (
+          <div className="flex gap-2">
+            <button
+              onClick={() => setShowLevelsModal(true)}
+              className="flex items-center gap-2 border border-gray-200 bg-white hover:bg-gray-50 text-gray-700 px-4 py-2.5 rounded-xl font-medium transition-colors text-sm"
+            >
+              <Layers className="w-4 h-4" />
+              {t('courses_manage_levels')}
+            </button>
+            <button
+              onClick={openAdd}
+              className="flex items-center gap-2 btn-primary text-white px-5 py-2.5 rounded-xl font-medium transition-colors shadow-sm text-sm"
+            >
+              <Plus className="w-4 h-4" />
+              {t('courses_add')}
+            </button>
+          </div>
+        )}
       </div>
 
       {/* Stats */}
@@ -378,27 +384,29 @@ export default function LMSCoursesPage() {
                     )}
 
                     {/* Actions menu */}
-                    <div className="absolute top-3 left-3" onClick={e => e.stopPropagation()}>
-                      <button
-                        onClick={() => setOpenMenuId(openMenuId === course.id ? null : course.id)}
-                        className="p-1.5 bg-white/90 hover:bg-white rounded-lg transition-colors"
-                      >
-                        <MoreVertical className="w-4 h-4 text-gray-700" />
-                      </button>
-                      {openMenuId === course.id && (
-                        <div className="absolute left-0 top-8 bg-white rounded-xl shadow-lg border border-gray-100 z-10 min-w-[140px]">
-                          <button onClick={() => { setViewCourse(course); setOpenMenuId(null); }} className="w-full flex items-center gap-2 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors">
-                            <Eye className="w-4 h-4" /> {t('courses_view')}
-                          </button>
-                          <button onClick={() => openEdit(course)} className="w-full flex items-center gap-2 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors">
-                            <Edit className="w-4 h-4" /> {t('courses_edit')}
-                          </button>
-                          <button onClick={() => handleDelete(course.id)} className="w-full flex items-center gap-2 px-3 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors">
-                            <Trash2 className="w-4 h-4" /> {t('courses_delete')}
-                          </button>
-                        </div>
-                      )}
-                    </div>
+                    {!isStudent && (
+                      <div className="absolute top-3 left-3" onClick={e => e.stopPropagation()}>
+                        <button
+                          onClick={() => setOpenMenuId(openMenuId === course.id ? null : course.id)}
+                          className="p-1.5 bg-white/90 hover:bg-white rounded-lg transition-colors"
+                        >
+                          <MoreVertical className="w-4 h-4 text-gray-700" />
+                        </button>
+                        {openMenuId === course.id && (
+                          <div className="absolute left-0 top-8 bg-white rounded-xl shadow-lg border border-gray-100 z-10 min-w-[140px]">
+                            <button onClick={() => { setViewCourse(course); setOpenMenuId(null); }} className="w-full flex items-center gap-2 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors">
+                              <Eye className="w-4 h-4" /> {t('courses_view')}
+                            </button>
+                            <button onClick={() => openEdit(course)} className="w-full flex items-center gap-2 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors">
+                              <Edit className="w-4 h-4" /> {t('courses_edit')}
+                            </button>
+                            <button onClick={() => handleDelete(course.id)} className="w-full flex items-center gap-2 px-3 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors">
+                              <Trash2 className="w-4 h-4" /> {t('courses_delete')}
+                            </button>
+                          </div>
+                        )}
+                      </div>
+                    )}
                   </div>
 
                   <div className="p-4">
@@ -441,7 +449,7 @@ export default function LMSCoursesPage() {
                   <th className="text-right px-4 py-3 text-xs font-semibold text-gray-600">{t('courses_table_subject')}</th>
                   <th className="text-right px-4 py-3 text-xs font-semibold text-gray-600">{t('courses_table_level')}</th>
                   <th className="text-right px-4 py-3 text-xs font-semibold text-gray-600">{t('courses_table_files')}</th>
-                  <th className="text-right px-4 py-3 text-xs font-semibold text-gray-600">{t('courses_table_actions')}</th>
+                  {!isStudent && <th className="text-right px-4 py-3 text-xs font-semibold text-gray-600">{t('courses_table_actions')}</th>}
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-50">
@@ -474,13 +482,15 @@ export default function LMSCoursesPage() {
                       <td className="px-4 py-3">
                         <span className="text-xs text-gray-500">{course.attachments.length} {t('file')} </span>
                       </td>
-                      <td className="px-4 py-3">
-                        <div className="flex items-center gap-1">
-                          <button onClick={() => setViewCourse(course)} className="p-1.5 icon-btn-primary rounded-lg transition-colors"><Eye className="w-4 h-4" /></button>
-                          <button onClick={() => openEdit(course)} className="p-1.5 hover:bg-gray-100 text-gray-600 rounded-lg transition-colors"><Edit className="w-4 h-4" /></button>
-                          <button onClick={() => handleDelete(course.id)} className="p-1.5 hover:bg-red-50 text-red-500 rounded-lg transition-colors"><Trash2 className="w-4 h-4" /></button>
-                        </div>
-                      </td>
+                      {!isStudent && (
+                        <td className="px-4 py-3">
+                          <div className="flex items-center gap-1">
+                            <button onClick={() => setViewCourse(course)} className="p-1.5 icon-btn-primary rounded-lg transition-colors"><Eye className="w-4 h-4" /></button>
+                            <button onClick={() => openEdit(course)} className="p-1.5 hover:bg-gray-100 text-gray-600 rounded-lg transition-colors"><Edit className="w-4 h-4" /></button>
+                            <button onClick={() => handleDelete(course.id)} className="p-1.5 hover:bg-red-50 text-red-500 rounded-lg transition-colors"><Trash2 className="w-4 h-4" /></button>
+                          </div>
+                        </td>
+                      )}
                     </tr>
                   );
                 })}

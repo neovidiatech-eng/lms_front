@@ -19,6 +19,15 @@ interface AddAssignmentModalProps {
 
 export default function AddAssignmentModal({ isOpen, onClose, onAdd, initialData }: AddAssignmentModalProps) {
   const { language, t } = useLanguage();
+
+  const mockStudents = [
+    { value: 'أحمد محمد', label: language === 'ar' ? 'أحمد محمد' : 'Ahmed Mohamed' },
+    { value: 'سارة محمود', label: language === 'ar' ? 'سارة محمود' : 'Sarah Mahmoud' },
+    { value: 'زياد علي', label: language === 'ar' ? 'زياد علي' : 'Zeyad Ali' },
+    { value: 'مريم إبراهيم', label: language === 'ar' ? 'مريم إبراهيم' : 'Maryam Ibrahim' },
+    { value: 'ياسين حسن', label: language === 'ar' ? 'ياسين حسن' : 'Yassin Hassan' },
+  ];
+
   const {
     register,
     handleSubmit,
@@ -30,12 +39,13 @@ export default function AddAssignmentModal({ isOpen, onClose, onAdd, initialData
     resolver: zodResolver(getAssignmentSchema(t)) as Resolver<AssignmentFormData>,
     defaultValues: {
       status: 'pending',
+      teacher: 'أ. محمد الأحمدي' // Default teacher name
     },
   });
 
   const text = {
     title: { ar: 'إضافة واجب جديد', en: 'Add New Assignment' },
-    student: { ar: 'الطالب', en: 'Student' },
+    student: { ar: 'اختر الطالب', en: 'Select Student' },
     teacher: { ar: 'المعلم', en: 'Teacher' },
     subject: { ar: 'المادة', en: 'Subject' },
     assignmentTitle: { ar: 'العنوان', en: 'Title' },
@@ -56,7 +66,7 @@ export default function AddAssignmentModal({ isOpen, onClose, onAdd, initialData
       } else {
         reset({
           studentName: '',
-          teacher: '',
+          teacher: 'أ. محمد الأحمدي',
           subject: '',
           title: '',
           description: '',
@@ -92,43 +102,29 @@ export default function AddAssignmentModal({ isOpen, onClose, onAdd, initialData
         </div>
 
         <form onSubmit={handleSubmit(handleOnSubmit)} className="p-6 space-y-4" dir="rtl">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2 text-right">
-              {text.student[language]}
-            </label>
-            <input
-              type="text"
-              {...register('studentName')}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent text-right"
-              dir="rtl"
-            />
-            {errors.studentName && <p className="text-red-500 text-xs mt-1">{errors.studentName.message}</p>}
-          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <CustomSelect
+                label={text.student[language]}
+                value={watch('studentName')}
+                onChange={(val) => setValue('studentName', val, { shouldValidate: true })}
+                options={mockStudents}
+              />
+              {errors.studentName && <p className="text-red-500 text-xs mt-1 text-right">{errors.studentName.message}</p>}
+            </div>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2 text-right">
-              {text.teacher[language]}
-            </label>
-            <input
-              type="text"
-              {...register('teacher')}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent text-right"
-              dir="rtl"
-            />
-            {errors.teacher && <p className="text-red-500 text-xs mt-1">{errors.teacher.message}</p>}
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2 text-right">
-              {text.subject[language]}
-            </label>
-            <input
-              type="text"
-              {...register('subject')}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent text-right"
-              dir="rtl"
-            />
-            {errors.subject && <p className="text-red-500 text-xs mt-1">{errors.subject.message}</p>}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2 text-right">
+                {text.subject[language]}
+              </label>
+              <input
+                type="text"
+                {...register('subject')}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent text-right"
+                dir="rtl"
+              />
+              {errors.subject && <p className="text-red-500 text-xs mt-1 text-right">{errors.subject.message}</p>}
+            </div>
           </div>
 
           <div>
@@ -141,7 +137,7 @@ export default function AddAssignmentModal({ isOpen, onClose, onAdd, initialData
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent text-right"
               dir="rtl"
             />
-            {errors.title && <p className="text-red-500 text-xs mt-1">{errors.title.message}</p>}
+            {errors.title && <p className="text-red-500 text-xs mt-1 text-right">{errors.title.message}</p>}
           </div>
 
           <div>
@@ -154,7 +150,7 @@ export default function AddAssignmentModal({ isOpen, onClose, onAdd, initialData
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent text-right resize-none"
               dir="rtl"
             />
-            {errors.description && <p className="text-red-500 text-xs mt-1">{errors.description.message}</p>}
+            {errors.description && <p className="text-red-500 text-xs mt-1 text-right">{errors.description.message}</p>}
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -168,7 +164,7 @@ export default function AddAssignmentModal({ isOpen, onClose, onAdd, initialData
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent text-right"
                 dir="rtl"
               />
-              {errors.dueDate && <p className="text-red-500 text-xs mt-1">{errors.dueDate.message}</p>}
+              {errors.dueDate && <p className="text-red-500 text-xs mt-1 text-right">{errors.dueDate.message}</p>}
             </div>
             <CustomSelect
               label={text.status[language]}
@@ -180,7 +176,6 @@ export default function AddAssignmentModal({ isOpen, onClose, onAdd, initialData
                 { value: 'graded', label: text.graded[language] }
               ]}
             />
-
           </div>
 
           <div className="flex gap-3 pt-4">
