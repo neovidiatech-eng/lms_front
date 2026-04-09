@@ -1,6 +1,7 @@
 import axios from "axios";
 import { baseURL } from "../consts";
 import ErrorService from "../utils/ErrorService";
+import i18n from "../../i18n";
 
 const api = axios.create({
     baseURL: baseURL,
@@ -32,15 +33,21 @@ api.interceptors.response.use(
         const message = ErrorService.parseErrorMessage(error);
 
         if (status === 401) {
-            // Handle unauthorized - clear token from both storages
-            localStorage.removeItem("token");
-            sessionStorage.removeItem("token");
-            
-            // Only redirect if we're not already on an auth page
-            const publicPages = ["/login", "/register"];
-            if (!publicPages.includes(window.location.pathname)) {
-                window.location.href = "/login";
-                ErrorService.error("Session expired. Please login again.");
+            const token = localStorage.getItem("token") || sessionStorage.getItem("token");
+
+            if (token) {
+                // If token exists but we get 401, treat it as a role/permission issue as requested
+                ErrorService.error(i18n.t("unauthorizedRoleError"));
+            } else {
+                // Handle truly unauthorized (no token) - clear storage and redirect
+                localStorage.removeItem("token");
+                sessionStorage.removeItem("token");
+
+                const publicPages = ["/login", "/register"];
+                if (!publicPages.includes(window.location.pathname)) {
+                    window.location.href = "/login";
+                    ErrorService.error(i18n.t("sessionExpiredError"));
+                }
             }
         } else if (status === 403) {
             ErrorService.error("You do not have permission to perform this action.");
@@ -58,4 +65,4 @@ api.interceptors.response.use(
     }
 );
 
-export default api;
+export default api;

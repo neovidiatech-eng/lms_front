@@ -5,6 +5,7 @@ import CustomSelect from '../ui/CustomSelect';
 import { StudentFormData, studentSchema } from '../../lib/schemas/StudentSchema';
 import { Controller, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { usePlans } from '../../hooks/usePlans';
 
 interface EditStudentModalProps {
   isOpen: boolean;
@@ -20,6 +21,7 @@ export default function EditStudentModal({
   studentData,
 }: EditStudentModalProps) {
   const { language } = useLanguage();
+  const { data: plansData } = usePlans();
 
   // نستخدم values للتحديث التلقائي عند تغير studentData
   const { control, handleSubmit, register, reset, formState: { errors } } = useForm<StudentFormData>({
@@ -74,8 +76,11 @@ export default function EditStudentModal({
   ];
 
   const planOptions = [
-    { value: 'secondary_1', label: language === 'ar' ? 'ثانية القصيرة' : 'Secondary Short' },
-    { value: 'prep_3', label: language === 'ar' ? 'ثالثة إعدادي' : 'Prep 3' },
+    { value: '', label: language === 'ar' ? 'بدون خطة' : 'No Plan' },
+    ...(plansData?.data || []).map((p: any) => ({
+      value: p.id,
+      label: language === 'ar' ? p.name_ar : p.name_en,
+    }))
   ];
 
   const statusOptions = [

@@ -4,6 +4,7 @@ import CustomSelect from '../ui/CustomSelect';
 import { StudentFormData, studentSchema } from '../../lib/schemas/StudentSchema';
 import { Controller, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { usePlans } from '../../hooks/usePlans';
 
 interface AddStudentModalProps {
   isOpen: boolean;
@@ -13,6 +14,7 @@ interface AddStudentModalProps {
 
 export default function AddStudentModal({ isOpen, onClose, onSubmit }: AddStudentModalProps) {
   const { language } = useLanguage();
+  const { data: plansData } = usePlans();
   const { register, handleSubmit, control, reset, formState: { errors } } = useForm<StudentFormData>({
     resolver: zodResolver(studentSchema),
     defaultValues: {
@@ -38,11 +40,14 @@ export default function AddStudentModal({ isOpen, onClose, onSubmit }: AddStuden
     { code: '+965', country: 'الكويت', countryEn: 'Kuwait' },
   ];
 
-  const plans = [
-    { id: '', label: 'بدون خطة', labelEn: 'No Plan' },
-    { id: 'secondary_1', label: 'ثانية القصيرة', labelEn: 'Secondary Short' },
-    { id: 'secondary_2', label: 'ثانية التفاضلية', labelEn: 'Secondary Calculus' },
-    { id: 'prep_3', label: 'ثالثة إعدادي', labelEn: 'Preparatory 3' },
+  const plans = plansData?.data || [];
+
+  const planOptions = [
+    { value: '', label: language === 'ar' ? 'بدون خطة' : 'No Plan' },
+    ...plans.map((p: any) => ({
+      value: p.id,
+      label: language === 'ar' ? p.name_ar : p.name_en,
+    }))
   ];
 
   const countries = [
@@ -85,10 +90,7 @@ export default function AddStudentModal({ isOpen, onClose, onSubmit }: AddStuden
     label: language === 'ar' ? c.label : c.labelEn,
   }));
 
-  const planOptions = plans.map((p) => ({
-    value: p.id,
-    label: language === 'ar' ? p.label : p.labelEn,
-  }));
+
 
   const statusOptions = statuses.map((s) => ({
     value: s.id,

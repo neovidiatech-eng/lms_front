@@ -133,6 +133,8 @@
     "deleteConfirmStudent": "هل أنت متأكد من حذف هذا الطالب؟",
     "errorDeletingStudent": "حدث خطأ أثناء حذف الطالب",
     "plan": "الخطة",
+    "noPlan": "بدون خطة",
+    "hours": "الساعات",
     "sessionCalendar": "تقويم الحصص",
     "sessionCalendarSubtitle": "إدارة وتتبع جميع الحصص الدراسية",
     "totalSessions": "إجمالي الحصص",
@@ -248,5 +250,7 @@
     "courses_empty": "لا توجد كورسات حالياً",
     "courses_filter": " جرب تغيير فلتر البحث",
     "profile": "الملف الشخصى",
-    "logout": "تسجيل الخروج"
+    "logout": "تسجيل الخروج",
+    "unauthorizedRoleError": "هذا الإجراء غير صالح لدورك الحالي.",
+    "sessionExpiredError": "انتهت الجلسة. يرجى تسجيل الدخول مرة أخرى."
 }

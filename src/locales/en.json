@@ -133,6 +133,8 @@
     "deleteConfirmStudent": "Are you sure you want to delete this student?",
     "errorDeletingStudent": "Error deleting student",
     "plan": "Plan",
+    "noPlan": "No Plan",
+    "hours": "Hours",
     "sessionCalendar": "Session Calendar",
     "sessionCalendarSubtitle": "Manage and track all study sessions",
     "totalSessions": "Total Sessions",
@@ -245,5 +247,7 @@
     "courses_table_actions": "Actions",
     "courses_empty": "No courses available at the moment",
     "profile": "profile",
-    "logout": "logout"
+    "logout": "logout",
+    "unauthorizedRoleError": "This action is not valid for your current role.",
+    "sessionExpiredError": "Session expired. Please login again."
 }

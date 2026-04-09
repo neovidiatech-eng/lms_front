@@ -7,7 +7,7 @@ import EditStudentModal from '../components/modals/EditStudentModal';
 import Pagination from '../components/ui/Pagination';
 import CustomSelect from '../components/ui/CustomSelect';
 import { useTranslation } from 'react-i18next';
-import { useStudents } from '../hooks/useStudents';
+import { useStudents, useCreateStudent, useUpdateStudent, useDeleteStudent } from '../hooks/useStudents';
 import { Student } from '../types/student';
 
 
@@ -26,6 +26,9 @@ export default function Students() {
 
   const { data: apiResponse } = useStudents();
   const studentsList = apiResponse?.data || [];
+  const { mutateAsync: createStudent } = useCreateStudent();
+  const { mutateAsync: updateStudent } = useUpdateStudent();
+  const { mutateAsync: deleteStudent } = useDeleteStudent();
 
   const stats = [
     {
@@ -58,7 +61,8 @@ export default function Students() {
     {
       id: 'plans',
       label: t('numberOfPlans'),
-      value: 5,
+      value: 3
+      ,
       icon: ClipboardList,
       bgColor: 'bg-purple-50',
       iconColor: 'text-purple-600',
@@ -115,7 +119,7 @@ export default function Students() {
       )
     ) {
       try {
-        console.log('Deleting student:', studentId);
+        await deleteStudent(studentId);
         alert(t('studentDeletedSuccess'));
       } catch (error) {
         console.error('Error deleting student:', error);
@@ -219,16 +223,16 @@ export default function Students() {
             <thead className="bg-gray-50 border-b border-gray-200">
               <tr>
                 <th className="px-6 py-4 text-right text-sm font-semibold text-gray-700">
-                  {t('studentLabel')}
+                  {t('studentInfo')}
                 </th>
                 <th className="px-6 py-4 text-right text-sm font-semibold text-gray-700">
-                  {t('email')}
-                </th>
-                <th className="px-6 py-4 text-right text-sm font-semibold text-gray-700">
-                  {t('phoneNumber')}
+                  {t('phone')}
                 </th>
                 <th className="px-6 py-4 text-right text-sm font-semibold text-gray-700">
                   {t('plan')}
+                </th>
+                <th className="px-6 py-4 text-right text-sm font-semibold text-gray-700">
+                  {t('hours')}
                 </th>
                 <th className="px-6 py-4 text-right text-sm font-semibold text-gray-700">
                   {t('country')}
@@ -246,8 +250,8 @@ export default function Students() {
                 <tr key={student.id} className="hover:bg-gray-50 transition-colors">
                   <td className="px-6 py-4">
                     <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center flex-shrink-0">
-                        <span className="text-gray-600 text-sm font-medium">
+                      <div className="w-10 h-10 rounded-full bg-blue-50 flex items-center justify-center flex-shrink-0">
+                        <span className="text-blue-600 text-sm font-semibold">
                           {student.name.charAt(0).toUpperCase()}
                         </span>
                       </div>
@@ -258,30 +262,44 @@ export default function Students() {
                     </div>
                   </td>
                   <td className="px-6 py-4">
-                    <span className="text-sm text-gray-600">{student.email}</span>
-                  </td>
-                  <td className="px-6 py-4">
                     <WhatsAppPhone
                       phone={`${student.code_country} ${student.phone}`}
                       className="text-sm text-gray-900"
                     />
                   </td>
                   <td className="px-6 py-4">
-                    <span className="inline-flex px-3 py-1 badge-primary rounded-full text-xs font-medium">
-                      {student.planId}
+                    <span className="inline-flex px-3 py-1 bg-purple-50 text-purple-700 rounded-full text-xs font-medium border border-purple-100">
+                      {student.planId || t('noPlan')}
                     </span>
+                  </td>
+                  <td className="px-6 py-4">
+                    <div className="text-right">
+                      <div className="text-sm font-medium text-gray-900">
+                        {student.hours_attended} / {student.hours}
+                      </div>
+                      <div className="w-24 h-1.5 bg-gray-100 rounded-full mt-1 overflow-hidden ml-auto">
+                        <div
+                          className="h-full bg-blue-500 rounded-full transition-all duration-500"
+                          style={{ width: `${student.hours > 0 ? (student.hours_attended / student.hours) * 100 : 0}%` }}
+                        />
+                      </div>
+                    </div>
                   </td>
                   <td className="px-6 py-4">
                     <span className="text-sm text-gray-600">{student.country}</span>
                   </td>
                   <td className="px-6 py-4">
                     <span
-                      className={`inline-flex px-3 py-1 rounded-full text-xs font-medium ${student.status === 'pending'
+                      className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${student.status === 'active'
                         ? 'bg-green-100 text-green-700'
-                        : 'bg-red-100 text-red-700'
+                        : student.status === 'pending'
+                          ? 'bg-orange-100 text-orange-700'
+                          : 'bg-gray-100 text-gray-700'
                         }`}
                     >
-                      ✓ {t('activeLabel')}
+                      <span className={`w-1.5 h-1.5 rounded-full mr-1.5 ${student.status === 'active' ? 'bg-green-500' : student.status === 'pending' ? 'bg-orange-500' : 'bg-gray-500'
+                        }`} />
+                      {student.status === 'active' ? t('active') : student.status === 'pending' ? t('pending') : t('inactive')}
                     </span>
                   </td>
                   <td className="px-6 py-4">
@@ -328,9 +346,33 @@ export default function Students() {
       <AddStudentModal
         isOpen={isAddModalOpen}
         onClose={() => setIsAddModalOpen(false)}
-        onSubmit={(studentData) => {
-          console.log('New student data:', studentData);
-          alert(t('studentAddedSuccess'));
+        onSubmit={async (studentData) => {
+          try {
+            const payload: any = {
+              name: studentData.name,
+              email: studentData.email,
+              phone: studentData.countryCode + studentData.phone.replace(/^0/, ''),
+              phone_code: studentData.countryCode,
+              birth_date: (studentData.birthDate && studentData.birthDate !== "") ? new Date(studentData.birthDate).toISOString() : null,
+              gender: studentData.gender,
+              country: studentData.country,
+              active: studentData.status === 'active',
+            };
+
+            // Only include planId if it's a valid GUID string (not empty)
+            if (studentData.plan && studentData.plan.trim() !== "") {
+              payload.planId = studentData.plan;
+            }
+
+            if (studentData.password) {
+              payload.password = studentData.password;
+            }
+            await createStudent(payload);
+            setIsAddModalOpen(false);
+            alert(t('studentAddedSuccess'));
+          } catch (error) {
+            console.error('Error adding student:', error);
+          }
         }}
       />
 
@@ -351,17 +393,41 @@ export default function Students() {
               email: selectedStudent.email,
               phone: selectedStudent.phone,
               countryCode: selectedStudent.code_country,
-              country: selectedStudent.country === 'مصر' ? 'egypt' : 'saudi',
-              status: (selectedStudent.status === 'pending' ? 'inactive' : 'active') as 'active' | 'inactive',
-              gender: 'male',
-              plan: 'secondary_1',
-              birthDate: '',
+              country: selectedStudent.country ? selectedStudent.country.toLowerCase() : 'egypt',
+              status: (selectedStudent.active ? 'active' : 'inactive') as 'active' | 'inactive',
+              gender: selectedStudent.gender || 'male',
+              plan: selectedStudent.planId || '',
+              birthDate: selectedStudent.birth_date ? selectedStudent.birth_date.split('T')[0] : '',
             }
             : null
         }
-        onSubmit={(updatedData) => {
-          console.log('Saved:', updatedData);
-          setIsEditModalOpen(false);
+        onSubmit={async (updatedData) => {
+          try {
+            const payload: any = {
+              name: updatedData.name,
+              // Backend expects combined phone and separate phone_code
+              phone: updatedData.countryCode + updatedData.phone.replace(/^0/, ''),
+              phone_code: updatedData.countryCode,
+              country: updatedData.country,
+              birth_date: (updatedData.birthDate && updatedData.birthDate !== "") ? new Date(updatedData.birthDate).toISOString() : null,
+              gender: updatedData.gender,
+              active: updatedData.status === 'active',
+            };
+
+            if (updatedData.plan && updatedData.plan.trim() !== "") {
+              payload.planId = updatedData.plan;
+            } else {
+              payload.planId = null;
+            }
+
+            if (updatedData.password) {
+              payload.password = updatedData.password;
+            }
+            await updateStudent({ id: updatedData.id, data: payload });
+            setIsEditModalOpen(false);
+          } catch (error) {
+            console.error('Error updating student:', error);
+          }
         }}
       />
     </div>

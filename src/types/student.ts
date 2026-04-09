@@ -1,4 +1,4 @@
-export type StudentStatus = 'pending';
+export type StudentStatus = 'pending' | 'active' | 'inactive';
 
 export interface Student {
     id: string;

@@ -1,6 +1,7 @@
 import { X } from 'lucide-react';
 import { useLanguage } from '../../contexts/LanguageContext';
 import WhatsAppPhone from '../ui/WhatsAppPhone';
+import { useTranslation } from 'react-i18next';
 
 interface ViewStudentModalProps {
   isOpen: boolean;
@@ -10,6 +11,7 @@ interface ViewStudentModalProps {
 
 export default function ViewStudentModal({ isOpen, onClose, studentData }: ViewStudentModalProps) {
   const { language } = useLanguage();
+  const { t } = useTranslation();
 
   if (!isOpen || !studentData) return null;
 
@@ -61,7 +63,7 @@ export default function ViewStudentModal({ isOpen, onClose, studentData }: ViewS
                   {language === 'ar' ? 'رقم الهاتف' : 'Phone Number'}
                 </label>
                 <WhatsAppPhone
-                  phone={`${studentData.countryCode} ${studentData.phone}`}
+                  phone={`${studentData.code_country} ${studentData.phone}`}
                   className="text-base text-gray-900"
                 />
               </div>
@@ -71,8 +73,8 @@ export default function ViewStudentModal({ isOpen, onClose, studentData }: ViewS
                 <label className="text-sm font-medium text-gray-500 block mb-1">
                   {language === 'ar' ? 'الخطة' : 'Plan'}
                 </label>
-                <span className="inline-flex px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm font-medium">
-                  {studentData.grade}
+                <span className="inline-flex px-3 py-1 bg-purple-100 text-purple-700 rounded-full text-sm font-medium">
+                  {studentData.planId || t('noPlan')}
                 </span>
               </div>
 
@@ -92,17 +94,32 @@ export default function ViewStudentModal({ isOpen, onClose, studentData }: ViewS
                 <span
                   className={`inline-flex px-3 py-1 rounded-full text-sm font-medium ${studentData.status === 'active'
                       ? 'bg-green-100 text-green-700'
-                      : 'bg-red-100 text-red-700'
+                      : studentData.status === 'pending'
+                        ? 'bg-orange-100 text-orange-700'
+                        : 'bg-gray-100 text-gray-700'
                     }`}
                 >
                   {studentData.status === 'active'
-                    ? language === 'ar'
-                      ? 'نشط'
-                      : 'Active'
-                    : language === 'ar'
-                      ? 'متوقف'
-                      : 'Inactive'}
+                    ? t('active')
+                    : studentData.status === 'pending'
+                      ? t('pending')
+                      : t('inactive')}
                 </span>
+              </div>
+
+              {/* Hours Info */}
+              <div className="text-right">
+                <label className="text-sm font-medium text-gray-500 block mb-1">
+                  {t('hours')}
+                </label>
+                <div className="space-y-1">
+                  <p className="text-base text-gray-900">
+                    {studentData.hours_attended} / {studentData.hours} {t('minutes')}
+                  </p>
+                  <p className="text-xs text-gray-500">
+                    {language === 'ar' ? 'المتبقي:' : 'Remaining:'} {studentData.hours_remaining}
+                  </p>
+                </div>
               </div>
 
               {/* Student ID */}

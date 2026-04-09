@@ -1,1 +1,1 @@
-export const baseURL = "http://46.21.250.194:3001"
+export const baseURL = "https://perfect-due.com"
