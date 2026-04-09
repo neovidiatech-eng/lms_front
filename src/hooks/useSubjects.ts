@@ -2,10 +2,17 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { addSubject, deleteSubject, getSubjects, searchSubject, updateSubject } from "../services/SubjectsServices"
 import { Subject } from "../types/subject";
 
-export const useSubjects = (search: string) => {
+export const useSubjects = () => {
+    return useQuery({
+        queryKey: ["subjects"],
+        queryFn: () => getSubjects(),
+    });
+};
+
+export const useSearchSubject = (search: string) => {
     return useQuery({
         queryKey: ["subjects", search],
-        queryFn: () => search ? searchSubject(search) : getSubjects(),
+        queryFn: () => searchSubject(search),
     });
 };
 

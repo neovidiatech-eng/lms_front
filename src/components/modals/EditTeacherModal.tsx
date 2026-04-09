@@ -1,21 +1,14 @@
 import { X, Users } from 'lucide-react';
-import { useEffect } from 'react';
+import { useEffect, useMemo } from 'react';
 import { useLanguage } from '../../contexts/LanguageContext';
 import CustomSelect from '../ui/CustomSelect';
 import { TeacherFormData, getTeacherSchema } from '../../lib/schemas/TeacherSchema';
 import { Controller, Resolver, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-
-interface Teacher {
-  id: string;
-  name: string;
-  email: string;
-  phone: string;
-  amount: number;
-  currency: string;
-  status: 'active' | 'inactive';
-  subject: string;
-}
+import { Teacher } from '../../types/teachers';
+import { useCurrency } from '../../hooks/useCurrency';
+import { useSubjects } from '../../hooks/useSubjects';
+import { CustomCheckbox } from '../ui/CustomCheckbox';
 
 interface EditTeacherModalProps {
   isOpen: boolean;
@@ -26,31 +19,48 @@ interface EditTeacherModalProps {
 
 export default function EditTeacherModal({ isOpen, onClose, onSubmit, teacher }: EditTeacherModalProps) {
   const { language, t } = useLanguage();
+  const { data: currenciesData } = useCurrency();
+  const { data: subjectsData, isLoading: isLoadingSubjects } = useSubjects();
+
   const { register, handleSubmit, setValue, watch, control, reset, formState: { errors }, } = useForm<TeacherFormData>({
     resolver: zodResolver(getTeacherSchema(t)) as Resolver<TeacherFormData>,
+  });
 
-  })
-
+  const currencyOptions = useMemo(() => {
+    if (!currenciesData?.currencies) return [];
+    return currenciesData.currencies.map(c => ({
+      value: c.id,
+      label: language === 'ar' ? `${c.name_ar} (${c.symbol})` : `${c.name_en} (${c.code})`
+    }));
+  }, [currenciesData, language]);
 
   useEffect(() => {
     if (teacher) {
-      const subjectsArray = teacher.subject.split('،').map(s => s.trim());
+      console.log("==> EditTeacherModal Mount:", teacher);
+
+      // Extract subject IDs directly from the API response
+      // Handles both cases: subject_ids being an array of objects or an array of GUIDs
+      const subjectsArray = teacher.subject_ids || (teacher as any).subjects || (teacher as any).subjectIds || (teacher as any).Subjects || [];
+      const subjectIds = subjectsArray.map((s: any) => {
+        if (typeof s === 'object') return s?.id;
+        return String(s);
+      }).filter(Boolean);
+
+      const currencyRaw = (teacher as any).currency || teacher.currency_id || (teacher as any).currencyId;
+      const currencyId = typeof currencyRaw === 'object' ? currencyRaw?.id : currencyRaw;
+      
+      console.log("==> Extracted Data:", { subjectIds, currencyId });
+
       reset({
         name: teacher.name,
         email: teacher.email,
         phone: teacher.phone,
         password: '',
-        hourlyRate: teacher.amount,
-        currency: teacher.currency,
-        gender: 'male',
-        status: teacher.status,
-        subjects: {
-          quran: subjectsArray.some(s => s.includes('القرآن')),
-          math: subjectsArray.some(s => s.includes('الرياضيات')),
-          arabic: subjectsArray.some(s => s.includes('العربية')),
-          math2: subjectsArray.some(s => s.includes('تفسيت 2')),
-          science: subjectsArray.some(s => s.includes('تفسيت') && !s.includes('2')),
-        },
+        hourlyRate: teacher.hour_price || (teacher as any).hourPrice || 0,
+        currency: currencyId || '',
+        gender: teacher.gender || 'male',
+        status: teacher.active ? 'active' : 'inactive',
+        subjects: subjectIds,
       });
     }
   }, [teacher, reset]);
@@ -61,13 +71,15 @@ export default function EditTeacherModal({ isOpen, onClose, onSubmit, teacher }:
   };
 
   if (!isOpen || !teacher) return null;
-  const subjectsValue = watch('subjects');
-  const currencies = [
-    { id: 'EGP', label: 'EGP', labelEn: 'EGP' },
-    { id: 'SAR', label: 'ر.س', labelEn: 'SAR' },
-    { id: 'AED', label: 'د.إ', labelEn: 'AED' },
-    { id: 'KWD', label: 'د.ك', labelEn: 'KWD' },
-  ];
+  const subjectsValue = watch('subjects') || [];
+
+  const handleSubjectToggle = (id: string, checked: boolean) => {
+    if (checked) {
+      setValue('subjects', [...subjectsValue, id], { shouldValidate: true });
+    } else {
+      setValue('subjects', subjectsValue.filter(s => s !== id), { shouldValidate: true });
+    }
+  };
 
   const genders = [
     { id: 'male', label: 'ذكر', labelEn: 'Male' },
@@ -77,14 +89,6 @@ export default function EditTeacherModal({ isOpen, onClose, onSubmit, teacher }:
   const statuses = [
     { id: 'active', label: 'نشط', labelEn: 'Active' },
     { id: 'inactive', label: 'غير نشط', labelEn: 'Inactive' },
-  ];
-
-  const subjectsList = [
-    { id: 'quran', label: 'القرآن الكريم', labelEn: 'Quran' },
-    { id: 'math', label: 'الرياضيات', labelEn: 'Mathematics' },
-    { id: 'arabic', label: 'اللغة العربية', labelEn: 'Arabic Language' },
-    { id: 'science', label: 'تفسيت', labelEn: 'Science' },
-    { id: 'math2', label: 'تفسيت 2', labelEn: 'Mathematics 2' },
   ];
 
   return (
@@ -112,7 +116,7 @@ export default function EditTeacherModal({ isOpen, onClose, onSubmit, teacher }:
               {/* Email */}
               <div className="text-right">
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  {language === 'ar' ? 'البريد الإلكتروني' : 'Email'} *
+                  {t('email')} *
                 </label>
                 <input
                   type="email"
@@ -127,7 +131,7 @@ export default function EditTeacherModal({ isOpen, onClose, onSubmit, teacher }:
               {/* Name */}
               <div className="text-right">
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  {language === 'ar' ? 'الاسم' : 'Name'} *
+                  {t('fullName')} *
                 </label>
                 <input
                   type="text"
@@ -145,7 +149,7 @@ export default function EditTeacherModal({ isOpen, onClose, onSubmit, teacher }:
               {/* Password */}
               <div className="text-right">
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  {language === 'ar' ? 'كلمة المرور' : 'Password'}
+                  {t('password')}
                 </label>
                 <input
                   type="password"
@@ -163,7 +167,7 @@ export default function EditTeacherModal({ isOpen, onClose, onSubmit, teacher }:
               {/* Phone */}
               <div className="text-right">
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  {language === 'ar' ? 'الهاتف' : 'Phone'} *
+                  {t('phoneNumber')} *
                 </label>
                 <input
                   type="tel"
@@ -184,9 +188,9 @@ export default function EditTeacherModal({ isOpen, onClose, onSubmit, teacher }:
                 control={control}
                 render={({ field }) => (
                   <CustomSelect
-                    label={language === 'ar' ? 'العملة' : 'Currency'}
+                    label={t('currency')}
                     value={field.value}
-                    options={currencies.map(c => ({ value: c.id, label: language === 'ar' ? c.label : c.labelEn }))}
+                    options={currencyOptions}
                     onChange={field.onChange}
                   />
                 )}
@@ -216,7 +220,7 @@ export default function EditTeacherModal({ isOpen, onClose, onSubmit, teacher }:
                 control={control}
                 render={({ field }) => (
                   <CustomSelect
-                    label={language === 'ar' ? 'الحالة' : 'Status'}
+                    label={t('status')}
                     value={field.value}
                     options={statuses.map(s => ({ value: s.id, label: language === 'ar' ? s.label : s.labelEn }))}
                     onChange={field.onChange}
@@ -244,24 +248,28 @@ export default function EditTeacherModal({ isOpen, onClose, onSubmit, teacher }:
                 {language === 'ar' ? 'المواد' : 'Subjects'}
               </label>
               <div className="bg-gray-50 rounded-xl p-4 border border-gray-200">
-                <div className="grid grid-cols-2 gap-3">
-                  {subjectsList.map((subject) => (
-                    <label
-                      key={subject.id}
-                      className="flex items-center gap-3 cursor-pointer hover:bg-white p-3 rounded-lg transition-colors"
-                    >
-                      <input
-                        type="checkbox"
-                        checked={!!subjectsValue?.[subject.id as keyof typeof subjectsValue]}
-                        onChange={(e) => setValue(`subjects.${subject.id as keyof TeacherFormData['subjects']}`, e.target.checked, { shouldValidate: true })}
-                        className="w-5 h-5 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
-                      />
-                      <span className="text-sm text-gray-700 flex-1 text-right">
-                        {language === 'ar' ? subject.label : subject.labelEn}
-                      </span>
-                    </label>
-                  ))}
-                </div>
+                {isLoadingSubjects ? (
+                  <div className="flex justify-center p-4">
+                    <div className="animate-spin rounded-full h-6 w-6 border-t-2 border-primary"></div>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-2 gap-3">
+                    {(subjectsData?.subjects || []).map((subject) => (
+                      <label
+                        key={subject.id}
+                        className="flex items-center gap-3 cursor-pointer hover:bg-white p-3 rounded-lg transition-colors"
+                      >
+                        <CustomCheckbox
+                          checked={subjectsValue.includes(subject.id)}
+                          onChange={(checked) => handleSubjectToggle(subject.id, checked)}
+                        />
+                        <span className="text-sm text-gray-700 flex-1 text-right">
+                          {language === 'ar' ? subject.name_ar : (subject.name_en || subject.name_ar)}
+                        </span>
+                      </label>
+                    ))}
+                  </div>
+                )}
                 {errors.subjects && <p className="text-red-500 text-xs mt-2">{errors.subjects.message}</p>}
               </div>
             </div>
