@@ -2,11 +2,12 @@ import { X } from 'lucide-react';
 import { useLanguage } from '../../contexts/LanguageContext';
 import WhatsAppPhone from '../ui/WhatsAppPhone';
 import { useTranslation } from 'react-i18next';
+import { Student } from '../../types/student';
 
 interface ViewStudentModalProps {
   isOpen: boolean;
   onClose: () => void;
-  studentData: any;
+  studentData: Student | null;
 }
 
 export default function ViewStudentModal({ isOpen, onClose, studentData }: ViewStudentModalProps) {
@@ -38,12 +39,12 @@ export default function ViewStudentModal({ isOpen, onClose, studentData }: ViewS
             <div className="flex items-center gap-4 pb-6 border-b border-gray-200">
               <div className="w-20 h-20 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0">
                 <span className="text-2xl font-bold text-blue-600">
-                  {studentData.name.charAt(0).toUpperCase()}
+                  {studentData.user.name.charAt(0).toUpperCase()}
                 </span>
               </div>
               <div className="text-right flex-1">
-                <h3 className="text-2xl font-bold text-gray-900 mb-1">{studentData.name}</h3>
-                <p className="text-gray-600">{studentData.email}</p>
+                <h3 className="text-2xl font-bold text-gray-900 mb-1">{studentData.user.name}</h3>
+                <p className="text-gray-600">{studentData.user.email}</p>
               </div>
             </div>
 
@@ -54,7 +55,7 @@ export default function ViewStudentModal({ isOpen, onClose, studentData }: ViewS
                 <label className="text-sm font-medium text-gray-500 block mb-1">
                   {language === 'ar' ? 'البريد الإلكتروني' : 'Email'}
                 </label>
-                <p className="text-base text-gray-900">{studentData.email}</p>
+                <p className="text-base text-gray-900">{studentData.user.email}</p>
               </div>
 
               {/* Phone */}
@@ -63,7 +64,7 @@ export default function ViewStudentModal({ isOpen, onClose, studentData }: ViewS
                   {language === 'ar' ? 'رقم الهاتف' : 'Phone Number'}
                 </label>
                 <WhatsAppPhone
-                  phone={`${studentData.code_country} ${studentData.phone}`}
+                  phone={`${studentData.user.code_country} ${studentData.user.phone}`}
                   className="text-base text-gray-900"
                 />
               </div>
@@ -93,10 +94,10 @@ export default function ViewStudentModal({ isOpen, onClose, studentData }: ViewS
                 </label>
                 <span
                   className={`inline-flex px-3 py-1 rounded-full text-sm font-medium ${studentData.status === 'active'
-                      ? 'bg-green-100 text-green-700'
-                      : studentData.status === 'pending'
-                        ? 'bg-orange-100 text-orange-700'
-                        : 'bg-gray-100 text-gray-700'
+                    ? 'bg-green-100 text-green-700'
+                    : studentData.status === 'pending'
+                      ? 'bg-orange-100 text-orange-700'
+                      : 'bg-gray-100 text-gray-700'
                     }`}
                 >
                   {studentData.status === 'active'

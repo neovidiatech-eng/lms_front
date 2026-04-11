@@ -25,7 +25,8 @@ export default function Students() {
   const itemsPerPage = 7;
 
   const { data: apiResponse } = useStudents();
-  const studentsList = apiResponse?.data || [];
+  const rawData: any = apiResponse?.data;
+  const studentsList: Student[] = Array.isArray(rawData) ? rawData : (rawData?.students || rawData?.data || []);
   const { mutateAsync: createStudent } = useCreateStudent();
   const { mutateAsync: updateStudent } = useUpdateStudent();
   const { mutateAsync: deleteStudent } = useDeleteStudent();
@@ -84,9 +85,9 @@ export default function Students() {
 
   const filteredStudents = studentsList.filter(student => {
     const matchesSearch =
-      student.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      student.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      student.phone.includes(searchTerm);
+      student.user.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      student.user.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      student.user.phone?.includes(searchTerm);
 
     const matchesGrade = selectedGrade === 'all' || student.planId === selectedGrade;
     const matchesCountry = selectedCountry === 'all' || student.country === selectedCountry;
@@ -252,18 +253,18 @@ export default function Students() {
                     <div className="flex items-center gap-3">
                       <div className="w-10 h-10 rounded-full bg-blue-50 flex items-center justify-center flex-shrink-0">
                         <span className="text-blue-600 text-sm font-semibold">
-                          {student.name.charAt(0).toUpperCase()}
+                          {student.user.name ? student.user.name.charAt(0).toUpperCase() : '?'}
                         </span>
                       </div>
                       <div className="text-right">
-                        <div className="font-medium text-gray-900">{student.name}</div>
-                        <div className="text-xs text-gray-500">{student.email}</div>
+                        <div className="font-medium text-gray-900">{student.user.name}</div>
+                        <div className="text-xs text-gray-500">{student.user.email}</div>
                       </div>
                     </div>
                   </td>
                   <td className="px-6 py-4">
                     <WhatsAppPhone
-                      phone={`${student.code_country} ${student.phone}`}
+                      phone={`${student.user.code_country} ${student.user.phone}`}
                       className="text-sm text-gray-900"
                     />
                   </td>
@@ -389,10 +390,10 @@ export default function Students() {
           selectedStudent
             ? {
               id: selectedStudent.id,
-              name: selectedStudent.name,
-              email: selectedStudent.email,
-              phone: selectedStudent.phone,
-              countryCode: selectedStudent.code_country,
+              name: selectedStudent.user.name,
+              email: selectedStudent.user.email,
+              phone: selectedStudent.user.phone,
+              countryCode: selectedStudent.user.code_country,
               country: selectedStudent.country ? selectedStudent.country.toLowerCase() : 'egypt',
               status: (selectedStudent.active ? 'active' : 'inactive') as 'active' | 'inactive',
               gender: selectedStudent.gender || 'male',

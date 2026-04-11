@@ -45,8 +45,7 @@ const queryClient = new QueryClient({
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(() => {
-    return true;
-    //!!localStorage.getItem("token") || !!sessionStorage.getItem("token");
+    return !!localStorage.getItem("token") || !!sessionStorage.getItem("token");
   });
   const { i18n } = useTranslation();
 

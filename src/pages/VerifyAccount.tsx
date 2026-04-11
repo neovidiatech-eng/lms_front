@@ -41,7 +41,7 @@ export default function VerifyAccount({ onVerifySuccess }: VerifyAccountProps) {
       message.success(t("verifySuccess") || "Account verified successfully");
       sessionStorage.removeItem("verify_email");
       onVerifySuccess();
-      navigate("/login");
+      navigate("/dashboard");
     } catch (error) {
       console.error("Account verification failed:", error);
     }
