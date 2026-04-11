@@ -78,16 +78,13 @@ export default function AddTeacherModal({ isOpen, onClose, onSubmit }: AddTeache
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
       <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh]  overflow-y-auto no-scrollbar">
         {/* Header */}
-        <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between rounded-t-2xl">
-          <button
-            onClick={onClose}
-            className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
-          >
-            <X className="w-5 h-5 text-gray-500" />
+        <div className="sticky top-0 bg-primary px-6 py-4 flex items-center justify-between rounded-t-2xl">
+          <button onClick={onClose} className="p-2 hover:bg-white/20 rounded-lg transition-colors">
+            <X className="w-5 h-5 text-white/80" />
           </button>
-          <h2 className="text-xl font-bold text-gray-900 flex items-center gap-2">
+          <h2 className="text-xl font-bold text-white flex items-center gap-2">
             <Users className="w-6 h-6" />
-            <span>{language === 'ar' ? 'إضافة معلم جديد' : 'Add New Teacher'}</span>
+            <span>{t('addTeacher')}</span>
           </h2>
         </div>
 
@@ -99,7 +96,7 @@ export default function AddTeacherModal({ isOpen, onClose, onSubmit }: AddTeache
               {/* Email */}
               <div className="text-right">
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  {language === 'ar' ? 'البريد الإلكتروني' : 'Email'} *
+                  {t('email')} *
                 </label>
                 <input
                   type="email"
@@ -114,11 +111,11 @@ export default function AddTeacherModal({ isOpen, onClose, onSubmit }: AddTeache
               {/* Name */}
               <div className="text-right">
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  {language === 'ar' ? 'الاسم' : 'Name'} *
+                  {t('name')} *
                 </label>
                 <input
                   type="text"
-                  placeholder={language === 'ar' ? 'الاسم' : 'Name'}
+                  placeholder={t('name')}
                   {...register('name')}
                   className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary text-right"
                   dir="rtl"
@@ -132,7 +129,7 @@ export default function AddTeacherModal({ isOpen, onClose, onSubmit }: AddTeache
               {/* Password */}
               <div className="text-right">
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  {language === 'ar' ? 'كلمة المرور' : 'Password'} *
+                  {t('password')} *
                 </label>
                 <input
                   type="password"
@@ -147,7 +144,7 @@ export default function AddTeacherModal({ isOpen, onClose, onSubmit }: AddTeache
               {/* Phone */}
               <div className="text-right">
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  {language === 'ar' ? 'الهاتف' : 'Phone'} *
+                  {t('phone')} *
                 </label>
                 <input
                   type="tel"
@@ -168,7 +165,7 @@ export default function AddTeacherModal({ isOpen, onClose, onSubmit }: AddTeache
                 control={control}
                 render={({ field }) => (
                   <CustomSelect
-                    label={language === 'ar' ? 'العملة' : 'Currency'}
+                    label={t('currency')}
                     value={field.value}
                     options={currencyOptions}
                     onChange={field.onChange}
@@ -179,7 +176,7 @@ export default function AddTeacherModal({ isOpen, onClose, onSubmit }: AddTeache
               {/* Hourly Rate */}
               <div className="text-right">
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  {language === 'ar' ? 'سعر الساعة' : 'Hourly Rate'}
+                  {t('hourlyRate')}
                 </label>
                 <input
                   type="number"
@@ -199,7 +196,7 @@ export default function AddTeacherModal({ isOpen, onClose, onSubmit }: AddTeache
                 control={control}
                 render={({ field }) => (
                   <CustomSelect
-                    label={language === 'ar' ? 'الحالة' : 'Status'}
+                    label={t('status')}
                     value={field.value}
                     options={statuses.map(s => ({ value: s.id, label: language === 'ar' ? s.label : s.labelEn }))}
                     onChange={field.onChange}
@@ -213,7 +210,7 @@ export default function AddTeacherModal({ isOpen, onClose, onSubmit }: AddTeache
                 control={control}
                 render={({ field }) => (
                   <CustomSelect
-                    label={language === 'ar' ? 'الجنس' : 'Gender'}
+                    label={t('gender')}
                     value={field.value}
                     options={genders.map(g => ({ value: g.id, label: language === 'ar' ? g.label : g.labelEn }))}
                     onChange={field.onChange}
@@ -225,7 +222,7 @@ export default function AddTeacherModal({ isOpen, onClose, onSubmit }: AddTeache
             {/* Subjects */}
             <div className="text-right">
               <label className="block text-sm font-medium text-gray-700 mb-3">
-                {language === 'ar' ? 'المواد' : 'Subjects'}
+                {t('subject')}
               </label>
               <div className="bg-gray-50 rounded-xl p-4 border border-gray-200">
                 {isLoadingSubjects ? (
@@ -262,13 +259,13 @@ export default function AddTeacherModal({ isOpen, onClose, onSubmit }: AddTeache
               onClick={onClose}
               className="flex-1 px-6 py-3 border border-gray-300 text-gray-700 rounded-xl hover:bg-gray-50 transition-colors font-medium"
             >
-              {language === 'ar' ? 'إلغاء' : 'Cancel'}
+              {t('cancel')}
             </button>
             <button
               type="submit"
               className="flex-1 px-6 py-3 btn-primary text-white rounded-xl transition-colors font-medium"
             >
-              {language === 'ar' ? 'إضافة معلم جديد' : 'Add Teacher'}
+              {t('addTeacher')}
             </button>
           </div>
         </form>

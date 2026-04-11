@@ -95,16 +95,13 @@ export default function EditTeacherModal({ isOpen, onClose, onSubmit, teacher }:
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
       <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh]  overflow-y-auto no-scrollbar">
         {/* Header */}
-        <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between rounded-t-2xl">
-          <button
-            onClick={onClose}
-            className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
-          >
-            <X className="w-5 h-5 text-gray-500" />
+        <div className="sticky top-0 bg-primary px-6 py-4 flex items-center justify-between rounded-t-2xl">
+          <button onClick={onClose} className="p-2 hover:bg-white/20 rounded-lg transition-colors">
+            <X className="w-5 h-5 text-white/80" />
           </button>
-          <h2 className="text-xl font-bold text-gray-900 flex items-center gap-2">
+          <h2 className="text-xl font-bold text-white flex items-center gap-2">
             <Users className="w-6 h-6" />
-            <span>{language === 'ar' ? 'تعديل بيانات المعلم' : 'Edit Teacher'}</span>
+            <span>{t('editTeacher')}</span>
           </h2>
         </div>
 
@@ -160,7 +157,7 @@ export default function EditTeacherModal({ isOpen, onClose, onSubmit, teacher }:
                 />
                 {errors.password && <p className="text-red-500 text-xs mt-1">{errors.password.message}</p>}
                 <p className="text-xs text-gray-500 mt-1 text-right">
-                  {language === 'ar' ? 'اتركه فارغاً إذا كنت لا تريد تغييره' : 'Leave blank if you don\'t want to change it'}
+                  {t('leaveBlankPassword')}
                 </p>
               </div>
 
@@ -199,7 +196,7 @@ export default function EditTeacherModal({ isOpen, onClose, onSubmit, teacher }:
               {/* Hourly Rate */}
               <div className="text-right">
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  {language === 'ar' ? 'سعر الساعة' : 'Hourly Rate'}
+                  {t('hourlyRate')}
                 </label>
                 <input
                   type="number"
@@ -233,7 +230,7 @@ export default function EditTeacherModal({ isOpen, onClose, onSubmit, teacher }:
                 control={control}
                 render={({ field }) => (
                   <CustomSelect
-                    label={language === 'ar' ? 'الجنس' : 'Gender'}
+                    label={t('gender')}
                     value={field.value}
                     options={genders.map(g => ({ value: g.id, label: language === 'ar' ? g.label : g.labelEn }))}
                     onChange={field.onChange}
@@ -245,7 +242,7 @@ export default function EditTeacherModal({ isOpen, onClose, onSubmit, teacher }:
             {/* Subjects */}
             <div className="text-right">
               <label className="block text-sm font-medium text-gray-700 mb-3">
-                {language === 'ar' ? 'المواد' : 'Subjects'}
+                {t('subject')}
               </label>
               <div className="bg-gray-50 rounded-xl p-4 border border-gray-200">
                 {isLoadingSubjects ? (
@@ -282,13 +279,13 @@ export default function EditTeacherModal({ isOpen, onClose, onSubmit, teacher }:
               onClick={onClose}
               className="flex-1 px-6 py-3 border border-gray-300 text-gray-700 rounded-xl hover:bg-gray-50 transition-colors font-medium"
             >
-              {language === 'ar' ? 'إلغاء' : 'Cancel'}
+              {t('cancel')}
             </button>
             <button
               type="submit"
               className="flex-1 px-6 py-3 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-colors font-medium shadow-lg shadow-blue-600/30"
             >
-              {language === 'ar' ? 'حفظ التعديلات' : 'Save Changes'}
+              {t('saveChanges')}
             </button>
           </div>
         </form>

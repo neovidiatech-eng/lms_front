@@ -39,12 +39,12 @@ export default function ViewTeacherModal({ isOpen, onClose, teacher }: ViewTeach
   const totalHours = teacherSessions.reduce((sum, s) => sum + calcSessionHours(s), 0);
   const completedHours = completedSessions.reduce((sum, s) => sum + calcSessionHours(s), 0);
   const pendingHours = upcomingSessions.reduce((sum, s) => sum + calcSessionHours(s), 0);
-  
+
   const hourPrice = teacher.hour_price || 0;
   const totalEarnings = completedHours * hourPrice;
   const pendingEarnings = pendingHours * hourPrice;
   const totalOwed = totalHours * hourPrice;
-  
+
   const currency = teacher.currency_id || 'EGP';
   const currencySymbol = currency === 'EGP' ? 'ج.م' : currency === 'SAR' ? 'ر.س' : currency;
 

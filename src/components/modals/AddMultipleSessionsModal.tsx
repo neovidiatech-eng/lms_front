@@ -4,7 +4,7 @@ import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useLanguage } from '../../contexts/LanguageContext';
 import CustomSelect from '../ui/CustomSelect';
-// تأكدي من استيراد الـ Schema الصحيح للمتعدد
+import DatePickerField from '../ui/DatePickerField';
 import { getMultipleSessionsSchema, MultipleSessionsFormData } from '../../lib/schemas/SessionSchema';
 export interface SessionPreviewItem {
   date: string;
@@ -20,7 +20,6 @@ interface AddMultipleSessionsModalProps {
 export default function AddMultipleSessionsModal({ isOpen, onClose, onAdd }: AddMultipleSessionsModalProps) {
   const { language, t } = useLanguage();
 
-  // 1. إعداد React Hook Form
   const {
     register,
     handleSubmit,
@@ -41,41 +40,41 @@ export default function AddMultipleSessionsModal({ isOpen, onClose, onAdd }: Add
     }
   });
 
-  // مراقبة الحقول لتحديث المعاينة والمنطق تلقائياً
   const watchedStudent = watch('student');
   const watchedTeacher = watch('teacher');
   const watchedMonthYear = watch('monthYear');
   const watchedDuration = watch('duration');
 
-  const [weekDays, setWeekDays] = useState([
-    { id: 'sunday', name: 'الأحد', checked: false, time: '10:00' },
-    { id: 'monday', name: 'الاثنين', checked: false, time: '10:00' },
-    { id: 'tuesday', name: 'الثلاثاء', checked: false, time: '10:00' },
-    { id: 'wednesday', name: 'الأربعاء', checked: false, time: '10:00' },
-    { id: 'thursday', name: 'الخميس', checked: false, time: '10:00' },
-    { id: 'friday', name: 'الجمعة', checked: false, time: '10:00' },
-    { id: 'saturday', name: 'السبت', checked: false, time: '10:00' }
-  ]);
+  const weekDaysData = [
+    { id: 'sunday', nameKey: 'sunday' },
+    { id: 'monday', nameKey: 'monday' },
+    { id: 'tuesday', nameKey: 'tuesday' },
+    { id: 'wednesday', nameKey: 'wednesday' },
+    { id: 'thursday', nameKey: 'thursday' },
+    { id: 'friday', nameKey: 'fri' },
+    { id: 'saturday', nameKey: 'sat' },
+  ];
 
-  // منطق المواد المتاحة للمعلم
+  const [weekDays, setWeekDays] = useState(
+    weekDaysData.map(d => ({ ...d, checked: false, time: '10:00' }))
+  );
+
   const teacherSubjects: Record<string, { id: string; name: string }[]> = {
-    teacher1: [{ id: 'quran', name: 'القرآن الكريم' }, { id: 'tajweed', name: 'التجويد' }],
-    teacher2: [{ id: 'arabic', name: 'اللغة العربية' }, { id: 'grammar', name: 'النحو والصرف' }]
+    teacher1: [{ id: 'quran', name: language === 'ar' ? 'القرآن الكريم' : 'Quran' }, { id: 'tajweed', name: language === 'ar' ? 'التجويد' : 'Tajweed' }],
+    teacher2: [{ id: 'arabic', name: language === 'ar' ? 'اللغة العربية' : 'Arabic' }, { id: 'grammar', name: language === 'ar' ? 'النحو والصرف' : 'Grammar' }]
   };
 
   const availableSubjects = useMemo(() =>
     watchedTeacher ? teacherSubjects[watchedTeacher]?.map(s => ({ value: s.id, label: s.name })) || [] : []
-    , [watchedTeacher]);
+    , [watchedTeacher, language]);
 
-  // منطق الباقات
   const studentPackages: Record<string, { name: string; sessionsRemaining: number; totalSessions: number }> = {
-    student1: { name: 'باقة القرآن الكريم', sessionsRemaining: 8, totalSessions: 12 },
-    student2: { name: 'باقة اللغة العربية', sessionsRemaining: 5, totalSessions: 10 }
+    student1: { name: language === 'ar' ? 'باقة القرآن الكريم' : 'Quran Package', sessionsRemaining: 8, totalSessions: 12 },
+    student2: { name: language === 'ar' ? 'باقة اللغة العربية' : 'Arabic Package', sessionsRemaining: 5, totalSessions: 10 }
   };
 
   const selectedStudentPackage = watchedStudent ? studentPackages[watchedStudent] : null;
 
-  // توليد معاينة الحصص
   const sessionPreview = useMemo(() => {
     if (!watchedMonthYear) return [];
     const [year, month] = watchedMonthYear.split('-').map(Number);
@@ -93,13 +92,13 @@ export default function AddMultipleSessionsModal({ isOpen, onClose, onAdd }: Add
       if (matchingDay) {
         sessions.push({
           date: currentDate.toLocaleDateString('ar-EG', { year: 'numeric', month: '2-digit', day: '2-digit' }),
-          day: matchingDay.name,
+          day: t(matchingDay.nameKey),
           time: matchingDay.time
         });
       }
     }
     return sessions;
-  }, [watchedMonthYear, weekDays]);
+  }, [watchedMonthYear, weekDays, language]);
 
   const sessionsExceedPackage = selectedStudentPackage && sessionPreview.length > selectedStudentPackage.sessionsRemaining;
 
@@ -113,11 +112,11 @@ export default function AddMultipleSessionsModal({ isOpen, onClose, onAdd }: Add
 
   const onSubmit = (data: MultipleSessionsFormData) => {
     if (sessionPreview.length === 0) {
-      alert(language === 'ar' ? 'برجاء اختيار يوم واحد على الأقل' : 'Please select at least one day');
+      alert(t('addMultipleSessions_selectOneDayMin'));
       return;
     }
     if (sessionsExceedPackage) {
-      alert('عدد الحصص أكبر من المتبقي في الباقة');
+      alert(t('addMultipleSessions_sessionsExceedPackage'));
       return;
     }
 
@@ -132,19 +131,18 @@ export default function AddMultipleSessionsModal({ isOpen, onClose, onAdd }: Add
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
       <div className="bg-white rounded-2xl shadow-xl w-full max-w-6xl max-h-[90vh]  overflow-y-auto no-scrollbar">
-        <div className="sticky top-0 bg-white border-b px-6 py-4 flex items-center justify-between z-10">
-          <h2 className="text-2xl font-bold text-gray-900">إضافة حصص متعددة</h2>
-          <button onClick={onClose} className="p-2 hover:bg-gray-100 rounded-lg"><X /></button>
+        <div className="sticky top-0 bg-primary px-6 py-4 flex items-center justify-between rounded-t-2xl z-10">
+          <h2 className="text-2xl font-bold text-white">{t('addMultipleSessions_title')}</h2>
+          <button onClick={onClose} className="p-2 hover:bg-white/20 rounded-lg"><X className="text-white/80" /></button>
         </div>
 
         <form onSubmit={handleSubmit(onSubmit)} className="p-6 space-y-6">
-          {/* اسم الحصة */}
           <div className="space-y-2 text-right">
-            <label className="text-sm font-medium">اسم الحصة *</label>
+            <label className="text-sm font-medium">{t('addMultipleSessions_sessionName')} *</label>
             <input
               {...register('title')}
               className={`w-full px-4 py-3 border rounded-xl focus:ring-2 focus:ring-primary text-right ${errors.title ? 'border-red-500' : 'border-gray-200'}`}
-              placeholder="مثال: حصة القرآن الكريم"
+              placeholder={t('addMultipleSessions_sessionNamePlaceholder')}
             />
             {errors.title && <p className="text-red-500 text-xs mt-1">{errors.title.message}</p>}
           </div>
@@ -155,8 +153,8 @@ export default function AddMultipleSessionsModal({ isOpen, onClose, onAdd }: Add
               control={control}
               render={({ field }) => (
                 <CustomSelect
-                  label="الطالب"
-                  options={[{ value: 'student1', label: 'أحمد محمد' }, { value: 'student2', label: 'سارة علي' }]}
+                  label={t('studentLabel')}
+                  options={[{ value: 'student1', label: language === 'ar' ? 'أحمد محمد' : 'Ahmed Mohamed' }, { value: 'student2', label: language === 'ar' ? 'سارة علي' : 'Sara Ali' }]}
                   value={field.value}
                   onChange={field.onChange}
                   error={errors.student?.message}
@@ -169,7 +167,7 @@ export default function AddMultipleSessionsModal({ isOpen, onClose, onAdd }: Add
               control={control}
               render={({ field }) => (
                 <CustomSelect
-                  label="المعلم"
+                  label={t('teacherLabel')}
                   options={[{ value: 'teacher1', label: 'Ahmed Qandil' }, { value: 'teacher2', label: 'Ahmed Gamal' }]}
                   value={field.value}
                   onChange={(val) => {
@@ -182,14 +180,13 @@ export default function AddMultipleSessionsModal({ isOpen, onClose, onAdd }: Add
             />
           </div>
 
-          {/* معلومات الباقة */}
           {selectedStudentPackage && (
             <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 text-right">
-              <p className="text-sm font-bold text-blue-900 mb-2">تفاصيل الباقة</p>
+              <p className="text-sm font-bold text-blue-900 mb-2">{t('addMultipleSessions_packageDetails')}</p>
               <div className="flex justify-between text-xs text-blue-700">
-                <span>إجمالي الحصص: {selectedStudentPackage.totalSessions}</span>
-                <span>المتبقي: {selectedStudentPackage.sessionsRemaining}</span>
-                <span>الباقة: {selectedStudentPackage.name}</span>
+                <span>{t('addMultipleSessions_totalSessions')}: {selectedStudentPackage.totalSessions}</span>
+                <span>{t('addMultipleSessions_remaining')}: {selectedStudentPackage.sessionsRemaining}</span>
+                <span>{t('addMultipleSessions_package')}: {selectedStudentPackage.name}</span>
               </div>
             </div>
           )}
@@ -199,7 +196,7 @@ export default function AddMultipleSessionsModal({ isOpen, onClose, onAdd }: Add
             control={control}
             render={({ field }) => (
               <CustomSelect
-                label="المادة"
+                label={t('subjectLabel')}
                 options={availableSubjects}
                 value={field.value}
                 onChange={field.onChange}
@@ -211,13 +208,24 @@ export default function AddMultipleSessionsModal({ isOpen, onClose, onAdd }: Add
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-right">
             <div>
-              <label className="block text-sm font-medium mb-2">الشهر والسنة *</label>
-              <input type="month" {...register('monthYear')} className="w-full px-4 py-3 border border-gray-200 rounded-xl" />
-              {errors.monthYear && <p className="text-red-500 text-xs mt-1">{errors.monthYear.message}</p>}
+              <Controller
+                name="monthYear"
+                control={control}
+                render={({ field }) => (
+                  <DatePickerField
+                    label={`${t('addMultipleSessions_monthYear')} *`}
+                    picker="month"
+                    placeholder={t('addMultipleSessions_monthYearPlaceholder')}
+                    value={field.value}
+                    onChange={field.onChange}
+                    error={errors.monthYear?.message}
+                  />
+                )}
+              />
             </div>
 
             <div>
-              <label className="block text-sm font-medium mb-2">مدة الحصة *</label>
+              <label className="block text-sm font-medium mb-2">{t('addMultipleSessions_sessionDuration')} *</label>
               <Controller
                 name="duration"
                 control={control}
@@ -225,8 +233,8 @@ export default function AddMultipleSessionsModal({ isOpen, onClose, onAdd }: Add
                   <CustomSelect
                     {...field}
                     options={[
-                      { value: '30', label: '30 دقيقة' },
-                      { value: '60', label: '60 دقيقة' }
+                      { value: '30', label: t('addMultipleSessions_30min') },
+                      { value: '60', label: t('addMultipleSessions_60min') }
                     ]}
                   />
                 )}
@@ -234,15 +242,14 @@ export default function AddMultipleSessionsModal({ isOpen, onClose, onAdd }: Add
             </div>
 
             <div className="text-right">
-              <label className="block text-sm font-medium mb-2">رابط الحصة</label>
+              <label className="block text-sm font-medium mb-2">{t('addMultipleSessions_meetingLink')}</label>
               <input type="url" {...register('meetingLink')} className="w-full px-4 py-3 border border-gray-200 rounded-xl text-left" dir="ltr" />
               {errors.meetingLink && <p className="text-red-500 text-xs mt-1">{errors.meetingLink.message}</p>}
             </div>
           </div>
 
-          {/* أيام الأسبوع */}
           <div className="space-y-3 text-right">
-            <label className="text-sm font-medium">أيام الأسبوع *</label>
+            <label className="text-sm font-medium">{t('addMultipleSessions_weekDays')} *</label>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
               {weekDays.map((day) => (
                 <div key={day.id} className={`border rounded-xl p-4 transition-all ${day.checked ? 'border-primary bg-blue-50' : 'border-gray-200'}`}>
@@ -255,7 +262,7 @@ export default function AddMultipleSessionsModal({ isOpen, onClose, onAdd }: Add
                       className="px-3 py-2 border rounded-lg"
                     />
                     <div className="flex items-center gap-3">
-                      <span className="text-sm font-medium">{day.name}</span>
+                      <span className="text-sm font-medium">{t(day.nameKey)}</span>
                       <input
                         type="checkbox"
                         checked={day.checked}
@@ -265,17 +272,16 @@ export default function AddMultipleSessionsModal({ isOpen, onClose, onAdd }: Add
                     </div>
                   </div>
                   {day.checked && (
-                    <p className="text-[10px] text-gray-500 mt-2">ينتهي في: {calculateEndTime(day.time, watchedDuration)}</p>
+                    <p className="text-[10px] text-gray-500 mt-2">{t('addMultipleSessions_endsAt')}: {calculateEndTime(day.time, watchedDuration)}</p>
                   )}
                 </div>
               ))}
             </div>
           </div>
 
-          {/* المعاينة */}
           {sessionPreview.length > 0 && (
             <div className="bg-gray-50 rounded-xl p-4 space-y-3">
-              <h3 className="font-bold text-right">معاينة الجدول ({sessionPreview.length} حصة)</h3>
+              <h3 className="font-bold text-right">{t('addMultipleSessions_preview')} ({sessionPreview.length} {t('addMultipleSessions_sessionUnit')})</h3>
               <div className="max-h-40  overflow-y-auto no-scrollbar space-y-2 px-2">
                 {sessionPreview.map((s, i) => (
                   <div key={i} className="flex justify-between bg-white p-2 rounded border text-sm">
@@ -287,10 +293,9 @@ export default function AddMultipleSessionsModal({ isOpen, onClose, onAdd }: Add
             </div>
           )}
 
-          {/* أزرار التحكم */}
           <div className="flex gap-3 pt-4">
-            <button type="submit" className="flex-1 py-3 bg-primary text-white rounded-xl font-bold hover:opacity-90">إضافة</button>
-            <button type="button" onClick={onClose} className="flex-1 py-3 border border-gray-200 rounded-xl font-bold">إلغاء</button>
+            <button type="submit" className="flex-1 py-3 bg-primary text-white rounded-xl font-bold hover:opacity-90">{t('add')}</button>
+            <button type="button" onClick={onClose} className="flex-1 py-3 border border-gray-200 rounded-xl font-bold">{t('cancel')}</button>
           </div>
         </form>
       </div>

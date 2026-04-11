@@ -6,6 +6,7 @@ import { TransactionFormData, getTransactionSchema } from '../../lib/schemas/Tra
 import { Resolver, useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import CustomSelect from '../ui/CustomSelect';
+import DatePickerField from '../ui/DatePickerField';
 interface AddTransactionModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -111,7 +112,7 @@ export default function AddTransactionModal({ isOpen, onClose, onSave, currencie
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
       <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh]  overflow-y-auto no-scrollbar">
-        <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between rounded-t-2xl">
+        <div className="sticky top-0 bg-primary border-b border-gray-200 px-6 py-4 flex items-center justify-between rounded-t-2xl">
           <h2 className="text-xl font-bold text-gray-900">{text.title[language]}</h2>
           <button onClick={onClose} className="p-2 hover:bg-gray-100 rounded-lg">
             <X className="w-5 h-5 text-gray-600" />
@@ -215,8 +216,18 @@ export default function AddTransactionModal({ isOpen, onClose, onSave, currencie
 
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2 text-right">{text.date[language]} *</label>
-              <input type="date" {...register('date')} className="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-right" />
+              <Controller
+                name="date"
+                control={control}
+                render={({ field }) => (
+                  <DatePickerField
+                    label={`${text.date[language]} *`}
+                    value={field.value}
+                    onChange={field.onChange}
+                    error={errors.date?.message}
+                  />
+                )}
+              />
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2 text-right">{text.paymentMethod[language]}</label>

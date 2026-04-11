@@ -5,6 +5,7 @@ import { Expense, ExpenseFormData, getExpenseSchema } from '../../lib/schemas/Ex
 import { Resolver, useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import CustomSelect from '../ui/CustomSelect';
+import DatePickerField from '../ui/DatePickerField';
 
 interface AddExpenseModalProps {
   isOpen: boolean;
@@ -94,7 +95,7 @@ export default function AddExpenseModal({ isOpen, onClose, onSave, initialData }
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
       <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh]  overflow-y-auto no-scrollbar">
-        <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between rounded-t-2xl">
+        <div className="sticky top-0 bg-primary border-b border-gray-200 px-6 py-4 flex items-center justify-between rounded-t-2xl">
           <h2 className="text-2xl font-bold text-gray-900">{text.title[language]}</h2>
           <button
             onClick={onClose}
@@ -171,11 +172,17 @@ export default function AddExpenseModal({ isOpen, onClose, onSave, initialData }
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">{text.date[language]} *</label>
-            <input
-              type="date"
-              {...register("date")}
-              className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary"
+            <Controller
+              name="date"
+              control={control}
+              render={({ field }) => (
+                <DatePickerField
+                  label={`${text.date[language]} *`}
+                  value={field.value}
+                  onChange={field.onChange}
+                  error={errors.date?.message}
+                />
+              )}
             />
           </div>
 

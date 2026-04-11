@@ -3,6 +3,7 @@ import { Upload } from 'lucide-react';
 import { useFormContext, Controller } from 'react-hook-form';
 import CustomSelect from '../../../components/ui/CustomSelect';
 import { CourseFormFieldsProps } from '../../../types/lmsCourses';
+import { useLanguage } from '../../../contexts/LanguageContext';
 
 
 const CourseFormFields = ({
@@ -11,6 +12,7 @@ const CourseFormFields = ({
   thumbnailInputRef,
   attachInputRef,
 }: CourseFormFieldsProps) => {
+  const { t } = useLanguage();
   const { register, control, setValue, watch, formState: { errors } } = useFormContext();
 
   const thumbnailPreview = watch('thumbnailPreview');
@@ -44,7 +46,7 @@ const CourseFormFields = ({
     <div className="space-y-4">
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-1 text-right">
-          عنوان الكورس <span className="text-red-500">*</span>
+          {t('courseTitle')} <span className="text-red-500">*</span>
         </label>
         <input
           type="text"
@@ -52,19 +54,19 @@ const CourseFormFields = ({
           className={`w-full px-3 py-2.5 border rounded-lg text-sm focus:outline-none focus:ring-2 text-right ${
             errors.title ? 'border-red-500 focus:ring-red-200' : 'border-gray-200 focus:ring-blue-500'
           }`}
-          placeholder="أدخل عنوان الكورس"
+          placeholder={t('enterCourseTitle')}
         />
         {errors.title && <p className="text-red-500 text-xs mt-1 text-right">{errors.title.message as string}</p>}
       </div>
 
       {/* الوصف */}
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1 text-right">الوصف</label>
+        <label className="block text-sm font-medium text-gray-700 mb-1 text-right">{t('courseDescription')}</label>
         <textarea
           rows={3}
           {...register("description")}
           className="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 text-right resize-none"
-          placeholder="وصف الكورس"
+          placeholder={t('enterCourseDescription')}
         />
       </div>
 
@@ -74,15 +76,15 @@ const CourseFormFields = ({
           control={control}
           render={({ field }) => (
             <CustomSelect
-              label="المادة"
+              label={t('subject')}
               value={field.value}
               onChange={field.onChange}
               options={subjectCategories
-                .filter(c => c !== 'الكل')
+                .filter(c => c !== 'الكل' && c !== 'All')
                 .map(c => ({ value: c, label: c }))
               }
               className="h-[42px]"
-              placeholder="اختر المادة"
+              placeholder={t('selectSubject')}
               error={errors.category?.message as string}
             />
           )}
@@ -93,11 +95,11 @@ const CourseFormFields = ({
           control={control}
           render={({ field }) => (
             <CustomSelect
-              label="المستوى"
+              label={t('level')}
               value={field.value}
               onChange={(val) => field.onChange(Number(val))}
               options={levels.map(l => ({ value: l.id, label: l.name }))}
-              placeholder="اختر المستوى"
+              placeholder={t('selectLevel')}
               className="h-[42px]"
               error={errors.levelId?.message as string}
             />
@@ -106,7 +108,7 @@ const CourseFormFields = ({
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1 text-right">الصورة المصغرة</label>
+        <label className="block text-sm font-medium text-gray-700 mb-1 text-right">{t('thumbnailImage')}</label>
         <div
           onClick={() => thumbnailInputRef.current?.click()}
           className="border-2 border-dashed border-gray-200 rounded-xl overflow-hidden cursor-pointer hover:border-blue-400 transition-colors"
@@ -115,13 +117,13 @@ const CourseFormFields = ({
             <div className="relative h-36">
               <img src={thumbnailPreview} alt="thumbnail" className="w-full h-full object-cover" />
               <div className="absolute inset-0 bg-black/30 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity">
-                <p className="text-white text-sm font-medium">تغيير الصورة</p>
+                <p className="text-white text-sm font-medium">{t('changeImage')}</p>
               </div>
             </div>
           ) : (
             <div className="h-28 flex flex-col items-center justify-center gap-2 text-gray-400">
               <Upload className="w-6 h-6" />
-              <p className="text-sm">اضغط لرفع صورة</p>
+              <p className="text-sm">{t('clickToUploadImage')}</p>
             </div>
           )}
         </div>
@@ -133,7 +135,7 @@ const CourseFormFields = ({
         onClick={() => attachInputRef.current?.click()}
         className="w-full flex items-center justify-center gap-2 border border-dashed border-gray-300 hover:border-blue-400 text-gray-500 py-2.5 rounded-xl text-sm transition-colors"
       >
-        <Upload className="w-4 h-4" /> رفع ملفات إضافية
+        <Upload className="w-4 h-4" /> {t('uploadAdditionalFiles')}
       </button>
       <input ref={attachInputRef} type="file" multiple className="hidden" onChange={handleAttachFiles} />
     </div>

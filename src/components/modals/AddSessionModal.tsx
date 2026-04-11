@@ -2,6 +2,7 @@ import { X } from 'lucide-react';
 import { useEffect, useMemo } from 'react';
 import { useLanguage } from '../../contexts/LanguageContext';
 import CustomSelect from '../ui/CustomSelect';
+import DatePickerField from '../ui/DatePickerField';
 import { SessionFormData, getSessionSchema } from '../../lib/schemas/SessionSchema';
 import { Controller, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -120,10 +121,10 @@ export default function AddSessionModal({ isOpen, onClose, onAdd }: AddSessionMo
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
       <div className="bg-white rounded-2xl shadow-xl w-full max-w-4xl max-h-[90vh]  overflow-y-auto no-scrollbar">
-        <div className="sticky top-0 bg-white border-b border-gray-100 px-6 py-4 flex items-center justify-between z-10">
-          <h2 className="text-2xl font-bold text-gray-900">{text.title[language]}</h2>
+        <div className="sticky top-0 bg-primary border-b border-gray-100 px-6 py-4 flex items-center justify-between z-10">
+          <h2 className="text-2xl font-bold text-white">{text.title[language]}</h2>
           <button onClick={onClose} className="p-2 hover:bg-gray-100 rounded-lg transition-colors">
-            <X className="w-6 h-6" />
+            <X className="w-6 h-6 text-white" />
           </button>
         </div>
 
@@ -221,15 +222,12 @@ export default function AddSessionModal({ isOpen, onClose, onAdd }: AddSessionMo
             {/* التاريخ والعنوان */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-2 text-right">
-                <label className="block text-sm font-medium text-gray-700">
-                  {text.sessionDate[language]} <span className="text-red-500">{text.required[language]}</span>
-                </label>
-                <input
-                  type="date"
-                  {...register('sessionDate')}
-                  className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent text-right"
+                <DatePickerField
+                  label={`${text.sessionDate[language]} `}
+                  value={watch('sessionDate')}
+                  onChange={(val) => setValue('sessionDate', val, { shouldValidate: true })}
+                  error={errors.sessionDate?.message}
                 />
-                {errors.sessionDate && <span className="text-red-500 text-xs">{errors.sessionDate.message}</span>}
               </div>
 
               <div className="space-y-2 text-right">
