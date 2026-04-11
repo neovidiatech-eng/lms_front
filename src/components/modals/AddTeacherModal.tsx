@@ -2,9 +2,12 @@ import { X, Users } from 'lucide-react';
 import { useLanguage } from '../../contexts/LanguageContext';
 import CustomSelect from '../ui/CustomSelect';
 import { TeacherFormData, getTeacherSchema } from '../../lib/schemas/TeacherSchema';
-import { Controller, FieldPath, Resolver, useForm } from 'react-hook-form';
+import { Controller, Resolver, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { CustomCheckbox } from '../ui/CustomCheckbox';
+import { useCurrency } from '../../hooks/useCurrency';
+import { useMemo } from 'react';
+import { useSubjects } from '../../hooks/useSubjects';
 
 interface AddTeacherModalProps {
   isOpen: boolean;
@@ -14,7 +17,10 @@ interface AddTeacherModalProps {
 
 export default function AddTeacherModal({ isOpen, onClose, onSubmit }: AddTeacherModalProps) {
   const { language, t } = useLanguage();
-  const { register, handleSubmit, control, watch, reset, formState: { errors } } = useForm<TeacherFormData>({
+  const { data: currenciesData } = useCurrency();
+  const { data: subjectsData, isLoading: isLoadingSubjects, error, isError } = useSubjects();
+
+  const { register, handleSubmit, control, watch, reset, setValue, formState: { errors } } = useForm<TeacherFormData>({
     resolver: zodResolver(getTeacherSchema(t)) as Resolver<TeacherFormData>,
     defaultValues: {
       name: '',
@@ -22,18 +28,20 @@ export default function AddTeacherModal({ isOpen, onClose, onSubmit }: AddTeache
       phone: '',
       password: '',
       hourlyRate: 0,
-      currency: 'EGP',
+      currency: '',
       gender: 'male',
       status: 'active',
-      subjects: {
-        quran: false,
-        math: false,
-        arabic: false,
-        math2: false,
-        science: false,
-      },
+      subjects: [],
     }
   });
+
+  const currencyOptions = useMemo(() => {
+    if (!currenciesData?.currencies) return [];
+    return currenciesData.currencies.map(c => ({
+      value: c.id,
+      label: language === 'ar' ? `${c.name_ar} (${c.symbol})` : `${c.name_en} (${c.code})`
+    }));
+  }, [currenciesData, language]);
 
   const handleOnSubmit = (data: TeacherFormData) => {
     onSubmit(data);
@@ -42,14 +50,19 @@ export default function AddTeacherModal({ isOpen, onClose, onSubmit }: AddTeache
   };
 
   if (!isOpen) return null;
-  const subjectsValue = watch('subjects');
+  const subjectsValue = watch('subjects') || [];
 
-  const currencies = [
-    { id: 'EGP', label: 'EGP', labelEn: 'EGP' },
-    { id: 'SAR', label: 'ر.س', labelEn: 'SAR' },
-    { id: 'AED', label: 'د.إ', labelEn: 'AED' },
-    { id: 'KWD', label: 'د.ك', labelEn: 'KWD' },
-  ];
+  if (isError) {
+    console.log(error.message);
+  }
+
+  const handleSubjectToggle = (id: string, checked: boolean) => {
+    if (checked) {
+      setValue('subjects', [...subjectsValue, id], { shouldValidate: true });
+    } else {
+      setValue('subjects', subjectsValue.filter(s => s !== id), { shouldValidate: true });
+    }
+  };
 
   const genders = [
     { id: 'male', label: 'ذكر', labelEn: 'Male' },
@@ -61,28 +74,17 @@ export default function AddTeacherModal({ isOpen, onClose, onSubmit }: AddTeache
     { id: 'inactive', label: 'غير نشط', labelEn: 'Inactive' },
   ];
 
-  const subjectsList = [
-    { id: 'quran', label: 'القرآن الكريم', labelEn: 'Quran' },
-    { id: 'math', label: 'الرياضيات', labelEn: 'Mathematics' },
-    { id: 'arabic', label: 'اللغة العربية', labelEn: 'Arabic Language' },
-    { id: 'science', label: 'تفسيت', labelEn: 'Science' },
-    { id: 'math2', label: 'تفسيت 2', labelEn: 'Mathematics 2' },
-  ];
-
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
       <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh]  overflow-y-auto no-scrollbar">
         {/* Header */}
-        <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between rounded-t-2xl">
-          <button
-            onClick={onClose}
-            className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
-          >
-            <X className="w-5 h-5 text-gray-500" />
+        <div className="sticky top-0 bg-primary px-6 py-4 flex items-center justify-between rounded-t-2xl">
+          <button onClick={onClose} className="p-2 hover:bg-white/20 rounded-lg transition-colors">
+            <X className="w-5 h-5 text-white/80" />
           </button>
-          <h2 className="text-xl font-bold text-gray-900 flex items-center gap-2">
+          <h2 className="text-xl font-bold text-white flex items-center gap-2">
             <Users className="w-6 h-6" />
-            <span>{language === 'ar' ? 'إضافة معلم جديد' : 'Add New Teacher'}</span>
+            <span>{t('addTeacher')}</span>
           </h2>
         </div>
 
@@ -94,7 +96,7 @@ export default function AddTeacherModal({ isOpen, onClose, onSubmit }: AddTeache
               {/* Email */}
               <div className="text-right">
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  {language === 'ar' ? 'البريد الإلكتروني' : 'Email'} *
+                  {t('email')} *
                 </label>
                 <input
                   type="email"
@@ -104,23 +106,21 @@ export default function AddTeacherModal({ isOpen, onClose, onSubmit }: AddTeache
                   dir="ltr"
                 />
                 {errors.email && <p className="text-red-500 text-xs mt-1">{errors.email.message}</p>}
-
               </div>
 
               {/* Name */}
               <div className="text-right">
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  {language === 'ar' ? 'الاسم' : 'Name'} *
+                  {t('name')} *
                 </label>
                 <input
                   type="text"
-                  placeholder={language === 'ar' ? 'الاسم' : 'Name'}
+                  placeholder={t('name')}
                   {...register('name')}
                   className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary text-right"
                   dir="rtl"
                 />
                 {errors.name && <p className="text-red-500 text-xs mt-1">{errors.name.message}</p>}
-
               </div>
             </div>
 
@@ -129,7 +129,7 @@ export default function AddTeacherModal({ isOpen, onClose, onSubmit }: AddTeache
               {/* Password */}
               <div className="text-right">
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  {language === 'ar' ? 'كلمة المرور' : 'Password'} *
+                  {t('password')} *
                 </label>
                 <input
                   type="password"
@@ -139,23 +139,21 @@ export default function AddTeacherModal({ isOpen, onClose, onSubmit }: AddTeache
                   dir="ltr"
                 />
                 {errors.password && <p className="text-red-500 text-xs mt-1">{errors.password.message}</p>}
-
               </div>
 
               {/* Phone */}
               <div className="text-right">
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  {language === 'ar' ? 'الهاتف' : 'Phone'} *
+                  {t('phone')} *
                 </label>
                 <input
                   type="tel"
-                  placeholder="admin@admin.com"
+                  placeholder="+2012345678"
                   {...register('phone')}
                   className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary text-right"
                   dir="ltr"
                 />
                 {errors.phone && <p className="text-red-500 text-xs mt-1">{errors.phone.message}</p>}
-
               </div>
             </div>
 
@@ -167,9 +165,9 @@ export default function AddTeacherModal({ isOpen, onClose, onSubmit }: AddTeache
                 control={control}
                 render={({ field }) => (
                   <CustomSelect
-                    label={language === 'ar' ? 'العملة' : 'Currency'}
+                    label={t('currency')}
                     value={field.value}
-                    options={currencies.map(c => ({ value: c.id, label: language === 'ar' ? c.label : c.labelEn }))}
+                    options={currencyOptions}
                     onChange={field.onChange}
                   />
                 )}
@@ -178,7 +176,7 @@ export default function AddTeacherModal({ isOpen, onClose, onSubmit }: AddTeache
               {/* Hourly Rate */}
               <div className="text-right">
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  {language === 'ar' ? 'سعر الساعة' : 'Hourly Rate'}
+                  {t('hourlyRate')}
                 </label>
                 <input
                   type="number"
@@ -198,7 +196,7 @@ export default function AddTeacherModal({ isOpen, onClose, onSubmit }: AddTeache
                 control={control}
                 render={({ field }) => (
                   <CustomSelect
-                    label={language === 'ar' ? 'الحالة' : 'Status'}
+                    label={t('status')}
                     value={field.value}
                     options={statuses.map(s => ({ value: s.id, label: language === 'ar' ? s.label : s.labelEn }))}
                     onChange={field.onChange}
@@ -212,7 +210,7 @@ export default function AddTeacherModal({ isOpen, onClose, onSubmit }: AddTeache
                 control={control}
                 render={({ field }) => (
                   <CustomSelect
-                    label={language === 'ar' ? 'الجنس' : 'Gender'}
+                    label={t('gender')}
                     value={field.value}
                     options={genders.map(g => ({ value: g.id, label: language === 'ar' ? g.label : g.labelEn }))}
                     onChange={field.onChange}
@@ -224,37 +222,32 @@ export default function AddTeacherModal({ isOpen, onClose, onSubmit }: AddTeache
             {/* Subjects */}
             <div className="text-right">
               <label className="block text-sm font-medium text-gray-700 mb-3">
-                {language === 'ar' ? 'المواد' : 'Subjects'}
+                {t('subject')}
               </label>
               <div className="bg-gray-50 rounded-xl p-4 border border-gray-200">
-                <div className="grid grid-cols-2 gap-3">
-                  {subjectsList.map((subject) => (
-                    <label
-                      key={subject.id}
-                      className="flex items-center gap-3 cursor-pointer hover:bg-white p-3 rounded-lg transition-colors"
-                    >
-                      {/* <input
-                        type="checkbox"
-                        checked={!!subjectsValue?.[subject.id as keyof typeof subjectsValue]}
-                        onChange={(e) => setValue(`subjects.${subject.id as keyof TeacherFormData['subjects']}`, e.target.checked, { shouldValidate: true })}
-                        className="w-5 h-5 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
-                      /> */}
-
-                      <CustomCheckbox
-                        checked={!!subjectsValue?.[subject.id as keyof typeof subjectsValue]}
-                        onChange={(checked) => {
-                          const name = `subjects.${subject.id}` as FieldPath<TeacherFormData>;
-                          setValue(name, checked, { shouldValidate: true });
-                        }}
-                      />
-                      <span className="text-sm text-gray-700 flex-1 text-right">
-                        {language === 'ar' ? subject.label : subject.labelEn}
-                      </span>
-                    </label>
-                  ))}
-                </div>
+                {isLoadingSubjects ? (
+                  <div className="flex justify-center p-4">
+                    <div className="animate-spin rounded-full h-6 w-6 border-t-2 border-primary"></div>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-2 gap-3">
+                    {(subjectsData?.subjects || []).map((subject) => (
+                      <label
+                        key={subject.id}
+                        className="flex items-center gap-3 cursor-pointer hover:bg-white p-3 rounded-lg transition-colors"
+                      >
+                        <CustomCheckbox
+                          checked={subjectsValue.includes(subject.id)}
+                          onChange={(checked) => handleSubjectToggle(subject.id, checked)}
+                        />
+                        <span className="text-sm text-gray-700 flex-1 text-right">
+                          {language === 'ar' ? subject.name_ar : (subject.name_en || subject.name_ar)}
+                        </span>
+                      </label>
+                    ))}
+                  </div>
+                )}
                 {errors.subjects && <p className="text-red-500 text-xs mt-1">{errors.subjects.message}</p>}
-
               </div>
             </div>
           </div>
@@ -266,13 +259,13 @@ export default function AddTeacherModal({ isOpen, onClose, onSubmit }: AddTeache
               onClick={onClose}
               className="flex-1 px-6 py-3 border border-gray-300 text-gray-700 rounded-xl hover:bg-gray-50 transition-colors font-medium"
             >
-              {language === 'ar' ? 'إلغاء' : 'Cancel'}
+              {t('cancel')}
             </button>
             <button
               type="submit"
               className="flex-1 px-6 py-3 btn-primary text-white rounded-xl transition-colors font-medium"
             >
-              {language === 'ar' ? 'إضافة معلم جديد' : 'Add Teacher'}
+              {t('addTeacher')}
             </button>
           </div>
         </form>

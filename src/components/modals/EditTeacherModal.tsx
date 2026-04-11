@@ -1,21 +1,14 @@
 import { X, Users } from 'lucide-react';
-import { useEffect } from 'react';
+import { useEffect, useMemo } from 'react';
 import { useLanguage } from '../../contexts/LanguageContext';
 import CustomSelect from '../ui/CustomSelect';
 import { TeacherFormData, getTeacherSchema } from '../../lib/schemas/TeacherSchema';
 import { Controller, Resolver, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-
-interface Teacher {
-  id: string;
-  name: string;
-  email: string;
-  phone: string;
-  amount: number;
-  currency: string;
-  status: 'active' | 'inactive';
-  subject: string;
-}
+import { Teacher } from '../../types/teachers';
+import { useCurrency } from '../../hooks/useCurrency';
+import { useSubjects } from '../../hooks/useSubjects';
+import { CustomCheckbox } from '../ui/CustomCheckbox';
 
 interface EditTeacherModalProps {
   isOpen: boolean;
@@ -26,31 +19,48 @@ interface EditTeacherModalProps {
 
 export default function EditTeacherModal({ isOpen, onClose, onSubmit, teacher }: EditTeacherModalProps) {
   const { language, t } = useLanguage();
+  const { data: currenciesData } = useCurrency();
+  const { data: subjectsData, isLoading: isLoadingSubjects } = useSubjects();
+
   const { register, handleSubmit, setValue, watch, control, reset, formState: { errors }, } = useForm<TeacherFormData>({
     resolver: zodResolver(getTeacherSchema(t)) as Resolver<TeacherFormData>,
+  });
 
-  })
-
+  const currencyOptions = useMemo(() => {
+    if (!currenciesData?.currencies) return [];
+    return currenciesData.currencies.map(c => ({
+      value: c.id,
+      label: language === 'ar' ? `${c.name_ar} (${c.symbol})` : `${c.name_en} (${c.code})`
+    }));
+  }, [currenciesData, language]);
 
   useEffect(() => {
     if (teacher) {
-      const subjectsArray = teacher.subject.split('،').map(s => s.trim());
+      console.log("==> EditTeacherModal Mount:", teacher);
+
+      // Extract subject IDs directly from the API response
+      // Handles both cases: subject_ids being an array of objects or an array of GUIDs
+      const subjectsArray = teacher.subject_ids || (teacher as any).subjects || (teacher as any).subjectIds || (teacher as any).Subjects || [];
+      const subjectIds = subjectsArray.map((s: any) => {
+        if (typeof s === 'object') return s?.id;
+        return String(s);
+      }).filter(Boolean);
+
+      const currencyRaw = (teacher as any).currency || teacher.currency_id || (teacher as any).currencyId;
+      const currencyId = typeof currencyRaw === 'object' ? currencyRaw?.id : currencyRaw;
+      
+      console.log("==> Extracted Data:", { subjectIds, currencyId });
+
       reset({
         name: teacher.name,
         email: teacher.email,
         phone: teacher.phone,
         password: '',
-        hourlyRate: teacher.amount,
-        currency: teacher.currency,
-        gender: 'male',
-        status: teacher.status,
-        subjects: {
-          quran: subjectsArray.some(s => s.includes('القرآن')),
-          math: subjectsArray.some(s => s.includes('الرياضيات')),
-          arabic: subjectsArray.some(s => s.includes('العربية')),
-          math2: subjectsArray.some(s => s.includes('تفسيت 2')),
-          science: subjectsArray.some(s => s.includes('تفسيت') && !s.includes('2')),
-        },
+        hourlyRate: teacher.hour_price || (teacher as any).hourPrice || 0,
+        currency: currencyId || '',
+        gender: teacher.gender || 'male',
+        status: teacher.active ? 'active' : 'inactive',
+        subjects: subjectIds,
       });
     }
   }, [teacher, reset]);
@@ -61,13 +71,15 @@ export default function EditTeacherModal({ isOpen, onClose, onSubmit, teacher }:
   };
 
   if (!isOpen || !teacher) return null;
-  const subjectsValue = watch('subjects');
-  const currencies = [
-    { id: 'EGP', label: 'EGP', labelEn: 'EGP' },
-    { id: 'SAR', label: 'ر.س', labelEn: 'SAR' },
-    { id: 'AED', label: 'د.إ', labelEn: 'AED' },
-    { id: 'KWD', label: 'د.ك', labelEn: 'KWD' },
-  ];
+  const subjectsValue = watch('subjects') || [];
+
+  const handleSubjectToggle = (id: string, checked: boolean) => {
+    if (checked) {
+      setValue('subjects', [...subjectsValue, id], { shouldValidate: true });
+    } else {
+      setValue('subjects', subjectsValue.filter(s => s !== id), { shouldValidate: true });
+    }
+  };
 
   const genders = [
     { id: 'male', label: 'ذكر', labelEn: 'Male' },
@@ -79,28 +91,17 @@ export default function EditTeacherModal({ isOpen, onClose, onSubmit, teacher }:
     { id: 'inactive', label: 'غير نشط', labelEn: 'Inactive' },
   ];
 
-  const subjectsList = [
-    { id: 'quran', label: 'القرآن الكريم', labelEn: 'Quran' },
-    { id: 'math', label: 'الرياضيات', labelEn: 'Mathematics' },
-    { id: 'arabic', label: 'اللغة العربية', labelEn: 'Arabic Language' },
-    { id: 'science', label: 'تفسيت', labelEn: 'Science' },
-    { id: 'math2', label: 'تفسيت 2', labelEn: 'Mathematics 2' },
-  ];
-
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
       <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh]  overflow-y-auto no-scrollbar">
         {/* Header */}
-        <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between rounded-t-2xl">
-          <button
-            onClick={onClose}
-            className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
-          >
-            <X className="w-5 h-5 text-gray-500" />
+        <div className="sticky top-0 bg-primary px-6 py-4 flex items-center justify-between rounded-t-2xl">
+          <button onClick={onClose} className="p-2 hover:bg-white/20 rounded-lg transition-colors">
+            <X className="w-5 h-5 text-white/80" />
           </button>
-          <h2 className="text-xl font-bold text-gray-900 flex items-center gap-2">
+          <h2 className="text-xl font-bold text-white flex items-center gap-2">
             <Users className="w-6 h-6" />
-            <span>{language === 'ar' ? 'تعديل بيانات المعلم' : 'Edit Teacher'}</span>
+            <span>{t('editTeacher')}</span>
           </h2>
         </div>
 
@@ -112,7 +113,7 @@ export default function EditTeacherModal({ isOpen, onClose, onSubmit, teacher }:
               {/* Email */}
               <div className="text-right">
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  {language === 'ar' ? 'البريد الإلكتروني' : 'Email'} *
+                  {t('email')} *
                 </label>
                 <input
                   type="email"
@@ -127,7 +128,7 @@ export default function EditTeacherModal({ isOpen, onClose, onSubmit, teacher }:
               {/* Name */}
               <div className="text-right">
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  {language === 'ar' ? 'الاسم' : 'Name'} *
+                  {t('fullName')} *
                 </label>
                 <input
                   type="text"
@@ -145,7 +146,7 @@ export default function EditTeacherModal({ isOpen, onClose, onSubmit, teacher }:
               {/* Password */}
               <div className="text-right">
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  {language === 'ar' ? 'كلمة المرور' : 'Password'}
+                  {t('password')}
                 </label>
                 <input
                   type="password"
@@ -156,14 +157,14 @@ export default function EditTeacherModal({ isOpen, onClose, onSubmit, teacher }:
                 />
                 {errors.password && <p className="text-red-500 text-xs mt-1">{errors.password.message}</p>}
                 <p className="text-xs text-gray-500 mt-1 text-right">
-                  {language === 'ar' ? 'اتركه فارغاً إذا كنت لا تريد تغييره' : 'Leave blank if you don\'t want to change it'}
+                  {t('leaveBlankPassword')}
                 </p>
               </div>
 
               {/* Phone */}
               <div className="text-right">
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  {language === 'ar' ? 'الهاتف' : 'Phone'} *
+                  {t('phoneNumber')} *
                 </label>
                 <input
                   type="tel"
@@ -184,9 +185,9 @@ export default function EditTeacherModal({ isOpen, onClose, onSubmit, teacher }:
                 control={control}
                 render={({ field }) => (
                   <CustomSelect
-                    label={language === 'ar' ? 'العملة' : 'Currency'}
+                    label={t('currency')}
                     value={field.value}
-                    options={currencies.map(c => ({ value: c.id, label: language === 'ar' ? c.label : c.labelEn }))}
+                    options={currencyOptions}
                     onChange={field.onChange}
                   />
                 )}
@@ -195,7 +196,7 @@ export default function EditTeacherModal({ isOpen, onClose, onSubmit, teacher }:
               {/* Hourly Rate */}
               <div className="text-right">
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  {language === 'ar' ? 'سعر الساعة' : 'Hourly Rate'}
+                  {t('hourlyRate')}
                 </label>
                 <input
                   type="number"
@@ -216,7 +217,7 @@ export default function EditTeacherModal({ isOpen, onClose, onSubmit, teacher }:
                 control={control}
                 render={({ field }) => (
                   <CustomSelect
-                    label={language === 'ar' ? 'الحالة' : 'Status'}
+                    label={t('status')}
                     value={field.value}
                     options={statuses.map(s => ({ value: s.id, label: language === 'ar' ? s.label : s.labelEn }))}
                     onChange={field.onChange}
@@ -229,7 +230,7 @@ export default function EditTeacherModal({ isOpen, onClose, onSubmit, teacher }:
                 control={control}
                 render={({ field }) => (
                   <CustomSelect
-                    label={language === 'ar' ? 'الجنس' : 'Gender'}
+                    label={t('gender')}
                     value={field.value}
                     options={genders.map(g => ({ value: g.id, label: language === 'ar' ? g.label : g.labelEn }))}
                     onChange={field.onChange}
@@ -241,27 +242,31 @@ export default function EditTeacherModal({ isOpen, onClose, onSubmit, teacher }:
             {/* Subjects */}
             <div className="text-right">
               <label className="block text-sm font-medium text-gray-700 mb-3">
-                {language === 'ar' ? 'المواد' : 'Subjects'}
+                {t('subject')}
               </label>
               <div className="bg-gray-50 rounded-xl p-4 border border-gray-200">
-                <div className="grid grid-cols-2 gap-3">
-                  {subjectsList.map((subject) => (
-                    <label
-                      key={subject.id}
-                      className="flex items-center gap-3 cursor-pointer hover:bg-white p-3 rounded-lg transition-colors"
-                    >
-                      <input
-                        type="checkbox"
-                        checked={!!subjectsValue?.[subject.id as keyof typeof subjectsValue]}
-                        onChange={(e) => setValue(`subjects.${subject.id as keyof TeacherFormData['subjects']}`, e.target.checked, { shouldValidate: true })}
-                        className="w-5 h-5 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
-                      />
-                      <span className="text-sm text-gray-700 flex-1 text-right">
-                        {language === 'ar' ? subject.label : subject.labelEn}
-                      </span>
-                    </label>
-                  ))}
-                </div>
+                {isLoadingSubjects ? (
+                  <div className="flex justify-center p-4">
+                    <div className="animate-spin rounded-full h-6 w-6 border-t-2 border-primary"></div>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-2 gap-3">
+                    {(subjectsData?.subjects || []).map((subject) => (
+                      <label
+                        key={subject.id}
+                        className="flex items-center gap-3 cursor-pointer hover:bg-white p-3 rounded-lg transition-colors"
+                      >
+                        <CustomCheckbox
+                          checked={subjectsValue.includes(subject.id)}
+                          onChange={(checked) => handleSubjectToggle(subject.id, checked)}
+                        />
+                        <span className="text-sm text-gray-700 flex-1 text-right">
+                          {language === 'ar' ? subject.name_ar : (subject.name_en || subject.name_ar)}
+                        </span>
+                      </label>
+                    ))}
+                  </div>
+                )}
                 {errors.subjects && <p className="text-red-500 text-xs mt-2">{errors.subjects.message}</p>}
               </div>
             </div>
@@ -274,13 +279,13 @@ export default function EditTeacherModal({ isOpen, onClose, onSubmit, teacher }:
               onClick={onClose}
               className="flex-1 px-6 py-3 border border-gray-300 text-gray-700 rounded-xl hover:bg-gray-50 transition-colors font-medium"
             >
-              {language === 'ar' ? 'إلغاء' : 'Cancel'}
+              {t('cancel')}
             </button>
             <button
               type="submit"
               className="flex-1 px-6 py-3 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-colors font-medium shadow-lg shadow-blue-600/30"
             >
-              {language === 'ar' ? 'حفظ التعديلات' : 'Save Changes'}
+              {t('saveChanges')}
             </button>
           </div>
         </form>

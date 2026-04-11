@@ -93,7 +93,7 @@ export default function Students() {
 
     return matchesSearch && matchesGrade && matchesCountry;
   });
-  const totalPages = Math.ceil(filteredStudents?.length || 0 / itemsPerPage);
+  const totalPages = Math.ceil((filteredStudents?.length || 0) / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
   const endIndex = startIndex + itemsPerPage;
   const currentStudents = filteredStudents?.slice(startIndex, endIndex);

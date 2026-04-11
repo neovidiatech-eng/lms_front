@@ -5,6 +5,7 @@ import CustomSelect from '../ui/CustomSelect';
 import { UserFormData, getUserSchema } from '../../lib/schemas/UserSchema';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Controller, useForm } from 'react-hook-form';
+import { CustomCheckbox } from '../ui/CustomCheckbox';
 
 
 //  To Add id to userData
@@ -153,7 +154,7 @@ const roles = [
 
 export default function EditUserModal({ isOpen, onClose, onSubmit, userData }: EditUserModalProps) {
   const { language, t } = useLanguage();
-  const { control, handleSubmit, register, reset, setValue, watch, formState: { errors } } = useForm<UserFormData>({
+  const { control, handleSubmit, register, reset, formState: { errors } } = useForm<UserFormData>({
     resolver: zodResolver(getUserSchema(t)),
     defaultValues: userData,
   });
@@ -167,16 +168,6 @@ export default function EditUserModal({ isOpen, onClose, onSubmit, userData }: E
   }, [userData, isOpen, reset]);
 
   if (!isOpen) return null;
-
-  const selectedPermissions = watch('permissions') || [];
-
-  const handlePermissionToggle = (permissionId: string) => {
-    const nextPermissions = selectedPermissions.includes(permissionId)
-      ? selectedPermissions.filter((id) => id !== permissionId)
-      : [...selectedPermissions, permissionId];
-
-    setValue('permissions', nextPermissions, { shouldValidate: true });
-  };
 
   const onFormSubmit = (data: UserFormData) => {
     onSubmit({ ...data, id: userData.id });
@@ -208,15 +199,15 @@ export default function EditUserModal({ isOpen, onClose, onSubmit, userData }: E
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
       <div className="bg-white rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col">
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200">
-          <h2 className="text-2xl font-bold text-gray-900">
-            {language === 'ar' ? 'تعديل المستخدم' : 'Edit User'}
+        <div className="flex items-center justify-between px-6 py-4 bg-primary rounded-t-2xl">
+          <h2 className="text-2xl font-bold text-white">
+            {t('editUser')}
           </h2>
           <button
             onClick={onClose}
-            className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+            className="p-2 hover:bg-white/20 rounded-lg transition-colors"
           >
-            <X className="w-6 h-6 text-gray-500" />
+            <X className="w-6 h-6 text-white/80" />
           </button>
         </div>
 
@@ -227,7 +218,7 @@ export default function EditUserModal({ isOpen, onClose, onSubmit, userData }: E
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2 text-right">
-                  {language === 'ar' ? 'الاسم' : 'Name'}
+                  {t('name')}
                 </label>
                 <input
                   type="text"
@@ -239,7 +230,7 @@ export default function EditUserModal({ isOpen, onClose, onSubmit, userData }: E
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2 text-right">
-                  {language === 'ar' ? 'البريد الإلكتروني' : 'Email'}
+                  {t('email')}
                 </label>
                 <input
                   type="email"
@@ -258,7 +249,7 @@ export default function EditUserModal({ isOpen, onClose, onSubmit, userData }: E
                 control={control}
                 render={({ field }) => (
                   <CustomSelect
-                    label={language === 'ar' ? 'رمز الدولة' : 'Country Code'}
+                    label={t('countryCode')}
                     value={field.value}
                     onChange={field.onChange}
                     options={countryOptions}
@@ -268,7 +259,7 @@ export default function EditUserModal({ isOpen, onClose, onSubmit, userData }: E
               />
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2 text-right">
-                  {language === 'ar' ? 'الهاتف' : 'Phone'}
+                  {t('phone')}
                 </label>
                 <input
                   type="tel"
@@ -289,7 +280,7 @@ export default function EditUserModal({ isOpen, onClose, onSubmit, userData }: E
                 control={control}
                 render={({ field }) => (
                   <CustomSelect
-                    label={language === 'ar' ? 'الدور' : 'Role'}
+                    label={t('role')}
                     value={field.value}
                     onChange={field.onChange}
                     options={roleOptions}
@@ -299,14 +290,14 @@ export default function EditUserModal({ isOpen, onClose, onSubmit, userData }: E
               />
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2 text-right">
-                  {language === 'ar' ? 'كلمة المرور الجديدة (اختياري)' : 'New Password (Optional)'}
+                  {t('newPasswordOptional')}
                 </label>
                 <div className="relative">
                   <input
                     type={showPassword ? 'text' : 'password'}
                     {...register('password')}
                     className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 text-right"
-                    placeholder={language === 'ar' ? 'اترك فارغاً للإبقاء على كلمة المرور الحالية' : 'Leave empty to keep current password'}
+                    placeholder={t('leaveEmptyPassword')}
                   />
                   <button
                     type="button"
@@ -321,9 +312,11 @@ export default function EditUserModal({ isOpen, onClose, onSubmit, userData }: E
 
             {/* Permissions */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-4 text-right">
-                {language === 'ar' ? 'الصلاحيات' : 'Permissions'}
-              </label>
+              <div className="flex justify-between items-center mb-4">
+                <label className="block text-sm font-medium text-gray-700 text-right w-full">
+                  {t('permissions')}
+                </label>
+              </div>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 {Object.entries(permissionGroups).map(([key, group]) => (
                   <div key={key} className="space-y-2">
@@ -338,16 +331,29 @@ export default function EditUserModal({ isOpen, onClose, onSubmit, userData }: E
                         <span className="text-sm text-gray-700">
                           {language === 'ar' ? permission.label : permission.labelEn}
                         </span>
-                        <input
-                          type="checkbox"
-                          checked={selectedPermissions.includes(permission.id)}
-                          onChange={() => handlePermissionToggle(permission.id)}
-                          className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                        <Controller
+                          name="permissions"
+                          control={control}
+                          render={({ field }) => {
+                            const isChecked = field.value?.includes(permission.id) ?? false;
+                            return (
+                              <CustomCheckbox
+                                checked={isChecked}
+                                onChange={() => {
+                                  const next = isChecked
+                                    ? field.value.filter((id: string) => id !== permission.id)
+                                    : [...(field.value || []), permission.id];
+                                  field.onChange(next);
+                                }}
+                              />
+                            );
+                          }}
                         />
                       </label>
                     ))}
                   </div>
                 ))}
+                {errors.permissions && <p className="text-red-500 text-sm mt-4 text-center w-full col-span-1 md:col-span-3">{errors.permissions.message}</p>}
               </div>
             </div>
           </div>
@@ -360,14 +366,14 @@ export default function EditUserModal({ isOpen, onClose, onSubmit, userData }: E
             onClick={onClose}
             className="px-6 py-2.5 border border-gray-300 text-gray-700 rounded-xl hover:bg-gray-100 transition-colors font-medium"
           >
-            {language === 'ar' ? 'إلغاء' : 'Cancel'}
+            {t('cancel')}
           </button>
           <button
             type="submit"
             form="edit-user-form"
             className="px-6 py-2.5 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-colors font-medium shadow-lg"
           >
-            {language === 'ar' ? 'حفظ التعديلات' : 'Save Changes'}
+            {t('saveChanges')}
           </button>
         </div>
       </div>

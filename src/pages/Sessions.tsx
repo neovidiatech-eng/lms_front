@@ -6,10 +6,12 @@ import AddSessionModal from '../components/modals/AddSessionModal';
 import AddMultipleSessionsModal, { SessionPreviewItem } from '../components/modals/AddMultipleSessionsModal';
 import ViewSessionDetailsModal from '../components/modals/ViewSessionDetailsModal';
 import EditSessionModal from '../components/modals/EditSessionModal';
-import { ContextSession, SessionDisplay, SessionGroupDetails, SingleSessionInput } from '../types/sessions';
 import { MultipleSessionsFormData } from '../lib/schemas/SessionSchema';
 import { useTranslation } from 'react-i18next';
 import { useLocation } from 'react-router-dom';
+import { useUpdateSchedule, useCreateSchedule, useCreateRecurringSchedule, useDeleteSchedule } from '../hooks/useSchedules';
+import { DayOfWeek } from '../types/scheduales';
+import { ContextSession, SessionDisplay, SessionGroupDetails, SingleSessionInput } from '../types/sessions';
 
 interface Session {
   id: string;
@@ -29,6 +31,10 @@ export default function Sessions() {
   const location = useLocation();
   const isStudent = location.pathname.includes('/student-dashboard') || location.pathname.includes('/teacher-dashboard');
   const { sessions: allSessionsFromContext, addSession, addMultipleSessions, updateSession, deleteSession } = useSessions();
+  const { mutate: updateScheduleMutation } = useUpdateSchedule();
+  const { mutate: createScheduleMutation } = useCreateSchedule();
+  const { mutate: createRecurringScheduleMutation } = useCreateRecurringSchedule();
+  const { mutate: deleteScheduleMutation } = useDeleteSchedule();
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const [showFilters, setShowFilters] = useState(false);
@@ -140,24 +146,47 @@ export default function Sessions() {
   };
 
   const handleAddSession = (sessionData: SingleSessionInput) => {
-    const dayName = new Date(sessionData.sessionDate).toLocaleDateString(
-      language === 'ar' ? 'ar-EG' : 'en-US',
-      { weekday: 'long' }
-    );
-    const newSession = {
-      id: Date.now().toString(),
-      sessionName: sessionData.title,
-      studentName: sessionData.student,
-      teacherName: sessionData.teacher,
-      subject: sessionData.subject,
-      day: dayName,                    // القيمة المحسوبة
-      date: sessionData.sessionDate,   // القيمة القادمة من المودال
-      time: sessionData.startTime,
-      endTime: sessionData.endTime,
-      meetingLink: sessionData.meetingLink
+    let formattedDate = sessionData.sessionDate;
+    try {
+      const d = new Date(`${sessionData.sessionDate} ${sessionData.startTime}`);
+      if (!isNaN(d.getTime())) formattedDate = d.toISOString();
+    } catch (e) { }
+
+    const payload = {
+      studentId: sessionData.student || "0",
+      teacherId: sessionData.teacher || "0",
+      subject_id: sessionData.subject || "0",
+      title: sessionData.title || "Session",
+      description: "",
+      link: sessionData.meetingLink || "",
+      notes: "",
+      start_time: formattedDate,
+      type: "session" as const,
+      notification_Time: "10"
     };
-    addSession(newSession);
-    console.log(newSession)
+
+    createScheduleMutation(payload, {
+      onSuccess: (res) => {
+        const dayName = new Date(sessionData.sessionDate).toLocaleDateString(
+          language === 'ar' ? 'ar-EG' : 'en-US',
+          { weekday: 'long' }
+        );
+        const newSession = {
+          id: res?.id || Date.now().toString(),
+          sessionName: sessionData.title,
+          studentName: sessionData.student,
+          teacherName: sessionData.teacher,
+          subject: sessionData.subject,
+          day: dayName,
+          date: sessionData.sessionDate,
+          time: sessionData.startTime,
+          endTime: sessionData.endTime,
+          meetingLink: sessionData.meetingLink
+        };
+        addSession(newSession);
+        console.log(newSession)
+      }
+    });
   };
   const calculateEndTime = (startTime: string, durationMinutes: string | number) => {
     if (!startTime) return '';
@@ -174,22 +203,42 @@ export default function Sessions() {
   }) => {
     const { formData, sessions } = data;
 
-    const newSessions = sessions.map((session, index) => ({
-      id: `${Date.now()}-${index}`,
-      sessionName: formData.title,
-      studentName: formData.student,
-      teacherName: formData.teacher,
-      subject: formData.subject,
-      day: session.day,
-      date: session.date,
-      time: session.time,
-      endTime: calculateEndTime(session.time, formData.duration),
-      meetingLink: formData.meetingLink
-    }));
+    const payload = {
+      studentId: formData.student || "0",
+      teacherId: formData.teacher || "0",
+      subject_id: formData.subject || "0",
+      title: formData.title || "Multiple Sessions",
+      description: "",
+      link: formData.meetingLink || "",
+      notes: "",
+      startTime: sessions[0]?.time || "",
+      days: sessions.map(s => s.day as DayOfWeek),
+      startDate: sessions[0]?.date || "",
+      endDate: sessions[sessions.length - 1]?.date || "",
+      notification_Time: "10",
+      type: "session" as const
+    };
 
-    addMultipleSessions(newSessions);
-    setShowAddMultipleModal(false);
-    console.log(newSessions);
+    createRecurringScheduleMutation(payload, {
+      onSuccess: () => {
+        const newSessions = sessions.map((session, index) => ({
+          id: `${Date.now()}-${index}`,
+          sessionName: formData.title,
+          studentName: formData.student,
+          teacherName: formData.teacher,
+          subject: formData.subject,
+          day: session.day,
+          date: session.date,
+          time: session.time,
+          endTime: calculateEndTime(session.time, formData.duration),
+          meetingLink: formData.meetingLink
+        }));
+
+        addMultipleSessions(newSessions);
+        setShowAddMultipleModal(false);
+        console.log(newSessions);
+      }
+    });
   };
 
   const handleViewSession = (sessionId: string) => {
@@ -202,14 +251,18 @@ export default function Sessions() {
 
   const handleDeleteSession = (sessionId: string) => {
     if (window.confirm(t('deleteConfirmSession'))) {
-      // Delete all sessions in this group
       const sessionsToDelete = allSessionsFromContext.filter(s => {
         const key = `${s.studentName}-${s.teacherName}-${s.subject}`;
         return key === sessionId;
       });
+      const realSessionId = sessionsToDelete[0]?.id || sessionId;
 
-      sessionsToDelete.forEach(session => {
-        deleteSession(session.id);
+      deleteScheduleMutation(realSessionId, {
+        onSuccess: () => {
+          sessionsToDelete.forEach(session => {
+            deleteSession(session.id);
+          });
+        }
       });
     }
   };
@@ -240,15 +293,38 @@ export default function Sessions() {
       s.date === updatedSession.date
     );
 
+    let formattedDate = updatedSession.date;
+    try {
+      const d = new Date(`${updatedSession.date} ${updatedSession.time}`);
+      if (!isNaN(d.getTime())) {
+        formattedDate = d.toISOString();
+      }
+    } catch (e) { }
+
+    const sessionDataToUpdate = {
+      title: updatedSession.sessionName || "",
+      description: "",
+      link: updatedSession.meetingLink || "",
+      notes: "",
+      status: "planned",
+      start_time: formattedDate,
+      type: "session" as const,
+      notification_Time: "10"
+    };
+
     if (sessionInContext) {
-      updateSession(sessionInContext.id, {
-        day: updatedSession.day,
-        date: updatedSession.date,
-        time: updatedSession.time,
-        endTime: updatedSession.endTime,
-        meetingLink: updatedSession.meetingLink
+      updateScheduleMutation({ id: sessionInContext.id, data: sessionDataToUpdate }, {
+        onSuccess: () => {
+          updateSession(sessionInContext.id, {
+            day: updatedSession.day,
+            date: updatedSession.date,
+            time: updatedSession.time,
+            endTime: updatedSession.endTime,
+            meetingLink: updatedSession.meetingLink
+          });
+          alert(t('changesSavedSuccess'));
+        }
       });
-      alert(t('changesSavedSuccess'));
     }
   };
 

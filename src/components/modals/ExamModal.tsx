@@ -1,6 +1,7 @@
 import { X } from 'lucide-react';
 import { useLanguage } from '../../contexts/LanguageContext';
 import CustomSelect from '../ui/CustomSelect';
+import DatePickerField from '../ui/DatePickerField';
 import { Resolver, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { ExamFormData, getExamSchema } from '../../lib/schemas/ExamSchema';
@@ -140,6 +141,12 @@ export default function AddExamModal({ isOpen, onClose, onAdd, initialData }: Ad
               <label className="block text-sm font-medium text-gray-700 mb-2 text-right">{text.dueDate[language]}</label>
               <input type="date" {...register('dueDate')} className="w-full px-4 py-2 border border-gray-300 rounded-lg text-right" dir="rtl" />
               {errors.dueDate && <p className="text-red-500 text-xs mt-1 text-right">{errors.dueDate.message}</p>}
+              <DatePickerField
+                label={text.dueDate[language]}
+                value={watch('dueDate')}
+                onChange={(val) => setValue('dueDate', val, { shouldValidate: true })}
+                error={errors.dueDate?.message}
+              />
             </div>
           </div>
 

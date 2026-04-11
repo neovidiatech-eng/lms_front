@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 import { X } from 'lucide-react';
 import { useLanguage } from '../../contexts/LanguageContext';
 import CustomSelect from '../ui/CustomSelect';
+import DatePickerField from '../ui/DatePickerField';
 import { AssignmentFormData, getAssignmentSchema } from '../../lib/schemas/AssignmentSchema';
 import { Resolver, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -91,13 +92,13 @@ export default function AddAssignmentModal({ isOpen, onClose, onAdd, initialData
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
       <div className="bg-white rounded-2xl shadow-xl max-w-2xl w-full max-h-[90vh]  overflow-y-auto no-scrollbar">
-        <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between rounded-t-2xl">
-          <h2 className="text-2xl font-bold text-gray-900">{text.title[language]}</h2>
+        <div className="sticky top-0 bg-primary border-b border-gray-200 px-6 py-4 flex items-center justify-between rounded-t-2xl">
+          <h2 className="text-2xl font-bold text-white">{text.title[language]}</h2>
           <button
             onClick={onClose}
             className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
           >
-            <X className="w-6 h-6" />
+            <X className="w-6 h-6 text-white" />
           </button>
         </div>
 
@@ -155,14 +156,11 @@ export default function AddAssignmentModal({ isOpen, onClose, onAdd, initialData
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2 text-right">
-                {text.dueDate[language]}
-              </label>
-              <input
-                type="date"
-                {...register('dueDate')}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent text-right"
-                dir="rtl"
+              <DatePickerField
+                label={text.dueDate[language]}
+                value={watch('dueDate')}
+                onChange={(val) => setValue('dueDate', val, { shouldValidate: true })}
+                error={errors.dueDate?.message}
               />
               {errors.dueDate && <p className="text-red-500 text-xs mt-1 text-right">{errors.dueDate.message}</p>}
             </div>

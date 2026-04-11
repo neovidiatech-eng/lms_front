@@ -29,10 +29,15 @@ export interface CourseForm {
   description: string;
   category: string;
   levelId: number;
-  videoUrl: string; 
-  thumbnailFile: File | null; 
+  videoUrl: string;
+  thumbnailFile: File | null;
   thumbnailPreview: string;
   attachments: AttachedFile[];
+}
+
+export interface LevelColorOption {
+  label: string;
+  value: string;
 }
 
 export interface CourseFormFieldsProps {

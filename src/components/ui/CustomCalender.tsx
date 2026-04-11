@@ -1,8 +1,8 @@
 import React from 'react';
-import { Calendar, ConfigProvider, theme } from 'antd';
+import { Calendar, ConfigProvider, DatePicker, theme } from 'antd';
 import type { Dayjs } from 'dayjs';
-import ar_EG from 'antd/locale/ar_EG'; 
-import 'dayjs/locale/ar'; 
+import ar_EG from 'antd/locale/ar_EG';
+import 'dayjs/locale/ar';
 
 interface CustomCalendarProps {
   value?: Dayjs;
@@ -11,11 +11,11 @@ interface CustomCalendarProps {
   className?: string;
 }
 
-export const CustomCalendar = ({ 
-  value, 
-  onChange, 
-  fullscreen = false, 
-  className = "" 
+export const CustomCalendar = ({
+  value,
+  onChange,
+  fullscreen = false,
+  className = ""
 }: CustomCalendarProps) => {
   const { token } = theme.useToken();
 
@@ -26,10 +26,19 @@ export const CustomCalendar = ({
   };
 
   return (
-    <ConfigProvider locale={ar_EG} direction="rtl">
+    <ConfigProvider locale={ar_EG} direction="rtl"
+      theme={{
+        components: {
+          DatePicker: {
+            cellHeight: 50,
+            cellWidth: 50,
+          },
+        },
+      }}
+    >
       <div style={wrapperStyle} className={className}>
-        <Calendar 
-          fullscreen={fullscreen} 
+        <Calendar
+          fullscreen={fullscreen}
           value={value}
           onSelect={onChange}
           headerRender={({ value, type, onChange, onTypeChange }) => {

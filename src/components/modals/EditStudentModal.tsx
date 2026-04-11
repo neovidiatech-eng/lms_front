@@ -2,6 +2,7 @@ import { X, GraduationCap } from 'lucide-react';
 import { useEffect } from 'react';
 import { useLanguage } from '../../contexts/LanguageContext';
 import CustomSelect from '../ui/CustomSelect';
+import DatePickerField from '../ui/DatePickerField';
 import { StudentFormData, getStudentSchema } from '../../lib/schemas/StudentSchema';
 import { Controller, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -91,13 +92,13 @@ export default function EditStudentModal({
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 backdrop-blur-sm">
       <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh]  overflow-y-auto no-scrollbar">
-        <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between z-10">
-          <button onClick={onClose} className="p-2 hover:bg-gray-100 rounded-lg transition-colors">
-            <X className="w-5 h-5 text-gray-500" />
+        <div className="sticky top-0 bg-primary px-6 py-4 flex items-center justify-between rounded-t-2xl z-10">
+          <button onClick={onClose} className="p-2 hover:bg-white/20 rounded-lg transition-colors">
+            <X className="w-5 h-5 text-white/80" />
           </button>
-          <h2 className="text-xl font-bold text-gray-900 flex items-center gap-2">
-            <GraduationCap className="w-6 h-6 text-blue-600" />
-            <span>{language === 'ar' ? 'تعديل بيانات الطالب' : 'Edit Student'}</span>
+          <h2 className="text-xl font-bold text-white flex items-center gap-2">
+            <GraduationCap className="w-6 h-6" />
+            <span>{t('editStudent')}</span>
           </h2>
         </div>
 
@@ -105,21 +106,21 @@ export default function EditStudentModal({
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-right">
             {/* Name */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">{language === 'ar' ? 'الاسم' : 'Name'} *</label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">{t('name')} *</label>
               <input {...register('name')} className="w-full px-4 py-3 border border-gray-300 rounded-xl outline-none focus:ring-2 focus:ring-blue-500 text-right" dir="rtl" />
               {errors.name && <p className="text-red-500 text-xs mt-1">{errors.name.message}</p>}
             </div>
 
             {/* Email */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">{language === 'ar' ? 'البريد الإلكتروني' : 'Email'} *</label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">{t('email')} *</label>
               <input {...register('email')} className="w-full px-4 py-3 border border-gray-300 rounded-xl outline-none focus:ring-2 focus:ring-blue-500 text-right" dir="ltr" />
               {errors.email && <p className="text-red-500 text-xs mt-1">{errors.email.message}</p>}
             </div>
 
             {/* Phone */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">{language === 'ar' ? 'الهاتف' : 'Phone'} *</label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">{t('phone')} *</label>
               <input {...register('phone')} className="w-full px-4 py-3 border border-gray-300 rounded-xl outline-none focus:ring-2 focus:ring-blue-500 text-right" dir="ltr" />
               {errors.phone && <p className="text-red-500 text-xs mt-1">{errors.phone.message}</p>}
             </div>
@@ -130,7 +131,7 @@ export default function EditStudentModal({
               control={control}
               render={({ field: { value, onChange } }) => (
                 <CustomSelect
-                  label={language === 'ar' ? 'رمز الدولة' : 'Code'}
+                  label={t('countryCode')}
                   value={value}
                   options={countryCodeOptions}
                   onChange={onChange}
@@ -144,7 +145,7 @@ export default function EditStudentModal({
               control={control}
               render={({ field: { value, onChange } }) => (
                 <CustomSelect
-                  label={language === 'ar' ? 'الجنس' : 'Gender'}
+                  label={t('gender')}
                   value={value}
                   options={genderOptions}
                   onChange={onChange}
@@ -154,8 +155,17 @@ export default function EditStudentModal({
 
             {/* Birth Date */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">{language === 'ar' ? 'تاريخ الميلاد' : 'Birth Date'}</label>
-              <input type="date" {...register('birthDate')} className="w-full px-4 py-3 border border-gray-300 rounded-xl outline-none" />
+              <Controller
+                name="birthDate"
+                control={control}
+                render={({ field }) => (
+                  <DatePickerField
+                    label={t('birthDate')}
+                    value={field.value}
+                    onChange={field.onChange}
+                  />
+                )}
+              />
             </div>
 
             {/* Country */}
@@ -164,7 +174,7 @@ export default function EditStudentModal({
               control={control}
               render={({ field: { value, onChange } }) => (
                 <CustomSelect
-                  label={language === 'ar' ? 'الدولة' : 'Country'}
+                  label={t('country')}
                   value={value}
                   options={countryOptions}
                   onChange={onChange}
@@ -178,7 +188,7 @@ export default function EditStudentModal({
               control={control}
               render={({ field: { value, onChange } }) => (
                 <CustomSelect
-                  label={language === 'ar' ? 'الخطة الدراسية' : 'Plan'}
+                  label={t('studyPlan')}
                   value={value}
                   options={planOptions}
                   onChange={onChange}
@@ -193,7 +203,7 @@ export default function EditStudentModal({
             control={control}
             render={({ field: { value, onChange } }) => (
               <CustomSelect
-                label={language === 'ar' ? 'الحالة' : 'Status'}
+                label={t('status')}
                 value={value}
                 options={statusOptions}
                 onChange={onChange}
@@ -202,9 +212,9 @@ export default function EditStudentModal({
           />
 
           <div className="flex gap-3 mt-8 pt-6 border-t">
-            <button type="button" onClick={onClose} className="flex-1 py-3 border border-gray-300 rounded-xl hover:bg-gray-50">{language === 'ar' ? 'إلغاء' : 'Cancel'}</button>
+            <button type="button" onClick={onClose} className="flex-1 py-3 border border-gray-300 rounded-xl hover:bg-gray-50">{t('cancel')}</button>
             <button type="submit" className="flex-1 py-3 bg-blue-600 text-white rounded-xl hover:bg-blue-700 shadow-lg shadow-blue-200">
-              {language === 'ar' ? 'حفظ التعديلات' : 'Save Changes'}
+              {t('save')}
             </button>
           </div>
         </form>
