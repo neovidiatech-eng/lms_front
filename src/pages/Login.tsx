@@ -1,10 +1,5 @@
 import { useState } from "react";
-import {
-  Eye,
-  EyeOff,
-  ArrowLeft,
-  ArrowRight,
-} from "lucide-react";
+import { Eye, EyeOff, ArrowLeft, ArrowRight } from "lucide-react";
 // import { GoogleLogin } from "@react-oauth/google";
 import { useLanguage } from "../contexts/LanguageContext";
 import { useForm, Controller } from "react-hook-form";
@@ -38,7 +33,6 @@ export default function Login({ onLoginSuccess }: LoginProps) {
     },
   });
 
-
   const onSubmit = async (data: LoginInput) => {
     const { email, password } = data;
     try {
@@ -46,6 +40,7 @@ export default function Login({ onLoginSuccess }: LoginProps) {
 
       // The API returns the token in result.data.accessToken or result.accessToken
       const token = result.data?.accessToken || result.accessToken;
+      console.log(data);
 
       if (token) {
         // Clear anything old
@@ -74,16 +69,15 @@ export default function Login({ onLoginSuccess }: LoginProps) {
 
   return (
     <div>
-
       <div className="text-center mb-8">
-        <h1 className="text-xl font-bold text-gray-900 mb-2">
-          {t("login")}
-        </h1>
+        <h1 className="text-xl font-bold text-gray-900 mb-2">{t("login")}</h1>
         <p className="text-gray-600">{t("joinAcademy")}</p>
       </div>
 
       {/* Form */}
-      <form onSubmit={handleFormSubmit(onSubmit)} className="space-y-4">            {/* Email */}
+      <form onSubmit={handleFormSubmit(onSubmit)} className="space-y-4">
+        {" "}
+        {/* Email */}
         <div>
           <label className="block text-right text-gray-700 font-medium mb-2">
             {t("email")}
@@ -97,9 +91,12 @@ export default function Login({ onLoginSuccess }: LoginProps) {
             placeholder="admin@admin.com"
             dir="ltr"
           />
-          {errors.email && <p className="text-red-500 text-xs mt-1 text-right">{errors.email.message}</p>}
+          {errors.email && (
+            <p className="text-red-500 text-xs mt-1 text-right">
+              {errors.email.message}
+            </p>
+          )}
         </div>
-
         {/* Password */}
         <div>
           <label className="block text-right text-gray-700 font-medium mb-2">
@@ -115,7 +112,11 @@ export default function Login({ onLoginSuccess }: LoginProps) {
               dir={language === "ar" ? "rtl" : "ltr"}
               placeholder="********"
             />
-            {errors.password && <p className="text-red-500 text-xs mt-1 text-right">{errors.password.message}</p>}
+            {errors.password && (
+              <p className="text-red-500 text-xs mt-1 text-right">
+                {errors.password.message}
+              </p>
+            )}
 
             <button
               type="button"
@@ -130,7 +131,6 @@ export default function Login({ onLoginSuccess }: LoginProps) {
             </button>
           </div>
         </div>
-
         {/* Remember + Forgot */}
         <div className="flex items-center justify-between">
           <Link
@@ -153,7 +153,6 @@ export default function Login({ onLoginSuccess }: LoginProps) {
             />
           </div>
         </div>
-
         {/* Login Button */}
         <button
           type="submit"
@@ -166,40 +165,42 @@ export default function Login({ onLoginSuccess }: LoginProps) {
         </button>
         <p className="text-center text-gray-500">{t("or")}</p>
         <div className="space-y-4 mb-6">
-        <div className="flex justify-center w-full">
-          <GoogleLogin
-            onSuccess={async (credentialResponse) => {
-              const idToken = credentialResponse.credential;
-              console.log(idToken);
-              if (idToken) {
-                try {
-                  const result = await googleLogin({ idToken, provider: "google" });
-                  const token = result.data?.accessToken || result.accessToken;
+          <div className="flex justify-center w-full">
+            <GoogleLogin
+              onSuccess={async (credentialResponse) => {
+                const idToken = credentialResponse.credential;
+                console.log(idToken);
+                if (idToken) {
+                  try {
+                    const result = await googleLogin({
+                      idToken,
+                      provider: "google",
+                    });
+                    const token =
+                      result.data?.accessToken || result.accessToken;
 
-                  if (token) {
-                    localStorage.setItem("token", token);
-                    onLoginSuccess();
-                    navigate("/dashboard");
+                    if (token) {
+                      localStorage.setItem("token", token);
+                      onLoginSuccess();
+                      navigate("/dashboard");
+                    }
+                  } catch (error) {
+                    console.error("Google Login failed:", error);
                   }
-                } catch (error) {
-                  console.error("Google Login failed:", error);
                 }
-              }
-            }}
-            onError={() => {
-              console.log("Login Failed");
-            }}
-            useOneTap
-            theme="outline"
-            size="large"
-            shape="circle"
-            width="384px"
-          />
-        </div>
+              }}
+              onError={() => {
+                console.log("Login Failed");
+              }}
+              useOneTap
+              theme="outline"
+              size="large"
+              shape="circle"
+              width="384px"
+            />
+          </div>
         </div>
       </form>
     </div>
-
-
   );
 }
