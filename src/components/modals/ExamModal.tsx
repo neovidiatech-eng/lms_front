@@ -97,10 +97,10 @@ export default function AddExamModal({ isOpen, onClose, onAdd, initialData }: Ad
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
       <div className="bg-white rounded-2xl shadow-xl max-w-2xl w-full max-h-[90vh]  overflow-y-auto no-scrollbar">
-        <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between rounded-t-2xl z-10">
-          <h2 className="text-2xl font-bold text-gray-900">{text.title[language]}</h2>
+        <div className="sticky top-0 bg-primary border-b border-gray-200 px-6 py-4 flex items-center justify-between rounded-t-2xl z-10">
+          <h2 className="text-2xl font-bold text-white">{text.title[language]}</h2>
           <button onClick={onClose} className="p-2 hover:bg-gray-100 rounded-lg transition-colors">
-            <X className="w-6 h-6" />
+            <X className="w-6 h-6 text-white" />
           </button>
         </div>
 
