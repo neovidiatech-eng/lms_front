@@ -5,7 +5,8 @@ import Pagination from "../components/ui/Pagination";
 import WhatsAppPhone from "../components/ui/WhatsAppPhone";
 import ViewSubscriptionRequestModal from "../components/modals/ViewSubscriptionRequestModal";
 import CustomSelect from "../components/ui/CustomSelect";
-import axios from "axios";
+import { getSubscriptionRequests } from "../services/subscriptionRequestServices";
+
 interface SubscriptionRequest {
   id: string;
   studentName: string;
@@ -67,80 +68,30 @@ export default function SubscriptionRequests() {
   };
 
   const [requests, setRequests] = useState<SubscriptionRequest[]>([]);
-  // const [requests] = useState<SubscriptionRequest[]>([
-  //   {
-  //     id: '1',
-  //     studentName: 'أحمد محمد',
-  //     parentName: 'محمد علي',
-  //     phone: '01234567890',
-  //     email: 'parent@email.com',
-  //     planName: 'باقة الأساسية',
-  //     planPrice: '500 جنيه',
-  //     sessionsCount: 4,
-  //     requestDate: '2024-03-01',
-  //     status: 'pending',
-  //     notes: 'طالب جديد'
-  //   },
-  //   {
-  //     id: '2',
-  //     studentName: 'فاطمة حسن',
-  //     parentName: 'حسن أحمد',
-  //     phone: '01098765432',
-  //     email: 'parent2@email.com',
-  //     planName: 'باقة المتقدمة',
-  //     planPrice: '800 جنيه',
-  //     sessionsCount: 8,
-  //     requestDate: '2024-03-02',
-  //     status: 'approved'
-  //   },
-  //   {
-  //     id: '3',
-  //     studentName: 'عمر خالد',
-  //     parentName: 'خالد محمود',
-  //     phone: '01111222333',
-  //     email: 'parent3@email.com',
-  //     planName: 'باقة البريميوم',
-  //     planPrice: '1200 جنيه',
-  //     sessionsCount: 12,
-  //     requestDate: '2024-03-03',
-  //     status: 'rejected',
-  //     notes: 'تم الرفض بسبب عدم اكتمال البيانات'
-  //   }
-  // ]);
+
   useEffect(() => {
     const fetchRequests = async () => {
       try {
-        const res = await axios.get(
-          "https://perfect-due.com/subscription/requests",
-          {
-            headers: {
-              Authorization: `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImU3OTlkNTY3LTBjMTUtNDMxMi04Y2NmLTY4OTIzYmQ5NjkyMyIsImlhdCI6MTc3NTczNzQ2MiwiZXhwIjoxNzc1NzQ0NjYyfQ.YcL6X70iB6mmErAVXW5Uac9aSySfBoURdD3TViO1Pso`,
-            },
-          },
-        );
+        const data = await getSubscriptionRequests();
+        console.log(data);
 
-        const formatted = res.data.data.map((item: any) => ({
+        if (!Array.isArray(data)) {
+          console.error("Invalid data:", data);
+          return;
+        }
+
+        const formatted = data.map((item: any) => ({
           id: item.id,
-
-          studentName: item.user.name || "—",
-
-          parentName: item.user.name || "—",
-
-          phone: item.user.phone || "—",
-
-          email: item.user.email || "—",
-
-          planName: item.plan.name_ar || item.plan.name_en,
-
-          planPrice: item.plan.price,
-
-          sessionsCount: item.plan.hours,
-
-          requestDate: item.createdAt.split("T")[0],
-
+          studentName: item.user?.name || "—",
+          parentName: item.user?.name || "—",
+          phone: item.user?.phone || "—",
+          email: item.user?.email || "—",
+          planName: item.plan?.name_ar || item.plan?.name_en,
+          planPrice: item.plan?.price,
+          sessionsCount: item.plan?.hours,
+          requestDate: item.createdAt?.split("T")[0],
           status: item.status,
         }));
-
         setRequests(formatted);
       } catch (error) {
         console.log(error);
@@ -380,3 +331,5 @@ export default function SubscriptionRequests() {
     </div>
   );
 }
+
+// https://perfect-due.com/api-docs/
