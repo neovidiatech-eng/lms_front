@@ -1,19 +1,7 @@
 import { X, Phone, Mail, GraduationCap, DollarSign, Calendar, CheckCircle, Clock } from 'lucide-react';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { useSessions } from '../../contexts/SessionsContext';
-
-interface Teacher {
-  id: string;
-  name: string;
-  email: string;
-  phone: string;
-  countryCode: string;
-  amount: number;
-  currency: string;
-  status: 'active' | 'inactive';
-  subject: string;
-  avatar?: string;
-}
+import { Teacher } from '../../types/teachers';
 
 interface ViewTeacherModalProps {
   isOpen: boolean;
@@ -22,7 +10,7 @@ interface ViewTeacherModalProps {
 }
 
 export default function ViewTeacherModal({ isOpen, onClose, teacher }: ViewTeacherModalProps) {
-  const { language } = useLanguage();
+  const { language, t } = useLanguage();
   const { sessions } = useSessions();
 
   if (!isOpen || !teacher) return null;
@@ -35,8 +23,8 @@ export default function ViewTeacherModal({ isOpen, onClose, teacher }: ViewTeach
   const uniqueStudents = [...new Set(teacherSessions.map(s => s.studentName))];
 
   const calcSessionHours = (session: { time: string; endTime: string }) => {
-    const parseTime = (t: string) => {
-      const m = t.match(/(\d+):(\d+)\s*(AM|PM)/i);
+    const parseTime = (timeStr: string) => {
+      const m = timeStr.match(/(\d+):(\d+)\s*(AM|PM)/i);
       if (!m) return 0;
       let h = parseInt(m[1]);
       const min = parseInt(m[2]);
@@ -51,10 +39,22 @@ export default function ViewTeacherModal({ isOpen, onClose, teacher }: ViewTeach
   const totalHours = teacherSessions.reduce((sum, s) => sum + calcSessionHours(s), 0);
   const completedHours = completedSessions.reduce((sum, s) => sum + calcSessionHours(s), 0);
   const pendingHours = upcomingSessions.reduce((sum, s) => sum + calcSessionHours(s), 0);
-  const totalEarnings = completedHours * teacher.amount;
-  const pendingEarnings = pendingHours * teacher.amount;
-  const totalOwed = totalHours * teacher.amount;
-  const currencySymbol = teacher.currency === 'EGP' ? 'ج.م' : teacher.currency === 'SAR' ? 'ر.س' : teacher.currency;
+
+  const hourPrice = teacher.hour_price || 0;
+  const totalEarnings = completedHours * hourPrice;
+  const pendingEarnings = pendingHours * hourPrice;
+  const totalOwed = totalHours * hourPrice;
+
+  const currency = teacher.currency_id || 'EGP';
+  const currencySymbol = currency === 'EGP' ? 'ج.م' : currency === 'SAR' ? 'ر.س' : currency;
+
+  // Safe subject extraction
+  const subjects = (teacher.subject_ids || []).map((s: any) => {
+    if (typeof s === 'object') {
+      return s.name_ar || s.name_en || s.name || '';
+    }
+    return String(s);
+  }).filter(Boolean);
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
@@ -74,9 +74,9 @@ export default function ViewTeacherModal({ isOpen, onClose, teacher }: ViewTeach
             <h3 className="text-2xl font-bold text-gray-900 mb-2">{teacher.name}</h3>
 
             <div className="flex items-center gap-4 mb-4 flex-wrap justify-center">
-              <a href={`tel:${teacher.countryCode}${teacher.phone}`} className="flex items-center gap-2 text-gray-600 hover:text-blue-600 transition-colors">
+              <a href={`tel:${teacher.code_country}${teacher.phone}`} className="flex items-center gap-2 text-gray-600 hover:text-blue-600 transition-colors">
                 <Phone className="w-4 h-4" />
-                <span className="text-sm">{teacher.countryCode} {teacher.phone}</span>
+                <span className="text-sm">{teacher.code_country} {teacher.phone}</span>
               </a>
               <a href={`mailto:${teacher.email}`} className="flex items-center gap-2 text-gray-600 hover:text-blue-600 transition-colors">
                 <Mail className="w-4 h-4" />
@@ -85,58 +85,58 @@ export default function ViewTeacherModal({ isOpen, onClose, teacher }: ViewTeach
             </div>
 
             <div className="flex flex-wrap gap-2 justify-center mb-4">
-              {teacher.subject.split('،').map((sub, index) => (
+              {subjects.map((sub, index) => (
                 <span key={index} className="inline-flex px-3 py-1 bg-blue-100 text-blue-700 rounded-lg text-sm font-medium">
-                  {sub.trim()}
+                  {sub}
                 </span>
               ))}
             </div>
 
             <div className="flex gap-4 items-center flex-wrap justify-center">
-              <div className={`rounded-xl px-6 py-3 text-center border ${teacher.status === 'active' ? 'bg-green-50 border-green-100' : 'bg-gray-50 border-gray-200'}`}>
-                <p className="text-xs text-gray-500 mb-1">{language === 'ar' ? 'الحالة' : 'Status'}</p>
-                <p className={`text-lg font-bold ${teacher.status === 'active' ? 'text-green-700' : 'text-gray-600'}`}>
-                  {teacher.status === 'active' ? (language === 'ar' ? 'نشط' : 'Active') : (language === 'ar' ? 'غير نشط' : 'Inactive')}
+              <div className={`rounded-xl px-6 py-3 text-center border ${teacher.active ? 'bg-green-50 border-green-100' : 'bg-gray-50 border-gray-200'}`}>
+                <p className="text-xs text-gray-500 mb-1">{t('status')}</p>
+                <p className={`text-lg font-bold ${teacher.active ? 'text-green-700' : 'text-gray-600'}`}>
+                  {teacher.active ? t('active') : t('inactive')}
                 </p>
               </div>
               <div className="bg-blue-50 rounded-xl px-6 py-3 text-center border border-blue-100">
-                <p className="text-xs text-blue-600 mb-1">{language === 'ar' ? 'السعر بالساعة' : 'Hourly Rate'}</p>
-                <p className="text-lg font-bold text-blue-700">{teacher.amount.toFixed(2)} {currencySymbol}</p>
+                <p className="text-xs text-blue-600 mb-1">{t('hourlyRate') || (language === 'ar' ? 'السعر بالساعة' : 'Hourly Rate')}</p>
+                <p className="text-lg font-bold text-blue-700">{hourPrice.toFixed(2)} {currencySymbol}</p>
               </div>
             </div>
           </div>
 
           <div className="mb-8">
             <div className="flex items-center gap-2 mb-4 justify-end">
-              <h4 className="text-lg font-bold text-gray-900">{language === 'ar' ? 'الإحصائيات' : 'Statistics'}</h4>
+              <h4 className="text-lg font-bold text-gray-900">{t('statistics') || (language === 'ar' ? 'الإحصائيات' : 'Statistics')}</h4>
             </div>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               <div className="bg-white rounded-xl p-4 border border-gray-200 hover:shadow-md transition-shadow">
                 <div className="p-2 rounded-lg bg-blue-50 w-fit mb-3">
                   <GraduationCap className="w-5 h-5 text-blue-600" />
                 </div>
-                <p className="text-sm text-gray-600 mb-1 text-right">{language === 'ar' ? 'عدد الطلاب' : 'Students'}</p>
+                <p className="text-sm text-gray-600 mb-1 text-right">{t('students') || (language === 'ar' ? 'عدد الطلاب' : 'Students')}</p>
                 <p className="text-2xl font-bold text-gray-900 text-right">{uniqueStudents.length}</p>
               </div>
               <div className="bg-white rounded-xl p-4 border border-gray-200 hover:shadow-md transition-shadow">
                 <div className="p-2 rounded-lg bg-orange-50 w-fit mb-3">
                   <Calendar className="w-5 h-5 text-orange-600" />
                 </div>
-                <p className="text-sm text-gray-600 mb-1 text-right">{language === 'ar' ? 'حصص اليوم' : "Today's Sessions"}</p>
+                <p className="text-sm text-gray-600 mb-1 text-right">{t('todaySessions') || (language === 'ar' ? 'حصص اليوم' : "Today's Sessions")}</p>
                 <p className="text-2xl font-bold text-gray-900 text-right">{todaySessions.length}</p>
               </div>
               <div className="bg-white rounded-xl p-4 border border-gray-200 hover:shadow-md transition-shadow">
                 <div className="p-2 rounded-lg bg-green-50 w-fit mb-3">
                   <CheckCircle className="w-5 h-5 text-green-600" />
                 </div>
-                <p className="text-sm text-gray-600 mb-1 text-right">{language === 'ar' ? 'حصص مكتملة' : 'Completed'}</p>
+                <p className="text-sm text-gray-600 mb-1 text-right">{t('completedSessions') || (language === 'ar' ? 'حصص مكتملة' : 'Completed')}</p>
                 <p className="text-2xl font-bold text-gray-900 text-right">{completedSessions.length}</p>
               </div>
               <div className="bg-white rounded-xl p-4 border border-gray-200 hover:shadow-md transition-shadow">
                 <div className="p-2 rounded-lg bg-yellow-50 w-fit mb-3">
                   <Clock className="w-5 h-5 text-yellow-600" />
                 </div>
-                <p className="text-sm text-gray-600 mb-1 text-right">{language === 'ar' ? 'حصص قادمة' : 'Upcoming'}</p>
+                <p className="text-sm text-gray-600 mb-1 text-right">{t('upcomingSessions') || (language === 'ar' ? 'حصص قادمة' : 'Upcoming')}</p>
                 <p className="text-2xl font-bold text-gray-900 text-right">{upcomingSessions.length}</p>
               </div>
             </div>
@@ -145,52 +145,52 @@ export default function ViewTeacherModal({ isOpen, onClose, teacher }: ViewTeach
           <div>
             <div className="flex items-center gap-2 mb-4 justify-end">
               <DollarSign className="w-5 h-5 text-green-600" />
-              <h4 className="text-lg font-bold text-gray-900">{language === 'ar' ? 'تفاصيل الأرباح' : 'Earnings Details'}</h4>
+              <h4 className="text-lg font-bold text-gray-900">{t('earningsDetails') || (language === 'ar' ? 'تفاصيل الأرباح' : 'Earnings Details')}</h4>
             </div>
 
             <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 mb-4 text-right">
-              <p className="text-xs text-blue-700 font-semibold mb-1">{language === 'ar' ? 'المعادلة الحسابية' : 'Formula'}</p>
+              <p className="text-xs text-blue-700 font-semibold mb-1">{t('formula') || (language === 'ar' ? 'المعادلة الحسابية' : 'Formula')}</p>
               <p className="text-sm text-blue-800 font-mono">
                 {language === 'ar'
-                  ? `الأرباح = عدد الساعات × ${teacher.amount} ${currencySymbol}/ساعة`
-                  : `Earnings = Hours × ${teacher.amount} ${currencySymbol}/hour`}
+                  ? `الأرباح = عدد الساعات × ${hourPrice} ${currencySymbol}/ساعة`
+                  : `Earnings = Hours × ${hourPrice} ${currencySymbol}/hour`}
               </p>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
               <div className="rounded-xl p-5 bg-blue-50 text-blue-700">
-                <p className="text-sm mb-2 text-right opacity-80">{language === 'ar' ? 'إجمالي الساعات' : 'Total Hours'}</p>
+                <p className="text-sm mb-2 text-right opacity-80">{t('totalHours') || (language === 'ar' ? 'إجمالي الساعات' : 'Total Hours')}</p>
                 <p className="text-2xl font-bold text-right">{totalHours.toFixed(1)} {language === 'ar' ? 'ساعة' : 'hrs'}</p>
               </div>
               <div className="rounded-xl p-5 bg-white text-gray-900 border border-gray-200">
-                <p className="text-sm mb-2 text-right opacity-80">{language === 'ar' ? 'السعر / ساعة' : 'Rate / Hour'}</p>
-                <p className="text-2xl font-bold text-right">{teacher.amount.toFixed(2)} {currencySymbol}</p>
+                <p className="text-sm mb-2 text-right opacity-80">{t('ratePerHour') || (language === 'ar' ? 'السعر / ساعة' : 'Rate / Hour')}</p>
+                <p className="text-2xl font-bold text-right">{hourPrice.toFixed(2)} {currencySymbol}</p>
               </div>
               <div className="rounded-xl p-5 bg-green-50 text-green-700">
-                <p className="text-sm mb-2 text-right opacity-80">{language === 'ar' ? 'إجمالي المستحق' : 'Total Owed'}</p>
+                <p className="text-sm mb-2 text-right opacity-80">{t('totalOwed') || (language === 'ar' ? 'إجمالي المستحق' : 'Total Owed')}</p>
                 <p className="text-2xl font-bold text-right">{totalOwed.toFixed(2)} {currencySymbol}</p>
               </div>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
               <div className="rounded-xl p-5 bg-green-50 text-green-700">
-                <p className="text-sm mb-2 text-right opacity-80">{language === 'ar' ? 'أرباح الحصص المكتملة' : 'Completed Earnings'}</p>
+                <p className="text-sm mb-2 text-right opacity-80">{t('completedEarnings') || (language === 'ar' ? 'أرباح الحصص المكتملة' : 'Completed Earnings')}</p>
                 <p className="text-2xl font-bold text-right">{totalEarnings.toFixed(2)} {currencySymbol}</p>
                 <p className="text-xs opacity-60 text-right mt-1">{completedHours.toFixed(1)} {language === 'ar' ? 'ساعة' : 'hrs'}</p>
               </div>
               <div className="rounded-xl p-5 bg-orange-50 text-orange-700">
-                <p className="text-sm mb-2 text-right opacity-80">{language === 'ar' ? 'أرباح معلقة' : 'Pending Earnings'}</p>
+                <p className="text-sm mb-2 text-right opacity-80">{t('pendingEarnings') || (language === 'ar' ? 'أرباح معلقة' : 'Pending Earnings')}</p>
                 <p className="text-2xl font-bold text-right">{pendingEarnings.toFixed(2)} {currencySymbol}</p>
                 <p className="text-xs opacity-60 text-right mt-1">{pendingHours.toFixed(1)} {language === 'ar' ? 'ساعة' : 'hrs'}</p>
               </div>
               <div className="rounded-xl p-5 bg-gray-50 text-gray-700 border border-gray-200">
-                <p className="text-sm mb-2 text-right opacity-80">{language === 'ar' ? 'رصيد متاح للسحب' : 'Available for Withdrawal'}</p>
+                <p className="text-sm mb-2 text-right opacity-80">{t('availableForWithdrawal') || (language === 'ar' ? 'رصيد متاح للسحب' : 'Available for Withdrawal')}</p>
                 <p className="text-2xl font-bold text-right">{totalEarnings.toFixed(2)} {currencySymbol}</p>
               </div>
             </div>
 
             <div className="rounded-xl p-5 bg-red-50 text-red-700">
-              <p className="text-sm mb-2 text-right opacity-80">{language === 'ar' ? 'طلبات سحب معلقة' : 'Pending Withdrawal Requests'}</p>
+              <p className="text-sm mb-2 text-right opacity-80">{t('pendingWithdrawalRequests') || (language === 'ar' ? 'طلبات سحب معلقة' : 'Pending Withdrawal Requests')}</p>
               <p className="text-2xl font-bold text-right">0.00 {currencySymbol}</p>
             </div>
           </div>
@@ -198,7 +198,7 @@ export default function ViewTeacherModal({ isOpen, onClose, teacher }: ViewTeach
           {teacherSessions.length > 0 && (
             <div className="mt-8">
               <div className="flex items-center gap-2 mb-4 justify-end">
-                <h4 className="text-lg font-bold text-gray-900">{language === 'ar' ? 'آخر الحصص' : 'Recent Sessions'}</h4>
+                <h4 className="text-lg font-bold text-gray-900">{t('recentSessions') || (language === 'ar' ? 'آخر الحصص' : 'Recent Sessions')}</h4>
               </div>
               <div className="space-y-2">
                 {teacherSessions.slice(0, 5).map(session => (
@@ -220,7 +220,7 @@ export default function ViewTeacherModal({ isOpen, onClose, teacher }: ViewTeach
 
         <div className="sticky bottom-0 bg-gray-50 border-t border-gray-200 px-6 py-4 rounded-b-2xl">
           <button onClick={onClose} className="w-full px-6 py-3 bg-gray-700 hover:bg-gray-800 text-white rounded-xl transition-colors font-medium">
-            {language === 'ar' ? 'إغلاق' : 'Close'}
+            {t('close') || (language === 'ar' ? 'إغلاق' : 'Close')}
           </button>
         </div>
       </div>

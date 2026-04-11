@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { X, Save, Bell, Send } from 'lucide-react';
 import { useLanguage } from '../../contexts/LanguageContext';
 import CustomSelect from '../ui/CustomSelect';
+import DatePickerField from '../ui/DatePickerField';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { getEditSubscriptionSchema, type EditSubscriptionFormData } from '../../lib/schemas/SubscriptionSchema';
@@ -161,27 +162,33 @@ export default function EditSubscriptionModal({
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2 text-right">
-                {text.startDate[language]}
-              </label>
-              <input
-                type="date"
-                {...register('startDate')}
-                className={`w-full px-4 py-2.5 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-right ${errors.startDate ? 'border-red-500' : 'border-gray-300'}`}
+              <Controller
+                name="startDate"
+                control={control}
+                render={({ field }) => (
+                  <DatePickerField
+                    label={text.startDate[language]}
+                    value={field.value}
+                    onChange={field.onChange}
+                    error={errors.startDate?.message}
+                  />
+                )}
               />
-              {errors.startDate && <p className="mt-1 text-sm text-red-500 text-right">{errors.startDate.message}</p>}
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2 text-right">
-                {text.endDate[language]}
-              </label>
-              <input
-                type="date"
-                {...register('endDate')}
-                className={`w-full px-4 py-2.5 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-right ${errors.endDate ? 'border-red-500' : 'border-gray-300'}`}
+              <Controller
+                name="endDate"
+                control={control}
+                render={({ field }) => (
+                  <DatePickerField
+                    label={text.endDate[language]}
+                    value={field.value}
+                    onChange={field.onChange}
+                    error={errors.endDate?.message}
+                  />
+                )}
               />
-              {errors.endDate && <p className="mt-1 text-sm text-red-500 text-right">{errors.endDate.message}</p>}
             </div>
           </div>
 

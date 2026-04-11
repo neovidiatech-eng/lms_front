@@ -1,26 +1,26 @@
-import { useState, useRef } from 'react';
-import { PlayCircle, Plus, Search, BookOpen, MoreVertical, Edit, Trash2, Eye, X, Layers } from 'lucide-react';
+import { useState, } from 'react';
+import { PlayCircle, Plus, Search, BookOpen, MoreVertical, Edit, Trash2, Eye, Layers } from 'lucide-react';
 import CourseViewer from '../../components/features/LMS/CourseViewer';
-import { Course, Level } from '../../types/lmsCourses';
-import CourseFormFields from './components/CourseFormFields';
-import { FormProvider, useForm } from 'react-hook-form';
+import { Course, Level, LevelColorOption } from '../../types/lmsCourses';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { CourseFormData, getCourseSchema } from '../../lib/schemas/CourseSchema';
+import CourseModal from '../../components/modals/CourseModal';
+import { useForm } from 'react-hook-form';
+import LevelsModal from '../../components/modals/ShowLevelModal';
 
 
 
 const subjectCategories = ['الكل', 'رياضيات', 'علوم', 'لغة عربية', 'لغة إنجليزية', 'فيزياء', 'كيمياء', 'أحياء', 'تاريخ', 'جغرافيا', 'تربية إسلامية'];
-
-const levelColorOptions = [
-  { label: 'أخضر', value: 'bg-green-100 text-green-700' },
-  { label: 'أصفر', value: 'bg-yellow-100 text-yellow-700' },
-  { label: 'أحمر', value: 'bg-red-100 text-red-700' },
-  { label: 'أزرق', value: 'badge-primary' },
-  { label: 'برتقالي', value: 'bg-orange-100 text-orange-700' },
+const levelColorOptions: LevelColorOption[] = [
+  { label: 'green', value: 'bg-green-100 text-green-700' },
+  { label: 'blue', value: 'bg-blue-100 text-blue-700' },
+  { label: 'red', value: 'bg-red-100 text-red-700' },
+  { label: 'yellow', value: 'bg-yellow-100 text-yellow-700' },
+  { label: 'orange', value: 'bg-orange-100 text-orange-700' },
 ];
 
-const defaultLevels: Level[] = [
+export const defaultLevels: Level[] = [
   { id: 1, name: 'مبتدئ', color: 'bg-green-100 text-green-700' },
   { id: 2, name: 'متوسط', color: 'bg-yellow-100 text-yellow-700' },
   { id: 3, name: 'متقدم', color: 'bg-red-100 text-red-700' },
@@ -119,9 +119,6 @@ export default function LMSCoursesPage() {
   const [newLevelColor, setNewLevelColor] = useState(levelColorOptions[0].value);
 
   const [nextId, setNextId] = useState(mockCourses.length + 1);
-
-  const thumbnailInputRef = useRef<HTMLInputElement>(null);
-  const attachInputRef = useRef<HTMLInputElement>(null);
   const { t, language } = useLanguage()
   const methods = useForm<CourseFormData>({
     resolver: zodResolver(getCourseSchema(t)),
@@ -137,7 +134,7 @@ export default function LMSCoursesPage() {
     } as CourseFormData,
   });
 
-  const { reset, handleSubmit } = methods;
+  const { reset } = methods;
 
 
   const filtered = courses.filter(c => {
@@ -275,7 +272,7 @@ export default function LMSCoursesPage() {
       {/* Stats */}
       <div className="grid grid-cols-2 gap-4">
         {[
-          { label: t('courses_total'), value: courses.length, color: 'bg-primary-light text-primary', icon: BookOpen },
+          { label: t('courses_total'), value: courses.length, color: 'bg-primary-light text-white', icon: BookOpen },
           { label: t('courses_levels'), value: levels.length, color: 'bg-green-50 text-green-600', icon: Layers },
         ].map((s, i) => (
           <div key={i} className="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
@@ -505,130 +502,31 @@ export default function LMSCoursesPage() {
           </div>
         )
       }
-
-      {/* Add Modal */}
-      {
-        showAddModal && (
-          <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4" onClick={() => setShowAddModal(false)}>
-            <div className="bg-white rounded-2xl max-w-md w-full p-6 max-h-[90vh] overflow-y-auto  no-scrollbar" onClick={e => e.stopPropagation()}>
-              <div className="flex items-center justify-between mb-5">
-                <button onClick={() => setShowAddModal(false)} className="p-1 hover:bg-gray-100 rounded-lg transition-colors">
-                  <X className="w-5 h-5 text-gray-500" />
-                </button>
-                <h2 className="text-xl font-bold text-gray-900">إضافة كورس جديد</h2>
-              </div>
-              <FormProvider {...methods}>
-                <form onSubmit={handleSubmit(onAddSubmit)}>
-                  <CourseFormFields
-                    levels={levels}
-                    subjectCategories={subjectCategories}
-                    thumbnailInputRef={thumbnailInputRef}
-                    attachInputRef={attachInputRef}
-                  />
-                  <div className="flex gap-3 mt-6">
-                    <button onClick={() => setShowAddModal(false)} className="flex-1 px-4 py-2.5 border border-gray-200 rounded-xl text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors">إلغاء</button>
-                    <button
-                      type="submit"
-                      className="flex-1 px-4 py-2.5 btn-primary text-white rounded-xl text-sm font-medium transition-colors"
-                    >
-                      إضافة
-                    </button>            </div>
-                </form>
-              </FormProvider>
-            </div>
-          </div>
-        )
-      }
-
-      {/* Edit Modal */}
-      {
-        editCourse && (
-          <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4" onClick={() => setEditCourse(null)}>
-            <div className="bg-white rounded-2xl max-w-md w-full p-6 max-h-[90vh] overflow-y-auto  no-scrollbar" onClick={e => e.stopPropagation()}>
-              <div className="flex items-center justify-between mb-5">
-                <button onClick={() => setEditCourse(null)} className="p-1 hover:bg-gray-100 rounded-lg transition-colors">
-                  <X className="w-5 h-5 text-gray-500" />
-                </button>
-                <h2 className="text-xl font-bold text-gray-900">تعديل الكورس</h2>
-              </div>
-              <FormProvider {...methods}>
-                <form onSubmit={handleSubmit(onEditSubmit)}>
-                  <CourseFormFields
-                    levels={levels}
-                    subjectCategories={subjectCategories}
-                    thumbnailInputRef={thumbnailInputRef}
-                    attachInputRef={attachInputRef} />
-                  <div className="flex gap-3 mt-6">
-                    <button onClick={() => setEditCourse(null)} className="flex-1 px-4 py-2.5 border border-gray-200 rounded-xl text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors">إلغاء</button>
-                    <button
-                      type="submit"
-                      className="flex-1 px-4 py-2.5 btn-primary text-white rounded-xl text-sm font-medium transition-colors"
-                    >
-                      حفظ التعديلات
-                    </button>            </div>
-                </form>
-              </FormProvider>
-            </div>
-          </div>
-        )
-      }
+      <CourseModal
+        isOpen={showAddModal || !!editCourse}
+        onClose={() => {
+          setShowAddModal(false);
+          setEditCourse(null);
+        }}
+        onSubmit={editCourse ? onEditSubmit : onAddSubmit}
+        course={editCourse}
+        levels={levels}
+        subjectCategories={subjectCategories}
+      />
 
       {/* Levels Modal */}
-      {
-        showLevelsModal && (
-          <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4" onClick={() => setShowLevelsModal(false)}>
-            <div className="bg-white rounded-2xl max-w-sm w-full p-6" onClick={e => e.stopPropagation()}>
-              <div className="flex items-center justify-between mb-5">
-                <button onClick={() => setShowLevelsModal(false)} className="p-1 hover:bg-gray-100 rounded-lg transition-colors">
-                  <X className="w-5 h-5 text-gray-500" />
-                </button>
-                <h2 className="text-xl font-bold text-gray-900">إدارة المستويات</h2>
-              </div>
-              <div className="space-y-2 mb-5">
-                {levels.map(l => (
-                  <div key={l.id} className="flex items-center justify-between bg-gray-50 rounded-xl px-3 py-2.5">
-                    <button onClick={() => handleDeleteLevel(l.id)} className="p-1 hover:bg-red-50 text-red-400 hover:text-red-600 rounded-lg transition-colors">
-                      <Trash2 className="w-4 h-4" />
-                    </button>
-                    <span className={`text-sm font-medium px-2 py-0.5 rounded-full ${l.color}`}>{l.name}</span>
-                  </div>
-                ))}
-                {levels.length === 0 && <p className="text-center text-sm text-gray-400 py-4">لا توجد مستويات</p>}
-              </div>
-              <div className="border-t border-gray-100 pt-4 space-y-3">
-                <p className="text-sm font-semibold text-gray-700 text-right">إضافة مستوى جديد</p>
-                <input
-                  type="text"
-                  value={newLevelName}
-                  onChange={e => setNewLevelName(e.target.value)}
-                  placeholder="اسم المستوى"
-                  className="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary text-right"
-                  onKeyDown={e => e.key === 'Enter' && handleAddLevel()}
-                />
-                <div className="flex gap-2 flex-wrap">
-                  {levelColorOptions.map(opt => (
-                    <button
-                      key={opt.value}
-                      onClick={() => setNewLevelColor(opt.value)}
-                      className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all ${opt.value} ${newLevelColor === opt.value ? 'ring-2 ring-offset-1 ring-gray-400 scale-105' : 'opacity-60 hover:opacity-100'}`}
-                    >
-                      {opt.label}
-                    </button>
-                  ))}
-                </div>
-                <button
-                  onClick={handleAddLevel}
-                  disabled={!newLevelName.trim()}
-                  className="w-full flex items-center justify-center gap-2 btn-primary disabled:opacity-40 text-white py-2.5 rounded-xl text-sm font-medium transition-colors"
-                >
-                  <Plus className="w-4 h-4" />
-                  إضافة
-                </button>
-              </div>
-            </div>
-          </div>
-        )
-      }
+      <LevelsModal
+        isOpen={showLevelsModal}
+        onClose={() => setShowLevelsModal(false)}
+        levels={levels}
+        handleDeleteLevel={handleDeleteLevel}
+        newLevelName={newLevelName}
+        setNewLevelName={setNewLevelName}
+        newLevelColor={newLevelColor}
+        setNewLevelColor={setNewLevelColor}
+        levelColorOptions={levelColorOptions}
+        handleAddLevel={handleAddLevel}
+      />
     </div >
   );
 }

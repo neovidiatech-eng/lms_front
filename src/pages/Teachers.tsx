@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { Search, Eye, Pencil, Trash2, Plus, Users, UserCheck, UserX } from 'lucide-react';
 import WhatsAppPhone from '../components/ui/WhatsAppPhone';
 import AddTeacherModal from '../components/modals/AddTeacherModal';
@@ -7,26 +7,17 @@ import EditTeacherModal from '../components/modals/EditTeacherModal';
 import Pagination from '../components/ui/Pagination';
 import CustomSelect from '../components/ui/CustomSelect';
 import { useTranslation } from 'react-i18next';
-
-interface Teacher {
-  id: string;
-  name: string;
-  email: string;
-  phone: string;
-  countryCode: string;
-  amount: number;
-  currency: string;
-  status: 'active' | 'inactive';
-  subject: string;
-  avatar?: string;
-}
+import { useTeacher, useDeleteTeacher, useCreateTeacher, useUpdateTeacher } from '../hooks/useTeacher';
+import { Teacher, CreateTeacherInput } from '../types/teachers';
+import { TeacherFormData } from '../lib/schemas/TeacherSchema';
+import { useCurrency } from '../hooks/useCurrency';
+import ErrorService from '../utils/ErrorService';
 
 export default function Teachers() {
   const { t, i18n } = useTranslation();
   const language = i18n.language.split('-')[0];
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedStatus, setSelectedStatus] = useState('all');
-  const [selectedCountry, setSelectedCountry] = useState('all');
   const [currentPage, setCurrentPage] = useState(1);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
@@ -34,87 +25,42 @@ export default function Teachers() {
   const [selectedTeacher, setSelectedTeacher] = useState<Teacher | null>(null);
   const itemsPerPage = 7;
 
-  const teachers: Teacher[] = [
-    {
-      id: '1',
-      name: 'Mohammed',
-      email: 'Mohammed123@gmail.com',
-      phone: '1027373763',
-      countryCode: '+20',
-      amount: 100,
-      currency: 'EGP',
-      status: 'active',
-      subject: 'الرياضيات',
-    },
-    {
-      id: '2',
-      name: 'Mahmoud',
-      email: 'Mahmoud@gmail.com',
-      phone: '1234567890',
-      countryCode: '+20',
-      amount: 120,
-      currency: 'EGP',
-      status: 'active',
-      subject: 'الرياضيات',
-    },
-    {
-      id: '3',
-      name: 're',
-      email: 'aheelff@gmail.com',
-      phone: '102141478',
-      countryCode: '+20',
-      amount: 250,
-      currency: 'EGP',
-      status: 'active',
-      subject: 'القرآن الكريم، اللغة العربية',
-    },
-    {
-      id: '4',
-      name: 'Ahmed Ali',
-      email: 'ahmed12@example.com',
-      phone: '1023020214',
-      countryCode: '+20',
-      amount: 150,
-      currency: 'EGP',
-      status: 'active',
-      subject: 'القرآن الكريم، اللغة العربية',
-    },
-    {
-      id: '5',
-      name: 'محمد عبدالباري',
-      email: 'engahmedgamal00086sdd@gmail.com',
-      phone: '1023065856',
-      countryCode: '+20',
-      amount: 150,
-      currency: 'EGP',
-      status: 'active',
-      subject: 'حساب ، تفسيت',
-    },
-    {
-      id: '6',
-      name: 'أحمد محمد',
-      email: 'ahmed.teacher@gmail.com',
-      phone: '1012345678',
-      countryCode: '+20',
-      amount: 180,
-      currency: 'EGP',
-      status: 'active',
-      subject: 'الفيزياء',
-    },
-    {
-      id: '7',
-      name: 'سارة أحمد',
-      email: 'sara.ahmed@gmail.com',
-      phone: '1098765432',
-      countryCode: '+20',
-      amount: 200,
-      currency: 'EGP',
-      status: 'active',
-      subject: 'الكيمياء',
-    },
-  ];
+  const [debouncedSearch, setDebouncedSearch] = useState('');
 
-  const statsCards = [
+  useEffect(() => {
+    // const timer = setTimeout(() => {
+    //   setDebouncedSearch(searchTerm);
+    // }, 1000);
+    if (searchTerm.length > 3) {
+      setDebouncedSearch(searchTerm);
+    } else if (searchTerm.length === 0) {
+      setDebouncedSearch('');
+    }
+  }, [searchTerm]);
+
+  const { data: teachersResponse, isLoading, isError } = useTeacher(debouncedSearch);
+  const { data: currenciesData } = useCurrency();
+  const deleteTeacherMutation = useDeleteTeacher();
+  const createTeacherMutation = useCreateTeacher();
+  const updateTeacherMutation = useUpdateTeacher();
+
+  // Bulletproof data extraction
+  const teachers = useMemo(() => {
+    return teachersResponse?.teachers || [];
+  }, [teachersResponse]);
+
+  // Currency lookup map for the table
+  const currencyLookup = useMemo(() => {
+    const map: Record<string, string> = {};
+    if (currenciesData?.currencies) {
+      currenciesData.currencies.forEach(c => {
+        map[c.id] = c.symbol || c.code;
+      });
+    }
+    return map;
+  }, [currenciesData]);
+
+  const statsCards = useMemo(() => [
     {
       id: 'total',
       label: t('totalTeachers'),
@@ -127,7 +73,7 @@ export default function Teachers() {
     {
       id: 'active',
       label: t('active'),
-      value: teachers.filter((t) => t.status === 'active').length,
+      value: teachers.filter((teacher) => teacher?.active).length,
       icon: UserCheck,
       bgColor: 'bg-green-50',
       iconColor: 'text-green-600',
@@ -136,41 +82,45 @@ export default function Teachers() {
     {
       id: 'inactive',
       label: t('inactive'),
-      value: teachers.filter((t) => t.status === 'inactive').length,
+      value: teachers.filter((teacher) => teacher && !teacher.active).length,
       icon: UserX,
       bgColor: 'bg-orange-50',
       iconColor: 'text-orange-600',
       valueColor: 'text-orange-600',
     },
-  ];
+  ], [teachers, t]);
 
   const statuses = [
     { id: 'all', label: 'الحالة', labelEn: 'Status' },
     { id: 'active', label: 'نشط', labelEn: 'Active' },
     { id: 'inactive', label: 'غير نشط', labelEn: 'Inactive' },
   ];
+  const filteredTeachers = useMemo(() => {
+    return teachers.filter(teacher => {
+      if (!teacher) return false;
 
-  const countries = [
-    { id: 'all', label: 'كل الدول', labelEn: 'All Countries' },
-    { id: 'egypt', label: 'مصر', labelEn: 'Egypt' },
-    { id: 'saudi', label: 'السعودية', labelEn: 'Saudi Arabia' },
-    { id: 'uae', label: 'الإمارات', labelEn: 'UAE' },
-    { id: 'kuwait', label: 'الكويت', labelEn: 'Kuwait' },
-  ];
+      const name = teacher.name?.toLowerCase() || '';
+      const email = teacher.email?.toLowerCase() || '';
+      const phone = teacher.phone || '';
+      const search = searchTerm.toLowerCase();
 
-  const filteredTeachers = teachers.filter(teacher => {
-    const matchesSearch = teacher.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      teacher.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      teacher.phone.includes(searchTerm);
-    const matchesStatus = selectedStatus === 'all' || teacher.status === selectedStatus;
-    const matchesCountry = selectedCountry === 'all';
-    return matchesSearch && matchesStatus && matchesCountry;
-  });
+      const matchesSearch =
+        name.includes(search) ||
+        email.includes(search) ||
+        phone.includes(searchTerm);
 
-  const totalPages = Math.ceil(filteredTeachers.length / itemsPerPage);
+      const matchesStatus = selectedStatus === 'all' ||
+        (selectedStatus === 'active' && teacher.active) ||
+        (selectedStatus === 'inactive' && !teacher.active);
+
+
+      return matchesSearch && matchesStatus;
+    });
+  }, [teachers, searchTerm, selectedStatus]);
+
+  const totalPages = Math.max(1, Math.ceil(filteredTeachers.length / itemsPerPage));
   const startIndex = (currentPage - 1) * itemsPerPage;
-  const endIndex = startIndex + itemsPerPage;
-  const currentTeachers = filteredTeachers.slice(startIndex, endIndex);
+  const currentTeachers = filteredTeachers.slice(startIndex, startIndex + itemsPerPage);
 
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
@@ -186,17 +136,75 @@ export default function Teachers() {
     setIsEditModalOpen(true);
   };
 
+  const mapFormToApi = (formData: TeacherFormData): CreateTeacherInput => {
+    return {
+      name: formData.name,
+      email: formData.email,
+      phone: formData.phone,
+      password: formData.password || undefined,
+      hour_price: Number(formData.hourlyRate),
+      currency_id: formData.currency,
+      gender: formData.gender as 'male' | 'female',
+      active: formData.status === 'active',
+      code_country: '+20', // Default if missing, ideally extracted from phone
+      subject_ids: formData.subjects,
+    };
+  };
+
+  const handleAddTeacher = async (formData: TeacherFormData) => {
+    try {
+      const apiData = mapFormToApi(formData);
+      await createTeacherMutation.mutateAsync(apiData);
+      ErrorService.success(t('teacher Added Success'));
+      setIsAddModalOpen(false);
+    } catch (error) {
+      console.error('Error adding teacher:', error);
+      ErrorService.error(t('teacher Added Error'));
+    }
+  };
+
+  const handleUpdateTeacher = async (formData: TeacherFormData) => {
+    if (!selectedTeacher) return;
+    try {
+      const apiData = mapFormToApi(formData);
+      await updateTeacherMutation.mutateAsync({ id: selectedTeacher.id, data: apiData });
+      ErrorService.success(t('teacher Updated Success'));
+      setIsEditModalOpen(false);
+      setSelectedTeacher(null);
+    } catch (error) {
+      console.error('Error updating teacher:', error);
+      ErrorService.error(t('teacher Updated Error'));
+    }
+  };
+
   const handleDeleteTeacher = async (teacherId: string) => {
     if (window.confirm(t('deleteConfirmTeacher'))) {
       try {
-        console.log('Deleting teacher:', teacherId);
-        alert(t('teacherDeletedSuccess'));
+        await deleteTeacherMutation.mutateAsync(teacherId);
+        ErrorService.success(t('teacher Deleted Success'));
       } catch (error) {
         console.error('Error deleting teacher:', error);
-        alert(t('teacherDeletedError'));
+        ErrorService.error(t('teacher Deleted Error'));
       }
     }
   };
+
+  if (isLoading) {
+    return (
+      <div className="p-6 lg:p-8 flex items-center justify-center min-h-[60vh]">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
+
+  if (isError) {
+    return (
+      <div className="p-6 lg:p-8 flex items-center justify-center min-h-[60vh]">
+        <p className="text-red-500 text-lg">{t('errorLoadingData')}</p>
+      </div>
+    );
+  }
+
 
   return (
     <div className="p-6 lg:p-8">
@@ -266,16 +274,6 @@ export default function Teachers() {
             onChange={(val) => setSelectedStatus(val as string)}
             className="h-[46px]"
           />
-
-          {/* Country Filter */}
-          <CustomSelect
-            value={selectedCountry}
-            options={countries.map((c) => {
-              return { value: c.id, label: language === 'ar' ? c.label : c.labelEn };
-            })}
-            onChange={(val) => setSelectedCountry(val as string)}
-            className="h-[46px]"
-          />
         </div>
       </div>
 
@@ -301,9 +299,6 @@ export default function Teachers() {
                   {t('status')}
                 </th>
                 <th className="px-6 py-4 text-right text-sm font-semibold text-gray-700">
-                  {t('subject')}
-                </th>
-                <th className="px-6 py-4 text-right text-sm font-semibold text-gray-700">
                   {t('actions')}
                 </th>
               </tr>
@@ -313,52 +308,39 @@ export default function Teachers() {
                 <tr key={teacher.id} className="hover:bg-gray-50 transition-colors">
                   <td className="px-6 py-4">
                     <div className="flex items-center gap-3 justify-end">
-                      <span className="text-sm font-medium text-gray-900">{teacher.name}</span>
+                      <span className="text-sm font-medium text-gray-900">{teacher.name || '-'}</span>
                       <div className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center flex-shrink-0">
                         <Users className="w-5 h-5 text-gray-500" />
                       </div>
                     </div>
                   </td>
                   <td className="px-6 py-4">
-                    <span className="text-sm text-gray-600">{teacher.email}</span>
+                    <span className="text-sm text-gray-600">{teacher.email || '-'}</span>
                   </td>
                   <td className="px-6 py-4">
                     <WhatsAppPhone
-                      phone={`${teacher.countryCode} ${teacher.phone}`}
+                      phone={`${teacher.code_country || ''} ${teacher.phone || ''}`.trim()}
                       className="text-sm text-green-600 hover:text-green-700"
                     />
                   </td>
                   <td className="px-6 py-4">
                     <span className="text-sm font-medium text-gray-900">
-                      {teacher.currency} {teacher.amount.toFixed(2)}
+                      {currencyLookup[teacher.currency_id || (teacher as any).currencyId] || teacher.currency_id || (teacher as any).currencyId || '-'} {teacher.hour_price?.toFixed(2) ?? '0.00'}
                     </span>
                   </td>
                   <td className="px-6 py-4">
                     <span
-                      className={`inline-flex px-3 py-1 rounded-full text-xs font-medium ${teacher.status === 'active'
+                      className={`inline-flex px-3 py-1 rounded-full text-xs font-medium ${teacher.active
                         ? 'bg-green-100 text-green-700'
                         : 'bg-orange-100 text-orange-700'
                         }`}
                     >
-                      {teacher.status === 'active'
-                        ? t('active')
-                        : t('inactive')}
+                      {teacher.active ? t('active') : t('inactive')}
                     </span>
                   </td>
+
                   <td className="px-6 py-4">
-                    <div className="flex flex-wrap gap-1 justify-end">
-                      {teacher.subject.split('،').map((sub, index) => (
-                        <span
-                          key={index}
-                          className="inline-flex px-2 py-1 bg-purple-100 text-purple-700 rounded-md text-xs"
-                        >
-                          {sub.trim()}
-                        </span>
-                      ))}
-                    </div>
-                  </td>
-                  <td className="px-6 py-4">
-                    <div className="flex items-center gap-2 justify-end">
+                    <div className="flex items-center gap-2 justify-start mt-2">
                       <button
                         onClick={() => handleViewTeacher(teacher)}
                         className="p-2 hover:bg-gray-100 rounded-lg transition-colors group"
@@ -384,6 +366,13 @@ export default function Teachers() {
                   </td>
                 </tr>
               ))}
+              {currentTeachers.length === 0 && (
+                <tr>
+                  <td colSpan={6} className="px-6 py-12 text-center text-gray-500">
+                    {t('noTeachersFound')}
+                  </td>
+                </tr>
+              )}
             </tbody>
           </table>
         </div>
@@ -401,10 +390,7 @@ export default function Teachers() {
       <AddTeacherModal
         isOpen={isAddModalOpen}
         onClose={() => setIsAddModalOpen(false)}
-        onSubmit={(teacherData) => {
-          console.log('New teacher data:', teacherData);
-          alert(t('teacherAddedSuccess'));
-        }}
+        onSubmit={handleAddTeacher}
       />
 
       {/* View Teacher Modal */}
@@ -424,9 +410,7 @@ export default function Teachers() {
           setIsEditModalOpen(false);
           setSelectedTeacher(null);
         }}
-        onSubmit={(teacherData) => {
-          console.log('Updated teacher data:', teacherData);
-        }}
+        onSubmit={handleUpdateTeacher}
         teacher={selectedTeacher}
       />
     </div>

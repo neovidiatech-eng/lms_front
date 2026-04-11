@@ -8,7 +8,7 @@ export interface Teacher {
     gender: 'male' | 'female';
     hour_price: number;
     active: boolean;
-    subject_ids: string[];
+    subject_ids: any[];
     createdAt: string;
     updatedAt: string;
     password?: string;
@@ -27,8 +27,14 @@ export interface CreateTeacherInput {
     subject_ids: string[];
 }
 
+export interface TeachersData {
+    count: number;
+    activeCount?: number;
+    teachers: Teacher[];
+}
+
 export interface TeachersFetchResponse {
     message: string;
     status: number;
-    data: Teacher[];
+    data: TeachersData;
 }
