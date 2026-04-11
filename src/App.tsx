@@ -9,6 +9,8 @@ import ErrorBoundary from './components/layout/ErrorBoundary';
 import ErrorService from './utils/ErrorService';
 import LanguageSwitcher from './components/ui/LanguageSwitcher';
 import { dashboardRoutes } from './components/constants/dashboardRoutes';
+import { studentDashboardRoutes } from './pages/StudentDashboard/studentDashboardRoutes';
+import { teacherDashboardRoutes } from './pages/TeacherDashboard/teacherDashboardRoutes';
 import { GoogleOAuthProvider } from '@react-oauth/google';
 import { googleClientId } from './components/constants';
 
@@ -20,6 +22,8 @@ const ForgotPassword = lazy(() => import('./pages/ForgotPassword'));
 const ResetPassword = lazy(() => import('./pages/ResetPassword'));
 const VerifyAccount = lazy(() => import('./pages/VerifyAccount'));
 const Dashboard = lazy(() => import('./pages/Dashboard'));
+const StudentDashboard = lazy(() => import('./pages/StudentDashboard/StudentDashboard'));
+const TeacherDashboard = lazy(() => import('./pages/TeacherDashboard/TeacherDashboard'));
 
 // Centralized Loading Fallback UI
 const LoadingFallback = () => (
@@ -84,6 +88,36 @@ function App() {
                     >
                       <Route index element={null} />
                       {dashboardRoutes.flatMap(route => {
+                        if (route.subItems) {
+                          return route.subItems.map(subItem => (
+                            <Route key={subItem.id} path={subItem.path} element={subItem.element} />
+                          ));
+                        }
+                        return route.element ? [<Route key={route.id} path={route.path} element={route.element} />] : [];
+                      })}
+                    </Route>
+
+                    <Route
+                      path="/student-dashboard"
+                      element={isAuthenticated ? <StudentDashboard /> : <Navigate to="/login" replace />}
+                    >
+                      <Route index element={null} />
+                      {studentDashboardRoutes.flatMap(route => {
+                        if (route.subItems) {
+                          return route.subItems.map(subItem => (
+                            <Route key={subItem.id} path={subItem.path} element={subItem.element} />
+                          ));
+                        }
+                        return route.element ? [<Route key={route.id} path={route.path} element={route.element} />] : [];
+                      })}
+                    </Route>
+
+                    <Route
+                      path="/teacher-dashboard"
+                      element={isAuthenticated ? <TeacherDashboard /> : <Navigate to="/login" replace />}
+                    >
+                      <Route index element={null} />
+                      {teacherDashboardRoutes.flatMap(route => {
                         if (route.subItems) {
                           return route.subItems.map(subItem => (
                             <Route key={subItem.id} path={subItem.path} element={subItem.element} />

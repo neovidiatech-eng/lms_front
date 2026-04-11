@@ -1,0 +1,35 @@
+import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import Header from '../../components/layout/Header';
+import TeacherSidebar from './TeacherSidebar';
+
+interface TeacherDashboardLayoutProps {
+  children: React.ReactNode;
+}
+
+export default function TeacherDashboardLayout({ children }: TeacherDashboardLayoutProps) {
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const { i18n } = useTranslation();
+  const isRtl = i18n.language.split('-')[0] === 'ar';
+
+  return (
+    <div className="min-h-screen bg-gray-50 flex flex-col font-sans" dir={isRtl ? 'rtl' : 'ltr'}>
+      <Header 
+        onMenuClick={() => setSidebarOpen(!sidebarOpen)} 
+        userRole={'teacher'}
+        userName={'Teacher Mohamed'}
+        userEmail={'teacher@example.com'}
+      />
+      
+      <div className="flex-1 flex overflow-hidden">
+        <TeacherSidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
+        
+        <main className={`flex-1 overflow-x-hidden overflow-y-auto w-full max-w-[100vw] transition-all duration-300 ${isRtl ? 'lg:pr-64' : 'lg:pl-64'}`}>
+          <div className="p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto min-h-full">
+            {children}
+          </div>
+        </main>
+      </div>
+    </div>
+  );
+}

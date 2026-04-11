@@ -21,6 +21,14 @@ interface AddExamModalProps {
 export default function AddExamModal({ isOpen, onClose, onAdd, initialData }: AddExamModalProps) {
   const { language, t } = useLanguage();
 
+  const mockStudents = [
+    { value: 'أحمد محمد', label: language === 'ar' ? 'أحمد محمد' : 'Ahmed Mohamed' },
+    { value: 'سارة محمود', label: language === 'ar' ? 'سارة محمود' : 'Sarah Mahmoud' },
+    { value: 'زياد علي', label: language === 'ar' ? 'زياد علي' : 'Zeyad Ali' },
+    { value: 'مريم إبراهيم', label: language === 'ar' ? 'مريم إبراهيم' : 'Maryam Ibrahim' },
+    { value: 'ياسين حسن', label: language === 'ar' ? 'ياسين حسن' : 'Yassin Hassan' },
+  ];
+
   const {
     register,
     handleSubmit,
@@ -32,7 +40,8 @@ export default function AddExamModal({ isOpen, onClose, onAdd, initialData }: Ad
     resolver: zodResolver(getExamSchema(t)) as Resolver<ExamFormData>,
     defaultValues: {
       grade: 100,
-      status: 'upcoming'
+      status: 'upcoming',
+      teacher: 'أ. محمد الأحمدي' // Default teacher name
     }
   });
 
@@ -50,7 +59,7 @@ export default function AddExamModal({ isOpen, onClose, onAdd, initialData }: Ad
         reset({
           title: '',
           subject: '',
-          teacher: '',
+          teacher: 'أ. محمد الأحمدي',
           studentName: '',
           dueDate: '',
           duration: '',
@@ -69,7 +78,7 @@ export default function AddExamModal({ isOpen, onClose, onAdd, initialData }: Ad
     examTitle: { ar: 'العنوان', en: 'Title' },
     subject: { ar: 'المادة', en: 'Subject' },
     teacher: { ar: 'المعلم', en: 'Teacher' },
-    student: { ar: 'الطالب', en: 'Student' },
+    student: { ar: 'اختر الطالب', en: 'Select Student' },
     dueDate: { ar: 'التاريخ', en: 'Date' },
     duration: { ar: 'المدة (دقيقة)', en: 'Duration (minutes)' },
     grade: { ar: 'الدرجة', en: 'Grade' },
@@ -117,20 +126,21 @@ export default function AddExamModal({ isOpen, onClose, onAdd, initialData }: Ad
             {errors.subject && <p className="text-red-500 text-xs mt-1 text-right">{errors.subject.message}</p>}
           </div>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2 text-right">{text.teacher[language]}</label>
-            <input type="text" {...register('teacher')} className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent text-right" dir="rtl" />
-            {errors.teacher && <p className="text-red-500 text-xs mt-1 text-right">{errors.teacher.message}</p>}
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2 text-right">{text.student[language]}</label>
-            <input type="text" {...register('studentName')} className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent text-right" dir="rtl" />
-            {errors.studentName && <p className="text-red-500 text-xs mt-1 text-right">{errors.studentName.message}</p>}
-          </div>
-
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
+              <CustomSelect
+                label={text.student[language]}
+                value={watch('studentName')}
+                onChange={(value) => setValue('studentName', value, { shouldValidate: true })}
+                options={mockStudents}
+              />
+              {errors.studentName && <p className="text-red-500 text-xs mt-1 text-right">{errors.studentName.message}</p>}
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2 text-right">{text.dueDate[language]}</label>
+              <input type="date" {...register('dueDate')} className="w-full px-4 py-2 border border-gray-300 rounded-lg text-right" dir="rtl" />
+              {errors.dueDate && <p className="text-red-500 text-xs mt-1 text-right">{errors.dueDate.message}</p>}
               <DatePickerField
                 label={text.dueDate[language]}
                 value={watch('dueDate')}
@@ -138,33 +148,33 @@ export default function AddExamModal({ isOpen, onClose, onAdd, initialData }: Ad
                 error={errors.dueDate?.message}
               />
             </div>
+          </div>
 
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2 text-right">{text.duration[language]}</label>
               <input type="number" min="1" {...register('duration')} className="w-full px-4 py-2 border border-gray-300 rounded-lg text-right" dir="rtl" />
               {errors.duration && <p className="text-red-500 text-xs mt-1 text-right">{errors.duration.message}</p>}
             </div>
-          </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2 text-right">{text.grade[language]}</label>
               <input type="number" min="0" {...register('grade', { valueAsNumber: true })} className="w-full px-4 py-2 border border-gray-300 rounded-lg text-right" dir="rtl" />
               {errors.grade && <p className="text-red-500 text-xs mt-1 text-right">{errors.grade.message}</p>}
             </div>
+          </div>
 
-            <div>
-              <CustomSelect
-                label={text.status[language]}
-                value={watch('status')}
-                onChange={(value) => setValue('status', value as 'upcoming' | 'completed', { shouldValidate: true })}
-                options={[
-                  { value: 'upcoming', label: text.upcoming[language] },
-                  { value: 'completed', label: text.completed[language] }
-                ]}
-              />
-              {errors.status && <p className="text-red-500 text-xs mt-1 text-right">{errors.status.message}</p>}
-            </div>
+          <div>
+            <CustomSelect
+              label={text.status[language]}
+              value={watch('status')}
+              onChange={(value) => setValue('status', value as 'upcoming' | 'completed', { shouldValidate: true })}
+              options={[
+                { value: 'upcoming', label: text.upcoming[language] },
+                { value: 'completed', label: text.completed[language] }
+              ]}
+            />
+            {errors.status && <p className="text-red-500 text-xs mt-1 text-right">{errors.status.message}</p>}
           </div>
 
           <div className="flex gap-3 pt-4">
