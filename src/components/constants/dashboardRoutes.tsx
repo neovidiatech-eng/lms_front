@@ -20,8 +20,10 @@ import {
   Layers,
   Package,
   Coins,
+  ShieldCheck,
   Repeat
 } from 'lucide-react';
+import Roles from '../../pages/Roles';
 
 export interface RouteConfig {
   id: string;
@@ -115,6 +117,14 @@ export const dashboardRoutes: RouteConfig[] = [
       { id: 'all-subscriptions', label: 'sidebar_all_subscriptions', icon: Layers, path: 'all-subscriptions', element: <AllSubscriptionsPage /> },
       { id: 'plans', label: 'sidebar_plans', icon: Package, path: 'plans', element: <PlansPage /> }
     ]
+  },
+
+  {
+    id: 'roles',
+    label: 'sidebar_roles',
+    icon: ShieldCheck,
+    path: 'roles',
+    element: <Roles />
   },
   {
     id: 'finance',

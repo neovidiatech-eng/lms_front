@@ -166,36 +166,36 @@ export default function Login({ onLoginSuccess }: LoginProps) {
         </button>
         <p className="text-center text-gray-500">{t("or")}</p>
         <div className="space-y-4 mb-6">
-        <div className="flex justify-center w-full">
-          <GoogleLogin
-            onSuccess={async (credentialResponse) => {
-              const idToken = credentialResponse.credential;
-              console.log(idToken);
-              if (idToken) {
-                try {
-                  const result = await googleLogin({ idToken, provider: "google" });
-                  const token = result.data?.accessToken || result.accessToken;
+          <div className="flex justify-center w-full">
+            <GoogleLogin
+              onSuccess={async (credentialResponse) => {
+                const idToken = credentialResponse.credential;
+                console.log(idToken);
+                if (idToken) {
+                  try {
+                    const result = await googleLogin({ idToken, provider: "google" });
+                    const token = result.data?.accessToken || result.accessToken;
 
-                  if (token) {
-                    localStorage.setItem("token", token);
-                    onLoginSuccess();
-                    navigate("/dashboard");
+                    if (token) {
+                      localStorage.setItem("token", token);
+                      onLoginSuccess();
+                      navigate("/dashboard");
+                    }
+                  } catch (error) {
+                    console.error("Google Login failed:", error);
                   }
-                } catch (error) {
-                  console.error("Google Login failed:", error);
                 }
-              }
-            }}
-            onError={() => {
-              console.log("Login Failed");
-            }}
-            useOneTap
-            theme="outline"
-            size="large"
-            shape="circle"
-            width="384px"
-          />
-        </div>
+              }}
+              onError={() => {
+                console.log("Login Failed");
+              }}
+              useOneTap
+              theme="outline"
+              size="large"
+              shape="circle"
+              width="384px"
+            />
+          </div>
         </div>
       </form>
     </div>
