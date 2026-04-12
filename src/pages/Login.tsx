@@ -54,8 +54,17 @@ export default function Login({ onLoginSuccess }: LoginProps) {
           sessionStorage.setItem("token", token);
         }
 
+        const role = result.data?.role || result.role;
+        localStorage.setItem("role", role);
         onLoginSuccess();
-        navigate("/dashboard");
+
+        if (role === "teacher") {
+          navigate("/teacher-dashboard");
+        } else if (role === "student") {
+          navigate("/student-dashboard");
+        } else {
+          navigate("/dashboard");
+        }
       }
     } catch (error) {
       console.error("Login failed:", error);
@@ -195,28 +204,8 @@ export default function Login({ onLoginSuccess }: LoginProps) {
               width="384px"
             />
           </div>
-          if (token) {
-            localStorage.setItem("token", token);
-          onLoginSuccess();
-          navigate("/dashboard");
-                    }
-                  } catch (error) {
-            console.error("Google Login failed:", error);
-                  }
-                }
-              }}
-          onError={() => {
-            console.log("Login Failed");
-          }}
-          useOneTap
-          theme="outline"
-          size="large"
-          shape="circle"
-          width="384px"
-            />
         </div>
+      </form>
     </div>
-      </form >
-    </div >
   );
 }

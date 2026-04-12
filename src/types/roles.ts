@@ -4,3 +4,9 @@ export interface Role {
     createdAt: string;
     updatedAt: string;
 }
+
+export interface RolesResponse {
+    message: string;
+    status: number;
+    data: Role[];
+}
