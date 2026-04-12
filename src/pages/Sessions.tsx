@@ -8,6 +8,7 @@ import ViewSessionDetailsModal from '../components/modals/ViewSessionDetailsModa
 import EditSessionModal from '../components/modals/EditSessionModal';
 import { MultipleSessionsFormData } from '../lib/schemas/SessionSchema';
 import { useTranslation } from 'react-i18next';
+import { useLocation } from 'react-router-dom';
 import { useUpdateSchedule, useCreateSchedule, useCreateRecurringSchedule, useDeleteSchedule } from '../hooks/useSchedules';
 import { DayOfWeek } from '../types/scheduales';
 import { ContextSession, SessionDisplay, SessionGroupDetails, SingleSessionInput } from '../types/sessions';
@@ -27,6 +28,8 @@ interface Session {
 export default function Sessions() {
   const { t, i18n } = useTranslation();
   const language = i18n.language.split('-')[0];
+  const location = useLocation();
+  const isStudent = location.pathname.includes('/student-dashboard') || location.pathname.includes('/teacher-dashboard');
   const { sessions: allSessionsFromContext, addSession, addMultipleSessions, updateSession, deleteSession } = useSessions();
   const { mutate: updateScheduleMutation } = useUpdateSchedule();
   const { mutate: createScheduleMutation } = useCreateSchedule();
@@ -374,20 +377,24 @@ export default function Sessions() {
                 className={`w-full ${language === 'ar' ? 'pr-12 text-right' : 'pl-12'} py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent`}
               />
             </div>
-            <button
-              onClick={() => setShowAddModal(true)}
-              className="flex items-center gap-2 px-6 py-3 btn-primary text-white rounded-xl transition-colors font-medium"
-            >
-              <Plus className="w-5 h-5" />
-              {t('singleSession')}
-            </button>
-            <button
-              onClick={() => setShowAddMultipleModal(true)}
-              className="flex items-center gap-2 px-6 py-3 btn-primary text-white rounded-xl transition-colors font-medium"
-            >
-              <Plus className="w-5 h-5" />
-              {t('multipleSessions')}
-            </button>
+            {!isStudent && (
+              <>
+                <button
+                  onClick={() => setShowAddModal(true)}
+                  className="flex items-center gap-2 px-6 py-3 btn-primary text-white rounded-xl transition-colors font-medium"
+                >
+                  <Plus className="w-5 h-5" />
+                  {t('singleSession')}
+                </button>
+                <button
+                  onClick={() => setShowAddMultipleModal(true)}
+                  className="flex items-center gap-2 px-6 py-3 btn-primary text-white rounded-xl transition-colors font-medium"
+                >
+                  <Plus className="w-5 h-5" />
+                  {t('multipleSessions')}
+                </button>
+              </>
+            )}
           </div>
 
           {showFilters && (
@@ -526,13 +533,15 @@ export default function Sessions() {
                       >
                         <Eye className="w-4 h-4" />
                       </button>
-                      <button
-                        onClick={() => handleDeleteSession(session.id)}
-                        className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-                        title={t('delete')}
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </button>
+                      {!isStudent && (
+                        <button
+                          onClick={() => handleDeleteSession(session.id)}
+                          className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                          title={t('delete')}
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      )}
                     </div>
                   </td>
                 </tr>
@@ -568,6 +577,7 @@ export default function Sessions() {
         sessionGroup={selectedSessionGroup}
         onEditSession={handleEditSession}
         onJoinSession={handleJoinSession}
+        readOnly={isStudent}
       />
 
       <EditSessionModal

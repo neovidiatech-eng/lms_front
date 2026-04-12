@@ -31,9 +31,10 @@ interface ViewSessionDetailsModalProps {
   sessionGroup: SessionGroup | null;
   onEditSession?: (sessionId: string, sessionIndex: number) => void;
   onJoinSession?: (sessionId: string, sessionIndex: number) => void;
+  readOnly?: boolean;
 }
 
-export default function ViewSessionDetailsModal({ isOpen, onClose, sessionGroup, onEditSession, onJoinSession }: ViewSessionDetailsModalProps) {
+export default function ViewSessionDetailsModal({ isOpen, onClose, sessionGroup, onEditSession, onJoinSession, readOnly }: ViewSessionDetailsModalProps) {
   const { language } = useLanguage();
 
   const text = {
@@ -237,7 +238,7 @@ export default function ViewSessionDetailsModal({ isOpen, onClose, sessionGroup,
                               {text.joinSession[language]}
                             </button>
                           )}
-                          {onEditSession && (
+                          {onEditSession && !readOnly && (
                             <button
                               onClick={() => onEditSession(sessionGroup.id, index)}
                               className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
