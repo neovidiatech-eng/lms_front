@@ -1,4 +1,4 @@
-import { lazy, ReactNode } from 'react';
+import { lazy, ReactNode } from "react";
 import {
   Home,
   Users,
@@ -20,8 +20,8 @@ import {
   Layers,
   Package,
   Coins,
-  Repeat
-} from 'lucide-react';
+  Repeat,
+} from "lucide-react";
 
 export interface RouteConfig {
   id: string;
@@ -34,104 +34,216 @@ export interface RouteConfig {
 }
 
 // --- Lazy Loading Page Components ---
-const UsersPage = lazy(() => import('../../pages/Users'));
-const StudentsPage = lazy(() => import('../../pages/Students'));
-const TeachersPage = lazy(() => import('../../pages/Teachers'));
-const ParentsPage = lazy(() => import('../../pages/Parents'));
-const SessionsPage = lazy(() => import('../../pages/Sessions'));
-const AgendaPage = lazy(() => import('../../pages/Agenda'));
-const ExamsPage = lazy(() => import('../../pages/Exams'));
-const AssignmentsPage = lazy(() => import('../../pages/Assignments'));
-const SubscriptionRequestsPage = lazy(() => import('../../pages/SubscriptionRequests'));
-const AllSubscriptionsPage = lazy(() => import('../../pages/AllSubscriptions'));
-const PlansPage = lazy(() => import('../../pages/Plans'));
-const CurrenciesPage = lazy(() => import('../../pages/Currencies'));
-const ExpensesPage = lazy(() => import('../../pages/Expenses'));
-const TransactionsPage = lazy(() => import('../../pages/Transactions'));
-const TeacherRequestsPage = lazy(() => import('../../pages/TeacherRequests'));
-const TeacherAvailabilityPage = lazy(() => import('../../pages/TeacherAvailability'));
-const SubjectsPage = lazy(() => import('../../pages/Subjects'));
-const LMSCoursesPage = lazy(() => import('../../pages/LMSCourses/LMSCourses'));
-const SettingsPage = lazy(() => import('../../pages/Settings'));
+const UsersPage = lazy(() => import("../../pages/Users"));
+const StudentsPage = lazy(() => import("../../pages/Students"));
+const TeachersPage = lazy(() => import("../../pages/Teachers"));
+const ParentsPage = lazy(() => import("../../pages/Parents"));
+const SessionsPage = lazy(() => import("../../pages/Sessions"));
+const AgendaPage = lazy(() => import("../../pages/Agenda"));
+const ExamsPage = lazy(() => import("../../pages/Exams"));
+const AssignmentsPage = lazy(() => import("../../pages/Assignments"));
+const SubscriptionRequestsPage = lazy(
+  () => import("../../pages/SubscriptionRequests"),
+);
+const AllSubscriptionsPage = lazy(() => import("../../pages/AllSubscriptions"));
+const PlansPage = lazy(() => import("../../pages/Plans"));
+const CurrenciesPage = lazy(() => import("../../pages/Currencies"));
+const ExpensesPage = lazy(() => import("../../pages/Expenses"));
+const TransactionsPage = lazy(() => import("../../pages/Transactions"));
+const TeacherRequestsPage = lazy(() => import("../../pages/TeacherRequests"));
+const TeacherAvailabilityPage = lazy(
+  () => import("../../pages/TeacherAvailability"),
+);
+const SubjectsPage = lazy(() => import("../../pages/Subjects"));
+const LMSCoursesPage = lazy(() => import("../../pages/LMSCourses/LMSCourses"));
+const SettingsPage = lazy(() => import("../../pages/Settings"));
 
 export const dashboardRoutes: RouteConfig[] = [
   {
-    id: 'dashboard',
-    label: 'sidebar_dashboard',
+    id: "dashboard",
+    label: "sidebar_dashboard",
     icon: Home,
-    path: '',
+    path: "",
   },
   {
-    id: 'lms',
-    label: 'sidebar_lms',
+    id: "lms",
+    label: "sidebar_lms",
     icon: PlayCircle,
-    path: 'lms',
+    path: "lms",
     subItems: [
-      { id: 'lms-courses', label: 'sidebar_courses', icon: Play, path: 'lms-courses', element: <LMSCoursesPage /> }
-    ]
+      {
+        id: "lms-courses",
+        label: "sidebar_courses",
+        icon: Play,
+        path: "lms-courses",
+        element: <LMSCoursesPage />,
+      },
+    ],
   },
   {
-    id: 'users',
-    label: 'sidebar_user_management',
+    id: "users",
+    label: "sidebar_user_management",
     icon: Users,
-    path: 'users',
+    path: "users",
     subItems: [
-      { id: 'admins', label: 'sidebar_admins', icon: UserCheck, path: 'admins', element: <UsersPage /> },
-      { id: 'students', label: 'sidebar_students', icon: GraduationCap, path: 'students', element: <StudentsPage /> },
-      { id: 'parents', label: 'sidebar_parents', icon: Users, path: 'parents', element: <ParentsPage /> }
-    ]
+      {
+        id: "admins",
+        label: "sidebar_admins",
+        icon: UserCheck,
+        path: "admins",
+        element: <UsersPage />,
+      },
+      {
+        id: "students",
+        label: "sidebar_students",
+        icon: GraduationCap,
+        path: "students",
+        element: <StudentsPage />,
+      },
+      {
+        id: "parents",
+        label: "sidebar_parents",
+        icon: Users,
+        path: "parents",
+        element: <ParentsPage />,
+      },
+    ],
   },
   {
-    id: 'teachers-section',
-    label: 'sidebar_teachers',
+    id: "teachers-section",
+    label: "sidebar_teachers",
     icon: GraduationCap,
-    path: 'teachers-group',
+    path: "teachers-group",
     subItems: [
-      { id: 'teachers', label: 'sidebar_teachers', icon: GraduationCap, path: 'teachers', element: <TeachersPage /> },
-      { id: 'teacher-requests', label: 'sidebar_requests', icon: FileQuestion, path: 'teacher-requests', element: <TeacherRequestsPage /> },
-      { id: 'teacher-availability', label: 'sidebar_available', icon: Clock, path: 'teacher-availability', element: <TeacherAvailabilityPage /> },
-      { id: 'subjects', label: 'sidebar_subjects', icon: Book, path: 'subjects', element: <SubjectsPage /> }
-    ]
+      {
+        id: "teachers",
+        label: "sidebar_teachers",
+        icon: GraduationCap,
+        path: "teachers",
+        element: <TeachersPage />,
+      },
+      {
+        id: "teacher-requests",
+        label: "sidebar_requests",
+        icon: FileQuestion,
+        path: "teacher-requests",
+        element: <TeacherRequestsPage />,
+      },
+      {
+        id: "teacher-availability",
+        label: "sidebar_available",
+        icon: Clock,
+        path: "teacher-availability",
+        element: <TeacherAvailabilityPage />,
+      },
+      {
+        id: "subjects",
+        label: "sidebar_subjects",
+        icon: Book,
+        path: "subjects",
+        element: <SubjectsPage />,
+      },
+    ],
   },
   {
-    id: 'content',
-    label: 'sidebar_academic_content',
+    id: "content",
+    label: "sidebar_academic_content",
     icon: BookOpen,
-    path: 'content',
+    path: "content",
     subItems: [
-      { id: 'sessions', label: 'sidebar_sessions', icon: Play, path: 'sessions', element: <SessionsPage /> },
-      { id: 'agenda', label: 'sidebar_agenda', icon: Calendar, path: 'agenda', element: <AgendaPage /> },
-      { id: 'exams', label: 'sidebar_exams', icon: FileText, path: 'exams', element: <ExamsPage /> },
-      { id: 'assignments', label: 'sidebar_assignments', icon: ClipboardList, path: 'assignments', element: <AssignmentsPage /> }
-    ]
+      {
+        id: "sessions",
+        label: "sidebar_sessions",
+        icon: Play,
+        path: "sessions",
+        element: <SessionsPage />,
+      },
+      {
+        id: "agenda",
+        label: "sidebar_agenda",
+        icon: Calendar,
+        path: "agenda",
+        element: <AgendaPage />,
+      },
+      {
+        id: "exams",
+        label: "sidebar_exams",
+        icon: FileText,
+        path: "exams",
+        element: <ExamsPage />,
+      },
+      {
+        id: "assignments",
+        label: "sidebar_assignments",
+        icon: ClipboardList,
+        path: "assignments",
+        element: <AssignmentsPage />,
+      },
+    ],
   },
   {
-    id: 'subscriptions',
-    label: 'sidebar_subscriptions',
+    id: "subscriptions",
+    label: "sidebar_subscription_requests",
     icon: CreditCard,
-    path: 'subscriptions-group',
+    path: "subscriptions-group",
     subItems: [
-      { id: 'subscription-requests', label: 'sidebar_subscription_requests', icon: AlertCircle, path: 'subscription-requests', element: <SubscriptionRequestsPage /> },
-      { id: 'all-subscriptions', label: 'sidebar_all_subscriptions', icon: Layers, path: 'all-subscriptions', element: <AllSubscriptionsPage /> },
-      { id: 'plans', label: 'sidebar_plans', icon: Package, path: 'plans', element: <PlansPage /> }
-    ]
+      {
+        id: "subscription-requests",
+        label: "sidebar_subscription_requests",
+        icon: AlertCircle,
+        path: "subscription-requests",
+        element: <SubscriptionRequestsPage />,
+      },
+      {
+        id: "all-subscriptions",
+        label: "sidebar_all_subscriptions",
+        icon: Layers,
+        path: "all-subscriptions",
+        element: <AllSubscriptionsPage />,
+      },
+      {
+        id: "plans",
+        label: "sidebar_plans",
+        icon: Package,
+        path: "plans",
+        element: <PlansPage />,
+      },
+    ],
   },
   {
-    id: 'finance',
-    label: 'sidebar_finance',
+    id: "finance",
+    label: "sidebar_finance",
     icon: DollarSign,
-    path: 'finance-group',
+    path: "finance-group",
     subItems: [
-      { id: 'currencies', label: 'sidebar_currencies', icon: Coins, path: 'currencies', element: <CurrenciesPage /> },
-      { id: 'expenses', label: 'sidebar_expenses', icon: CreditCard, path: 'expenses', element: <ExpensesPage /> },
-      { id: 'transactions', label: 'sidebar_transactions', icon: Repeat, path: 'transactions', element: <TransactionsPage /> }
-    ]
+      {
+        id: "currencies",
+        label: "sidebar_currencies",
+        icon: Coins,
+        path: "currencies",
+        element: <CurrenciesPage />,
+      },
+      {
+        id: "expenses",
+        label: "sidebar_expenses",
+        icon: CreditCard,
+        path: "expenses",
+        element: <ExpensesPage />,
+      },
+      {
+        id: "transactions",
+        label: "sidebar_transactions",
+        icon: Repeat,
+        path: "transactions",
+        element: <TransactionsPage />,
+      },
+    ],
   },
   {
-    id: 'settings',
-    label: 'sidebar_settings',
+    id: "settings",
+    label: "sidebar_settings",
     icon: Settings,
-    path: 'settings',
-    element: <SettingsPage />
-  }
+    path: "settings",
+    element: <SettingsPage />,
+  },
 ];
