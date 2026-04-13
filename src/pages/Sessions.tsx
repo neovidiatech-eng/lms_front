@@ -3,13 +3,18 @@ import { Search, Plus, Eye, Trash2, Edit } from 'lucide-react';
 import Pagination from '../components/ui/Pagination';
 import { useTranslation } from 'react-i18next';
 import { useLocation } from 'react-router-dom';
-import { useGetSchedules, useSearchSchedules, useCreateSchedule, useCreateRecurringSchedule, useUpdateSchedule, useDeleteSchedule } from '../hooks/useSchedules';
+import { useGetSchedules, useSearchSchedules, useCreateSchedule, useCreateRecurringSchedule, useUpdateSchedule, useDeleteSchedule, useDeleteGroupedSchedule } from '../hooks/useSchedules';
 import AddSessionModal from '../components/modals/AddSessionModal';
 import AddMultipleSessionsModal from '../components/modals/AddMultipleSessionsModal';
 import ViewSessionModal from '../components/modals/ViewSessionModal';
 import EditSessionModal from '../components/modals/EditSessionModal';
+import ConfirmModal from '../components/modals/ConfirmModal';
 import { Schedule, UpdateSchedulePayload } from '../types/scheduales';
 import { SessionFormData, MultipleSessionsPayload } from '../lib/schemas/SessionSchema';
+import ErrorService from '../utils/ErrorService';
+import { useSubjects } from '../hooks/useSubjects';
+import { sub } from 'framer-motion/client';
+import { Subject } from '../types/subject';
 
 
 
@@ -26,54 +31,89 @@ export default function Sessions() {
   const [showViewModal, setShowViewModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [selectedSession, setSelectedSession] = useState<Schedule | null>(null);
+  const [groupedSessions, setGroupedSessions] = useState<Schedule[]>([]);
+  const [sessionToDelete, setSessionToDelete] = useState<Schedule | null>(null);
 
   const createSchedule = useCreateSchedule();
   const createRecurringSchedule = useCreateRecurringSchedule();
   const updateSchedule = useUpdateSchedule();
   const deleteSchedule = useDeleteSchedule();
+  const deleteGroupedSchedule = useDeleteGroupedSchedule();
 
-  const handleUpdateSession = (id: string, data: UpdateSchedulePayload) => {
-    updateSchedule.mutate({ id, data });
-  };
-
-  const handleDeleteSession = (id: string) => {
-    if (window.confirm(t('confirmDelete'))) {
-      deleteSchedule.mutate(id);
+  const handleUpdateSession = async (id: string, data: UpdateSchedulePayload) => {
+    try {
+      await updateSchedule.mutateAsync({ id, data });
+      ErrorService.success(t('sessionUpdatedSuccess'));
+      setShowEditModal(false);
+      setSelectedSession(null);
+    } catch (error) {
+      console.error('Update session failed:', error);
     }
   };
 
-  const handleAddSession = (data: SessionFormData) => {
-    createSchedule.mutate({
-      studentId: data.student,
-      teacherId: data.teacher,
-      subject_id: data.subject,
-      title: data.title,
-      description: data.description || '',
-      link: data.meetingLink || '',
-      notes: data.notes || '',
-      start_time: `${data.sessionDate}T${data.startTime}:00.000Z`,
-      type: data.type,
-      notification_Time: data.notification_Time
-    });
+  const handleDeleteSession = (session: Schedule) => {
+    setSessionToDelete(session);
   };
 
-  const handleAddMultipleSessions = (data: MultipleSessionsPayload) => {
+  const confirmDelete = async () => {
+    if (!sessionToDelete) return;
+    try {
+      if (sessionToDelete.is_recurring) {
+        await deleteGroupedSchedule.mutateAsync(sessionToDelete.parent_recurring_id || sessionToDelete.id);
+      } else {
+        await deleteSchedule.mutateAsync(sessionToDelete.id);
+      }
+      ErrorService.success(t('sessionDeletedSuccess'));
+      setSessionToDelete(null);
+    } catch (error) {
+      console.error('Delete session failed:', error);
+    }
+  };
+
+  const handleAddSession = async (data: SessionFormData) => {
+    try {
+      await createSchedule.mutateAsync({
+        studentId: data.student,
+        teacherId: data.teacher,
+        subject_id: data.subject,
+        title: data.title,
+        description: data.description || '',
+        link: data.meetingLink || '',
+        notes: data.notes || '',
+        start_time: `${data.sessionDate}T${data.startTime}:00.000Z`,
+        type: data.type,
+        notification_Time: data.notification_Time
+      });
+      ErrorService.success(t('sessionAddedSuccess'));
+      setShowAddModal(false);
+    } catch (error) {
+      console.error('Add session failed:', error);
+    }
+  };
+
+  const handleAddMultipleSessions = async (data: MultipleSessionsPayload) => {
     const { formData, sessions } = data;
-    createRecurringSchedule.mutate({
-      studentId: formData.student,
-      teacherId: formData.teacher,
-      subject_id: formData.subject,
-      title: formData.title,
-      description: formData.description || '',
-      link: formData.meetingLink || '',
-      notes: formData.notes || '',
-      startTime: sessions[0]?.time || '00:00',
-      days: data.selectedDays,
-      startDate: formData.monthYear ? `${formData.monthYear}-01` : new Date().toISOString().split('T')[0],
-      endDate: formData.monthYear ? `${formData.monthYear}-28` : new Date().toISOString().split('T')[0],
-      notification_Time: formData.notification_Time || '10',
-      type: formData.type
-    });
+    try {
+      await createRecurringSchedule.mutateAsync({
+        studentId: formData.student,
+        teacherId: formData.teacher,
+        subject_id: formData.subject,
+        title: formData.title,
+        description: formData.description || '',
+        link: formData.meetingLink || '',
+        notes: formData.notes || '',
+        startTime: sessions[0]?.time || '00:00',
+        days: data.selectedDays,
+        startDate: formData.monthYear ? `${formData.monthYear}-01` : new Date().toISOString().split('T')[0],
+        endDate: formData.monthYear ? `${formData.monthYear}-28` : new Date().toISOString().split('T')[0],
+        notification_Time: formData.notification_Time || '10',
+        type: formData.type
+      });
+      ErrorService.success(t('sessionsAddedSuccess'));
+      setShowAddMultipleModal(false);
+    } catch (error) {
+      console.error('Add multiple sessions failed:', error);
+    }
   };
 
   useEffect(() => {
@@ -90,10 +130,24 @@ export default function Sessions() {
   const itemsPerPage = 5;
   const scheduleData = (debouncedSearch ? searchResults?.data?.schedule : allSchedules?.data?.schedule) || [];
 
-  const totalPages = Math.ceil(scheduleData.length / itemsPerPage);
+  const displaySchedules: Schedule[] = [];
+  const seenParents = new Set<string>();
+
+  scheduleData.forEach((schedule) => {
+    if (schedule.parent_recurring_id) {
+      if (!seenParents.has(schedule.parent_recurring_id)) {
+        seenParents.add(schedule.parent_recurring_id);
+        displaySchedules.push(schedule);
+      }
+    } else {
+      displaySchedules.push(schedule);
+    }
+  });
+
+  const totalPages = Math.ceil(displaySchedules.length / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
   const endIndex = startIndex + itemsPerPage;
-  const currentSessions = scheduleData.slice(startIndex, endIndex);
+  const currentSessions = displaySchedules.slice(startIndex, endIndex);
 
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
@@ -170,6 +224,16 @@ export default function Sessions() {
     }
   };
 
+  const { data: subjects } = useSubjects();
+  const dynamicsubjects = subjects?.subjects || [];
+
+  const getSubjectName = (subId: string) => {
+    const subject = dynamicsubjects.find((s: Subject) => s.id === subId);
+    return subject ? subject.name_ar : "subject"
+  };
+
+
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -237,7 +301,7 @@ export default function Sessions() {
                   <td className="px-6 py-4 text-gray-700 text-right">{session.student.user.name}</td>
                   <td className="px-6 py-4 text-gray-700 text-right">{session.teacher.user.name}</td>
                   <td className="px-6 py-4 text-right">
-                    <span className="text-primary font-medium">{session.description}</span>
+                    <span className="text-primary font-medium">    {getSubjectName(session.subjectId)}</span>
                   </td>
                   <td className="px-6 py-4 text-gray-700 text-right">
                     {(() => {
@@ -264,6 +328,10 @@ export default function Sessions() {
                     <div className="flex items-center gap-2 justify-end">
                       <button
                         onClick={() => {
+                          const grouped = session.parent_recurring_id
+                            ? scheduleData.filter((s: Schedule) => s.parent_recurring_id === session.parent_recurring_id)
+                            : [session];
+                          setGroupedSessions(grouped);
                           setSelectedSession(session);
                           setShowViewModal(true);
                         }}
@@ -285,7 +353,7 @@ export default function Sessions() {
                             <Edit className="w-4 h-4" />
                           </button>
                           <button
-                            onClick={() => handleDeleteSession(session.id)}
+                            onClick={() => handleDeleteSession(session)}
                             className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
                             title={t('delete')}
                           >
@@ -323,8 +391,9 @@ export default function Sessions() {
 
       <ViewSessionModal
         isOpen={showViewModal}
-        onClose={() => { setShowViewModal(false); setSelectedSession(null); }}
+        onClose={() => { setShowViewModal(false); setSelectedSession(null); setGroupedSessions([]); }}
         session={selectedSession}
+        groupedSessions={groupedSessions}
       />
 
       <EditSessionModal
@@ -332,6 +401,12 @@ export default function Sessions() {
         onClose={() => { setShowEditModal(false); setSelectedSession(null); }}
         session={selectedSession}
         onSave={handleUpdateSession}
+      />
+
+      <ConfirmModal
+        isOpen={!!sessionToDelete}
+        onClose={() => setSessionToDelete(null)}
+        onConfirm={confirmDelete}
       />
     </div>
   );

@@ -9,6 +9,7 @@ import CustomSelect from '../components/ui/CustomSelect';
 import { useTranslation } from 'react-i18next';
 import { useStudents, useCreateStudent, useUpdateStudent, useDeleteStudent } from '../hooks/useStudents';
 import { Student } from '../types/student';
+import ErrorService from '../utils/ErrorService';
 
 
 export default function Students() {
@@ -121,10 +122,10 @@ export default function Students() {
     ) {
       try {
         await deleteStudent(studentId);
-        alert(t('studentDeletedSuccess'));
+        ErrorService.success(t('studentDeletedSuccess'));
       } catch (error) {
         console.error('Error deleting student:', error);
-        alert(t('errorDeletingStudent'));
+        // Detailed error is handled by axios interceptor
       }
     }
   };
@@ -370,9 +371,10 @@ export default function Students() {
             }
             await createStudent(payload);
             setIsAddModalOpen(false);
-            alert(t('studentAddedSuccess'));
+            ErrorService.success(t('studentAddedSuccess'));
           } catch (error) {
             console.error('Error adding student:', error);
+            // Detailed error is handled by axios interceptor
           }
         }}
       />
@@ -425,9 +427,11 @@ export default function Students() {
               payload.password = updatedData.password;
             }
             await updateStudent({ id: updatedData.id, data: payload });
+            ErrorService.success(t('studentUpdatedSuccess'));
             setIsEditModalOpen(false);
           } catch (error) {
             console.error('Error updating student:', error);
+            // Detailed error is handled by axios interceptor
           }
         }}
       />

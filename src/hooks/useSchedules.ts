@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { updateSchedule, createSchedule, createRecurringSchedule, deleteSchedule } from "../services/SchedulesServices";
+import { updateSchedule, createSchedule, createRecurringSchedule, deleteSchedule, deleteRecurringScheduale } from "../services/SchedulesServices";
 import { UpdateSchedulePayload, CreateSchedulePayload, CreateRecurringSchedulePayload } from "../types/scheduales";
 import { getAllSchedules, searchSchedules, getSchedulesForTeacher } from "../services/SessionsServices";
 
@@ -65,6 +65,20 @@ export const useDeleteSchedule = () => {
         }
     });
 };
+
+export const useDeleteGroupedSchedule = () => {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: (id: string) => deleteRecurringScheduale(id),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ["schedules"] });
+        },
+        onError: (error) => {
+            console.error("Delete schedule failed:", error);
+        }
+    });
+};
+
 
 export const useUpdateSchedule = () => {
     const queryClient = useQueryClient();

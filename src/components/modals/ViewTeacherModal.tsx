@@ -2,6 +2,8 @@ import { X, Phone, Mail, GraduationCap, DollarSign, Calendar, CheckCircle, Clock
 import { useLanguage } from '../../contexts/LanguageContext';
 import { useSessions } from '../../contexts/SessionsContext';
 import { Teacher } from '../../types/teachers';
+import { useCurrency } from '../../hooks/useCurrency';
+import { Currency } from '../../types/currency';
 
 interface ViewTeacherModalProps {
   isOpen: boolean;
@@ -12,6 +14,7 @@ interface ViewTeacherModalProps {
 export default function ViewTeacherModal({ isOpen, onClose, teacher }: ViewTeacherModalProps) {
   const { language, t } = useLanguage();
   const { sessions } = useSessions();
+  const { data: currenciesData } = useCurrency();
 
   if (!isOpen || !teacher) return null;
 
@@ -45,9 +48,11 @@ export default function ViewTeacherModal({ isOpen, onClose, teacher }: ViewTeach
   const pendingEarnings = pendingHours * hourPrice;
   const totalOwed = totalHours * hourPrice;
 
-  const currency = teacher.currencyId || 'EGP';
-  const currencySymbol = currency === 'EGP' ? 'ج.م' : currency === 'SAR' ? 'ر.س' : currency;
-
+  const currencies = currenciesData?.currencies || [];
+  const teacherCurrency = currencies.find(
+    (c: Currency) => c.id === teacher.currencyId
+  );
+  const currencySymbol = teacherCurrency?.symbol || teacherCurrency?.code || 'EGP';
   // Safe subject extraction
   const subjects = (teacher.teacherSubjects || []).map((s: any) => {
     if (s.subject) {

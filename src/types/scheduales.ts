@@ -95,6 +95,7 @@ export interface Schedule {
     id: string;
     teacherId: string;
     studentId: string;
+    subjectId: string;
     status: string;
     title: string;
     description: string;

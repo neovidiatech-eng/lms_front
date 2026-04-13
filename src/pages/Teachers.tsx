@@ -156,7 +156,7 @@ export default function Teachers() {
       setIsAddModalOpen(false);
     } catch (error) {
       console.error('Error adding teacher:', error);
-      ErrorService.error(t('teacher Added Error'));
+      // Detailed error is handled by axios interceptor
     }
   };
 
@@ -170,7 +170,7 @@ export default function Teachers() {
       setSelectedTeacher(null);
     } catch (error) {
       console.error('Error updating teacher:', error);
-      ErrorService.error(t('teacher Updated Error'));
+      // Detailed error is handled by axios interceptor
     }
   };
 
@@ -181,7 +181,7 @@ export default function Teachers() {
         ErrorService.success(t('teacher Deleted Success'));
       } catch (error) {
         console.error('Error deleting teacher:', error);
-        ErrorService.error(t('teacher Deleted Error'));
+        // Detailed error is handled by axios interceptor
       }
     }
   };

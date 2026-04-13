@@ -71,7 +71,7 @@ export default function Roles() {
                 <h1 className="text-2xl font-bold">{t("roles")}</h1>
                 <button
                     onClick={() => setIsModalOpen(true)}
-                    className="btn-primary flex items-center gap-2 px-4 py-2"
+                    className="flex flex-1 md:flex-none items-center justify-center gap-2 px-6 py-3 btn-primary text-white rounded-xl transition-colors font-medium whitespace-nowrap"
                 >
                     <Plus /> {t("addNewRole")}
                 </button>
@@ -83,7 +83,7 @@ export default function Roles() {
                 placeholder={t("search")}
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="mb-4 w-full border p-2 rounded"
+                className={`w-full pr-12 text-right pl-12 py-3 mb-10 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent`}
             />
 
             {/* Table */}

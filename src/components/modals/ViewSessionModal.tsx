@@ -7,9 +7,10 @@ interface ViewSessionModalProps {
   isOpen: boolean;
   onClose: () => void;
   session: Schedule | null;
+  groupedSessions?: Schedule[];
 }
 
-export default function ViewSessionModal({ isOpen, onClose, session }: ViewSessionModalProps) {
+export default function ViewSessionModal({ isOpen, onClose, session, groupedSessions }: ViewSessionModalProps) {
   const { t, i18n } = useTranslation();
   const language = i18n.language.split('-')[0];
 
@@ -168,34 +169,68 @@ export default function ViewSessionModal({ isOpen, onClose, session }: ViewSessi
               </div>
 
               {/* Meeting Link & Recurring Info */}
-              {session.is_recurring ? (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
-                  <div className="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
-                    <div className="flex items-center gap-2 justify-end mb-2">
-                       <p className="text-xs text-gray-500">{t('scheduledDays') || (language === 'ar' ? 'أيام الحصة' : 'Recurring Day')}</p>
-                       <Calendar className="w-4 h-4 text-blue-500" />
-                    </div>
-                    <p className="font-bold text-gray-900 text-right">{t(session.day_of_week?.toLowerCase() || '') || session.day_of_week}</p>
+              {session.is_recurring && groupedSessions && groupedSessions.length > 1 ? (
+                <div className="mt-6 bg-white border border-gray-200 rounded-2xl overflow-hidden">
+                  <div className="bg-gray-50 px-6 py-4 border-b border-gray-200 flex items-center justify-between">
+                    <h4 className="font-bold text-gray-900 text-right">{t('recurringSessions') || (language === 'ar' ? 'الجلسات المتكررة' : 'Recurring Sessions')} ({groupedSessions.length})</h4>
                   </div>
-                  
-                  {session.link && (
-                    <div className="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
-                      <div className="flex items-center gap-2 justify-end mb-2">
-                        <p className="text-xs text-gray-500">{t('meetingLink')}</p>
-                        <Video className="w-4 h-4 text-red-500" />
-                      </div>
-                      <div className="flex items-center gap-2 justify-end">
-                        <a
-                          href={session.link}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="px-3 py-1 bg-primary text-white rounded-lg text-xs font-medium hover:opacity-90 transition-colors"
-                        >
-                          {t('openLink')}
-                        </a>
-                      </div>
+                  <div className="p-4 max-h-96 overflow-y-auto no-scrollbar">
+                    <div className="space-y-3">
+                      {groupedSessions.map(s => {
+                        const { date, time } = formatDateTime(s.start_time);
+                        const { time: endT } = formatDateTime(s.end_time);
+                        return (
+                          <div
+                            key={s.id}
+                            className="bg-gray-50 border border-gray-200 rounded-xl p-4 hover:bg-gray-100 transition-colors"
+                          >
+                            <div className="flex items-center justify-between gap-4" dir="rtl">
+                              <div className="flex items-center gap-3">
+                                <div>
+                                  <p className="text-xs text-gray-500 text-right">{t('scheduledDays') || (language === 'ar' ? 'اليوم' : 'Day')}</p>
+                                  <p className="font-bold text-gray-900 text-right">{t(s.day_of_week?.toLowerCase() || '') || s.day_of_week || '—'}</p>
+                                </div>
+
+                                <div className="border-r border-gray-300 pr-4">
+                                  <p className="text-xs text-gray-500 text-right">{t('date') || (language === 'ar' ? 'التاريخ' : 'Date')}</p>
+                                  <p className="font-medium text-gray-900 text-right">{date}</p>
+                                </div>
+
+                                <div className="border-r border-gray-300 pr-4">
+                                  <p className="text-xs text-gray-500 text-right">{t('time') || (language === 'ar' ? 'الوقت' : 'Time')}</p>
+                                  <p className="font-medium text-gray-900 text-right" dir="ltr">
+                                    {time} - {endT}
+                                  </p>
+                                </div>
+
+                                <div className="border-r border-gray-300 pr-4">
+                                  <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium border ${getStatusStyle(s.status)}`}>
+                                    {t(s.status?.toLowerCase() || '')}
+                                  </span>
+                                </div>
+                              </div>
+
+                              <div className="flex items-center gap-2">
+                                {s.link ? (
+                                  <a
+                                    href={s.link}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-sm font-medium"
+                                  >
+                                    <Video className="w-4 h-4" />
+                                    {t('joinSession') || (language === 'ar' ? 'دخول الحصة' : 'Join Session')}
+                                  </a>
+                                ) : (
+                                  <span className="text-sm text-gray-400">{t('noLink') || (language === 'ar' ? 'لا يوجد رابط' : 'No link')}</span>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                        )
+                      })}
                     </div>
-                  )}
+                  </div>
                 </div>
               ) : (
                 session.link && (

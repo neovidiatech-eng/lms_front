@@ -5,8 +5,9 @@ import CustomSelect from '../ui/CustomSelect';
 import { UserFormData, getUserSchema } from '../../lib/schemas/UserSchema';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Controller, useForm } from 'react-hook-form';
-import { CustomCheckbox } from '../ui/CustomCheckbox';
-
+import { useRoles } from '../../hooks/useRoles';
+// import { CustomCheckbox } from '../ui/CustomCheckbox';
+//import { usePermissions } from '../../hooks/usePermissions';
 
 //  To Add id to userData
 interface EditUserModalProps {
@@ -15,113 +16,7 @@ interface EditUserModalProps {
   onSubmit: (userData: UserFormData & { id: string }) => void;
   userData: UserFormData & { id: string };
 }
-const permissionGroups = {
-  dashboard: {
-    title: 'لوحة التحكم',
-    titleEn: 'Dashboard',
-    permissions: [
-      { id: 'dashboard_view', label: 'عرض لوحة التحكم', labelEn: 'View Dashboard' },
-    ],
-  },
-  students: {
-    title: 'الطلاب',
-    titleEn: 'Students',
-    permissions: [
-      { id: 'students_manage', label: 'إدارة الطلاب', labelEn: 'Manage Students' },
-    ],
-  },
-  teachers: {
-    title: 'المدرسين',
-    titleEn: 'Teachers',
-    permissions: [
-      { id: 'teachers_manage', label: 'إدارة المدرسين', labelEn: 'Manage Teachers' },
-    ],
-  },
-  sessions: {
-    title: 'الجلسات',
-    titleEn: 'Sessions',
-    permissions: [
-      { id: 'sessions_manage', label: 'إدارة الجلسات', labelEn: 'Manage Sessions' },
-    ],
-  },
-  plans: {
-    title: 'الباقات',
-    titleEn: 'Plans',
-    permissions: [
-      { id: 'plans_manage', label: 'إدارة الباقات', labelEn: 'Manage Plans' },
-    ],
-  },
-  subscriptions: {
-    title: 'الاشتراكات',
-    titleEn: 'Subscriptions',
-    permissions: [
-      { id: 'subscriptions_manage', label: 'إدارة الاشتراكات', labelEn: 'Manage Subscriptions' },
-    ],
-  },
-  exams: {
-    title: 'الامتحانات',
-    titleEn: 'Exams',
-    permissions: [
-      { id: 'exams_manage', label: 'إدارة الامتحانات', labelEn: 'Manage Exams' },
-    ],
-  },
-  homework: {
-    title: 'الواجبات',
-    titleEn: 'Homework',
-    permissions: [
-      { id: 'homework_manage', label: 'إدارة الواجبات', labelEn: 'Manage Homework' },
-    ],
-  },
-  settings: {
-    title: 'المواد',
-    titleEn: 'Settings',
-    permissions: [
-      { id: 'settings_manage', label: 'إدارة المواد', labelEn: 'Manage Settings' },
-    ],
-  },
-  preparations: {
-    title: 'الإعدادات',
-    titleEn: 'Preparations',
-    permissions: [
-      { id: 'preparations_manage', label: 'إدارة الإعدادات', labelEn: 'Manage Preparations' },
-    ],
-  },
-  users: {
-    title: 'المستخدمين',
-    titleEn: 'Users',
-    permissions: [
-      { id: 'users_manage', label: 'إدارة المستخدمين', labelEn: 'Manage Users' },
-    ],
-  },
-  finance: {
-    title: 'المالية',
-    titleEn: 'Finance',
-    permissions: [
-      { id: 'finance_manage', label: 'إدارة المالية', labelEn: 'Manage Finance' },
-    ],
-  },
-  chats: {
-    title: 'المحادثات',
-    titleEn: 'Chats',
-    permissions: [
-      { id: 'chats_manage', label: 'إدارة المحادثات', labelEn: 'Manage Chats' },
-    ],
-  },
-  withdrawals: {
-    title: 'طلبات السحب',
-    titleEn: 'Withdrawal Requests',
-    permissions: [
-      { id: 'withdrawals_manage', label: 'طلبات السحب', labelEn: 'Withdrawal Requests' },
-    ],
-  },
-  creative: {
-    title: 'طلبات الإبداع',
-    titleEn: 'Creative Requests',
-    permissions: [
-      { id: 'creative_manage', label: 'طلبات الإبداع', labelEn: 'Creative Requests' },
-    ],
-  },
-};
+// Static permission list removed in favor of dynamic fetching
 
 
 const countryCodes = [
@@ -144,22 +39,39 @@ const countryCodes = [
   { code: '+249', country: 'السودان', flag: '🇸🇩' },
 ];
 
-const roles = [
-  { id: 'student', label: 'الطالب', labelEn: 'Student' },
-  { id: 'guardian', label: 'ولي أمر', labelEn: 'Guardian' },
-  { id: 'teacher', label: 'المدرس', labelEn: 'Teacher' },
-  { id: 'admin', label: 'مسؤول', labelEn: 'Admin' },
-  { id: 'super_admin', label: 'مسؤول أعلى', labelEn: 'Super Admin' },
-];
-
 export default function EditUserModal({ isOpen, onClose, onSubmit, userData }: EditUserModalProps) {
-  const { language, t } = useLanguage();
+  const { t } = useLanguage();
+
+  // const { data: permsData} = usePermissions();
+  // const permissionsList = permsData?.data || [];
+
+  // const dynamicPermissionGroups = permissionsList.reduce((acc: any, p) => {
+  //   const parts = p.code.split('_');
+  //   const groupKey = parts.length > 1 ? parts[0].toLowerCase() : 'other';
+
+  //   if (!acc[groupKey]) {
+  //     acc[groupKey] = {
+  //       title: groupKey.charAt(0).toUpperCase() + groupKey.slice(1),
+  //       permissions: []
+  //     };
+  //   }
+  //   acc[groupKey].permissions.push({
+  //     id: p.code,
+  //     label: p.name
+  //   });
+  //   return acc;
+  // }, {});
+
   const { control, handleSubmit, register, reset, formState: { errors } } = useForm<UserFormData>({
     resolver: zodResolver(getUserSchema(t)),
     defaultValues: userData,
   });
 
   const [showPassword, setShowPassword] = useState(false);
+  const { data: rolesData } = useRoles();
+  const dynamicRoles = rolesData?.data || [];
+
+
 
   useEffect(() => {
     if (userData && isOpen) {
@@ -185,12 +97,12 @@ export default function EditUserModal({ isOpen, onClose, onSubmit, userData }: E
     ),
   }));
 
-  const roleOptions = roles.map((role) => ({
+  const roleOptions = dynamicRoles.map((role) => ({
     value: role.id,
-    searchText: language === 'ar' ? role.label : role.labelEn,
+    searchText: role.name,
     label: (
-      <div className="text-right w-full">
-        {language === 'ar' ? role.label : role.labelEn}
+      <div className="text-right w-full capitalize">
+        {role.name}
       </div>
     ),
   }));
@@ -311,51 +223,55 @@ export default function EditUserModal({ isOpen, onClose, onSubmit, userData }: E
             </div>
 
             {/* Permissions */}
-            <div>
+            {/* <div>
               <div className="flex justify-between items-center mb-4">
                 <label className="block text-sm font-medium text-gray-700 text-right w-full">
                   {t('permissions')}
                 </label>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                {Object.entries(permissionGroups).map(([key, group]) => (
-                  <div key={key} className="space-y-2">
-                    <h3 className="text-sm font-semibold text-gray-900 text-right">
-                      {language === 'ar' ? group.title : group.titleEn}
-                    </h3>
-                    {group.permissions.map((permission) => (
-                      <label
-                        key={permission.id}
-                        className="flex items-center justify-end gap-2 cursor-pointer"
-                      >
-                        <span className="text-sm text-gray-700">
-                          {language === 'ar' ? permission.label : permission.labelEn}
-                        </span>
-                        <Controller
-                          name="permissions"
-                          control={control}
-                          render={({ field }) => {
-                            const isChecked = field.value?.includes(permission.id) ?? false;
-                            return (
-                              <CustomCheckbox
-                                checked={isChecked}
-                                onChange={() => {
-                                  const next = isChecked
-                                    ? field.value.filter((id: string) => id !== permission.id)
-                                    : [...(field.value || []), permission.id];
-                                  field.onChange(next);
-                                }}
-                              />
-                            );
-                          }}
-                        />
-                      </label>
-                    ))}
-                  </div>
-                ))}
+                {isLoadingPerms ? (
+                  <div className="col-span-3 text-center py-4">{t('loading')}...</div>
+                ) : (
+                  Object.entries(dynamicPermissionGroups).map(([key, group]: [string, any]) => (
+                    <div key={key} className="space-y-2">
+                      <h3 className="text-sm font-semibold text-gray-900 text-right">
+                        {group.title}
+                      </h3>
+                      {group.permissions.map((permission: any) => (
+                        <label
+                          key={permission.id}
+                          className="flex items-center justify-end gap-2 cursor-pointer"
+                        >
+                          <span className="text-sm text-gray-700">
+                            {permission.label}
+                          </span>
+                          <Controller
+                            name="permissions"
+                            control={control}
+                            render={({ field }) => {
+                              const isChecked = field.value?.includes(permission.id) ?? false;
+                              return (
+                                <CustomCheckbox
+                                  checked={isChecked}
+                                  onChange={() => {
+                                    const next = isChecked
+                                      ? field.value.filter((id: string) => id !== permission.id)
+                                      : [...(field.value || []), permission.id];
+                                    field.onChange(next);
+                                  }}
+                                />
+                              );
+                            }}
+                          />
+                        </label>
+                      ))}
+                    </div>
+                  ))
+                )}
                 {errors.permissions && <p className="text-red-500 text-sm mt-4 text-center w-full col-span-1 md:col-span-3">{errors.permissions.message}</p>}
               </div>
-            </div>
+            </div> */}
           </div>
         </form>
 

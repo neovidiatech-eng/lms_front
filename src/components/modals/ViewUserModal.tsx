@@ -98,7 +98,6 @@ export default function ViewUserModal({ isOpen, onClose, userData }: ViewUserMod
                 </label>
                 <div className="flex items-center justify-end gap-2">
                   <WhatsAppPhone phone={`${userData.countryCode || '+20'} ${userData.phone}`} />
-                  <p className="text-gray-900 font-medium">{userData.countryCode || '+20'} {userData.phone}</p>
                 </div>
               </div>
 
@@ -116,8 +115,8 @@ export default function ViewUserModal({ isOpen, onClose, userData }: ViewUserMod
                 <div className="flex items-center justify-end gap-2">
                   <span
                     className={`px-3 py-1 rounded-full text-sm font-medium ${userData.status === 'active'
-                        ? 'bg-green-100 text-green-700'
-                        : 'bg-red-100 text-red-700'
+                      ? 'bg-green-100 text-green-700'
+                      : 'bg-red-100 text-red-700'
                       }`}
                   >
                     {userData.status === 'active'

@@ -1,23 +1,29 @@
 import { useState } from 'react';
-import { Search, Eye, Pencil, Trash2, Plus } from 'lucide-react';
+import { Search, Eye, Pencil, Trash2, Plus, Loader2 } from 'lucide-react';
 import WhatsAppPhone from '../components/ui/WhatsAppPhone';
 import AddUserModal from '../components/modals/AddUserModal';
 import EditUserModal from '../components/modals/EditUserModal';
 import ViewUserModal from '../components/modals/ViewUserModal';
 import Pagination from '../components/ui/Pagination';
 import { useTranslation } from 'react-i18next';
+import ErrorService from '../utils/ErrorService';
+import { useStaff, useAddStaff, useUpdateStaff, useDeleteStaff } from '../hooks/useStaff';
+import { StuffItem } from '../types/sttuf';
+import { UserFormData } from '../lib/schemas/UserSchema';
 
-interface User {
-  id: string;
-  name: string;
-  email: string;
-  phone: string;
-  countryCode?: string;
-  role: string;
-  status: 'active' | 'inactive';
-  avatar?: string;
-  permissions?: string[];
-}
+/** Map a StuffItem from the API to the flat shape the modals & table need */
+const toModalUser = (item: StuffItem) => ({
+  id: item.id,
+  name: item.user.name,
+  email: item.user.email,
+  phone: item.user.phone,
+  countryCode: item.user.code_country || '+20',
+  role: item.role?.name || '',
+  status: (item.user.status as 'active' | 'inactive') || 'active',
+  permissions: [] as string[],
+});
+
+type ModalUser = ReturnType<typeof toModalUser>;
 
 export default function Users() {
   const { t } = useTranslation();
@@ -26,126 +32,84 @@ export default function Users() {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
-  const [selectedUser, setSelectedUser] = useState<User | null>(null);
+  const [selectedUser, setSelectedUser] = useState<ModalUser | null>(null);
   const itemsPerPage = 7;
 
-  const users: User[] = [
-    {
-      id: '1',
-      name: 'ahmed khaled',
-      email: 'aj@demo.app',
-      phone: '0181262145',
-      countryCode: '+20',
-      role: 'student',
-      status: 'active',
-      permissions: ['dashboard_view', 'students_manage'],
-    },
-    {
-      id: '2',
-      name: 'Ahmed Gamal',
-      email: 'ahmed@demo.com',
-      phone: '01091536978',
-      countryCode: '+20',
-      role: 'admin',
-      status: 'inactive',
-      permissions: ['dashboard_view', 'students_manage', 'teachers_manage', 'sessions_manage'],
-    },
-    {
-      id: '3',
-      name: 'محاسب مالي',
-      email: 'account@demo.all',
-      phone: '0109153698547',
-      countryCode: '+20',
-      role: 'admin',
-      status: 'active',
-      permissions: ['dashboard_view', 'finance_manage', 'users_manage'],
-    },
-    {
-      id: '4',
-      name: 'Super Admin',
-      email: 'admin@admin.com',
-      phone: '012022222',
-      countryCode: '+966',
-      role: 'super_admin',
-      status: 'active',
-      permissions: [
-        'dashboard_view',
-        'students_manage',
-        'teachers_manage',
-        'sessions_manage',
-        'plans_manage',
-        'subscriptions_manage',
-        'exams_manage',
-        'homework_manage',
-        'settings_manage',
-        'preparations_manage',
-        'users_manage',
-        'finance_manage',
-        'chats_manage',
-        'withdrawals_manage',
-        'creative_manage',
-      ],
-    },
-    {
-      id: '5',
-      name: 'Ahmed Gamal',
-      email: 'adminffff@app.com',
-      phone: '01091536978',
-      countryCode: '+966',
-      role: 'teacher',
-      status: 'active',
-      permissions: ['dashboard_view', 'students_manage', 'homework_manage', 'exams_manage'],
-    },
-  ];
+  // ── API hooks ──────────────────────────────────────────────────────────
+  const { data: staffData, isLoading, isError } = useStaff(searchTerm);
+  const addStaff = useAddStaff();
+  const updateStaff = useUpdateStaff();
+  const deleteStaff = useDeleteStaff();
 
-  const filteredUsers = users.filter(user =>
-    user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    user.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    user.phone.includes(searchTerm)
-  );
+  const allUsers: ModalUser[] = (staffData?.stuff ?? []).map(toModalUser);
 
-  const totalPages = Math.ceil(filteredUsers.length / itemsPerPage);
+  const totalPages = Math.ceil(allUsers.length / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
-  const endIndex = startIndex + itemsPerPage;
-  const currentUsers = filteredUsers.slice(startIndex, endIndex);
+  const currentUsers = allUsers.slice(startIndex, startIndex + itemsPerPage);
 
-  const handlePageChange = (page: number) => {
-    setCurrentPage(page);
+  const handlePageChange = (page: number) => setCurrentPage(page);
+
+  const handleAddUser = (userData: UserFormData) => {
+    addStaff.mutate(
+      {
+        name: userData.name,
+        email: userData.email,
+        password: userData.password,
+        codeCountry: userData.countryCode,
+        phone: userData.phone,
+        roleId: userData.role,
+      },
+      {
+        onSuccess: () => {
+          ErrorService.success(t('userAddedSuccess'));
+          setIsAddModalOpen(false);
+        },
+      }
+    );
   };
 
-  const handleAddUser = (userData: any) => {
-    console.log('New user data:', userData);
-    setIsAddModalOpen(false);
-  };
-
-  const handleEditUser = (userData: any) => {
-    console.log('Updated user data:', userData);
-    setIsEditModalOpen(false);
-    setSelectedUser(null);
+  const handleEditUser = (userData: UserFormData & { id: string }) => {
+    updateStaff.mutate(
+      {
+        id: userData.id,
+        staff: {
+          name: userData.name,
+          email: userData.email,
+          codeCountry: userData.countryCode,
+          phone: userData.phone,
+          roleId: userData.role,
+          ...(userData.password ? { password: userData.password } : {}),
+        },
+      },
+      {
+        onSuccess: () => {
+          ErrorService.success(t('userUpdatedSuccess'));
+          setIsEditModalOpen(false);
+          setSelectedUser(null);
+        },
+      }
+    );
   };
 
   const handleDeleteUser = async (userId: string) => {
     if (window.confirm(t('deleteConfirmUser'))) {
-      try {
-        console.log('Deleting user:', userId);
-        alert(t('userDeletedSuccess'));
-      } catch (error) {
-        console.error('Error deleting user:', error);
-        alert(t('userDeletedError'));
-      }
+      deleteStaff.mutate(userId, {
+        onSuccess: () => ErrorService.success(t('userDeletedSuccess')),
+      });
     }
   };
 
-  const handleViewUser = (user: User) => {
+  const handleViewUser = (user: ModalUser) => {
     setSelectedUser(user);
     setIsViewModalOpen(true);
   };
 
-  const handleEditClick = (user: User) => {
+  const handleEditClick = (user: ModalUser) => {
     setSelectedUser(user);
     setIsEditModalOpen(true);
   };
 
+  // ── Render ─────────────────────────────────────────────────────────────
   return (
     <div className="p-6 lg:p-8">
       {/* Breadcrumb */}
@@ -165,9 +129,7 @@ export default function Users() {
           className="flex items-center gap-2 btn-primary text-white px-6 py-3 rounded-xl transition-colors"
         >
           <Plus className="w-5 h-5" />
-          <span className="font-medium">
-            {t('addNewUser')}
-          </span>
+          <span className="font-medium">{t('addNewUser')}</span>
         </button>
       </div>
 
@@ -179,7 +141,10 @@ export default function Users() {
             type="text"
             placeholder={t('search')}
             value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
+            onChange={(e) => {
+              setSearchTerm(e.target.value);
+              setCurrentPage(1);
+            }}
             className="w-full pr-12 pl-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent text-right"
           />
         </div>
@@ -191,93 +156,101 @@ export default function Users() {
           <table className="w-full">
             <thead className="bg-gray-50 border-b border-gray-200">
               <tr>
-                <th className="px-6 py-4 text-right text-sm font-semibold text-gray-700">
-                  {t('name')}
-                </th>
-                <th className="px-6 py-4 text-right text-sm font-semibold text-gray-700">
-                  {t('email')}
-                </th>
-                <th className="px-6 py-4 text-right text-sm font-semibold text-gray-700">
-                  {t('phone')}
-                </th>
-                <th className="px-6 py-4 text-right text-sm font-semibold text-gray-700">
-                  {t('role')}
-                </th>
-                <th className="px-6 py-4 text-right text-sm font-semibold text-gray-700">
-                  {t('status')}
-                </th>
-                <th className="px-6 py-4 text-right text-sm font-semibold text-gray-700">
-                  {t('actions')}
-                </th>
+                <th className="px-6 py-4 text-right text-sm font-semibold text-gray-700">{t('name')}</th>
+                <th className="px-6 py-4 text-right text-sm font-semibold text-gray-700">{t('email')}</th>
+                <th className="px-6 py-4 text-right text-sm font-semibold text-gray-700">{t('phone')}</th>
+                <th className="px-6 py-4 text-right text-sm font-semibold text-gray-700">{t('role')}</th>
+                <th className="px-6 py-4 text-right text-sm font-semibold text-gray-700">{t('status')}</th>
+                <th className="px-6 py-4 text-right text-sm font-semibold text-gray-700">{t('actions')}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200">
-              {currentUsers.map((user) => (
-                <tr key={user.id} className="hover:bg-gray-50 transition-colors">
-                  <td className="px-6 py-4">
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center flex-shrink-0">
-                        <span className="text-gray-600 text-sm font-medium">
-                          {user.name.charAt(0).toUpperCase()}
-                        </span>
-                      </div>
-                      <div className="text-right">
-                        <div className="font-medium text-gray-900">{user.name}</div>
-                        <div className="text-xs text-gray-500">{user.email}</div>
-                      </div>
-                    </div>
-                  </td>
-                  <td className="px-6 py-4">
-                    <span className="text-sm text-gray-600">{user.email}</span>
-                  </td>
-                  <td className="px-6 py-4">
-                    <WhatsAppPhone
-                      phone={`${user.countryCode || '+20'} ${user.phone}`}
-                      className="text-gray-900"
-                    />
-                  </td>
-                  <td className="px-6 py-4">
-                    <span className="text-sm text-purple-600 font-medium">{user.role}</span>
-                  </td>
-                  <td className="px-6 py-4">
-                    <span
-                      className={`inline-flex px-3 py-1 rounded-full text-xs font-medium ${user.status === 'active'
-                        ? 'bg-green-100 text-green-700'
-                        : 'bg-purple-100 text-purple-700'
-                        }`}
-                    >
-                      {user.status === 'active'
-                        ? t('active')
-                        : t('inactive')}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4">
-                    <div className="flex items-center gap-2 justify-end">
-                      <button
-                        onClick={() => handleViewUser(user)}
-                        className="p-2 hover:bg-gray-100 rounded-lg transition-colors group"
-                        title={t('view')}
-                      >
-                        <Eye className="w-4 h-4 text-gray-400 group-hover:text-gray-600" />
-                      </button>
-                      <button
-                        onClick={() => handleEditClick(user)}
-                        className="p-2 hover:bg-primary-light rounded-lg transition-colors group"
-                        title={t('edit')}
-                      >
-                        <Pencil className="w-4 h-4 text-gray-400 group-hover:text-blue-600" />
-                      </button>
-                      <button
-                        onClick={() => handleDeleteUser(user.id)}
-                        className="p-2 hover:bg-red-50 rounded-lg transition-colors group"
-                        title={t('delete')}
-                      >
-                        <Trash2 className="w-4 h-4 text-gray-400 group-hover:text-red-600" />
-                      </button>
-                    </div>
+              {isLoading ? (
+                <tr>
+                  <td colSpan={6} className="px-6 py-12 text-center text-gray-500">
+                    <Loader2 className="w-6 h-6 animate-spin mx-auto mb-2" />
+                    {t('loading')}...
                   </td>
                 </tr>
-              ))}
+              ) : isError ? (
+                <tr>
+                  <td colSpan={6} className="px-6 py-12 text-center text-red-500">
+                    {t('errorLoadingData')}
+                  </td>
+                </tr>
+              ) : currentUsers.length === 0 ? (
+                <tr>
+                  <td colSpan={6} className="px-6 py-12 text-center text-gray-400">
+                    {t('noData')}
+                  </td>
+                </tr>
+              ) : (
+                currentUsers.map((user) => (
+                  <tr key={user.id} className="hover:bg-gray-50 transition-colors">
+                    <td className="px-6 py-4">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center flex-shrink-0">
+                          <span className="text-gray-600 text-sm font-medium">
+                            {user.name.charAt(0).toUpperCase()}
+                          </span>
+                        </div>
+                        <div className="text-right">
+                          <div className="font-medium text-gray-900">{user.name}</div>
+                          <div className="text-xs text-gray-500">{user.email}</div>
+                        </div>
+                      </div>
+                    </td>
+                    <td className="px-6 py-4">
+                      <span className="text-sm text-gray-600">{user.email}</span>
+                    </td>
+                    <td className="px-6 py-4">
+                      <WhatsAppPhone
+                        phone={`${user.countryCode} ${user.phone}`}
+                        className="text-gray-900"
+                      />
+                    </td>
+                    <td className="px-6 py-4">
+                      <span className="text-sm text-purple-600 font-medium">{user.role}</span>
+                    </td>
+                    <td className="px-6 py-4">
+                      <span
+                        className={`inline-flex px-3 py-1 rounded-full text-xs font-medium ${user.status === 'active'
+                            ? 'bg-green-100 text-green-700'
+                            : 'bg-purple-100 text-purple-700'
+                          }`}
+                      >
+                        {user.status === 'active' ? t('active') : t('inactive')}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4">
+                      <div className="flex items-center gap-2 justify-end">
+                        <button
+                          onClick={() => handleViewUser(user)}
+                          className="p-2 hover:bg-gray-100 rounded-lg transition-colors group"
+                          title={t('view')}
+                        >
+                          <Eye className="w-4 h-4 text-gray-400 group-hover:text-gray-600" />
+                        </button>
+                        <button
+                          onClick={() => handleEditClick(user)}
+                          className="p-2 hover:bg-primary-light rounded-lg transition-colors group"
+                          title={t('edit')}
+                        >
+                          <Pencil className="w-4 h-4 text-gray-400 group-hover:text-blue-600" />
+                        </button>
+                        <button
+                          onClick={() => handleDeleteUser(user.id)}
+                          className="p-2 hover:bg-red-50 rounded-lg transition-colors group"
+                          title={t('delete')}
+                          disabled={deleteStaff.isPending}
+                        >
+                          <Trash2 className="w-4 h-4 text-gray-400 group-hover:text-red-600" />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))
+              )}
             </tbody>
           </table>
         </div>
@@ -285,7 +258,7 @@ export default function Users() {
         <Pagination
           currentPage={currentPage}
           totalPages={totalPages}
-          totalItems={filteredUsers.length}
+          totalItems={allUsers.length}
           itemsPerPage={itemsPerPage}
           onPageChange={handlePageChange}
         />
@@ -311,11 +284,11 @@ export default function Users() {
             name: selectedUser.name,
             email: selectedUser.email,
             phone: selectedUser.phone,
-            countryCode: selectedUser.countryCode || '+20',
+            countryCode: selectedUser.countryCode,
             role: selectedUser.role,
-            permissions: selectedUser.permissions || [],
+            permissions: selectedUser.permissions,
             password: '',
-            id: selectedUser.id
+            id: selectedUser.id,
           }}
         />
       )}

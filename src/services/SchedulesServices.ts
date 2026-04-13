@@ -26,6 +26,11 @@ export const deleteSchedule = async (scheduleId: string) => {
     return response.data;
 }
 
+export const deleteRecurringScheduale = async (groupId: string) => {
+    const response = await api.delete(`/schedules/group/${groupId}`);
+    return response.data;
+}
+
 export const updateSchedule = async (scheduleId: string, scheduleData: UpdateSchedulePayload) => {
     const response = await api.patch(`/schedules/${scheduleId}`, scheduleData);
     return response.data;
