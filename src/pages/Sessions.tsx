@@ -13,7 +13,6 @@ import { Schedule, UpdateSchedulePayload } from '../types/scheduales';
 import { SessionFormData, MultipleSessionsPayload } from '../lib/schemas/SessionSchema';
 import ErrorService from '../utils/ErrorService';
 import { useSubjects } from '../hooks/useSubjects';
-import { sub } from 'framer-motion/client';
 import { Subject } from '../types/subject';
 
 
