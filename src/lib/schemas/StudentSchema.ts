@@ -15,12 +15,12 @@ export const getStudentSchema = (t: TFunc) => z.object({
   password: z.string().min(6, t("validation.min", { count: 6 })).optional().or(z.literal('')),
 }).superRefine((data, ctx) => {
   const { countryCode, phone } = data;
-  
+
   if (!phone) return;
 
   // Egypt
   if (countryCode === "+20") {
-    if (!/^1[0125][0-9]{8}$/.test(phone)) {
+    if (!/^01[0125][0-9]{8}$/.test(phone)) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
         message: t("validation.invalidPhone"),

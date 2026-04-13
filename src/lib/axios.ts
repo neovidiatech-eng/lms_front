@@ -45,10 +45,22 @@ api.interceptors.response.use(
         localStorage.removeItem("token");
         sessionStorage.removeItem("token");
 
-        const publicPages = ["/login", "/register"];
-        if (!publicPages.includes(window.location.pathname)) {
-          window.location.href = "/login";
-          ErrorService.error(i18n.t("sessionExpiredError"));
+                const publicPages = ["/login", "/register"];
+                if (!publicPages.includes(window.location.pathname)) {
+                    window.location.href = "/login";
+                    ErrorService.error(i18n.t("sessionExpiredError"));
+                }
+            }
+        } else if (status === 403) {
+            ErrorService.error("You do not have permission to perform this action.");
+        } else if (status === 404) {
+            ErrorService.error("The requested resource was not found.");
+        } else if (status >= 500) {
+            ErrorService.error("A server error occurred. Please try again later.");
+        } else {
+            // Log the error
+            console.error("API Error:", error);
+            ErrorService.error(message);
         }
       }
     } else if (status === 403) {

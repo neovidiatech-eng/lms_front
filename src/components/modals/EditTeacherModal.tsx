@@ -39,26 +39,21 @@ export default function EditTeacherModal({ isOpen, onClose, onSubmit, teacher }:
       console.log("==> EditTeacherModal Mount:", teacher);
 
       // Extract subject IDs directly from the API response
-      // Handles both cases: subject_ids being an array of objects or an array of GUIDs
-      const subjectsArray = teacher.subject_ids || (teacher as any).subjects || (teacher as any).subjectIds || (teacher as any).Subjects || [];
-      const subjectIds = subjectsArray.map((s: any) => {
-        if (typeof s === 'object') return s?.id;
-        return String(s);
-      }).filter(Boolean);
+      const subjectsArray = teacher.teacherSubjects || [];
+      const subjectIds = subjectsArray.map((s: any) => String(s.subjectId || s.subject?.id)).filter(Boolean);
 
-      const currencyRaw = (teacher as any).currency || teacher.currency_id || (teacher as any).currencyId;
-      const currencyId = typeof currencyRaw === 'object' ? currencyRaw?.id : currencyRaw;
+      const currencyId = teacher.currencyId || '';
       
       console.log("==> Extracted Data:", { subjectIds, currencyId });
 
       reset({
-        name: teacher.name,
-        email: teacher.email,
-        phone: teacher.phone,
+        name: teacher.user?.name || '',
+        email: teacher.user?.email || '',
+        phone: teacher.user?.phone || '',
         password: '',
-        hourlyRate: teacher.hour_price || (teacher as any).hourPrice || 0,
-        currency: currencyId || '',
-        gender: teacher.gender || 'male',
+        hourlyRate: teacher.hour_price || 0,
+        currency: currencyId,
+        gender: (teacher.gender?.toLowerCase() as 'male' | 'female') || 'male',
         status: teacher.active ? 'active' : 'inactive',
         subjects: subjectIds,
       });

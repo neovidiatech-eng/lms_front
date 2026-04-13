@@ -1,6 +1,31 @@
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { updateSchedule, createSchedule, createRecurringSchedule, deleteSchedule } from "../services/SchedulesServices";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { updateSchedule, createSchedule, createRecurringSchedule, deleteSchedule, deleteRecurringScheduale } from "../services/SchedulesServices";
 import { UpdateSchedulePayload, CreateSchedulePayload, CreateRecurringSchedulePayload } from "../types/scheduales";
+import { getAllSchedules, searchSchedules, getSchedulesForTeacher } from "../services/SessionsServices";
+
+
+
+export const useGetSchedules = () => {
+    return useQuery({
+        queryKey: ["schedules"],
+        queryFn: () => getAllSchedules(),
+    });
+};
+
+export const useSearchSchedules = (searchTerm: string) => {
+    return useQuery({
+        queryKey: ["schedules", searchTerm],
+        queryFn: () => searchSchedules(searchTerm),
+    });
+};
+
+export const useGetSchedulesByTeacher = (teacherId: string) => {
+    return useQuery({
+        queryKey: ["schedules", "teacher", teacherId],
+        queryFn: () => getSchedulesForTeacher(teacherId),
+        enabled: !!teacherId,
+    });
+};
 
 export const useCreateSchedule = () => {
     const queryClient = useQueryClient();
@@ -40,6 +65,20 @@ export const useDeleteSchedule = () => {
         }
     });
 };
+
+export const useDeleteGroupedSchedule = () => {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: (id: string) => deleteRecurringScheduale(id),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ["schedules"] });
+        },
+        onError: (error) => {
+            console.error("Delete schedule failed:", error);
+        }
+    });
+};
+
 
 export const useUpdateSchedule = () => {
     const queryClient = useQueryClient();

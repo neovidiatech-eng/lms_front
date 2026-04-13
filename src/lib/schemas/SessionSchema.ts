@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { DayOfWeek } from '../../types/scheduales';
 
 type TFunc = (key: string, options?: any) => string;
 
@@ -7,8 +8,11 @@ const getBaseSession = (t: TFunc) => z.object({
   teacher: z.string().min(1, t("validation.required")),
   subject: z.string().min(1, t("validation.required")),
   title: z.string().min(3, t("validation.min", { count: 3 })),
+  description: z.string().min(5, t("validation.required")),
+  type: z.enum(['full', 'half']),
+  notification_Time: z.string(),
   meetingLink: z.string().url(t("validation.email")).optional().or(z.literal('')), // Adjust key if 'url' specific exists
-  notes: z.string().optional(),
+  notes: z.string().min(10, t("validation.min", { count: 10 })),
 });
 
 export const getSessionSchema = (t: TFunc) => getBaseSession(t).extend({
@@ -36,4 +40,5 @@ export interface MultipleSessionsPayload {
     day: string;
     time: string;
   }>;
+  selectedDays: DayOfWeek[];
 }

@@ -2,6 +2,8 @@ import { X, Phone, Mail, GraduationCap, DollarSign, Calendar, CheckCircle, Clock
 import { useLanguage } from '../../contexts/LanguageContext';
 import { useSessions } from '../../contexts/SessionsContext';
 import { Teacher } from '../../types/teachers';
+import { useCurrency } from '../../hooks/useCurrency';
+import { Currency } from '../../types/currency';
 
 interface ViewTeacherModalProps {
   isOpen: boolean;
@@ -12,10 +14,11 @@ interface ViewTeacherModalProps {
 export default function ViewTeacherModal({ isOpen, onClose, teacher }: ViewTeacherModalProps) {
   const { language, t } = useLanguage();
   const { sessions } = useSessions();
+  const { data: currenciesData } = useCurrency();
 
   if (!isOpen || !teacher) return null;
 
-  const teacherSessions = sessions.filter(s => s.teacherName === teacher.name);
+  const teacherSessions = sessions.filter(s => s.teacherName === teacher.user?.name);
   const today = new Date().toISOString().split('T')[0];
   const todaySessions = teacherSessions.filter(s => s.date === today);
   const upcomingSessions = teacherSessions.filter(s => s.date >= today);
@@ -45,15 +48,17 @@ export default function ViewTeacherModal({ isOpen, onClose, teacher }: ViewTeach
   const pendingEarnings = pendingHours * hourPrice;
   const totalOwed = totalHours * hourPrice;
 
-  const currency = teacher.currency_id || 'EGP';
-  const currencySymbol = currency === 'EGP' ? 'ج.م' : currency === 'SAR' ? 'ر.س' : currency;
-
+  const currencies = currenciesData?.currencies || [];
+  const teacherCurrency = currencies.find(
+    (c: Currency) => c.id === teacher.currencyId
+  );
+  const currencySymbol = teacherCurrency?.symbol || teacherCurrency?.code || 'EGP';
   // Safe subject extraction
-  const subjects = (teacher.subject_ids || []).map((s: any) => {
-    if (typeof s === 'object') {
-      return s.name_ar || s.name_en || s.name || '';
+  const subjects = (teacher.teacherSubjects || []).map((s: any) => {
+    if (s.subject) {
+      return s.subject.name_ar || s.subject.name_en || s.subject.name || '';
     }
-    return String(s);
+    return '';
   }).filter(Boolean);
 
   return (
@@ -63,7 +68,7 @@ export default function ViewTeacherModal({ isOpen, onClose, teacher }: ViewTeach
           <button onClick={onClose} className="p-2 hover:bg-gray-100 rounded-lg transition-colors">
             <X className="w-5 h-5 text-gray-500" />
           </button>
-          <h2 className="text-xl font-bold text-gray-900">{teacher.name}</h2>
+          <h2 className="text-xl font-bold text-gray-900">{teacher.user?.name}</h2>
         </div>
 
         <div className="p-6">
@@ -71,16 +76,16 @@ export default function ViewTeacherModal({ isOpen, onClose, teacher }: ViewTeach
             <div className="w-24 h-24 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center mb-4 shadow-lg">
               <GraduationCap className="w-12 h-12 text-white" />
             </div>
-            <h3 className="text-2xl font-bold text-gray-900 mb-2">{teacher.name}</h3>
+            <h3 className="text-2xl font-bold text-gray-900 mb-2">{teacher.user?.name}</h3>
 
             <div className="flex items-center gap-4 mb-4 flex-wrap justify-center">
-              <a href={`tel:${teacher.code_country}${teacher.phone}`} className="flex items-center gap-2 text-gray-600 hover:text-blue-600 transition-colors">
+              <a href={`tel:${teacher.user?.code_country}${teacher.user?.phone}`} className="flex items-center gap-2 text-gray-600 hover:text-blue-600 transition-colors">
                 <Phone className="w-4 h-4" />
-                <span className="text-sm">{teacher.code_country} {teacher.phone}</span>
+                <span className="text-sm">{teacher.user?.code_country} {teacher.user?.phone}</span>
               </a>
-              <a href={`mailto:${teacher.email}`} className="flex items-center gap-2 text-gray-600 hover:text-blue-600 transition-colors">
+              <a href={`mailto:${teacher.user?.email}`} className="flex items-center gap-2 text-gray-600 hover:text-blue-600 transition-colors">
                 <Mail className="w-4 h-4" />
-                <span className="text-sm">{teacher.email}</span>
+                <span className="text-sm">{teacher.user?.email}</span>
               </a>
             </div>
 

@@ -7,9 +7,9 @@ export const getUserSchema = (t: TFunc) => z.object({
   email: z.string().email(t("validation.email")),
   countryCode: z.string(),
   phone: z.string().min(1, t("validation.required")),
-  role: z.string(),
+  role: z.string().min(1, t("validation.required")),
   password: z.string().min(6, t("validation.min", { count: 6 })),
-  permissions: z.array(z.string()).min(1, t("validation.required")),
+  permissions: z.array(z.string()).optional(),
 });
 
 export type UserFormData = z.infer<ReturnType<typeof getUserSchema>>;
