@@ -5,7 +5,10 @@ import Pagination from "../components/ui/Pagination";
 import WhatsAppPhone from "../components/ui/WhatsAppPhone";
 import ViewSubscriptionRequestModal from "../components/modals/ViewSubscriptionRequestModal";
 import CustomSelect from "../components/ui/CustomSelect";
-import { getSubscriptionRequests } from "../services/subscriptionRequestServices";
+import {
+  changeSubscriptionRequestStatus,
+  getSubscriptionRequests,
+} from "../services/subscriptionRequestServices";
 
 interface SubscriptionRequest {
   id: string;
@@ -129,14 +132,33 @@ export default function SubscriptionRequests() {
     }
   };
 
-  const handleApprove = (id: string) => {
-    console.log("Approve request:", id);
+  const handleApprove = async (id: string) => {
+    try {
+      await changeSubscriptionRequestStatus(id, "approved");
+
+      setRequests((prev) =>
+        prev.map((req) =>
+          req.id === id ? { ...req, status: "approved" } : req,
+        ),
+      );
+    } catch (error) {
+      console.log(error);
+    }
   };
 
-  const handleReject = (id: string) => {
-    console.log("Reject request:", id);
-  };
+  const handleReject = async (id: string) => {
+    try {
+      await changeSubscriptionRequestStatus(id, "rejected");
 
+      setRequests((prev) =>
+        prev.map((req) =>
+          req.id === id ? { ...req, status: "rejected" } : req,
+        ),
+      );
+    } catch (error) {
+      console.log(error);
+    }
+  };
   const handleView = (request: SubscriptionRequest) => {
     setSelectedRequest(request);
     setViewModalOpen(true);

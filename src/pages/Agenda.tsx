@@ -1,161 +1,286 @@
-import { useState, useMemo } from 'react';
-import { ChevronLeft, ChevronRight, Calendar as CalendarIcon, Clock } from 'lucide-react';
-import { useLanguage } from '../contexts/LanguageContext';
-import { useSessions } from '../contexts/SessionsContext';
+import { useState, useMemo } from "react";
+import {
+  ChevronLeft,
+  ChevronRight,
+  Calendar as CalendarIcon,
+  Clock,
+} from "lucide-react";
 
-interface Session {
-  id: string;
-  studentName: string;
-  teacherName: string;
-  subject: string;
-  startTime: string;
-  endTime: string;
-  status: 'scheduled' | 'completed' | 'cancelled';
-  meetingLink?: string;
-}
-
-interface DayData {
-  date: Date;
-  sessions: Session[];
-}
+import { useLanguage } from "../contexts/LanguageContext";
+import { useAgenda } from "../hooks/useAgenda";
+import { AgendaSession } from "../types/Agenda";
+import SessionsDayModal from "../components/modals/SessionsDayModal";
 
 export default function Agenda() {
-  const { t } = useLanguage();
-  const { sessions: allSessions } = useSessions();
+  const { t, language } = useLanguage();
   const [currentDate, setCurrentDate] = useState(new Date());
+  const [selectedDate, setSelectedDate] = useState<string | null>(null);
+  const [modalOpen, setModalOpen] = useState(false);
+  const locale = language === "ar" ? "ar-EG" : "en-US";
+  // 📌 Month range
+  const startDate = useMemo(() => {
+    const d = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
+    return d.toISOString().split("T")[0];
+  }, [currentDate]);
 
+  const endDate = useMemo(() => {
+    const d = new Date(
+      currentDate.getFullYear(),
+      currentDate.getMonth() + 1,
+      0,
+    );
+    return d.toISOString().split("T")[0];
+  }, [currentDate]);
+
+  const {
+    sessions: allSessions,
+    loading,
+    error,
+  } = useAgenda(startDate, endDate);
+
+  // 📌 Group sessions by date
   const sessionsByDate = useMemo(() => {
-    const grouped: { [key: string]: Session[] } = {};
-    allSessions.forEach(session => {
-      if (session.date) {
-        const dateKey = session.date;
-        if (!grouped[dateKey]) grouped[dateKey] = [];
-        grouped[dateKey].push({
-          id: session.id,
-          studentName: session.studentName,
-          teacherName: session.teacherName,
-          subject: session.subject,
-          startTime: session.time,
-          endTime: session.endTime,
-          status: 'scheduled',
-          meetingLink: session.meetingLink
-        });
-      }
+    const grouped: Record<string, AgendaSession[]> = {};
+
+    allSessions.forEach((session) => {
+      const dateKey = session.start_time.split("T")[0];
+
+      if (!grouped[dateKey]) grouped[dateKey] = [];
+      grouped[dateKey].push(session);
     });
+
     return grouped;
   }, [allSessions]);
 
+  // 📌 Stats
+  const stats = useMemo(() => {
+    return {
+      total: allSessions.length,
+      scheduled: allSessions.filter((s) => s.status === "scheduled").length,
+      planned: allSessions.filter((s) => s.status === "planned").length,
+      cancelled: allSessions.filter((s) => s.status === "cancelled").length,
+    };
+  }, [allSessions]);
 
   const weekDays = [
-    t('sun'),
-    t('mon'),
-    t('tue'),
-    t('wed'),
-    t('thu'),
-    t('fri'),
-    t('sat')
+    t("sun"),
+    t("mon"),
+    t("tue"),
+    t("wed"),
+    t("thu"),
+    t("fri"),
+    t("sat"),
   ];
 
-  const formatDateKey = (date: Date) => {
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, '0');
-    const day = String(date.getDate()).padStart(2, '0');
-    return `${year}-${month}-${day}`;
-  };
+  const formatKey = (date: Date) => date.toISOString().split("T")[0];
 
+  // 📌 Build calendar days
   const getDaysInMonth = (date: Date) => {
     const firstDay = new Date(date.getFullYear(), date.getMonth(), 1);
     const lastDay = new Date(date.getFullYear(), date.getMonth() + 1, 0);
-    const days: (DayData | null)[] = [];
+
+    const days: (Date | null)[] = [];
+
     for (let i = 0; i < firstDay.getDay(); i++) days.push(null);
-    for (let day = 1; day <= lastDay.getDate(); day++) {
-      const currentDay = new Date(date.getFullYear(), date.getMonth(), day);
-      days.push({ date: currentDay, sessions: sessionsByDate[formatDateKey(currentDay)] || [] });
+
+    for (let d = 1; d <= lastDay.getDate(); d++) {
+      days.push(new Date(date.getFullYear(), date.getMonth(), d));
     }
+
     return days;
   };
 
-  const isToday = (date: Date) => {
-    const today = new Date();
-    return date.toDateString() === today.toDateString();
-  };
+  const isToday = (date: Date) =>
+    date.toDateString() === new Date().toDateString();
 
   const days = getDaysInMonth(currentDate);
-  const stats = {
-    total: Object.values(sessionsByDate).flat().length,
-    upcoming: Object.values(sessionsByDate).flat().filter(s => s.status === 'scheduled').length,
-    completed: Object.values(sessionsByDate).flat().filter(s => s.status === 'completed').length,
-    cancelled: Object.values(sessionsByDate).flat().filter(s => s.status === 'cancelled').length
-  };
-  const todaySessions = sessionsByDate[formatDateKey(new Date())] || [];
+
+  const todayKey = new Date().toISOString().split("T")[0];
+  const todaySessions = sessionsByDate[todayKey] || [];
+
+  // 📌 Loading
+  if (loading) {
+    return (
+      <div className="p-10 text-center text-gray-600">Loading agenda...</div>
+    );
+  }
+
+  // 📌 Error
+  if (error) {
+    return <div className="p-10 text-center text-red-500">{error}</div>;
+  }
 
   return (
     <div className="space-y-6">
+      {/* HEADER */}
       <div className="bg-primary rounded-2xl p-8 text-white flex items-center justify-between">
         <div className="text-right">
-          <h1 className="text-3xl font-bold mb-2">{t('sessionCalendar')}</h1>
-          <p className="text-blue-100">{t('sessionCalendarSubtitle')}</p>
+          <h1 className="text-3xl font-bold mb-2">{t("sessionCalendar")}</h1>
+          <p className="text-blue-100">{t("sessionCalendarSubtitle")}</p>
         </div>
-        <div className="p-4 bg-white/20 rounded-2xl"><CalendarIcon className="w-12 h-12" /></div>
+
+        <div className="p-4 bg-white/20 rounded-2xl">
+          <CalendarIcon className="w-12 h-12" />
+        </div>
       </div>
+
+      {/* STATS */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         {[
-          { label: t('totalSessions'), val: stats.total, color: 'primary' },
-          { label: t('scheduled'), val: stats.upcoming, color: 'green-500' },
-          { label: t('completed'), val: stats.completed, color: 'gray-500' },
-          { label: t('cancelled'), val: stats.cancelled, color: 'red-500' }
+          { label: t("totalSessions"), val: stats.total },
+          { label: t("scheduled"), val: stats.scheduled },
+          { label: t("planned"), val: stats.planned },
+          { label: t("cancelled"), val: stats.cancelled },
         ].map((s, i) => (
-          <div key={i} className={`bg-white rounded-xl p-6 shadow-sm border-r-4 border-${s.color}`}>
+          <div
+            key={i}
+            className="bg-white rounded-xl p-6 shadow-sm border-r-4 border-gray-200"
+          >
             <p className="text-sm text-gray-600 text-right mb-1">{s.label}</p>
-            <p className="text-3xl font-bold text-gray-900 text-right">{s.val}</p>
+            <p className="text-3xl font-bold text-gray-900 text-right">
+              {s.val}
+            </p>
           </div>
         ))}
       </div>
+
+      {/* CALENDAR + TODAY */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-2 bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+        {/* CALENDAR */}
+        <div className="lg:col-span-2 bg-white rounded-2xl shadow-sm border overflow-hidden">
+          {/* HEADER */}
           <div className="bg-primary p-6 flex items-center justify-between">
-            <button onClick={() => setCurrentDate(new Date())} className="px-4 py-2 bg-white/20 rounded-lg text-white text-sm">{t('today')}</button>
-            <h2 className="text-2xl font-bold text-white">{t([
-              'january', 'february', 'march', 'april', 'may', 'june',
-              'july', 'august', 'september', 'october', 'november', 'december'
-            ][currentDate.getMonth()])} {currentDate.getFullYear()}</h2>
-            <div className="flex gap-2">
-              <button onClick={() => setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 1))} className="p-2 bg-white/20 rounded-lg text-white"><ChevronRight className="w-5 h-5" /></button>
-              <button onClick={() => setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 1))} className="p-2 bg-white/20 rounded-lg text-white"><ChevronLeft className="w-5 h-5" /></button>
-            </div>
+            <button
+              onClick={() =>
+                setCurrentDate(
+                  new Date(
+                    currentDate.getFullYear(),
+                    currentDate.getMonth() - 1,
+                    1,
+                  ),
+                )
+              }
+              className="p-2 bg-white/20 rounded-lg text-white"
+            >
+              <ChevronRight className="w-5 h-5" />
+            </button>
+
+            <h2 className="text-xl font-bold text-white">
+              {currentDate.toLocaleString(locale, { month: "long" })}{" "}
+              {currentDate.getFullYear()}
+            </h2>
+
+            <button
+              onClick={() =>
+                setCurrentDate(
+                  new Date(
+                    currentDate.getFullYear(),
+                    currentDate.getMonth() + 1,
+                    1,
+                  ),
+                )
+              }
+              className="p-2 bg-white/20 rounded-lg text-white"
+            >
+              <ChevronLeft className="w-5 h-5" />
+            </button>
           </div>
-          <div className="grid grid-cols-7 bg-gray-50 border-b">{weekDays.map((d, i) => <div key={i} className="p-4 text-center text-sm font-semibold">{d}</div>)}</div>
-          <div className="grid grid-cols-7">
-            {days.map((d, i) => !d ? <div key={i} className="aspect-square border border-gray-100 bg-gray-50/50" /> : (
-              <div key={i} className={`aspect-square border border-gray-100 p-2 transition-colors ${isToday(d.date) ? 'bg-green-50 border-green-300' : d.sessions.length ? 'bg-primary-light' : 'hover:bg-gray-50'}`}>
-                <div className="flex items-center justify-between mb-1">
-                  <span className={`text-sm font-medium ${isToday(d.date) ? 'text-green-700 font-bold' : 'text-gray-700'}`}>{d.date.getDate()}</span>
-                </div>
-                {d.sessions.length > 0 && <div className="flex-1 flex items-center justify-center"><div className="bg-primary text-white text-xs font-bold rounded-full w-6 h-6 flex items-center justify-center">{d.sessions.length}</div></div>}
+
+          {/* WEEK DAYS */}
+          <div className="grid grid-cols-7 bg-gray-50 border-b">
+            {weekDays.map((d, i) => (
+              <div key={i} className="p-4 text-center text-sm font-semibold">
+                {d}
               </div>
             ))}
           </div>
+
+          {/* DAYS */}
+          <div className="grid grid-cols-7">
+            {days.map((d, i) =>
+              !d ? (
+                <div key={i} className="aspect-square border bg-gray-50" />
+              ) : (
+                <div
+                  key={i}
+                  className={`aspect-square border p-2 ${
+                    isToday(d)
+                      ? "bg-green-50 border-green-300"
+                      : "hover:bg-gray-50"
+                  }`}
+                >
+                  <div className="text-sm font-medium">{d.getDate()}</div>
+
+                  {/* CLICKABLE BADGE */}
+                  {sessionsByDate[formatKey(d)]?.length > 0 && (
+                    <button
+                      onClick={() => {
+                        const key = formatKey(d);
+                        setSelectedDate(key);
+                        setModalOpen(true);
+                      }}
+                      className="mt-2 flex justify-center w-full"
+                    >
+                      <div className="bg-primary text-white text-xs rounded-full w-6 h-6 flex items-center justify-center">
+                        {sessionsByDate[formatKey(d)].length}
+                      </div>
+                    </button>
+                  )}
+                </div>
+              ),
+            )}
+          </div>
         </div>
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
-          <h3 className="text-xl font-bold text-gray-900 text-right mb-6 flex items-center justify-end gap-2">
-            <span>{t('todaySessions')}</span>
+
+        {/* TODAY PANEL */}
+        <div className="bg-white rounded-2xl shadow-sm border p-6">
+          <h3 className="text-xl font-bold flex items-center justify-end gap-2 mb-6">
+            <span>{t("todaySessions")}</span>
             <Clock className="w-5 h-5 text-primary" />
           </h3>
-          {todaySessions.length === 0 ? <div className="text-center py-12"><CalendarIcon className="w-16 h-16 text-gray-300 mx-auto mb-4" /><p className="text-gray-500">{t('noSessionsToday')}</p></div> : (
+
+          {todaySessions.length === 0 ? (
+            <p className="text-center text-gray-500 py-10">
+              {t("noSessionsToday")}
+            </p>
+          ) : (
             <div className="space-y-4">
-              {todaySessions.map(s => (
-                <div key={s.id} className="bg-blue-50 border border-blue-200 rounded-xl p-4 text-right">
-                  <p className="text-xs text-gray-500">{t('studentLabel')}</p><p className="font-bold">{s.studentName}</p>
-                  <p className="text-xs text-gray-500 mt-2">{t('teacherLabel')}</p><p className="font-medium">{s.teacherName}</p>
-                  <p className="text-xs text-gray-500 mt-2">{t('subjectLabel')}</p><p className="font-medium text-primary">{s.subject}</p>
-                  <p className="text-sm font-semibold mt-2" dir="ltr">{s.startTime} - {s.endTime}</p>
-                  {s.meetingLink && <button onClick={() => window.open(s.meetingLink, '_blank')} className="w-full mt-3 bg-green-600 text-white py-2 rounded-lg text-sm">{t('joinSession')}</button>}
+              {todaySessions.map((s) => (
+                <div
+                  key={s.id}
+                  className="bg-blue-50 border rounded-xl p-4 text-right"
+                >
+                  <p className="font-bold">{s.title}</p>
+
+                  <p className="text-sm text-gray-600">
+                    {new Date(s.start_time).toLocaleTimeString()} -{" "}
+                    {new Date(s.end_time).toLocaleTimeString()}
+                  </p>
+
+                  <p className="text-xs mt-1">{s.status}</p>
+
+                  {s.link && (
+                    <button
+                      onClick={() => window.open(s.link, "_blank")}
+                      className="w-full mt-3 bg-green-600 text-white py-2 rounded-lg text-sm"
+                    >
+                      Join Session
+                    </button>
+                  )}
                 </div>
               ))}
             </div>
           )}
         </div>
       </div>
+
+      {/* MODAL */}
+      <SessionsDayModal
+        isOpen={modalOpen}
+        onClose={() => setModalOpen(false)}
+        date={selectedDate}
+        sessions={selectedDate ? sessionsByDate[selectedDate] || [] : []}
+      />
     </div>
   );
 }
