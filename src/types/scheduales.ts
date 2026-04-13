@@ -1,4 +1,4 @@
-export type ScheduleType = 'full' | 'session' | 'exam';
+export type ScheduleType = 'full' | 'half';
 
 export interface CreateSchedulePayload {
     studentId: string;
@@ -45,5 +45,86 @@ export interface CreateRecurringSchedulePayload {
     startDate: string;
     endDate: string;
     notification_Time: string;
-    type: 'full' | 'session' | 'exam';
+    type: ScheduleType;
+}
+
+// Aliases for Services
+export type CreateSessionBody = CreateSchedulePayload;
+export type CreateRecurringSessionBody = CreateRecurringSchedulePayload;
+export type UpdateSessionBody = UpdateSchedulePayload;
+
+export interface User {
+    id: string;
+    name: string;
+    email: string;
+    phone: string;
+    code_country: string;
+}
+
+export interface Student {
+    id: string;
+    user_id: string;
+    birth_date: string;
+    gender: string;
+    active: boolean;
+    createdAt: string;
+    updatedAt: string;
+    hours: number;
+    hours_attended: number;
+    hours_remaining: number;
+    planId: string | null;
+    country: string;
+    status: string;
+    user: User;
+}
+
+export interface Teacher {
+    id: string;
+    user_id: string;
+    currencyId: string;
+    hour_price: number;
+    gender: string;
+    active: boolean;
+    createdAt: string;
+    updatedAt: string;
+    roleId: string | null;
+    user: User;
+}
+
+export interface Schedule {
+    id: string;
+    teacherId: string;
+    studentId: string;
+    status: string;
+    title: string;
+    description: string;
+    type: string;
+    start_time: string;
+    end_time: string;
+    link: string;
+    notes: string | null;
+    createdAt: string;
+    updatedAt: string;
+    is_recurring: boolean;
+    day_of_week: string | null;
+    parent_recurring_id: string | null;
+    student: Student;
+    teacher: Teacher;
+}
+
+export interface Pagination {
+    page: number;
+    limit: number;
+    totalItems: number;
+    totalPages: number;
+    hasNextPage: boolean;
+}
+
+export interface GetSessionsResponse {
+    message: string;
+    status: number;
+    data: {
+        schedule: Schedule[];
+        pagination: Pagination;
+    };
 }

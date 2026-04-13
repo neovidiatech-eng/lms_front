@@ -15,7 +15,7 @@ export default function ViewTeacherModal({ isOpen, onClose, teacher }: ViewTeach
 
   if (!isOpen || !teacher) return null;
 
-  const teacherSessions = sessions.filter(s => s.teacherName === teacher.name);
+  const teacherSessions = sessions.filter(s => s.teacherName === teacher.user?.name);
   const today = new Date().toISOString().split('T')[0];
   const todaySessions = teacherSessions.filter(s => s.date === today);
   const upcomingSessions = teacherSessions.filter(s => s.date >= today);

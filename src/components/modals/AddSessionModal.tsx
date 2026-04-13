@@ -4,6 +4,8 @@ import { useLanguage } from '../../contexts/LanguageContext';
 import CustomSelect from '../ui/CustomSelect';
 import DatePickerField from '../ui/DatePickerField';
 import { SessionFormData, getSessionSchema } from '../../lib/schemas/SessionSchema';
+import { useStudents } from '../../hooks/useStudents';
+import { useTeacher } from '../../hooks/useTeacher';
 import { Controller, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 
@@ -13,11 +15,6 @@ interface AddSessionModalProps {
   onAdd: (session: SessionFormData) => void;
 }
 
-interface SubjectOption {
-  id: string;
-  name: string;
-}
-
 export default function AddSessionModal({ isOpen, onClose, onAdd }: AddSessionModalProps) {
   const { language, t } = useLanguage();
 
@@ -25,6 +22,7 @@ export default function AddSessionModal({ isOpen, onClose, onAdd }: AddSessionMo
     resolver: zodResolver(getSessionSchema(t)),
     defaultValues: {
       student: '', teacher: '', subject: '', title: '',
+      description: '', type: 'full', notification_Time: '10',
       sessionDate: '', duration: '', startTime: '', endTime: '',
       meetingLink: '', notes: ''
     }
@@ -39,15 +37,14 @@ export default function AddSessionModal({ isOpen, onClose, onAdd }: AddSessionMo
     if (!isOpen) reset();
   }, [isOpen, reset]);
 
-  const teacherSubjects: Record<string, SubjectOption[]> = {
-    teacher1: [{ id: 'quran', name: 'القرآن الكريم' }, { id: 'tajweed', name: 'التجويد' }],
-    teacher2: [{ id: 'arabic', name: 'اللغة العربية' }, { id: 'grammar', name: 'النحو والصرف' }]
-  };
+  const { data: studentsData } = useStudents();
+  const { data: teachersData } = useTeacher();
 
-  const studentPackages: Record<string, { name: string; sessionsRemaining: number; totalSessions: number }> = {
-    student1: { name: 'باقة القرآن الكريم', sessionsRemaining: 8, totalSessions: 12 },
-    student2: { name: 'باقة اللغة العربية', sessionsRemaining: 5, totalSessions: 10 }
-  };
+  const students = studentsData?.data?.students || [];
+  const teachers = teachersData?.teachers || [];
+
+  const studentOptions = students.map(s => ({ value: s.id, label: s.user.name }));
+  const teacherOptions = teachers.map(t => ({ value: t.id, label: t.user.name }));
 
   const durationPackages: Record<string, { name: string; duration: number }> = {
     '1': { name: '30 دقيقة', duration: 30 },
@@ -71,45 +68,22 @@ export default function AddSessionModal({ isOpen, onClose, onAdd }: AddSessionMo
     }
   }, [selectedDurationId, startTimeVal, setValue]);
 
+  const selectedTeacherData = teachers.find(t => t.id === selectedTeacher);
   const availableSubjects = useMemo(() => {
-    return selectedTeacher ? (teacherSubjects[selectedTeacher] || []).map((s) => ({
-      value: s.id,
-      label: s.name
+    return selectedTeacherData ? selectedTeacherData.teacherSubjects.map((ts) => ({
+      value: ts.subject.id,
+      label: language === 'ar' ? ts.subject.name_ar : ts.subject.name_en
     })) : [];
-  }, [selectedTeacher]);
+  }, [selectedTeacherData, language]);
 
-  const selectedStudentPackage = selectedStudent ? studentPackages[selectedStudent] : null;
+  const selectedStudentData = students.find(s => s.id === selectedStudent);
+  const selectedStudentPackage = selectedStudentData ? {
+    name: selectedStudentData.plan?.name || (language === 'ar' ? 'لا يوجد باقة' : 'No Package'),
+    sessionsRemaining: selectedStudentData.hours_remaining || 0,
+    totalSessions: selectedStudentData.hours || 0,
+  } : null;
 
-  const text = {
-    title: { ar: 'إضافة حصة واحدة', en: 'Add Single Session' },
-    student: { ar: 'الطالب', en: 'Student' },
-    selectStudent: { ar: 'اختر الطالب', en: 'Select Student' },
-    teacher: { ar: 'المعلم', en: 'Teacher' },
-    selectTeacher: { ar: 'اختر المعلم', en: 'Select Teacher' },
-    teacherQuestion: { ar: 'اختر المعلم أولاً', en: 'Select Teacher First' },
-    subject: { ar: 'المادة', en: 'Subject' },
-    selectSubject: { ar: 'اختر المادة', en: 'Select Subject' },
-    sessionTitle: { ar: 'العنوان', en: 'Title' },
-    sessionTitlePlaceholder: { ar: 'عنوان الحصة', en: 'Session Title' },
-    sessionDate: { ar: 'تاريخ الحصة', en: 'Session Date' },
-    description: { ar: 'الوصف', en: 'Description' },
-    descriptionPlaceholder: { ar: 'وصف الحصة', en: 'Session Description' },
-    duration: { ar: 'مدة الحصة *', en: 'Session Duration *' },
-    selectDuration: { ar: 'اختر المدة', en: 'Select Duration' },
-    startTime: { ar: 'وقت البداية', en: 'Start Time' },
-    endTime: { ar: 'وقت النهاية', en: 'End Time' },
-    meetingLink: { ar: 'رابط الاجتماع', en: 'Meeting Link' },
-    meetingLinkPlaceholder: { ar: 'https://zoom.us/...', en: 'https://zoom.us/...' },
-    notes: { ar: 'ملاحظات', en: 'Notes' },
-    notesPlaceholder: { ar: 'ملاحظات إضافية', en: 'Additional Notes' },
-    cancel: { ar: 'إلغاء', en: 'Cancel' },
-    add: { ar: 'إضافة', en: 'Add' },
-    required: { ar: '*', en: '*' },
-    packageInfo: { ar: 'تفاصيل الباقة', en: 'Package Details' },
-    packageName: { ar: 'الباقة', en: 'Package' },
-    sessionsRemaining: { ar: 'الحصص المتبقية', en: 'Sessions Remaining' },
-    totalSessions: { ar: 'إجمالي الحصص', en: 'Total Sessions' }
-  };
+
 
   const onFormSubmit = (data: SessionFormData) => {
     onAdd(data);
@@ -122,7 +96,7 @@ export default function AddSessionModal({ isOpen, onClose, onAdd }: AddSessionMo
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
       <div className="bg-white rounded-2xl shadow-xl w-full max-w-4xl max-h-[90vh]  overflow-y-auto no-scrollbar">
         <div className="sticky top-0 bg-primary border-b border-gray-100 px-6 py-4 flex items-center justify-between z-10">
-          <h2 className="text-2xl font-bold text-white">{text.title[language]}</h2>
+          <h2 className="text-2xl font-bold text-white">{t('addSingleSession_title')}</h2>
           <button onClick={onClose} className="p-2 hover:bg-gray-100 rounded-lg transition-colors">
             <X className="w-6 h-6 text-white" />
           </button>
@@ -130,7 +104,7 @@ export default function AddSessionModal({ isOpen, onClose, onAdd }: AddSessionMo
 
         <form onSubmit={handleSubmit(onFormSubmit)} className="p-6">
           <div className="space-y-6">
-            {/* الطالب والمعلم */}
+            {/* Student and Teacher */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
                 <Controller
@@ -138,14 +112,11 @@ export default function AddSessionModal({ isOpen, onClose, onAdd }: AddSessionMo
                   control={control}
                   render={({ field }) => (
                     <CustomSelect
-                      label={text.student[language]}
+                      label={t('studentLabel')}
                       value={field.value}
-                      options={[
-                        { value: 'student1', label: language === 'ar' ? 'أحمد محمد' : 'Ahmed Mohammed' },
-                        { value: 'student2', label: language === 'ar' ? 'سارة علي' : 'Sara Ali' },
-                      ]}
+                      options={studentOptions}
                       onChange={field.onChange}
-                      placeholder={text.selectStudent[language]}
+                      placeholder={t('selectStudent')}
                       className="h-[46px]"
                     />
                   )}
@@ -159,17 +130,14 @@ export default function AddSessionModal({ isOpen, onClose, onAdd }: AddSessionMo
                   control={control}
                   render={({ field }) => (
                     <CustomSelect
-                      label={text.teacher[language]}
+                      label={t('teacherLabel')}
                       value={field.value}
-                      options={[
-                        { value: 'teacher1', label: 'Ahmed Qandil' },
-                        { value: 'teacher2', label: 'Ahmed Gamal' },
-                      ]}
+                      options={teacherOptions}
                       onChange={(val) => {
                         field.onChange(val);
-                        setValue('subject', ''); // إعادة تعيين المادة عند تغيير المعلم
+                        setValue('subject', '');
                       }}
-                      placeholder={text.selectTeacher[language]}
+                      placeholder={t('selectTeacher')}
                       className="h-[46px]"
                     />
                   )}
@@ -178,39 +146,39 @@ export default function AddSessionModal({ isOpen, onClose, onAdd }: AddSessionMo
               </div>
             </div>
 
-            {/* تفاصيل الباقة */}
+            {/* Package Details */}
             {selectedStudentPackage && (
               <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
-                <h3 className="text-sm font-semibold text-blue-900 mb-3 text-right">{text.packageInfo[language]}</h3>
+                <h3 className="text-sm font-semibold text-blue-900 mb-3 text-right">{t('packageInfo')}</h3>
                 <div className="grid grid-cols-3 gap-4 text-right">
                   <div>
-                    <p className="text-xs text-blue-600 mb-1">{text.packageName[language]}</p>
+                    <p className="text-xs text-blue-600 mb-1">{t('packageName')}</p>
                     <p className="text-sm font-medium text-blue-900">{selectedStudentPackage.name}</p>
                   </div>
                   <div>
-                    <p className="text-xs text-blue-600 mb-1">{text.sessionsRemaining[language]}</p>
+                    <p className="text-xs text-blue-600 mb-1">{t('sessionsRemaining')}</p>
                     <p className="text-sm font-medium text-blue-900">{selectedStudentPackage.sessionsRemaining}</p>
                   </div>
                   <div>
-                    <p className="text-xs text-blue-600 mb-1">{text.totalSessions[language]}</p>
+                    <p className="text-xs text-blue-600 mb-1">{t('totalSessions')}</p>
                     <p className="text-sm font-medium text-blue-900">{selectedStudentPackage.totalSessions}</p>
                   </div>
                 </div>
               </div>
             )}
 
-            {/* المادة */}
+            {/* Subject */}
             <div className="space-y-2">
               <Controller
                 name="subject"
                 control={control}
                 render={({ field }) => (
                   <CustomSelect
-                    label={text.subject[language]}
+                    label={t('subjectLabel')}
                     value={field.value}
                     options={availableSubjects}
                     onChange={field.onChange}
-                    placeholder={selectedTeacher ? text.selectSubject[language] : text.teacherQuestion[language]}
+                    placeholder={selectedTeacher ? t('selectSubject') : t('teacherQuestion')}
                     className="h-[46px]"
                     disabled={!selectedTeacher}
                   />
@@ -219,11 +187,11 @@ export default function AddSessionModal({ isOpen, onClose, onAdd }: AddSessionMo
               {errors.subject && <span className="text-red-500 text-xs block text-right">{errors.subject.message}</span>}
             </div>
 
-            {/* التاريخ والعنوان */}
+            {/* Date and Title */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-2 text-right">
                 <DatePickerField
-                  label={`${text.sessionDate[language]} `}
+                  label={`${t('sessionDate')} `}
                   value={watch('sessionDate')}
                   onChange={(val) => setValue('sessionDate', val, { shouldValidate: true })}
                   error={errors.sessionDate?.message}
@@ -232,19 +200,76 @@ export default function AddSessionModal({ isOpen, onClose, onAdd }: AddSessionMo
 
               <div className="space-y-2 text-right">
                 <label className="block text-sm font-medium text-gray-700">
-                  {text.sessionTitle[language]} <span className="text-red-500">{text.required[language]}</span>
+                  {t('sessionTitleLabel')} <span className="text-red-500">*</span>
                 </label>
                 <input
                   type="text"
                   {...register('title')}
-                  placeholder={text.sessionTitlePlaceholder[language]}
+                  placeholder={t('sessionTitlePlaceholder')}
                   className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent text-right"
                 />
                 {errors.title && <span className="text-red-500 text-xs">{errors.title.message}</span>}
               </div>
             </div>
 
-            {/* المدة والوقت */}
+            {/* Description and Type */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="space-y-2 text-right">
+                <label className="block text-sm font-medium text-gray-700">
+                  {t('description')}
+                </label>
+                <textarea
+                  {...register('description')}
+                  placeholder={t('descriptionPlaceholder')}
+                  rows={2}
+                  className={`w-full px-4 py-3 border rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent text-right resize-none ${errors.description ? 'border-red-500' : 'border-gray-200'}`}
+                />
+                {errors.description && <span className="text-red-500 text-xs mt-1 block text-right">{errors.description.message}</span>}
+              </div>
+
+              <div className="space-y-2">
+                <Controller
+                  name="type"
+                  control={control}
+                  render={({ field }) => (
+                    <CustomSelect
+                      label={t('type')}
+                      value={field.value}
+                      options={[
+                        { value: 'full', label: t('full') },
+                        { value: 'half', label: t('half') },
+                      ]}
+                      onChange={field.onChange}
+                      className="h-[46px]"
+                    />
+                  )}
+                />
+                {errors.type && <span className="text-red-500 text-xs mt-1 block text-right">{errors.type.message}</span>}
+              </div>
+            </div>
+
+            {/* Notification Time */}
+            <div className="space-y-2">
+              <Controller
+                name="notification_Time"
+                control={control}
+                render={({ field }) => (
+                  <CustomSelect
+                    label={t('notificationTime')}
+                    value={field.value}
+                    options={[
+                      { value: '10', label: language === 'ar' ? '10 دقائق' : '10 min' },
+                      { value: '30', label: language === 'ar' ? '30 دقيقة' : '30 min' },
+                      { value: '60', label: language === 'ar' ? '60 دقيقة' : '60 min' },
+                    ]}
+                    onChange={field.onChange}
+                    className="h-[46px]"
+                  />
+                )}
+              />
+            </div>
+
+            {/* Duration and Time */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <div className="space-y-2">
                 <Controller
@@ -252,14 +277,14 @@ export default function AddSessionModal({ isOpen, onClose, onAdd }: AddSessionMo
                   control={control}
                   render={({ field }) => (
                     <CustomSelect
-                      label={text.duration[language]}
+                      label={t('duration')}
                       value={field.value}
                       options={Object.entries(durationPackages).map(([id, pkg]) => ({
                         value: id,
                         label: pkg.name
                       }))}
                       onChange={field.onChange}
-                      placeholder={text.selectDuration[language]}
+                      placeholder={t('selectDuration')}
                       className="h-[46px]"
                     />
                   )}
@@ -269,7 +294,7 @@ export default function AddSessionModal({ isOpen, onClose, onAdd }: AddSessionMo
 
               <div className="space-y-2 text-right">
                 <label className="block text-sm font-medium text-gray-700">
-                  {text.startTime[language]} <span className="text-red-500">{text.required[language]}</span>
+                  {t('startTime')} <span className="text-red-500">*</span>
                 </label>
                 <input
                   type="time"
@@ -281,7 +306,7 @@ export default function AddSessionModal({ isOpen, onClose, onAdd }: AddSessionMo
 
               <div className="space-y-2 text-right">
                 <label className="block text-sm font-medium text-gray-700">
-                  {text.endTime[language]} <span className="text-red-500">{text.required[language]}</span>
+                  {t('endTime')} <span className="text-red-500">*</span>
                 </label>
                 <input
                   type="time"
@@ -293,37 +318,38 @@ export default function AddSessionModal({ isOpen, onClose, onAdd }: AddSessionMo
               </div>
             </div>
 
-            {/* الرابط والملاحظات */}
+            {/* Meeting Link and Notes */}
             <div className="space-y-4">
               <div className="space-y-2 text-right">
-                <label className="block text-sm font-medium text-gray-700">{text.meetingLink[language]}</label>
+                <label className="block text-sm font-medium text-gray-700">{t('meetingLink')}</label>
                 <input
                   type="url"
                   {...register('meetingLink')}
-                  placeholder={text.meetingLinkPlaceholder[language]}
+                  placeholder="https://zoom.us/..."
                   className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent text-right"
                   dir="ltr"
                 />
               </div>
               <div className="space-y-2 text-right">
-                <label className="block text-sm font-medium text-gray-700">{text.notes[language]}</label>
+                <label className="block text-sm font-medium text-gray-700">{t('notes')}</label>
                 <textarea
                   {...register('notes')}
-                  placeholder={text.notesPlaceholder[language]}
+                  placeholder={t('notesPlaceholder')}
                   rows={3}
-                  className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent text-right resize-none"
+                  className={`w-full px-4 py-3 border rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent text-right resize-none ${errors.notes ? 'border-red-500' : 'border-gray-200'}`}
                 />
+                {errors.notes && <span className="text-red-500 text-xs mt-1 block text-right">{errors.notes.message}</span>}
               </div>
             </div>
           </div>
 
-          {/* الأزرار */}
+          {/* Buttons */}
           <div className="flex gap-3 mt-8">
             <button type="submit" className="flex-1 px-6 py-3 bg-blue-600 text-white rounded-xl transition-colors font-medium hover:bg-blue-700">
-              {text.add[language]}
+              {t('add')}
             </button>
             <button type="button" onClick={onClose} className="flex-1 px-6 py-3 border border-gray-200 text-gray-700 rounded-xl hover:bg-gray-50 transition-colors font-medium">
-              {text.cancel[language]}
+              {t('cancel')}
             </button>
           </div>
         </form>
