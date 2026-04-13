@@ -1,343 +1,217 @@
-import { useState, useMemo } from 'react';
-import { Search, Plus, Eye, Trash2, Filter } from 'lucide-react';
-import { useSessions } from '../contexts/SessionsContext';
+import { useState, useEffect } from 'react';
+import { Search, Plus, Eye, Trash2, Edit } from 'lucide-react';
 import Pagination from '../components/ui/Pagination';
-import AddSessionModal from '../components/modals/AddSessionModal';
-import AddMultipleSessionsModal, { SessionPreviewItem } from '../components/modals/AddMultipleSessionsModal';
-import ViewSessionDetailsModal from '../components/modals/ViewSessionDetailsModal';
-import EditSessionModal from '../components/modals/EditSessionModal';
-import { MultipleSessionsFormData } from '../lib/schemas/SessionSchema';
 import { useTranslation } from 'react-i18next';
 import { useLocation } from 'react-router-dom';
-import { useUpdateSchedule, useCreateSchedule, useCreateRecurringSchedule, useDeleteSchedule } from '../hooks/useSchedules';
-import { DayOfWeek } from '../types/scheduales';
-import { ContextSession, SessionDisplay, SessionGroupDetails, SingleSessionInput } from '../types/sessions';
+import { useGetSchedules, useSearchSchedules, useCreateSchedule, useCreateRecurringSchedule, useUpdateSchedule, useDeleteSchedule, useDeleteGroupedSchedule } from '../hooks/useSchedules';
+import AddSessionModal from '../components/modals/AddSessionModal';
+import AddMultipleSessionsModal from '../components/modals/AddMultipleSessionsModal';
+import ViewSessionModal from '../components/modals/ViewSessionModal';
+import EditSessionModal from '../components/modals/EditSessionModal';
+import ConfirmModal from '../components/modals/ConfirmModal';
+import { Schedule, UpdateSchedulePayload } from '../types/scheduales';
+import { SessionFormData, MultipleSessionsPayload } from '../lib/schemas/SessionSchema';
+import ErrorService from '../utils/ErrorService';
+import { useSubjects } from '../hooks/useSubjects';
+import { Subject } from '../types/subject';
 
-interface Session {
-  id: string;
-  title: string;
-  teacher: string;
-  subject: string;
-  grade: string;
-  date: string;
-  time: string;
-  duration: number;
-  status: 'scheduled' | 'completed' | 'cancelled';
-}
+
 
 export default function Sessions() {
   const { t, i18n } = useTranslation();
   const language = i18n.language.split('-')[0];
   const location = useLocation();
   const isStudent = location.pathname.includes('/student-dashboard') || location.pathname.includes('/teacher-dashboard');
-  const { sessions: allSessionsFromContext, addSession, addMultipleSessions, updateSession, deleteSession } = useSessions();
-  const { mutate: updateScheduleMutation } = useUpdateSchedule();
-  const { mutate: createScheduleMutation } = useCreateSchedule();
-  const { mutate: createRecurringScheduleMutation } = useCreateRecurringSchedule();
-  const { mutate: deleteScheduleMutation } = useDeleteSchedule();
   const [searchTerm, setSearchTerm] = useState('');
+  const [debouncedSearch, setDebouncedSearch] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
-  const [showFilters, setShowFilters] = useState(false);
   const [showAddModal, setShowAddModal] = useState(false);
   const [showAddMultipleModal, setShowAddMultipleModal] = useState(false);
   const [showViewModal, setShowViewModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
-  const [selectedSessionGroup, setSelectedSessionGroup] = useState<SessionGroupDetails | null>(null);
-  const [selectedSessionToEdit, setSelectedSessionToEdit] = useState<ContextSession | null>(null);
-  const [filters, setFilters] = useState({
-    status: '',
-    dateFrom: '',
-    dateTo: '',
-    teacher: '',
-    student: '',
-    subject: ''
-  });
-  const itemsPerPage = 7;
+  const [selectedSession, setSelectedSession] = useState<Schedule | null>(null);
+  const [groupedSessions, setGroupedSessions] = useState<Schedule[]>([]);
+  const [sessionToDelete, setSessionToDelete] = useState<Schedule | null>(null);
 
-  // Convert context sessions to display format and group by student/teacher/subject
-  const sessions = useMemo<SessionDisplay[]>(() => {
-    const grouped = new Map<string, Session>();
+  const createSchedule = useCreateSchedule();
+  const createRecurringSchedule = useCreateRecurringSchedule();
+  const updateSchedule = useUpdateSchedule();
+  const deleteSchedule = useDeleteSchedule();
+  const deleteGroupedSchedule = useDeleteGroupedSchedule();
 
-    allSessionsFromContext.forEach(session => {
-      const key = `${session.studentName}-${session.teacherName}-${session.subject}`;
-      if (!grouped.has(key)) {
-        grouped.set(key, {
-          id: key,
-          title: session.sessionName || '',
-          teacher: session.teacherName || '',
-          subject: session.studentName || '',
-          grade: session.subject || '',
-          date: session.date || '',
-          time: `${session.time || ''} - ${session.endTime || ''}`,
-          duration: 60,
-          status: 'scheduled' as const
-        });
+  const handleUpdateSession = async (id: string, data: UpdateSchedulePayload) => {
+    try {
+      await updateSchedule.mutateAsync({ id, data });
+      ErrorService.success(t('sessionUpdatedSuccess'));
+      setShowEditModal(false);
+      setSelectedSession(null);
+    } catch (error) {
+      console.error('Update session failed:', error);
+    }
+  };
+
+  const handleDeleteSession = (session: Schedule) => {
+    setSessionToDelete(session);
+  };
+
+  const confirmDelete = async () => {
+    if (!sessionToDelete) return;
+    try {
+      if (sessionToDelete.is_recurring) {
+        await deleteGroupedSchedule.mutateAsync(sessionToDelete.parent_recurring_id || sessionToDelete.id);
+      } else {
+        await deleteSchedule.mutateAsync(sessionToDelete.id);
       }
-    });
+      ErrorService.success(t('sessionDeletedSuccess'));
+      setSessionToDelete(null);
+    } catch (error) {
+      console.error('Delete session failed:', error);
+    }
+  };
 
-    return Array.from(grouped.values());
-  }, [allSessionsFromContext]);
-
-  // Build session group details from context
-  const sessionGroupDetails = useMemo(() => {
-    const grouped: Record<string, SessionGroupDetails> = {};
-    allSessionsFromContext.forEach(session => {
-      const key = `${session.studentName}-${session.teacherName}-${session.subject}`;
-
-      if (!grouped[key]) {
-        grouped[key] = {
-          id: key,
-          sessionName: session.sessionName,
-          student: session.studentName,
-          teacher: session.teacherName,
-          subject: session.subject,
-          monthYear: '',
-          duration: 60,
-          meetingLink: session.meetingLink || '',
-          sessions: [],
-          packageInfo: {
-            packageName: 'الباقة الأساسية',
-            totalSessions: 0,
-            sessionsUsed: 0,
-            sessionsRemaining: 0
-          }
-        };
-      }
-
-      grouped[key].sessions.push({
-        day: session.day,
-        date: session.date,
-        time: session.time,
-        endTime: session.endTime,
-        status: 'scheduled' as const,
-        meetingLink: session.meetingLink
+  const handleAddSession = async (data: SessionFormData) => {
+    try {
+      await createSchedule.mutateAsync({
+        studentId: data.student,
+        teacherId: data.teacher,
+        subject_id: data.subject,
+        title: data.title,
+        description: data.description || '',
+        link: data.meetingLink || '',
+        notes: data.notes || '',
+        start_time: `${data.sessionDate}T${data.startTime}:00.000Z`,
+        type: data.type,
+        notification_Time: data.notification_Time
       });
+      ErrorService.success(t('sessionAddedSuccess'));
+      setShowAddModal(false);
+    } catch (error) {
+      console.error('Add session failed:', error);
+    }
+  };
 
-      // Update package info
-      grouped[key].packageInfo.totalSessions = grouped[key].sessions.length;
-      grouped[key].packageInfo.sessionsUsed = 0;
-      grouped[key].packageInfo.sessionsRemaining = grouped[key].sessions.length;
-    });
+  const handleAddMultipleSessions = async (data: MultipleSessionsPayload) => {
+    const { formData, sessions } = data;
+    try {
+      await createRecurringSchedule.mutateAsync({
+        studentId: formData.student,
+        teacherId: formData.teacher,
+        subject_id: formData.subject,
+        title: formData.title,
+        description: formData.description || '',
+        link: formData.meetingLink || '',
+        notes: formData.notes || '',
+        startTime: sessions[0]?.time || '00:00',
+        days: data.selectedDays,
+        startDate: formData.monthYear ? `${formData.monthYear}-01` : new Date().toISOString().split('T')[0],
+        endDate: formData.monthYear ? `${formData.monthYear}-28` : new Date().toISOString().split('T')[0],
+        notification_Time: formData.notification_Time || '10',
+        type: formData.type
+      });
+      ErrorService.success(t('sessionsAddedSuccess'));
+      setShowAddMultipleModal(false);
+    } catch (error) {
+      console.error('Add multiple sessions failed:', error);
+    }
+  };
 
-    return grouped;
-  }, [allSessionsFromContext]);
+  useEffect(() => {
+    if (searchTerm.length > 2) {
+      setDebouncedSearch(searchTerm);
+    } else {
+      setDebouncedSearch("");
+    }
+  }, [searchTerm]);
 
+  const { data: allSchedules } = useGetSchedules();
+  const { data: searchResults } = useSearchSchedules(debouncedSearch);
 
-  const filteredSessions = sessions.filter(session => {
-    const title = (session.title || "").toLowerCase();
-    const teacher = (session.teacher || "").toLowerCase();
-    const subject = (session.subject || "").toLowerCase();
-    const grade = (session.grade || "").toLowerCase();
-    const search = searchTerm.toLowerCase();
+  const itemsPerPage = 5;
+  const scheduleData = (debouncedSearch ? searchResults?.data?.schedule : allSchedules?.data?.schedule) || [];
 
-    return title.includes(search) ||
-      teacher.includes(search) ||
-      subject.includes(search) ||
-      grade.includes(search);
+  const displaySchedules: Schedule[] = [];
+  const seenParents = new Set<string>();
+
+  scheduleData.forEach((schedule) => {
+    if (schedule.parent_recurring_id) {
+      if (!seenParents.has(schedule.parent_recurring_id)) {
+        seenParents.add(schedule.parent_recurring_id);
+        displaySchedules.push(schedule);
+      }
+    } else {
+      displaySchedules.push(schedule);
+    }
   });
 
-  const totalPages = Math.ceil(filteredSessions.length / itemsPerPage);
+  const totalPages = Math.ceil(displaySchedules.length / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
   const endIndex = startIndex + itemsPerPage;
-  const currentSessions = filteredSessions.slice(startIndex, endIndex);
+  const currentSessions = displaySchedules.slice(startIndex, endIndex);
 
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
   };
+  // const calculateEndTime = (startTime: string, durationMinutes: string | number) => {
+  //   if (!startTime) return '';
+  //   const [hours, minutes] = startTime.split(':').map(Number);
+  //   const date = new Date();
+  //   date.setHours(hours);
+  //   date.setMinutes(minutes + Number(durationMinutes));
+  //   return date.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', hour12: false });
+  // };
 
-  const handleAddSession = (sessionData: SingleSessionInput) => {
-    let formattedDate = sessionData.sessionDate;
+  const calculateDuration = (startTime: string, endTime: string) => {
+    if (!startTime || !endTime) return 0;
+
+    // Check if strings are valid dates (e.g. ISO strings)
+    if (startTime.includes('T') && endTime.includes('T')) {
+      const start = new Date(startTime).getTime();
+      const end = new Date(endTime).getTime();
+      if (!isNaN(start) && !isNaN(end)) {
+        return Math.max(0, Math.round((end - start) / 60000));
+      }
+    }
+
+    // Default to handling HH:MM or HH:MM:SS time format
+    const startParts = startTime.split(':').map(Number);
+    const endParts = endTime.split(':').map(Number);
+
+    if (startParts.length >= 2 && endParts.length >= 2) {
+      const startTotal = startParts[0] * 60 + startParts[1];
+      const endTotal = endParts[0] * 60 + endParts[1];
+
+      let duration = endTotal - startTotal;
+      if (duration < 0) duration += 24 * 60;
+      return duration;
+    }
+
+    return 0;
+  };
+
+  const formatDateTime = (dateString: string) => {
+    if (!dateString) return { date: '', time: '' };
     try {
-      const d = new Date(`${sessionData.sessionDate} ${sessionData.startTime}`);
-      if (!isNaN(d.getTime())) formattedDate = d.toISOString();
-    } catch (e) { }
-
-    const payload = {
-      studentId: sessionData.student || "0",
-      teacherId: sessionData.teacher || "0",
-      subject_id: sessionData.subject || "0",
-      title: sessionData.title || "Session",
-      description: "",
-      link: sessionData.meetingLink || "",
-      notes: "",
-      start_time: formattedDate,
-      type: "session" as const,
-      notification_Time: "10"
-    };
-
-    createScheduleMutation(payload, {
-      onSuccess: (res) => {
-        const dayName = new Date(sessionData.sessionDate).toLocaleDateString(
-          language === 'ar' ? 'ar-EG' : 'en-US',
-          { weekday: 'long' }
-        );
-        const newSession = {
-          id: res?.id || Date.now().toString(),
-          sessionName: sessionData.title,
-          studentName: sessionData.student,
-          teacherName: sessionData.teacher,
-          subject: sessionData.subject,
-          day: dayName,
-          date: sessionData.sessionDate,
-          time: sessionData.startTime,
-          endTime: sessionData.endTime,
-          meetingLink: sessionData.meetingLink
-        };
-        addSession(newSession);
-        console.log(newSession)
+      const date = new Date(dateString);
+      if (isNaN(date.getTime())) {
+        return { date: dateString, time: '' };
       }
-    });
-  };
-  const calculateEndTime = (startTime: string, durationMinutes: string | number) => {
-    if (!startTime) return '';
-    const [hours, minutes] = startTime.split(':').map(Number);
-    const date = new Date();
-    date.setHours(hours);
-    date.setMinutes(minutes + Number(durationMinutes));
-    return date.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', hour12: false });
-  };
-
-  const handleAddMultipleSessions = (data: {
-    formData: MultipleSessionsFormData;
-    sessions: SessionPreviewItem[]
-  }) => {
-    const { formData, sessions } = data;
-
-    const payload = {
-      studentId: formData.student || "0",
-      teacherId: formData.teacher || "0",
-      subject_id: formData.subject || "0",
-      title: formData.title || "Multiple Sessions",
-      description: "",
-      link: formData.meetingLink || "",
-      notes: "",
-      startTime: sessions[0]?.time || "",
-      days: sessions.map(s => s.day as DayOfWeek),
-      startDate: sessions[0]?.date || "",
-      endDate: sessions[sessions.length - 1]?.date || "",
-      notification_Time: "10",
-      type: "session" as const
-    };
-
-    createRecurringScheduleMutation(payload, {
-      onSuccess: () => {
-        const newSessions = sessions.map((session, index) => ({
-          id: `${Date.now()}-${index}`,
-          sessionName: formData.title,
-          studentName: formData.student,
-          teacherName: formData.teacher,
-          subject: formData.subject,
-          day: session.day,
-          date: session.date,
-          time: session.time,
-          endTime: calculateEndTime(session.time, formData.duration),
-          meetingLink: formData.meetingLink
-        }));
-
-        addMultipleSessions(newSessions);
-        setShowAddMultipleModal(false);
-        console.log(newSessions);
-      }
-    });
-  };
-
-  const handleViewSession = (sessionId: string) => {
-    const groupDetails = sessionGroupDetails[sessionId as keyof typeof sessionGroupDetails];
-    if (groupDetails) {
-      setSelectedSessionGroup(groupDetails);
-      setShowViewModal(true);
-    }
-  };
-
-  const handleDeleteSession = (sessionId: string) => {
-    if (window.confirm(t('deleteConfirmSession'))) {
-      const sessionsToDelete = allSessionsFromContext.filter(s => {
-        const key = `${s.studentName}-${s.teacherName}-${s.subject}`;
-        return key === sessionId;
+      const formattedDate = date.toLocaleDateString(language === 'ar' ? 'ar-EG' : 'en-US', {
+        day: 'numeric',
+        month: 'long',
+        year: 'numeric'
       });
-      const realSessionId = sessionsToDelete[0]?.id || sessionId;
-
-      deleteScheduleMutation(realSessionId, {
-        onSuccess: () => {
-          sessionsToDelete.forEach(session => {
-            deleteSession(session.id);
-          });
-        }
+      const formattedTime = date.toLocaleTimeString(language === 'ar' ? 'ar-EG' : 'en-US', {
+        hour: '2-digit',
+        minute: '2-digit'
       });
-    }
-  };
-
-  const handleEditSession = (sessionId: string, sessionIndex: number) => {
-    const groupDetails = sessionGroupDetails[sessionId as keyof typeof sessionGroupDetails];
-    if (groupDetails && groupDetails.sessions[sessionIndex]) {
-      const sessionToEdit = groupDetails.sessions[sessionIndex];
-      setSelectedSessionToEdit({
-        id: sessionId,
-        sessionIndex: sessionIndex,
-        sessionName: groupDetails.sessionName,
-        studentName: groupDetails.student,
-        teacherName: groupDetails.teacher,
-        subject: groupDetails.subject,
-        ...sessionToEdit
-      });
-      setShowEditModal(true);
-    }
-  };
-
-  const handleSaveEditedSession = (updatedSession: ContextSession) => {
-    // Find the actual session in context and update it
-    const sessionInContext = allSessionsFromContext.find(s =>
-      s.studentName === updatedSession.studentName &&
-      s.teacherName === updatedSession.teacherName &&
-      s.subject === updatedSession.subject &&
-      s.date === updatedSession.date
-    );
-
-    let formattedDate = updatedSession.date;
-    try {
-      const d = new Date(`${updatedSession.date} ${updatedSession.time}`);
-      if (!isNaN(d.getTime())) {
-        formattedDate = d.toISOString();
-      }
-    } catch (e) { }
-
-    const sessionDataToUpdate = {
-      title: updatedSession.sessionName || "",
-      description: "",
-      link: updatedSession.meetingLink || "",
-      notes: "",
-      status: "planned",
-      start_time: formattedDate,
-      type: "session" as const,
-      notification_Time: "10"
-    };
-
-    if (sessionInContext) {
-      updateScheduleMutation({ id: sessionInContext.id, data: sessionDataToUpdate }, {
-        onSuccess: () => {
-          updateSession(sessionInContext.id, {
-            day: updatedSession.day,
-            date: updatedSession.date,
-            time: updatedSession.time,
-            endTime: updatedSession.endTime,
-            meetingLink: updatedSession.meetingLink
-          });
-          alert(t('changesSavedSuccess'));
-        }
-      });
-    }
-  };
-
-  const handleJoinSession = (sessionId: string, sessionIndex: number) => {
-    console.log('Join session:', sessionId, 'index:', sessionIndex);
-    const groupDetails = sessionGroupDetails[sessionId as keyof typeof sessionGroupDetails];
-    if (groupDetails && groupDetails.meetingLink) {
-      window.open(groupDetails.meetingLink, '_blank');
+      return { date: formattedDate, time: formattedTime };
+    } catch (e) {
+      return { date: dateString, time: '' };
     }
   };
 
   const getStatusStyle = (status: string) => {
-    switch (status) {
+    switch (status?.toLowerCase()) {
       case 'scheduled':
         return 'bg-blue-50 text-blue-700 border-blue-200';
       case 'completed':
@@ -349,6 +223,16 @@ export default function Sessions() {
     }
   };
 
+  const { data: subjects } = useSubjects();
+  const dynamicsubjects = subjects?.subjects || [];
+
+  const getSubjectName = (subId: string) => {
+    const subject = dynamicsubjects.find((s: Subject) => s.id === subId);
+    return subject ? subject.name_ar : "subject"
+  };
+
+
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -358,16 +242,10 @@ export default function Sessions() {
       </div>
 
       <div className="bg-white rounded-2xl shadow-sm border border-gray-100">
-        <div className="p-6 border-b border-gray-100 space-y-4">
-          <div className="flex items-center gap-3">
-            <button
-              onClick={() => setShowFilters(!showFilters)}
-              className="flex items-center gap-2 px-4 py-2.5 border border-gray-200 rounded-xl text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
-            >
-              <Filter className="w-4 h-4" />
-              {t('filters')}
-            </button>
-            <div className="flex-1 relative">
+        <div className="p-6 border-b border-gray-100">
+          <div className="flex flex-col md:flex-row items-center gap-3">
+
+            <div className="flex-1 w-full relative">
               <Search className={`absolute ${language === 'ar' ? 'right-4' : 'left-4'} top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5`} />
               <input
                 type="text"
@@ -377,112 +255,26 @@ export default function Sessions() {
                 className={`w-full ${language === 'ar' ? 'pr-12 text-right' : 'pl-12'} py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent`}
               />
             </div>
+
             {!isStudent && (
-              <>
+              <div className="flex items-center gap-3 w-full md:w-auto">
                 <button
                   onClick={() => setShowAddModal(true)}
-                  className="flex items-center gap-2 px-6 py-3 btn-primary text-white rounded-xl transition-colors font-medium"
+                  className="flex flex-1 md:flex-none items-center justify-center gap-2 px-6 py-3 btn-primary text-white rounded-xl transition-colors font-medium whitespace-nowrap"
                 >
                   <Plus className="w-5 h-5" />
                   {t('singleSession')}
                 </button>
                 <button
                   onClick={() => setShowAddMultipleModal(true)}
-                  className="flex items-center gap-2 px-6 py-3 btn-primary text-white rounded-xl transition-colors font-medium"
+                  className="flex flex-1 md:flex-none items-center justify-center gap-2 px-6 py-3 btn-primary text-white rounded-xl transition-colors font-medium whitespace-nowrap"
                 >
                   <Plus className="w-5 h-5" />
                   {t('multipleSessions')}
                 </button>
-              </>
+              </div>
             )}
           </div>
-
-          {showFilters && (
-            <div className="grid grid-cols-3 gap-4 pt-4 border-t border-gray-100">
-              <div className="space-y-2">
-                <label className="block text-sm font-medium text-gray-700 text-right">
-                  {t('status')}
-                </label>
-                <select
-                  value={filters.status}
-                  onChange={(e) => setFilters({ ...filters, status: e.target.value })}
-                  className="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent text-right"
-                >
-                  <option value="">{t('all')}</option>
-                  <option value="scheduled">{t('scheduled')}</option>
-                  <option value="completed">{t('completed')}</option>
-                  <option value="cancelled">{t('cancelled')}</option>
-                </select>
-              </div>
-
-              <div className="space-y-2">
-                <label className="block text-sm font-medium text-gray-700 text-right">
-                  {t('fromDate')}
-                </label>
-                <input
-                  type="date"
-                  value={filters.dateFrom}
-                  onChange={(e) => setFilters({ ...filters, dateFrom: e.target.value })}
-                  className="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent text-right"
-                />
-              </div>
-
-              <div className="space-y-2">
-                <label className="block text-sm font-medium text-gray-700 text-right">
-                  {t('toDate')}
-                </label>
-                <input
-                  type="date"
-                  value={filters.dateTo}
-                  onChange={(e) => setFilters({ ...filters, dateTo: e.target.value })}
-                  className="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent text-right"
-                />
-              </div>
-
-              <div className="space-y-2">
-                <label className="block text-sm font-medium text-gray-700 text-right">
-                  {t('filterTeacher')}
-                </label>
-                <select
-                  value={filters.teacher}
-                  onChange={(e) => setFilters({ ...filters, teacher: e.target.value })}
-                  className="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent text-right"
-                >
-                  <option value="">{t('all')}</option>
-                  <option value="Ahmed Qandil">Ahmed Qandil</option>
-                  <option value="Ahmed Gamal">Ahmed Gamal</option>
-                </select>
-              </div>
-
-              <div className="space-y-2">
-                <label className="block text-sm font-medium text-gray-700 text-right">
-                  {t('filterStudent')}
-                </label>
-                <select
-                  value={filters.student}
-                  onChange={(e) => setFilters({ ...filters, student: e.target.value })}
-                  className="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent text-right"
-                >
-                  <option value="">{t('all')}</option>
-                </select>
-              </div>
-
-              <div className="space-y-2">
-                <label className="block text-sm font-medium text-gray-700 text-right">
-                  {t('filterSubject')}
-                </label>
-                <select
-                  value={filters.subject}
-                  onChange={(e) => setFilters({ ...filters, subject: e.target.value })}
-                  className="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent text-right"
-                >
-                  <option value="">{t('all')}</option>
-                  <option value="القرآن الكريم">القرآن الكريم</option>
-                  <option value="اللغة العربية">اللغة العربية</option>
-                </select>
-              </div>
-            </div>
-          )}
         </div>
 
         <div className="overflow-x-auto">
@@ -505,42 +297,68 @@ export default function Sessions() {
                   <td className="px-6 py-4">
                     <span className="font-medium text-gray-900">{session.title}</span>
                   </td>
-                  <td className="px-6 py-4 text-gray-700 text-right">{session.teacher}</td>
-                  <td className="px-6 py-4 text-gray-700 text-right">{session.subject}</td>
+                  <td className="px-6 py-4 text-gray-700 text-right">{session.student.user.name}</td>
+                  <td className="px-6 py-4 text-gray-700 text-right">{session.teacher.user.name}</td>
                   <td className="px-6 py-4 text-right">
-                    <span className="text-primary font-medium">{session.grade}</span>
+                    <span className="text-primary font-medium">    {getSubjectName(session.subjectId)}</span>
                   </td>
                   <td className="px-6 py-4 text-gray-700 text-right">
-                    <div className="flex flex-col gap-1">
-                      <span>{session.date}</span>
-                      <span className="text-sm text-gray-500">{session.time}</span>
-                    </div>
+                    {(() => {
+                      const { date, time } = formatDateTime(session.start_time);
+                      return (
+                        <div className="flex flex-col gap-1">
+                          <span className="font-medium text-gray-900">{date}</span>
+                          <div className="flex items-center gap-2">
+                            {time && <span className="text-sm text-gray-500" dir="ltr">{time}</span>}
+                          </div>
+                        </div>
+                      );
+                    })()}
                   </td>
                   <td className="px-6 py-4 text-gray-700 text-right">
-                    {session.duration} {t('minutes')}
+                    {calculateDuration(session.start_time, session.end_time)} {t('minutes')}
                   </td>
                   <td className="px-6 py-4 text-right">
                     <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium border ${getStatusStyle(session.status)}`}>
-                      {t(session.status)}
+                      {t(session.status?.toLowerCase() || '')}
                     </span>
                   </td>
                   <td className="px-6 py-4">
                     <div className="flex items-center gap-2 justify-end">
                       <button
-                        onClick={() => handleViewSession(session.id)}
+                        onClick={() => {
+                          const grouped = session.parent_recurring_id
+                            ? scheduleData.filter((s: Schedule) => s.parent_recurring_id === session.parent_recurring_id)
+                            : [session];
+                          setGroupedSessions(grouped);
+                          setSelectedSession(session);
+                          setShowViewModal(true);
+                        }}
                         className="p-2 icon-btn-primary rounded-lg transition-colors"
                         title={t('view')}
                       >
                         <Eye className="w-4 h-4" />
                       </button>
                       {!isStudent && (
-                        <button
-                          onClick={() => handleDeleteSession(session.id)}
-                          className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-                          title={t('delete')}
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </button>
+                        <>
+                          <button
+                            onClick={() => {
+                              setSelectedSession(session);
+                              setShowEditModal(true);
+                            }}
+                            className="p-2 text-amber-600 hover:bg-amber-50 rounded-lg transition-colors"
+                            title={t('edit')}
+                          >
+                            <Edit className="w-4 h-4" />
+                          </button>
+                          <button
+                            onClick={() => handleDeleteSession(session)}
+                            className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                            title={t('delete')}
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        </>
                       )}
                     </div>
                   </td>
@@ -553,12 +371,11 @@ export default function Sessions() {
         <Pagination
           currentPage={currentPage}
           totalPages={totalPages}
-          totalItems={filteredSessions.length}
+          totalItems={scheduleData.length}
           itemsPerPage={itemsPerPage}
           onPageChange={handlePageChange}
         />
       </div>
-
       <AddSessionModal
         isOpen={showAddModal}
         onClose={() => setShowAddModal(false)}
@@ -571,20 +388,24 @@ export default function Sessions() {
         onAdd={handleAddMultipleSessions}
       />
 
-      <ViewSessionDetailsModal
+      <ViewSessionModal
         isOpen={showViewModal}
-        onClose={() => setShowViewModal(false)}
-        sessionGroup={selectedSessionGroup}
-        onEditSession={handleEditSession}
-        onJoinSession={handleJoinSession}
-        readOnly={isStudent}
+        onClose={() => { setShowViewModal(false); setSelectedSession(null); setGroupedSessions([]); }}
+        session={selectedSession}
+        groupedSessions={groupedSessions}
       />
 
       <EditSessionModal
         isOpen={showEditModal}
-        onClose={() => setShowEditModal(false)}
-        session={selectedSessionToEdit}
-        onSave={handleSaveEditedSession}
+        onClose={() => { setShowEditModal(false); setSelectedSession(null); }}
+        session={selectedSession}
+        onSave={handleUpdateSession}
+      />
+
+      <ConfirmModal
+        isOpen={!!sessionToDelete}
+        onClose={() => setSessionToDelete(null)}
+        onConfirm={confirmDelete}
       />
     </div>
   );

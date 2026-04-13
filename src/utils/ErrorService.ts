@@ -40,8 +40,10 @@ class ErrorService {
     if (error?.response?.data) {
       const data = error.response.data;
       if (typeof data === 'string') return data;
-      if (data.message) return data.message;
-      if (data.error) return data.error;
+      if (data.errors && Array.isArray(data.errors)) {
+        const detail = data.errors.join(' | ');
+        return data.message ? `${data.message}: ${detail}` : detail;
+      }
     }
 
     if (error?.message) return error.message;

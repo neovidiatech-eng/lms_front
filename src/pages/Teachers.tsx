@@ -8,7 +8,7 @@ import Pagination from '../components/ui/Pagination';
 import CustomSelect from '../components/ui/CustomSelect';
 import { useTranslation } from 'react-i18next';
 import { useTeacher, useDeleteTeacher, useCreateTeacher, useUpdateTeacher } from '../hooks/useTeacher';
-import { Teacher, CreateTeacherInput } from '../types/teachers';
+import { CreateTeacherInput, Teacher } from '../types/teachers';
 import { TeacherFormData } from '../lib/schemas/TeacherSchema';
 import { useCurrency } from '../hooks/useCurrency';
 import ErrorService from '../utils/ErrorService';
@@ -28,9 +28,6 @@ export default function Teachers() {
   const [debouncedSearch, setDebouncedSearch] = useState('');
 
   useEffect(() => {
-    // const timer = setTimeout(() => {
-    //   setDebouncedSearch(searchTerm);
-    // }, 1000);
     if (searchTerm.length > 3) {
       setDebouncedSearch(searchTerm);
     } else if (searchTerm.length === 0) {
@@ -99,9 +96,9 @@ export default function Teachers() {
     return teachers.filter(teacher => {
       if (!teacher) return false;
 
-      const name = teacher.name?.toLowerCase() || '';
-      const email = teacher.email?.toLowerCase() || '';
-      const phone = teacher.phone || '';
+      const name = teacher.user?.name?.toLowerCase() || '';
+      const email = teacher.user?.email?.toLowerCase() || '';
+      const phone = teacher.user?.phone || '';
       const search = searchTerm.toLowerCase();
 
       const matchesSearch =
@@ -159,7 +156,7 @@ export default function Teachers() {
       setIsAddModalOpen(false);
     } catch (error) {
       console.error('Error adding teacher:', error);
-      ErrorService.error(t('teacher Added Error'));
+      // Detailed error is handled by axios interceptor
     }
   };
 
@@ -173,7 +170,7 @@ export default function Teachers() {
       setSelectedTeacher(null);
     } catch (error) {
       console.error('Error updating teacher:', error);
-      ErrorService.error(t('teacher Updated Error'));
+      // Detailed error is handled by axios interceptor
     }
   };
 
@@ -184,7 +181,7 @@ export default function Teachers() {
         ErrorService.success(t('teacher Deleted Success'));
       } catch (error) {
         console.error('Error deleting teacher:', error);
-        ErrorService.error(t('teacher Deleted Error'));
+        // Detailed error is handled by axios interceptor
       }
     }
   };
@@ -308,24 +305,24 @@ export default function Teachers() {
                 <tr key={teacher.id} className="hover:bg-gray-50 transition-colors">
                   <td className="px-6 py-4">
                     <div className="flex items-center gap-3 justify-end">
-                      <span className="text-sm font-medium text-gray-900">{teacher.name || '-'}</span>
+                      <span className="text-sm font-medium text-gray-900">{teacher.user?.name || '-'}</span>
                       <div className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center flex-shrink-0">
                         <Users className="w-5 h-5 text-gray-500" />
                       </div>
                     </div>
                   </td>
                   <td className="px-6 py-4">
-                    <span className="text-sm text-gray-600">{teacher.email || '-'}</span>
+                    <span className="text-sm text-gray-600">{teacher.user?.email || '-'}</span>
                   </td>
                   <td className="px-6 py-4">
                     <WhatsAppPhone
-                      phone={`${teacher.code_country || ''} ${teacher.phone || ''}`.trim()}
+                      phone={`${teacher.user?.code_country || ''} ${teacher.user?.phone || ''}`.trim()}
                       className="text-sm text-green-600 hover:text-green-700"
                     />
                   </td>
                   <td className="px-6 py-4">
                     <span className="text-sm font-medium text-gray-900">
-                      {currencyLookup[teacher.currency_id || (teacher as any).currencyId] || teacher.currency_id || (teacher as any).currencyId || '-'} {teacher.hour_price?.toFixed(2) ?? '0.00'}
+                      {currencyLookup[teacher.currencyId] || teacher.currencyId || '-'} {teacher.hour_price?.toFixed(2) ?? '0.00'}
                     </span>
                   </td>
                   <td className="px-6 py-4">

@@ -1,27 +1,15 @@
-import React, { lazy } from 'react';
-import { 
-  BarChart3, 
+import { lazy } from 'react';
+import {
+  BarChart3,
   BookOpen,
   FileText,
   User,
   MessageSquare,
   Send,
-  Users
+  Users,
+  Clock
 } from 'lucide-react';
-
-export interface TeacherRouteConfig {
-  id: string;
-  label: string;
-  icon: React.ElementType;
-  path?: string;
-  element?: React.ReactNode;
-  subItems?: {
-    id: string;
-    label: string;
-    path: string;
-    element: React.ReactNode;
-  }[];
-}
+import { RouteConfig } from '../../components/constants/dashboardRoutes';
 
 // Reuse dashboard components for content viewing
 const DashboardOverview = lazy(() => import('./TeacherDashboardHome'));
@@ -34,8 +22,9 @@ const AssignmentsPage = lazy(() => import('../../pages/Assignments'));
 const StudentsPage = lazy(() => import('./TeacherStudents'));
 const ChatPage = lazy(() => import('./TeacherChat'));
 const RequestsPage = lazy(() => import('./TeacherRequests'));
+const AvailabilityPage = lazy(() => import('../../pages/TeacherAvailability'));
 
-export const teacherDashboardRoutes: TeacherRouteConfig[] = [
+export const teacherDashboardRoutes: RouteConfig[] = [
   {
     id: 'dashboard',
     label: 'sidebar_dashboard',
@@ -51,9 +40,17 @@ export const teacherDashboardRoutes: TeacherRouteConfig[] = [
     element: <LMSCoursesPage />,
   },
   {
+    id: 'teacher-availability',
+    label: 'sidebar_available',
+    icon: Clock,
+    path: 'availability',
+    element: <AvailabilityPage />,
+  },
+  {
     id: 'academic-content',
     label: 'sidebar_academic_content',
     icon: FileText,
+    path: 'content',
     subItems: [
       {
         id: 'sessions',

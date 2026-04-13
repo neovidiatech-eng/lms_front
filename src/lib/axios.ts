@@ -56,7 +56,7 @@ api.interceptors.response.use(
         } else if (status >= 500) {
             ErrorService.error("A server error occurred. Please try again later.");
         } else {
-            // Log the error and show generic message if it's not a handled status
+            // Log the error
             console.error("API Error:", error);
             ErrorService.error(message);
         }

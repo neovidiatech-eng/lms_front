@@ -5,7 +5,11 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useLanguage } from '../../contexts/LanguageContext';
 import CustomSelect from '../ui/CustomSelect';
 import DatePickerField from '../ui/DatePickerField';
-import { getMultipleSessionsSchema, MultipleSessionsFormData } from '../../lib/schemas/SessionSchema';
+import { useTeacher } from '../../hooks/useTeacher';
+import { useStudents } from '../../hooks/useStudents';
+import { getMultipleSessionsSchema, MultipleSessionsFormData, MultipleSessionsPayload } from '../../lib/schemas/SessionSchema';
+import { DayOfWeek } from '../../types/scheduales';
+
 export interface SessionPreviewItem {
   date: string;
   day: string;
@@ -14,7 +18,7 @@ export interface SessionPreviewItem {
 interface AddMultipleSessionsModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onAdd: (data: { formData: MultipleSessionsFormData; sessions: SessionPreviewItem[] }) => void;
+  onAdd: (data: MultipleSessionsPayload) => void;
 }
 
 export default function AddMultipleSessionsModal({ isOpen, onClose, onAdd }: AddMultipleSessionsModalProps) {
@@ -36,7 +40,11 @@ export default function AddMultipleSessionsModal({ isOpen, onClose, onAdd }: Add
       teacher: '',
       subject: '',
       monthYear: '',
-      meetingLink: ''
+      meetingLink: '',
+      description: '',
+      type: 'full',
+      notification_Time: '10',
+      notes: ''
     }
   });
 
@@ -59,21 +67,29 @@ export default function AddMultipleSessionsModal({ isOpen, onClose, onAdd }: Add
     weekDaysData.map(d => ({ ...d, checked: false, time: '10:00' }))
   );
 
-  const teacherSubjects: Record<string, { id: string; name: string }[]> = {
-    teacher1: [{ id: 'quran', name: language === 'ar' ? 'القرآن الكريم' : 'Quran' }, { id: 'tajweed', name: language === 'ar' ? 'التجويد' : 'Tajweed' }],
-    teacher2: [{ id: 'arabic', name: language === 'ar' ? 'اللغة العربية' : 'Arabic' }, { id: 'grammar', name: language === 'ar' ? 'النحو والصرف' : 'Grammar' }]
-  };
+  const { data: studentsData } = useStudents();
+  const { data: teachersData } = useTeacher();
 
-  const availableSubjects = useMemo(() =>
-    watchedTeacher ? teacherSubjects[watchedTeacher]?.map(s => ({ value: s.id, label: s.name })) || [] : []
-    , [watchedTeacher, language]);
+  const students = studentsData?.data?.students || [];
+  const teachers = teachersData?.teachers || [];
 
-  const studentPackages: Record<string, { name: string; sessionsRemaining: number; totalSessions: number }> = {
-    student1: { name: language === 'ar' ? 'باقة القرآن الكريم' : 'Quran Package', sessionsRemaining: 8, totalSessions: 12 },
-    student2: { name: language === 'ar' ? 'باقة اللغة العربية' : 'Arabic Package', sessionsRemaining: 5, totalSessions: 10 }
-  };
+  const studentOptions = students.map(s => ({ value: s.id, label: s.user.name }));
+  const teacherOptions = teachers.map(t => ({ value: t.id, label: t.user.name }));
 
-  const selectedStudentPackage = watchedStudent ? studentPackages[watchedStudent] : null;
+  const selectedTeacherData = teachers.find(t => t.id === watchedTeacher);
+  const availableSubjects = useMemo(() => {
+    return selectedTeacherData ? selectedTeacherData.teacherSubjects.map((ts) => ({
+      value: ts.subject.id,
+      label: language === 'ar' ? ts.subject.name_ar : ts.subject.name_en
+    })) : [];
+  }, [selectedTeacherData, language]);
+
+  const selectedStudentData = students.find(s => s.id === watchedStudent);
+  const selectedStudentPackage = selectedStudentData ? {
+    name: selectedStudentData.plan?.name || (language === 'ar' ? 'لا يوجد باقة' : 'No Package'),
+    sessionsRemaining: selectedStudentData.hours_remaining || 0,
+    totalSessions: selectedStudentData.hours || 0,
+  } : null;
 
   const sessionPreview = useMemo(() => {
     if (!watchedMonthYear) return [];
@@ -120,7 +136,15 @@ export default function AddMultipleSessionsModal({ isOpen, onClose, onAdd }: Add
       return;
     }
 
-    onAdd({ formData: data, sessions: sessionPreview });
+    const selectedDays = weekDays
+      .filter(d => d.checked)
+      .map(d => (d.id.charAt(0).toUpperCase() + d.id.slice(1)) as DayOfWeek);
+
+    onAdd({
+      formData: data,
+      sessions: sessionPreview,
+      selectedDays
+    });
     reset();
     setWeekDays(prev => prev.map(d => ({ ...d, checked: false })));
     onClose();
@@ -154,7 +178,7 @@ export default function AddMultipleSessionsModal({ isOpen, onClose, onAdd }: Add
               render={({ field }) => (
                 <CustomSelect
                   label={t('studentLabel')}
-                  options={[{ value: 'student1', label: language === 'ar' ? 'أحمد محمد' : 'Ahmed Mohamed' }, { value: 'student2', label: language === 'ar' ? 'سارة علي' : 'Sara Ali' }]}
+                  options={studentOptions}
                   value={field.value}
                   onChange={field.onChange}
                   error={errors.student?.message}
@@ -168,7 +192,7 @@ export default function AddMultipleSessionsModal({ isOpen, onClose, onAdd }: Add
               render={({ field }) => (
                 <CustomSelect
                   label={t('teacherLabel')}
-                  options={[{ value: 'teacher1', label: 'Ahmed Qandil' }, { value: 'teacher2', label: 'Ahmed Gamal' }]}
+                  options={teacherOptions}
                   value={field.value}
                   onChange={(val) => {
                     field.onChange(val);
@@ -209,6 +233,73 @@ export default function AddMultipleSessionsModal({ isOpen, onClose, onAdd }: Add
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-right">
             <div>
               <Controller
+                name="type"
+                control={control}
+                render={({ field }) => (
+                  <CustomSelect
+                    label={t('type')}
+                    value={field.value}
+                    options={[
+                      { value: 'full', label: t('full') },
+                      { value: 'half', label: t('half') },
+                    ]}
+                    onChange={field.onChange}
+                  />
+                )}
+              />
+              {errors.type && <p className="text-red-500 text-xs mt-1">{errors.type.message}</p>}
+            </div>
+
+            <div>
+              <Controller
+                name="notification_Time"
+                control={control}
+                render={({ field }) => (
+                  <CustomSelect
+                    label={t('notificationTime')}
+                    value={field.value}
+                    options={[
+                      { value: '10', label: language === 'ar' ? '10 دقائق' : '10 min' },
+                      { value: '30', label: language === 'ar' ? '30 دقيقة' : '30 min' },
+                      { value: '60', label: language === 'ar' ? '60 دقيقة' : '60 min' },
+                    ]}
+                    onChange={field.onChange}
+                  />
+                )}
+              />
+            </div>
+
+            <div className="text-right">
+              <label className="block text-sm font-medium mb-2">{t('addMultipleSessions_meetingLink')}</label>
+              <input type="url" {...register('meetingLink')} className="w-full px-4 py-3 border border-gray-200 rounded-xl text-left" dir="ltr" />
+              {errors.meetingLink && <p className="text-red-500 text-xs mt-1">{errors.meetingLink.message}</p>}
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-right">
+            <div>
+              <label className="block text-sm font-medium mb-2">{t('description') || (language === 'ar' ? 'الوصف' : 'Description')}</label>
+              <textarea
+                {...register('description')}
+                rows={2}
+                className={`w-full px-4 py-3 border rounded-xl text-right resize-none ${errors.description ? 'border-red-500' : 'border-gray-200'}`}
+              />
+              {errors.description && <p className="text-red-500 text-xs mt-1">{errors.description.message}</p>}
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-2">{t('notes') || (language === 'ar' ? 'الملاحظات' : 'Notes')} *</label>
+              <textarea
+                {...register('notes')}
+                rows={2}
+                className={`w-full px-4 py-3 border rounded-xl text-right resize-none ${errors.notes ? 'border-red-500' : 'border-gray-200'}`}
+              />
+              {errors.notes && <p className="text-red-500 text-xs mt-1">{errors.notes.message}</p>}
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-right">
+            <div>
+              <Controller
                 name="monthYear"
                 control={control}
                 render={({ field }) => (
@@ -222,29 +313,6 @@ export default function AddMultipleSessionsModal({ isOpen, onClose, onAdd }: Add
                   />
                 )}
               />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium mb-2">{t('addMultipleSessions_sessionDuration')} *</label>
-              <Controller
-                name="duration"
-                control={control}
-                render={({ field }) => (
-                  <CustomSelect
-                    {...field}
-                    options={[
-                      { value: '30', label: t('addMultipleSessions_30min') },
-                      { value: '60', label: t('addMultipleSessions_60min') }
-                    ]}
-                  />
-                )}
-              />
-            </div>
-
-            <div className="text-right">
-              <label className="block text-sm font-medium mb-2">{t('addMultipleSessions_meetingLink')}</label>
-              <input type="url" {...register('meetingLink')} className="w-full px-4 py-3 border border-gray-200 rounded-xl text-left" dir="ltr" />
-              {errors.meetingLink && <p className="text-red-500 text-xs mt-1">{errors.meetingLink.message}</p>}
             </div>
           </div>
 

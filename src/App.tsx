@@ -10,7 +10,7 @@ import ErrorService from './utils/ErrorService';
 import LanguageSwitcher from './components/ui/LanguageSwitcher';
 import { dashboardRoutes } from './components/constants/dashboardRoutes';
 import { studentDashboardRoutes } from './pages/StudentDashboard/studentDashboardRoutes';
-import { teacherDashboardRoutes } from './pages/TeacherDashboard/teacherDashboardRoutes';
+import { teacherDashboardRoutes } from './pages/TeacherDashboard/teacherDashboardRoutes.tsx';
 import { GoogleOAuthProvider } from '@react-oauth/google';
 import { googleClientId } from './components/constants';
 
@@ -64,6 +64,13 @@ function App() {
     setIsAuthenticated(true);
   };
 
+  const getRedirectPath = () => {
+    const role = localStorage.getItem("role");
+    if (role === "teacher") return "/teacher-dashboard";
+    if (role === "student") return "/student-dashboard";
+    return "/dashboard";
+  };
+
 
   return (
     <ErrorBoundary>
@@ -75,7 +82,7 @@ function App() {
                 {!isAuthenticated && <LanguageSwitcher />}
                 <Suspense fallback={<LoadingFallback />}>
                   <Routes>
-                    <Route element={!isAuthenticated ? <AuthLayout /> : <Navigate to="/dashboard" replace />}>
+                    <Route element={!isAuthenticated ? <AuthLayout /> : <Navigate to={getRedirectPath()} replace />}>
                       <Route path="/login" element={<Login onLoginSuccess={handleLogin} />} />
                       <Route path="/register" element={<Register onRegisterSuccess={handleLogin} />} />
                       <Route path="/forgot-password" element={<ForgotPassword />} />
