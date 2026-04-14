@@ -16,7 +16,16 @@ export const searchStudent = async (search: string): Promise<StudentsFetchRespon
             return {
                 message: "",
                 status: 404,
-                data: []
+                data: {
+                    students: [],
+                    pagination: {
+                        page: 1,
+                        limit: 10,
+                        totalItems: 0,
+                        totalPages: 0,
+                        hasNextPage: false,
+                    }
+                }
             };
         }
         throw error;

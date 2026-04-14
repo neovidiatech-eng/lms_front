@@ -21,7 +21,6 @@ export default function VerifyAccount({ onVerifySuccess }: VerifyAccountProps) {
   const email = sessionStorage.getItem("verify_email") || "";
 
   const {
-    register,
     handleSubmit,
     control,
     formState: { errors, isSubmitting },
@@ -41,7 +40,7 @@ export default function VerifyAccount({ onVerifySuccess }: VerifyAccountProps) {
       message.success(t("verifySuccess") || "Account verified successfully");
       sessionStorage.removeItem("verify_email");
       onVerifySuccess();
-      navigate("/dashboard");
+      navigate("/login");
     } catch (error) {
       console.error("Account verification failed:", error);
     }

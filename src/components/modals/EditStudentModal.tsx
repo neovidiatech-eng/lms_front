@@ -24,13 +24,11 @@ export default function EditStudentModal({
   const { language, t } = useLanguage();
   const { data: plansData } = usePlans();
 
-  // نستخدم values للتحديث التلقائي عند تغير studentData
   const { control, handleSubmit, register, reset, formState: { errors } } = useForm<StudentFormData>({
     resolver: zodResolver(getStudentSchema(t)),
     defaultValues: studentData || undefined,
   });
 
-  // التأكد من عمل reset عند فتح المودال ببيانات جديدة
   useEffect(() => {
     if (isOpen && studentData) {
       reset(studentData);
@@ -77,7 +75,6 @@ export default function EditStudentModal({
   ];
 
   const planOptions = [
-    { value: '', label: language === 'ar' ? 'بدون خطة' : 'No Plan' },
     ...(plansData?.data || []).map((p: any) => ({
       value: p.id,
       label: language === 'ar' ? p.name_ar : p.name_en,
@@ -87,6 +84,7 @@ export default function EditStudentModal({
   const statusOptions = [
     { value: 'active', label: language === 'ar' ? 'نشط' : 'Active' },
     { value: 'inactive', label: language === 'ar' ? 'متوقف' : 'Inactive' },
+    { value: 'pending', label: language === 'ar' ? 'قيد الانتظار' : 'Pending' },
   ];
 
   return (

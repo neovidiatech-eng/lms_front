@@ -26,6 +26,7 @@ export default function Students() {
   const itemsPerPage = 7;
 
   const { data: apiResponse } = useStudents();
+
   const rawData: any = apiResponse?.data;
   const studentsList: Student[] = Array.isArray(rawData) ? rawData : (rawData?.students || rawData?.data || []);
   const { mutateAsync: createStudent } = useCreateStudent();
@@ -129,6 +130,8 @@ export default function Students() {
       }
     }
   };
+
+
 
   return (
     <div className="p-6 lg:p-8">
@@ -271,7 +274,7 @@ export default function Students() {
                   </td>
                   <td className="px-6 py-4">
                     <span className="inline-flex px-3 py-1 bg-purple-50 text-purple-700 rounded-full text-xs font-medium border border-purple-100">
-                      {student.planId || t('noPlan')}
+                      {student.plan.name_ar || student.plan.name_en || t('noPlan')}
                     </span>
                   </td>
                   <td className="px-6 py-4">
@@ -397,7 +400,7 @@ export default function Students() {
               phone: selectedStudent.user.phone,
               countryCode: selectedStudent.user.code_country,
               country: selectedStudent.country ? selectedStudent.country.toLowerCase() : 'egypt',
-              status: (selectedStudent.active ? 'active' : 'inactive') as 'active' | 'inactive',
+              status: (selectedStudent.status || (selectedStudent.active ? 'active' : 'inactive')) as 'active' | 'inactive' | 'pending',
               gender: selectedStudent.gender || 'male',
               plan: selectedStudent.planId || '',
               birthDate: selectedStudent.birth_date ? selectedStudent.birth_date.split('T')[0] : '',
