@@ -68,7 +68,8 @@ function App() {
     const role = localStorage.getItem("role");
     if (role === "teacher") return "/teacher-dashboard";
     if (role === "student") return "/student-dashboard";
-    return "/dashboard";
+    if (role === "super_admin") return "/dashboard";
+    return "/login";
   };
 
 

@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { Search, Eye } from 'lucide-react';
 import Pagination from '../../../components/ui/Pagination';
 import { useTranslation } from 'react-i18next';
-import { useGetSchedules, useSearchSchedules } from '../../../features/admin/hooks/useSchedules';
+import {useSearchSchedules } from '../../../features/admin/hooks/useSchedules';
 import ViewSessionModal from '../../../components/modals/ViewSessionModal';
 import { Schedule } from '../../../types/scheduales';
 import { useSubjects } from '../../../features/admin/hooks/useSubjects';
@@ -26,11 +26,10 @@ export default function Sessions() {
     }
   }, [searchTerm]);
 
-  const { data: allSchedules } = useGetSchedules();
-  const { data: searchResults } = useSearchSchedules(debouncedSearch);
+  const { data: allSchedules } = useSearchSchedules(debouncedSearch);
 
   const itemsPerPage = 5;
-  const scheduleData = (debouncedSearch ? searchResults?.data?.schedule : allSchedules?.data?.schedule) || [];
+  const scheduleData = (debouncedSearch ? allSchedules?.data?.schedule : allSchedules?.data?.schedule) || [];
 
   const displaySchedules: Schedule[] = [];
   const seenParents = new Set<string>();

@@ -303,13 +303,13 @@ export default function Register({ onRegisterSuccess }: RegisterProps) {
                   </div>
                 )}
 
-                {plansData?.data?.length === 0 && (
+                {plansData?.length === 0 && (
                   <div className="col-span-full py-8 text-center text-gray-500 bg-white rounded-xl border border-dashed border-gray-300">
                     {t("noPlansAvailable")}
                   </div>
                 )}
 
-                {plansData?.data?.map((pkg) => (
+                {plansData?.map((pkg) => (
                   <button
                     key={pkg.id}
                     type="button"

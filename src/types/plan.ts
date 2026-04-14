@@ -11,7 +11,7 @@ export type Plan = {
   name_en: string;
   name_ar: string;
   description: string;
-  price: string;
+  price: string | number;
   duration: number;
   hours: number;
   features: string[];
@@ -19,10 +19,18 @@ export type Plan = {
   active: boolean;
   bestSeller: boolean;
   currency: Currency;
+  created_at?: string;
+  updated_at?: string;
 };
 
 export type PlansResponse = {
   message: string;
   status: number;
   data: Plan[];
+};
+
+export type PlanResponse = {
+  message: string;
+  status: number;
+  data: Plan;
 };

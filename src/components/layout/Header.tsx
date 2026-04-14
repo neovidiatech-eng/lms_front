@@ -8,9 +8,10 @@ interface HeaderProps {
   userRole: 'admin' | 'teacher' | 'student';
   userName: string;
   userEmail: string;
+  isCollapsed?: boolean;
 }
 
-export default function Header({ onMenuClick, userRole }: HeaderProps) {
+export default function Header({ onMenuClick, userRole, isCollapsed }: HeaderProps) {
   const { language, toggleLanguage, t } = useLanguage();
   const { settings } = useSettings();
   const [isDarkMode, setIsDarkMode] = useState(false);
@@ -50,7 +51,13 @@ export default function Header({ onMenuClick, userRole }: HeaderProps) {
   }
 
   return (
-    <header className="bg-white border-b border-gray-200 sticky top-0 z-40">
+    <header 
+      className={`bg-white border-b border-gray-200 sticky top-0 z-40 transition-all duration-300 ${
+        isRtl 
+          ? (isCollapsed ? 'lg:mr-20' : 'lg:mr-72') 
+          : (isCollapsed ? 'lg:ml-20' : 'lg:ml-72')
+      }`}
+    >
       <div className="flex items-center justify-between px-4 py-3">
         <div className="flex items-center gap-4">
           <button onClick={onMenuClick} className="p-2 hover:bg-gray-100 rounded-lg transition-colors lg:hidden">

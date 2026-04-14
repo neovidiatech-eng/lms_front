@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import Header from '../../components/layout/Header';
-import StudentSidebar from './StudentSidebar'; // force re-index
+import StudentSidebar from './StudentSidebar';
 import { useLanguage } from '../../contexts/LanguageContext';
 
 interface StudentDashboardLayoutProps {
@@ -29,6 +29,7 @@ export default function StudentDashboardLayout({
         userRole={userRole}
         userName={userName}
         userEmail={userEmail}
+        isCollapsed={isCollapsed}
       />
 
       <StudentSidebar

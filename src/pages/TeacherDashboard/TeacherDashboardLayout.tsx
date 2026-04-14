@@ -15,11 +15,12 @@ export default function TeacherDashboardLayout({ children }: TeacherDashboardLay
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col font-sans" dir={isRtl ? 'rtl' : 'ltr'}>
-      <Header 
-        onMenuClick={() => setSidebarOpen(!sidebarOpen)} 
-        userRole={'teacher'}
-        userName={'Teacher Mohamed'}
-        userEmail={'teacher@example.com'}
+      <Header
+        userRole="teacher"
+        userName="Teacher"
+        userEmail="teacher@teacher.com"
+        onMenuClick={() => setSidebarOpen(!sidebarOpen)}
+        isCollapsed={isCollapsed}
       />
       
       <div className="flex-1 flex overflow-hidden">
@@ -30,7 +31,7 @@ export default function TeacherDashboardLayout({ children }: TeacherDashboardLay
           setIsCollapsed={setIsCollapsed}
         />
         
-        <main className={`flex-1 overflow-x-hidden overflow-y-auto w-full max-w-[100vw] transition-all duration-300 ${isRtl ? (isCollapsed ? 'lg:pr-20' : 'lg:pr-64') : (isCollapsed ? 'lg:pl-20' : 'lg:pl-64')}`}>
+        <main className={`flex-1 overflow-x-hidden overflow-y-auto w-full max-w-[100vw] transition-all duration-300 ${isRtl ? (isCollapsed ? 'lg:pr-20' : 'lg:pr-72') : (isCollapsed ? 'lg:pl-20' : 'lg:pl-72')}`}>
           <div className="p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto min-h-full">
             {children}
           </div>

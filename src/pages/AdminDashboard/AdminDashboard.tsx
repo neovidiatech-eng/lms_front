@@ -26,6 +26,7 @@ export default function AdminDashboard() {
         userRole="admin"
         userName="Super Admin"
         userEmail="admin@admin.com"
+        isCollapsed={isCollapsed}
       />
 
       <AdminSidebar
