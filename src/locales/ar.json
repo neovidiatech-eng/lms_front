@@ -299,7 +299,6 @@
   "studyPlan": "الخطة الدراسية",
   "countryCode": "رمز الدولة",
   "editStudent": "تعديل بيانات الطالب",
-  "noPlan": "بدون خطة",
   "subjectNameAr": "اسم المادة (عربي)",
   "subjectNameEn": "اسم المادة (إنجليزي)",
   "teal": "أزرق مخضر",
@@ -373,8 +372,6 @@
   "courses_manage_levels": "إدارة المستويات",
   "courses_no_levels": "لا توجد مستويات مضافة حالياً",
   "courses_add_level_title": "إضافة مستوى جديد",
-  "courses_level_name_placeholder": "أدخل اسم المستوى (مثلاً: تمهيدي)"
-}
   "courses_level_name_placeholder": "أدخل اسم المستوى (مثلاً: تمهيدي)",
   "planned": "مخططة",
   "sessionDetails": "تفاصيل الحصة",
