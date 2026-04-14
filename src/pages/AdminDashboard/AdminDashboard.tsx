@@ -1,9 +1,7 @@
-import { DollarSign, Calendar, Users, GraduationCap, Clock, FileText, CheckCircle, AlertCircle, Sparkles } from 'lucide-react';
 import { useState, lazy, Suspense } from 'react';
 import { Outlet, useLocation } from 'react-router-dom';
 import Header from '../../components/layout/Header';
 import AdminSidebar from './AdminSidebar';
-import { useSettings } from '../../contexts/SettingsContext';
 import SubscribePlanModal from '../../components/modals/SubscribePlanModal';
 import { useTranslation } from 'react-i18next';
 
@@ -11,11 +9,11 @@ import { useTranslation } from 'react-i18next';
 const AdminDashboardHome = lazy(() => import('../../features/admin/pages/Dashboard'));
 
 export default function AdminDashboard() {
-  const { t, i18n } = useTranslation();
+  const { i18n } = useTranslation();
   const location = useLocation();
-  const { settings } = useSettings();
   const [showSubscribeModal, setShowSubscribeModal] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [isCollapsed, setIsCollapsed] = useState(false);
 
   const isHome = location.pathname === '/dashboard' || location.pathname === '/dashboard/';
   const language = i18n.language.split('-')[0];
@@ -33,9 +31,11 @@ export default function AdminDashboard() {
       <AdminSidebar
         isOpen={sidebarOpen}
         onClose={() => setSidebarOpen(false)}
+        isCollapsed={isCollapsed}
+        setIsCollapsed={setIsCollapsed}
       />
 
-      <main className={`${isRtl ? 'lg:mr-72' : 'lg:ml-72'} transition-all duration-300`}>
+      <main className={`${isRtl ? (isCollapsed ? 'lg:mr-20' : 'lg:mr-72') : (isCollapsed ? 'lg:ml-20' : 'lg:ml-72')} transition-all duration-300`}>
         <div className="p-6">
           <Suspense fallback={<div className="flex items-center justify-center min-h-[400px] animate-pulse text-gray-400">Loading...</div>}>
             {isHome ? <AdminDashboardHome /> : <Outlet />}
