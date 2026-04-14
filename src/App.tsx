@@ -8,7 +8,7 @@ import { useEffect } from 'react';
 import ErrorBoundary from './components/layout/ErrorBoundary';
 import ErrorService from './utils/ErrorService';
 import LanguageSwitcher from './components/ui/LanguageSwitcher';
-import { dashboardRoutes } from './components/constants/dashboardRoutes';
+import { adminDashboardRoutes } from './pages/AdminDashboard/adminDashboardRoutes';
 import { studentDashboardRoutes } from './pages/StudentDashboard/studentDashboardRoutes';
 import { teacherDashboardRoutes } from './pages/TeacherDashboard/teacherDashboardRoutes.tsx';
 import { GoogleOAuthProvider } from '@react-oauth/google';
@@ -21,7 +21,7 @@ const Register = lazy(() => import('./pages/Register'));
 const ForgotPassword = lazy(() => import('./pages/ForgotPassword'));
 const ResetPassword = lazy(() => import('./pages/ResetPassword'));
 const VerifyAccount = lazy(() => import('./pages/VerifyAccount'));
-const Dashboard = lazy(() => import('./pages/Dashboard'));
+const AdminDashboard = lazy(() => import('./pages/AdminDashboard/AdminDashboard'));
 const StudentDashboard = lazy(() => import('./pages/StudentDashboard/StudentDashboard'));
 const TeacherDashboard = lazy(() => import('./pages/TeacherDashboard/TeacherDashboard'));
 
@@ -91,10 +91,10 @@ function App() {
                     </Route>
                     <Route
                       path="/dashboard"
-                      element={isAuthenticated ? <Dashboard /> : <Navigate to="/login" replace />}
+                      element={isAuthenticated ? <AdminDashboard /> : <Navigate to="/login" replace />}
                     >
                       <Route index element={null} />
-                      {dashboardRoutes.flatMap(route => {
+                      {adminDashboardRoutes.flatMap(route => {
                         if (route.subItems) {
                           return route.subItems.map(subItem => (
                             <Route key={subItem.id} path={subItem.path} element={subItem.element} />

@@ -6,8 +6,8 @@ import { TeacherFormData, getTeacherSchema } from '../../lib/schemas/TeacherSche
 import { Controller, Resolver, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Teacher } from '../../types/teachers';
-import { useCurrency } from '../../hooks/useCurrency';
-import { useSubjects } from '../../hooks/useSubjects';
+import { useCurrency } from '../../features/admin/hooks/useCurrency';
+import { useSubjects } from '../../features/admin/hooks/useSubjects';
 import { CustomCheckbox } from '../ui/CustomCheckbox';
 
 interface EditTeacherModalProps {
@@ -43,7 +43,7 @@ export default function EditTeacherModal({ isOpen, onClose, onSubmit, teacher }:
       const subjectIds = subjectsArray.map((s: any) => String(s.subjectId || s.subject?.id)).filter(Boolean);
 
       const currencyId = teacher.currencyId || '';
-      
+
       console.log("==> Extracted Data:", { subjectIds, currencyId });
 
       reset({

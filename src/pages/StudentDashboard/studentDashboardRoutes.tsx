@@ -22,15 +22,15 @@ export interface StudentRouteConfig {
   subItems?: StudentRouteConfig[];
 }
 
-// --- Lazy Loading Page Components for Student ---
-const SessionsPage = lazy(() => import('../../pages/Sessions'));
-const AgendaPage = lazy(() => import('../../pages/Agenda'));
-const ExamsPage = lazy(() => import('../../pages/Exams'));
-const AssignmentsPage = lazy(() => import('../../pages/Assignments'));
-const ProfilePage = lazy(() => import('./StudentProfile'));
-const LMSCoursesPage = lazy(() => import('../../pages/LMSCourses/LMSCourses'));
-const ChatPage = lazy(() => import('./StudentChat'));
-const RequestsPage = lazy(() => import('./StudentRequests'));
+// --- Lazy Loading Page Components for Student from Features ---
+const SessionsPage = lazy(() => import('../../features/student/pages/Sessions'));
+const AgendaPage = lazy(() => import('../../features/student/pages/Agenda'));
+const ExamsPage = lazy(() => import('../../features/student/pages/Exams'));
+const AssignmentsPage = lazy(() => import('../../features/student/pages/Assignments'));
+const ProfilePage = lazy(() => import('../../features/student/pages/Profile'));
+const LMSCoursesPage = lazy(() => import('../../features/student/pages/LMSCourses/LMSCourses'));
+const ChatPage = lazy(() => import('../../features/student/pages/Chat'));
+const RequestsPage = lazy(() => import('../../features/student/pages/Requests'));
 
 export const studentDashboardRoutes: StudentRouteConfig[] = [
   {

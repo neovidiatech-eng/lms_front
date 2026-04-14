@@ -1,7 +1,7 @@
 import { X, Calendar, Clock, User, GraduationCap, BookOpen, Video, MapPin, FileText } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { Schedule } from '../../types/scheduales';
-import { useGetSchedulesByTeacher } from '../../hooks/useSchedules';
+import { useGetSchedulesByTeacher } from '../../features/admin/hooks/useSchedules';
 
 interface ViewSessionModalProps {
   isOpen: boolean;
@@ -163,7 +163,7 @@ export default function ViewSessionModal({ isOpen, onClose, session, groupedSess
                   </div>
                   <div className="flex-1 text-right">
                     <p className="text-xs text-gray-500">{t('notificationTime') || (language === 'ar' ? 'وقت التنبيه' : 'Notification Time')}</p>
-                    <p className="font-semibold text-gray-900">10 {t('minutes')}</p> 
+                    <p className="font-semibold text-gray-900">10 {t('minutes')}</p>
                   </div>
                 </div>
               </div>

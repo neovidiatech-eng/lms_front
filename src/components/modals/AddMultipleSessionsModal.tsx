@@ -5,8 +5,8 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useLanguage } from '../../contexts/LanguageContext';
 import CustomSelect from '../ui/CustomSelect';
 import DatePickerField from '../ui/DatePickerField';
-import { useTeacher } from '../../hooks/useTeacher';
-import { useStudents } from '../../hooks/useStudents';
+import { useTeacher } from '../../features/admin/hooks/useTeacher';
+import { useStudents } from '../../features/admin/hooks/useStudents';
 import { getMultipleSessionsSchema, MultipleSessionsFormData, MultipleSessionsPayload } from '../../lib/schemas/SessionSchema';
 import { DayOfWeek } from '../../types/scheduales';
 
@@ -338,8 +338,8 @@ export default function AddMultipleSessionsModal({ isOpen, onClose, onAdd }: Add
             <label className="text-sm font-medium">{t('addMultipleSessions_weekDays')} *</label>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
               {weekDays.map((day) => (
-                <div 
-                  key={day.id} 
+                <div
+                  key={day.id}
                   onClick={() => setWeekDays(prev => prev.map(d => d.id === day.id ? { ...d, checked: !d.checked } : d))}
                   className={`border rounded-xl p-4 transition-all cursor-pointer ${day.checked ? 'border-primary bg-blue-50' : 'border-gray-200 hover:border-primary/50'}`}
                 >

@@ -5,7 +5,7 @@ import CustomSelect from '../ui/CustomSelect';
 import { UserFormData, getUserSchema } from '../../lib/schemas/UserSchema';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Controller, useForm } from 'react-hook-form';
-import { useRoles } from '../../hooks/useRoles';
+import { useRoles } from '../../features/admin/hooks/useRoles';
 // import { CustomCheckbox } from '../ui/CustomCheckbox';
 //import { usePermissions } from '../../hooks/usePermissions';
 
