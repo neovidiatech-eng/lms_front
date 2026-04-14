@@ -243,7 +243,10 @@ export default function AddMultipleSessionsModal({ isOpen, onClose, onAdd }: Add
                       { value: 'full', label: t('full') },
                       { value: 'half', label: t('half') },
                     ]}
-                    onChange={field.onChange}
+                    onChange={(val) => {
+                      field.onChange(val);
+                      setValue('duration', val === 'half' ? '30' : '60');
+                    }}
                   />
                 )}
               />
@@ -314,29 +317,43 @@ export default function AddMultipleSessionsModal({ isOpen, onClose, onAdd }: Add
                 )}
               />
             </div>
+            <div>
+              <label className="block text-sm font-medium mb-2">{t('startTime') || (language === 'ar' ? 'وقت البدء' : 'Start Time')} *</label>
+              <input
+                type="time"
+                defaultValue="10:00"
+                onChange={(e) => {
+                  const newTime = e.target.value;
+                  if (newTime) {
+                    setWeekDays(prev => prev.map(d => ({ ...d, time: newTime })));
+                  }
+                }}
+                className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent outline-none bg-white"
+                dir="ltr"
+              />
+            </div>
           </div>
 
           <div className="space-y-3 text-right">
             <label className="text-sm font-medium">{t('addMultipleSessions_weekDays')} *</label>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
               {weekDays.map((day) => (
-                <div key={day.id} className={`border rounded-xl p-4 transition-all ${day.checked ? 'border-primary bg-blue-50' : 'border-gray-200'}`}>
+                <div 
+                  key={day.id} 
+                  onClick={() => setWeekDays(prev => prev.map(d => d.id === day.id ? { ...d, checked: !d.checked } : d))}
+                  className={`border rounded-xl p-4 transition-all cursor-pointer ${day.checked ? 'border-primary bg-blue-50' : 'border-gray-200 hover:border-primary/50'}`}
+                >
                   <div className="flex items-center justify-between">
                     <input
                       type="time"
                       value={day.time}
+                      onClick={(e) => e.stopPropagation()}
                       onChange={(e) => setWeekDays(prev => prev.map(d => d.id === day.id ? { ...d, time: e.target.value } : d))}
                       disabled={!day.checked}
                       className="px-3 py-2 border rounded-lg"
                     />
                     <div className="flex items-center gap-3">
                       <span className="text-sm font-medium">{t(day.nameKey)}</span>
-                      <input
-                        type="checkbox"
-                        checked={day.checked}
-                        onChange={() => setWeekDays(prev => prev.map(d => d.id === day.id ? { ...d, checked: !d.checked } : d))}
-                        className="w-5 h-5 accent-primary"
-                      />
                     </div>
                   </div>
                   {day.checked && (
