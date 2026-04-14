@@ -8,6 +8,7 @@ import { useStudents } from '../../hooks/useStudents';
 import { useTeacher } from '../../hooks/useTeacher';
 import { Controller, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
+import CustomTimePicker from '../ui/CustomTime';
 
 interface AddSessionModalProps {
   isOpen: boolean;
@@ -293,15 +294,25 @@ export default function AddSessionModal({ isOpen, onClose, onAdd }: AddSessionMo
               </div>
 
               <div className="space-y-2 text-right">
-                <label className="block text-sm font-medium text-gray-700">
-                  {t('startTime')} <span className="text-red-500">*</span>
-                </label>
-                <input
+
+                {/* <input
                   type="time"
                   {...register('startTime')}
                   className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent text-right"
                 />
-                {errors.startTime && <span className="text-red-500 text-xs">{errors.startTime.message}</span>}
+                {errors.startTime && <span className="text-red-500 text-xs">{errors.startTime.message}</span>} */}
+                <Controller
+                  name="startTime"
+                  control={control}
+                  render={({ field }) => (
+                    <CustomTimePicker
+                      label={t('startTime')}
+                      value={field.value}
+                      onChange={field.onChange}
+                      error={errors.startTime?.message}
+                    />
+                  )}
+                />
               </div>
 
               <div className="space-y-2 text-right">

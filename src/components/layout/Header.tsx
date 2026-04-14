@@ -10,7 +10,7 @@ interface HeaderProps {
   userEmail: string;
 }
 
-export default function Header({ onMenuClick, userRole, userName, userEmail }: HeaderProps) {
+export default function Header({ onMenuClick, userRole }: HeaderProps) {
   const { language, toggleLanguage, t } = useLanguage();
   const { settings } = useSettings();
   const [isDarkMode, setIsDarkMode] = useState(false);
@@ -36,8 +36,18 @@ export default function Header({ onMenuClick, userRole, userName, userEmail }: H
     sessionStorage.removeItem("platform_settings");
     localStorage.removeItem("token");
     sessionStorage.removeItem("token");
+    localStorage.removeItem("role");
+    sessionStorage.removeItem("role");
+    localStorage.removeItem("email");
+    sessionStorage.removeItem("email");
     window.location.href = "/login";
   };
+
+  let role = localStorage.getItem("role")
+  let email = localStorage.getItem("email")
+  if (role === "super_admin") {
+    role = "Super Admin";
+  }
 
   return (
     <header className="bg-white border-b border-gray-200 sticky top-0 z-40">
@@ -93,8 +103,8 @@ export default function Header({ onMenuClick, userRole, userName, userEmail }: H
             <button onClick={() => setShowProfileMenu(!showProfileMenu)} className="flex items-center gap-2 p-2 hover:bg-gray-100 rounded-lg transition-colors">
               <ChevronDown className="w-4 h-4 text-gray-600" />
               <div className="hidden sm:block text-right">
-                <p className="text-sm font-semibold text-gray-900">{userName}</p>
-                <p className="text-xs text-gray-500">{userEmail}</p>
+                <p className="text-sm font-semibold text-gray-900">{role}</p>
+                <p className="text-xs text-gray-500">{email}</p>
               </div>
               <div className="w-8 h-8 rounded-full flex items-center justify-center" style={{ backgroundColor: settings.primaryColor }}>
                 <User className="w-4 h-4 text-white" />
@@ -105,8 +115,8 @@ export default function Header({ onMenuClick, userRole, userName, userEmail }: H
                 <div className="fixed inset-0 z-40" onClick={() => setShowProfileMenu(false)}></div>
                 <div className={`absolute ${isRtl ? 'left-0' : 'right-0'} mt-2 w-56 bg-white rounded-xl shadow-lg border border-gray-200 py-2 z-50`}>
                   <div className="px-4 py-3 border-b border-gray-100">
-                    <p className="text-sm font-semibold text-gray-900 text-right">{userName}</p>
-                    <p className="text-xs text-gray-500 text-right">{userRole}</p>
+                    <p className="text-sm font-semibold text-gray-900 text-right">{role}</p>
+                    <p className="text-xs text-gray-500 text-right">{email}</p>
                   </div>
                   <div className="py-2">
                     <button className="w-full px-4 py-2 text-right hover:bg-gray-50 transition-colors flex items-center justify-end gap-2">
