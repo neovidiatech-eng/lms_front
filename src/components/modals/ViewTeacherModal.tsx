@@ -2,7 +2,7 @@ import { X, Phone, Mail, GraduationCap, DollarSign, Calendar, CheckCircle, Clock
 import { useLanguage } from '../../contexts/LanguageContext';
 import { useSessions } from '../../contexts/SessionsContext';
 import { Teacher } from '../../types/teachers';
-import { useCurrency } from '../../hooks/useCurrency';
+import { useCurrency } from '../../features/admin/hooks/useCurrency';
 import { Currency } from '../../types/currency';
 
 interface ViewTeacherModalProps {

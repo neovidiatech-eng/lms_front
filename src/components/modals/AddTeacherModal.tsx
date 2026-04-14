@@ -5,9 +5,9 @@ import { TeacherFormData, getTeacherSchema } from '../../lib/schemas/TeacherSche
 import { Controller, Resolver, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { CustomCheckbox } from '../ui/CustomCheckbox';
-import { useCurrency } from '../../hooks/useCurrency';
+import { useCurrency } from '../../features/admin/hooks/useCurrency';
 import { useMemo } from 'react';
-import { useSubjects } from '../../hooks/useSubjects';
+import { useSubjects } from '../../features/admin/hooks/useSubjects';
 
 interface AddTeacherModalProps {
   isOpen: boolean;

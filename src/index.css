@@ -46,9 +46,11 @@
     color: white;
     transition: filter 0.15s, box-shadow 0.15s;
   }
+
   .btn-primary:hover {
     filter: brightness(0.9);
   }
+
   .btn-primary:disabled {
     opacity: 0.4;
     cursor: not-allowed;
@@ -96,6 +98,7 @@
   .icon-btn-primary {
     color: var(--color-primary);
   }
+
   .icon-btn-primary:hover {
     background-color: color-mix(in srgb, var(--color-primary) 10%, transparent);
   }
@@ -107,8 +110,10 @@
 
   /* Hide scrollbar for IE, Edge and Firefox */
   .no-scrollbar {
-    -ms-overflow-style: none;  /* IE and Edge */
-    scrollbar-width: none;  /* Firefox */
+    -ms-overflow-style: none;
+    /* IE and Edge */
+    scrollbar-width: none;
+    /* Firefox */
   }
 }
 
@@ -126,9 +131,22 @@
 }
 
 .ant-select-selector {
-  background-color: #f9fafb !important; 
+  background-color: #f9fafb !important;
   border-color: #e5e7eb !important;
   height: 48px !important;
   display: flex !important;
   align-items: center !important;
+}
+
+.custom-time-popup .ant-picker-time-panel-column {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.custom-time-popup .ant-picker-time-panel-column::-webkit-scrollbar {
+  display: none;
+}
+
+.custom-time-popup .ant-picker-time-panel-column {
+  overflow-y: auto;
 }

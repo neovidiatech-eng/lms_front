@@ -2,7 +2,7 @@ import { Suspense } from 'react';
 import { Outlet, useLocation } from 'react-router-dom';
 import TeacherDashboardLayout from './TeacherDashboardLayout';
 import ErrorBoundary from '../../components/layout/ErrorBoundary';
-import TeacherDashboardHome from './TeacherDashboardHome';
+import TeacherDashboardHome from '../../features/teacher/pages/Home';
 
 const LoadingFallback = () => (
   <div className="flex items-center justify-center min-h-[400px]">

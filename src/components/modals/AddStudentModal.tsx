@@ -5,7 +5,7 @@ import DatePickerField from '../ui/DatePickerField';
 import { StudentFormData, getStudentSchema } from '../../lib/schemas/StudentSchema';
 import { Controller, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { usePlans } from '../../hooks/usePlans';
+import { usePlans } from '../../features/admin/hooks/usePlans';
 
 interface AddStudentModalProps {
   isOpen: boolean;

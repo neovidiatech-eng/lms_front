@@ -10,7 +10,7 @@ import localeAr from 'antd/es/locale/ar_EG';
 import localeEn from 'antd/es/locale/en_US';
 import dayjs from 'dayjs';
 import 'dayjs/locale/ar';
-import { usePlans } from "../hooks/usePlans";
+import { usePlans } from "../features/admin/hooks/usePlans";
 import { useNavigate } from "react-router-dom";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";

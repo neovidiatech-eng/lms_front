@@ -23,7 +23,7 @@ import {
   ShieldCheck,
   Repeat
 } from 'lucide-react';
-import Roles from '../../pages/Roles';
+import Roles from '../../features/admin/pages/Roles';
 
 export interface RouteConfig {
   id: string;
@@ -36,29 +36,29 @@ export interface RouteConfig {
 }
 
 // --- Lazy Loading Page Components ---
-const UsersPage = lazy(() => import("../../pages/Users"));
-const StudentsPage = lazy(() => import("../../pages/Students"));
-const TeachersPage = lazy(() => import("../../pages/Teachers"));
-const ParentsPage = lazy(() => import("../../pages/Parents"));
-const SessionsPage = lazy(() => import("../../pages/Sessions"));
-const AgendaPage = lazy(() => import("../../pages/Agenda"));
-const ExamsPage = lazy(() => import("../../pages/Exams"));
-const AssignmentsPage = lazy(() => import("../../pages/Assignments"));
+const UsersPage = lazy(() => import("../../features/admin/pages/Users"));
+const StudentsPage = lazy(() => import("../../features/admin/pages/Students"));
+const TeachersPage = lazy(() => import("../../features/admin/pages/Teachers"));
+const ParentsPage = lazy(() => import("../../features/admin/pages/Parents"));
+const SessionsPage = lazy(() => import("../../features/admin/pages/Sessions"));
+const AgendaPage = lazy(() => import("../../features/admin/pages/Agenda"));
+const ExamsPage = lazy(() => import("../../features/admin/pages/Exams"));
+const AssignmentsPage = lazy(() => import("../../features/admin/pages/Assignments"));
 const SubscriptionRequestsPage = lazy(
-  () => import("../../pages/SubscriptionRequests"),
+  () => import("../../features/admin/pages/SubscriptionRequests"),
 );
-const AllSubscriptionsPage = lazy(() => import("../../pages/AllSubscriptions"));
-const PlansPage = lazy(() => import("../../pages/Plans"));
-const CurrenciesPage = lazy(() => import("../../pages/Currencies"));
-const ExpensesPage = lazy(() => import("../../pages/Expenses"));
-const TransactionsPage = lazy(() => import("../../pages/Transactions"));
-const TeacherRequestsPage = lazy(() => import("../../pages/TeacherRequests"));
+const AllSubscriptionsPage = lazy(() => import("../../features/admin/pages/AllSubscriptions"));
+const PlansPage = lazy(() => import("../../features/admin/pages/Plans"));
+const CurrenciesPage = lazy(() => import("../../features/admin/pages/Currencies"));
+const ExpensesPage = lazy(() => import("../../features/admin/pages/Expenses"));
+const TransactionsPage = lazy(() => import("../../features/admin/pages/Transactions"));
+const TeacherRequestsPage = lazy(() => import("../../features/admin/pages/TeacherRequests"));
 const TeacherAvailabilityPage = lazy(
-  () => import("../../pages/TeacherAvailability"),
+  () => import("../../features/admin/pages/TeacherAvailability"),
 );
-const SubjectsPage = lazy(() => import("../../pages/Subjects"));
-const LMSCoursesPage = lazy(() => import("../../pages/LMSCourses/LMSCourses"));
-const SettingsPage = lazy(() => import("../../pages/Settings"));
+const SubjectsPage = lazy(() => import("../../features/admin/pages/Subjects"));
+const LMSCoursesPage = lazy(() => import("../../features/admin/pages/LMSCourses/LMSCourses"));
+const SettingsPage = lazy(() => import("../../features/admin/pages/Settings"));
 
 export const dashboardRoutes: RouteConfig[] = [
   {

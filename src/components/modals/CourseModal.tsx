@@ -4,8 +4,8 @@ import { FormProvider, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { CourseFormData, getCourseSchema } from '../../lib/schemas/CourseSchema';
 import { Course, Level } from '../../types/lmsCourses';
-import CourseFormFields from '../../pages/LMSCourses/components/CourseFormFields';
 import { useTranslation } from 'react-i18next';
+import CourseFormFields from '../../features/admin/pages/LMSCourses/components/CourseFormFields';
 
 interface CourseModalProps {
   isOpen: boolean;

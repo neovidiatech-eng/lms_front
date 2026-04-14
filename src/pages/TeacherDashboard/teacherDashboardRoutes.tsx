@@ -12,17 +12,18 @@ import {
 import { RouteConfig } from '../../components/constants/dashboardRoutes';
 
 // Reuse dashboard components for content viewing
-const DashboardOverview = lazy(() => import('./TeacherDashboardHome'));
-const ProfilePage = lazy(() => import('./TeacherProfile'));
-const LMSCoursesPage = lazy(() => import('../../pages/LMSCourses/LMSCourses'));
-const SessionsPage = lazy(() => import('../../pages/Sessions'));
-const AgendaPage = lazy(() => import('../../pages/Agenda'));
-const ExamsPage = lazy(() => import('../../pages/Exams'));
-const AssignmentsPage = lazy(() => import('../../pages/Assignments'));
-const StudentsPage = lazy(() => import('./TeacherStudents'));
-const ChatPage = lazy(() => import('./TeacherChat'));
-const RequestsPage = lazy(() => import('./TeacherRequests'));
-const AvailabilityPage = lazy(() => import('../../pages/TeacherAvailability'));
+// Lazy Loading Page Components for Teacher from Features
+const DashboardOverview = lazy(() => import('../../features/teacher/pages/Home'));
+const ProfilePage = lazy(() => import('../../features/teacher/pages/Profile'));
+const LMSCoursesPage = lazy(() => import('../../features/teacher/pages/LMSCourses/LMSCourses'));
+const SessionsPage = lazy(() => import('../../features/teacher/pages/Sessions'));
+const AgendaPage = lazy(() => import('../../features/teacher/pages/Agenda'));
+const ExamsPage = lazy(() => import('../../features/teacher/pages/Exams'));
+const AssignmentsPage = lazy(() => import('../../features/teacher/pages/Assignments'));
+const StudentsPage = lazy(() => import('../../features/teacher/pages/Students'));
+const ChatPage = lazy(() => import('../../features/teacher/pages/Chat'));
+const RequestsPage = lazy(() => import('../../features/teacher/pages/Requests'));
+const AvailabilityPage = lazy(() => import('../../features/admin/pages/TeacherAvailability'));
 
 export const teacherDashboardRoutes: RouteConfig[] = [
   {

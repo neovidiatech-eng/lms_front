@@ -58,6 +58,9 @@ export default function Login({ onLoginSuccess }: LoginProps) {
         localStorage.setItem("role", role);
         onLoginSuccess();
 
+        const email = data.email;
+        localStorage.setItem("email", email);
+
         if (role === "teacher") {
           navigate("/teacher-dashboard");
         } else if (role === "student") {
