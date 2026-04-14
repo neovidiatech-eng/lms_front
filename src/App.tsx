@@ -78,7 +78,7 @@ function App() {
         <QueryClientProvider client={queryClient}>
           <SettingsProvider>
             <SessionsProvider>
-              <Router>
+              <Router >
                 {!isAuthenticated && <LanguageSwitcher />}
                 <Suspense fallback={<LoadingFallback />}>
                   <Routes>

@@ -17,6 +17,7 @@ export default function StudentDashboardLayout({
   userEmail = 'student@student.com',
 }: StudentDashboardLayoutProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [isCollapsed, setIsCollapsed] = useState(false);
   const { language } = useLanguage();
 
   const isRtl = language === 'ar';
@@ -33,9 +34,11 @@ export default function StudentDashboardLayout({
       <StudentSidebar
         isOpen={sidebarOpen}
         onClose={() => setSidebarOpen(false)}
+        isCollapsed={isCollapsed}
+        setIsCollapsed={setIsCollapsed}
       />
 
-      <main className={`${isRtl ? 'lg:mr-72' : 'lg:ml-72'} transition-all duration-300`}>
+      <main className={`${isRtl ? (isCollapsed ? 'lg:mr-20' : 'lg:mr-72') : (isCollapsed ? 'lg:ml-20' : 'lg:ml-72')} transition-all duration-300`}>
         <div className="p-6">
           {children}
         </div>

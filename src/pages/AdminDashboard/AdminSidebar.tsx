@@ -4,13 +4,16 @@ import { NavLink } from 'react-router-dom';
 import { useSettings } from '../../contexts/SettingsContext';
 import { adminDashboardRoutes } from './adminDashboardRoutes';
 import { useTranslation } from 'react-i18next';
+import SidebarToggle from '../../components/layout/SidebarToggle';
 
 interface AdminSidebarProps {
   isOpen: boolean;
   onClose: () => void;
+  isCollapsed: boolean;
+  setIsCollapsed: (value: boolean) => void;
 }
 
-export default function AdminSidebar({ isOpen, onClose }: AdminSidebarProps) {
+export default function AdminSidebar({ isOpen, onClose, isCollapsed, setIsCollapsed }: AdminSidebarProps) {
   const { t, i18n } = useTranslation();
   const language = i18n.language.split('-')[0];
   const { settings } = useSettings();
@@ -45,9 +48,17 @@ export default function AdminSidebar({ isOpen, onClose }: AdminSidebarProps) {
 
       {/* Sidebar */}
       <aside
-        className={`fixed top-0 ${language === 'ar' ? 'right-0' : 'left-0'} h-full bg-white border-${language === 'ar' ? 'l' : 'r'} border-gray-200 w-72 transform transition-transform duration-300 z-50 lg:translate-x-0 ${isOpen ? 'translate-x-0' : language === 'ar' ? 'translate-x-full' : '-translate-x-full'
+        className={`fixed top-0 ${language === 'ar' ? 'right-0' : 'left-0'} h-full bg-white border-${language === 'ar' ? 'l' : 'r'} border-gray-200 ${isCollapsed ? 'w-20' : 'w-72'} transform transition-all duration-300 z-50 lg:translate-x-0 ${isOpen ? 'translate-x-0' : language === 'ar' ? 'translate-x-full' : '-translate-x-full'
           }`}
       >
+        {/* Toggle Button for Desktop */}
+        <div className="hidden lg:block">
+          <SidebarToggle 
+            isCollapsed={isCollapsed} 
+            onToggle={() => setIsCollapsed(!isCollapsed)} 
+          />
+        </div>
+
         {/* Close button for mobile */}
         <button
           onClick={onClose}
@@ -56,17 +67,16 @@ export default function AdminSidebar({ isOpen, onClose }: AdminSidebarProps) {
           <X className="w-5 h-5 text-gray-600" />
         </button>
 
-        {/* Logo */}
-        <div className="p-6 border-b border-gray-200">
+        <div className={`p-6 border-b border-gray-200 transition-all ${isCollapsed ? 'px-4' : ''}`}>
           <div className="flex items-center gap-3">
             {settings.logoUrl ? (
-              <img src={settings.logoUrl} alt="logo" className="w-12 h-12 rounded-xl object-contain" />
+              <img src={settings.logoUrl} alt="logo" className="w-12 h-12 rounded-xl object-contain shrink-0" />
             ) : (
-              <div className="w-12 h-12 rounded-xl flex items-center justify-center shadow-lg text-white font-bold text-xl" style={{ background: `linear-gradient(135deg, ${settings.primaryColor}, ${settings.accentColor})` }}>
+              <div className="w-12 h-12 rounded-xl flex items-center justify-center shadow-lg text-white font-bold text-xl shrink-0" style={{ background: `linear-gradient(135deg, ${settings.primaryColor}, ${settings.accentColor})` }}>
                 {settings.name.charAt(0)}
               </div>
             )}
-            <div className="text-right">
+            <div className={`text-right transition-all duration-300 ${isCollapsed ? 'opacity-0 invisible w-0' : 'opacity-100'}`}>
               <h2 className="text-lg font-bold text-gray-900 line-clamp-1">{settings.name}</h2>
               <p className="text-xs text-gray-500">{t('sidebar_dashboard')}</p>
             </div>
@@ -81,19 +91,23 @@ export default function AdminSidebar({ isOpen, onClose }: AdminSidebarProps) {
                 {item.subItems ? (
                   <>
                     <button
-                      onClick={() => toggleExpand(item.id)}
-                      className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all text-gray-700 hover:bg-gray-50`}
+                      onClick={() => !isCollapsed && toggleExpand(item.id)}
+                      className={`w-full flex items-center gap-3 ${isCollapsed ? 'justify-center px-2' : 'px-4'} py-3 rounded-xl transition-all text-gray-700 hover:bg-gray-50`}
+                      title={isCollapsed ? t(item.label) : ''}
                     >
-                      {item.icon && <item.icon className="w-5 h-5 flex-shrink-0" />}
-                      <span className={`text-sm font-medium flex-1 ${language === 'ar' ? 'text-right' : 'text-left'}`}>
-                        {t(item.label)}
-                      </span>
-                      <ChevronDown
-                        className={`w-4 h-4 flex-shrink-0 transition-transform ${expandedItems.includes(item.id) ? 'rotate-180' : ''
-                          }`}
-                      />
+                      {item.icon && <item.icon className={`w-5 h-5 flex-shrink-0 transition-all ${isCollapsed ? 'mx-auto' : ''}`} />}
+                      {!isCollapsed && (
+                        <>
+                          <span className={`text-sm font-medium flex-1 ${language === 'ar' ? 'text-right' : 'text-left'}`}>
+                            {t(item.label)}
+                          </span>
+                          <ChevronDown
+                            className={`w-4 h-4 flex-shrink-0 transition-transform ${expandedItems.includes(item.id) ? 'rotate-180' : ''}`}
+                          />
+                        </>
+                      )}
                     </button>
-                    {expandedItems.includes(item.id) && (
+                    {!isCollapsed && expandedItems.includes(item.id) && (
                       <div className={`${language === 'ar' ? 'mr-8' : 'ml-8'} mt-1 space-y-1`}>
                         {item.subItems.map((subItem) => (
                           <NavLink
@@ -118,15 +132,18 @@ export default function AdminSidebar({ isOpen, onClose }: AdminSidebarProps) {
                     to={resolvePath(item.path)}
                     onClick={onClose}
                     className={({ isActive }) => `
-                      w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all
+                      w-full flex items-center gap-3 ${isCollapsed ? 'justify-center px-2' : 'px-4'} py-3 rounded-xl transition-all
                       ${isActive ? '' : 'text-gray-700 hover:bg-gray-50'}
                     `}
                     style={({ isActive }) => isActive ? { backgroundColor: settings.primaryColor + '15', color: settings.primaryColor } : {}}
+                    title={isCollapsed ? t(item.label) : ''}
                   >
-                    {item.icon && <item.icon className="w-5 h-5 flex-shrink-0" />}
-                    <span className={`text-sm font-medium flex-1 ${language === 'ar' ? 'text-right' : 'text-left'}`}>
-                      {t(item.label)}
-                    </span>
+                    {item.icon && <item.icon className={`w-5 h-5 flex-shrink-0 transition-all ${isCollapsed ? 'mx-auto' : ''}`} />}
+                    {!isCollapsed && (
+                      <span className={`text-sm font-medium flex-1 ${language === 'ar' ? 'text-right' : 'text-left'}`}>
+                        {t(item.label)}
+                      </span>
+                    )}
                   </NavLink>
                 )}
               </div>

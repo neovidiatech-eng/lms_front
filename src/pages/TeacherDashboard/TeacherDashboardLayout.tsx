@@ -9,6 +9,7 @@ interface TeacherDashboardLayoutProps {
 
 export default function TeacherDashboardLayout({ children }: TeacherDashboardLayoutProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [isCollapsed, setIsCollapsed] = useState(false);
   const { i18n } = useTranslation();
   const isRtl = i18n.language.split('-')[0] === 'ar';
 
@@ -22,9 +23,14 @@ export default function TeacherDashboardLayout({ children }: TeacherDashboardLay
       />
       
       <div className="flex-1 flex overflow-hidden">
-        <TeacherSidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
+        <TeacherSidebar 
+          isOpen={sidebarOpen} 
+          onClose={() => setSidebarOpen(false)} 
+          isCollapsed={isCollapsed}
+          setIsCollapsed={setIsCollapsed}
+        />
         
-        <main className={`flex-1 overflow-x-hidden overflow-y-auto w-full max-w-[100vw] transition-all duration-300 ${isRtl ? 'lg:pr-64' : 'lg:pl-64'}`}>
+        <main className={`flex-1 overflow-x-hidden overflow-y-auto w-full max-w-[100vw] transition-all duration-300 ${isRtl ? (isCollapsed ? 'lg:pr-20' : 'lg:pr-64') : (isCollapsed ? 'lg:pl-20' : 'lg:pl-64')}`}>
           <div className="p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto min-h-full">
             {children}
           </div>
