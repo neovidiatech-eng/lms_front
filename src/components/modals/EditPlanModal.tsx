@@ -1,7 +1,7 @@
-import { useState } from 'react';
-import { X, Save, Plus, Trash2 } from 'lucide-react';
-import { useLanguage } from '../../contexts/LanguageContext';
-import CustomSelect from '../ui/CustomSelect';
+import { useState } from "react";
+import { X, Save, Plus, Trash2 } from "lucide-react";
+import { useLanguage } from "../../contexts/LanguageContext";
+import CustomSelect from "../ui/CustomSelect";
 interface EditPlanModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -16,12 +16,17 @@ interface EditPlanModalProps {
     sessionsCount: number;
     features: string[];
     isPopular: boolean;
-    status: 'active' | 'inactive';
+    status: "active" | "inactive";
   };
   onSave: (plan: any) => void;
 }
 
-export default function EditPlanModal({ isOpen, onClose, plan, onSave }: EditPlanModalProps) {
+export default function EditPlanModal({
+  isOpen,
+  onClose,
+  plan,
+  onSave,
+}: EditPlanModalProps) {
   const { language } = useLanguage();
   const [formData, setFormData] = useState({
     name: plan.name,
@@ -33,64 +38,72 @@ export default function EditPlanModal({ isOpen, onClose, plan, onSave }: EditPla
     sessionsCount: plan.sessionsCount,
     features: [...plan.features],
     isPopular: plan.isPopular,
-    status: plan.status
+    status: plan.status,
   });
 
   const text = {
-    title: { ar: 'تعديل الخطة', en: 'Edit Plan' },
-    nameAr: { ar: 'اسم الخطة (عربي)', en: 'Plan Name (Arabic)' },
-    nameEn: { ar: 'اسم الخطة (إنجليزي)', en: 'Plan Name (English)' },
-    description: { ar: 'الوصف', en: 'Description' },
-    price: { ar: 'السعر', en: 'Price' },
-    currency: { ar: 'العملة', en: 'Currency' },
-    duration: { ar: 'المدة (شهر)', en: 'Duration (Months)' },
-    sessionsCount: { ar: 'عدد الحصص', en: 'Sessions Count' },
-    features: { ar: 'المميزات', en: 'Features' },
-    addFeature: { ar: 'إضافة ميزة', en: 'Add Feature' },
-    isPopular: { ar: 'الأكثر شعبية', en: 'Most Popular' },
-    status: { ar: 'الحالة', en: 'Status' },
-    active: { ar: 'نشط', en: 'Active' },
-    inactive: { ar: 'غير نشط', en: 'Inactive' },
-    save: { ar: 'حفظ', en: 'Save' },
-    cancel: { ar: 'إلغاء', en: 'Cancel' },
-    featurePlaceholder: { ar: 'اكتب الميزة...', en: 'Enter feature...' }
+    title: { ar: "تعديل الخطة", en: "Edit Plan" },
+    nameAr: { ar: "اسم الخطة (عربي)", en: "Plan Name (Arabic)" },
+    nameEn: { ar: "اسم الخطة (إنجليزي)", en: "Plan Name (English)" },
+    description: { ar: "الوصف", en: "Description" },
+    price: { ar: "السعر", en: "Price" },
+    currency: { ar: "العملة", en: "Currency" },
+    duration: { ar: "المدة (شهر)", en: "Duration (Months)" },
+    sessionsCount: { ar: "عدد الحصص", en: "Sessions Count" },
+    features: { ar: "المميزات", en: "Features" },
+    addFeature: { ar: "إضافة ميزة", en: "Add Feature" },
+    isPopular: { ar: "الأكثر شعبية", en: "Most Popular" },
+    status: { ar: "الحالة", en: "Status" },
+    active: { ar: "نشط", en: "Active" },
+    inactive: { ar: "غير نشط", en: "Inactive" },
+    save: { ar: "حفظ", en: "Save" },
+    cancel: { ar: "إلغاء", en: "Cancel" },
+    featurePlaceholder: { ar: "اكتب الميزة...", en: "Enter feature..." },
   };
 
   const currencies = [
-    { code: 'EGP', nameAr: 'جنيه مصري', nameEn: 'Egyptian Pound' },
-    { code: 'USD', nameAr: 'دولار أمريكي', nameEn: 'US Dollar' },
-    { code: 'EUR', nameAr: 'يورو', nameEn: 'Euro' },
-    { code: 'GBP', nameAr: 'جنيه إسترليني', nameEn: 'British Pound' },
-    { code: 'SAR', nameAr: 'ريال سعودي', nameEn: 'Saudi Riyal' },
-    { code: 'AED', nameAr: 'درهم إماراتي', nameEn: 'UAE Dirham' },
-    { code: 'KWD', nameAr: 'دينار كويتي', nameEn: 'Kuwaiti Dinar' },
-    { code: 'QAR', nameAr: 'ريال قطري', nameEn: 'Qatari Riyal' }
+    { code: "EGP", nameAr: "جنيه مصري", nameEn: "Egyptian Pound" },
+    { code: "USD", nameAr: "دولار أمريكي", nameEn: "US Dollar" },
+    { code: "EUR", nameAr: "يورو", nameEn: "Euro" },
+    { code: "GBP", nameAr: "جنيه إسترليني", nameEn: "British Pound" },
+    { code: "SAR", nameAr: "ريال سعودي", nameEn: "Saudi Riyal" },
+    { code: "AED", nameAr: "درهم إماراتي", nameEn: "UAE Dirham" },
+    { code: "KWD", nameAr: "دينار كويتي", nameEn: "Kuwaiti Dinar" },
+    { code: "QAR", nameAr: "ريال قطري", nameEn: "Qatari Riyal" },
   ];
 
   if (!isOpen) return null;
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    const filteredFeatures = formData.features.filter(f => f.trim() !== '');
+    const filteredFeatures = formData.features.filter((f) => f.trim() !== "");
     if (filteredFeatures.length === 0) {
-      alert(language === 'ar' ? 'يجب إضافة ميزة واحدة على الأقل' : 'Please add at least one feature');
+      alert(
+        language === "ar"
+          ? "يجب إضافة ميزة واحدة على الأقل"
+          : "Please add at least one feature",
+      );
       return;
     }
     onSave({
       ...plan,
       ...formData,
-      features: filteredFeatures
+      features: filteredFeatures,
     });
+
     onClose();
   };
 
   const addFeature = () => {
-    setFormData({ ...formData, features: [...formData.features, ''] });
+    setFormData({ ...formData, features: [...formData.features, ""] });
   };
 
   const removeFeature = (index: number) => {
     const newFeatures = formData.features.filter((_, i) => i !== index);
-    setFormData({ ...formData, features: newFeatures.length > 0 ? newFeatures : [''] });
+    setFormData({
+      ...formData,
+      features: newFeatures.length > 0 ? newFeatures : [""],
+    });
   };
 
   const updateFeature = (index: number, value: string) => {
@@ -121,7 +134,9 @@ export default function EditPlanModal({ isOpen, onClose, plan, onSave }: EditPla
               <input
                 type="text"
                 value={formData.name}
-                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                onChange={(e) =>
+                  setFormData({ ...formData, name: e.target.value })
+                }
                 className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-right"
                 required
               />
@@ -134,7 +149,9 @@ export default function EditPlanModal({ isOpen, onClose, plan, onSave }: EditPla
               <input
                 type="text"
                 value={formData.nameEn}
-                onChange={(e) => setFormData({ ...formData, nameEn: e.target.value })}
+                onChange={(e) =>
+                  setFormData({ ...formData, nameEn: e.target.value })
+                }
                 className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-left"
                 required
               />
@@ -147,7 +164,9 @@ export default function EditPlanModal({ isOpen, onClose, plan, onSave }: EditPla
             </label>
             <textarea
               value={formData.description}
-              onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+              onChange={(e) =>
+                setFormData({ ...formData, description: e.target.value })
+              }
               className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-right resize-none"
               rows={3}
               required
@@ -162,7 +181,9 @@ export default function EditPlanModal({ isOpen, onClose, plan, onSave }: EditPla
               <input
                 type="number"
                 value={formData.price}
-                onChange={(e) => setFormData({ ...formData, price: e.target.value })}
+                onChange={(e) =>
+                  setFormData({ ...formData, price: e.target.value })
+                }
                 className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-right"
                 min="0"
                 required
@@ -175,10 +196,12 @@ export default function EditPlanModal({ isOpen, onClose, plan, onSave }: EditPla
               </label>
               <CustomSelect
                 value={formData.currency}
-                onChange={(value) => setFormData({ ...formData, currency: value as string })}
+                onChange={(value) =>
+                  setFormData({ ...formData, currency: value as string })
+                }
                 options={currencies.map((curr) => ({
                   value: curr.code,
-                  label: `${curr.code} - ${language === 'ar' ? curr.nameAr : curr.nameEn}`
+                  label: `${curr.code} - ${language === "ar" ? curr.nameAr : curr.nameEn}`,
                 }))}
               />
             </div>
@@ -192,7 +215,9 @@ export default function EditPlanModal({ isOpen, onClose, plan, onSave }: EditPla
               <input
                 type="number"
                 value={formData.duration}
-                onChange={(e) => setFormData({ ...formData, duration: e.target.value })}
+                onChange={(e) =>
+                  setFormData({ ...formData, duration: e.target.value })
+                }
                 className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-right"
                 min="1"
                 required
@@ -206,7 +231,12 @@ export default function EditPlanModal({ isOpen, onClose, plan, onSave }: EditPla
               <input
                 type="number"
                 value={formData.sessionsCount}
-                onChange={(e) => setFormData({ ...formData, sessionsCount: parseInt(e.target.value) || 0 })}
+                onChange={(e) =>
+                  setFormData({
+                    ...formData,
+                    sessionsCount: parseInt(e.target.value) || 0,
+                  })
+                }
                 className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-right"
                 min="0"
                 required
@@ -259,7 +289,9 @@ export default function EditPlanModal({ isOpen, onClose, plan, onSave }: EditPla
               <input
                 type="checkbox"
                 checked={formData.isPopular}
-                onChange={(e) => setFormData({ ...formData, isPopular: e.target.checked })}
+                onChange={(e) =>
+                  setFormData({ ...formData, isPopular: e.target.checked })
+                }
                 className="w-5 h-5 text-blue-600 border-gray-300 rounded focus:ring-2 focus:ring-blue-500"
               />
             </div>
@@ -270,10 +302,12 @@ export default function EditPlanModal({ isOpen, onClose, plan, onSave }: EditPla
               </label>
               <CustomSelect
                 value={formData.status}
-                onChange={(value) => setFormData({ ...formData, status: value as any })}
+                onChange={(value) =>
+                  setFormData({ ...formData, status: value as any })
+                }
                 options={[
-                  { value: 'active', label: text.active[language] },
-                  { value: 'inactive', label: text.inactive[language] }
+                  { value: "active", label: text.active[language] },
+                  { value: "inactive", label: text.inactive[language] },
                 ]}
               />
             </div>

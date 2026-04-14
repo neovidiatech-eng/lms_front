@@ -1,21 +1,30 @@
-import { useState } from 'react';
-import { Plus, Edit, Trash2, Eye, Package, CheckCircle } from 'lucide-react';
-import { useLanguage } from '../contexts/LanguageContext';
-import AddPlanModal from '../components/modals/AddPlanModal';
-import ViewPlanModal from '../components/modals/ViewPlanModal';
-type CurrencyCode = "EGP" | "USD" | "EUR" | "GBP" | "SAR" | "AED" | "KWD" | "QAR";
+import { useEffect, useState } from "react";
+import { Plus, Edit, Trash2, Eye, Package, CheckCircle } from "lucide-react";
+import { useLanguage } from "../contexts/LanguageContext";
+import AddPlanModal from "../components/modals/AddPlanModal";
+import ViewPlanModal from "../components/modals/ViewPlanModal";
+import { deletePlans, getPlans, updatePlan } from "../services/PlansServices";
+type CurrencyCode =
+  | "EGP"
+  | "USD"
+  | "EUR"
+  | "GBP"
+  | "SAR"
+  | "AED"
+  | "KWD"
+  | "QAR";
 interface Plan {
   id: string;
   name: string;
   nameEn: string;
   description: string;
-  price: number; 
+  price: number;
   currency: CurrencyCode;
-  duration: number; 
+  duration: number;
   sessionsCount: number;
   features: string[];
   isPopular: boolean;
-  status: 'active' | 'inactive';
+  status: "active" | "inactive";
 }
 
 export default function Plans() {
@@ -25,94 +34,146 @@ export default function Plans() {
   const [selectedPlan, setSelectedPlan] = useState<Plan | null>(null);
 
   const text = {
-    title: { ar: 'خطط الاشتراك', en: 'Subscription Plans' },
-    addPlan: { ar: 'إضافة خطة', en: 'Add Plan' },
-    edit: { ar: 'تعديل', en: 'Edit' },
-    delete: { ar: 'حذف', en: 'Delete' },
-    view: { ar: 'عرض', en: 'View' },
-    active: { ar: 'نشط', en: 'Active' },
-    inactive: { ar: 'غير نشط', en: 'Inactive' },
-    popular: { ar: 'الأكثر شعبية', en: 'Most Popular' },
-    sessions: { ar: 'حصة', en: 'sessions' },
-    month: { ar: 'شهر', en: 'month' },
-    noPlans: { ar: 'لا توجد خطط', en: 'No plans found' },
-    planDetails: { ar: 'تفاصيل الخطة', en: 'Plan Details' },
-    features: { ar: 'المميزات', en: 'Features' },
-    price: { ar: 'السعر', en: 'Price' },
-    duration: { ar: 'المدة', en: 'Duration' },
-    confirmDelete: { ar: 'هل أنت متأكد من حذف هذه الخطة؟', en: 'Are you sure you want to delete this plan?' }
+    title: { ar: "خطط الاشتراك", en: "Subscription Plans" },
+    addPlan: { ar: "إضافة خطة", en: "Add Plan" },
+    edit: { ar: "تعديل", en: "Edit" },
+    delete: { ar: "حذف", en: "Delete" },
+    view: { ar: "عرض", en: "View" },
+    active: { ar: "نشط", en: "Active" },
+    inactive: { ar: "غير نشط", en: "Inactive" },
+    popular: { ar: "الأكثر شعبية", en: "Most Popular" },
+    sessions: { ar: "حصة", en: "sessions" },
+    month: { ar: "شهر", en: "month" },
+    noPlans: { ar: "لا توجد خطط", en: "No plans found" },
+    planDetails: { ar: "تفاصيل الخطة", en: "Plan Details" },
+    features: { ar: "المميزات", en: "Features" },
+    price: { ar: "السعر", en: "Price" },
+    duration: { ar: "المدة", en: "Duration" },
+    confirmDelete: {
+      ar: "هل أنت متأكد من حذف هذه الخطة؟",
+      en: "Are you sure you want to delete this plan?",
+    },
   };
 
-  const [plans, setPlans] = useState<Plan[]>([
-    {
-      id: '1',
-      name: 'الباقة الأساسية',
-      nameEn: 'Basic Plan',
-      description: 'خطة مثالية للمبتدئين',
-      price: 500,
-      currency: 'EGP',
-      duration: 1,
-      sessionsCount: 12,
-      features: [
-        '12 حصة شهرياً',
-        'دعم فني على مدار الساعة',
-        'وصول للمواد التعليمية',
-        'تقارير الأداء الأسبوعية'
-      ],
-      isPopular: false,
-      status: 'active'
-    },
-    {
-      id: '2',
-      name: 'الباقة المتقدمة',
-      nameEn: 'Advanced Plan',
-      description: 'خطة شاملة مع مزايا إضافية',
-      price: 800,
-      currency: 'EGP',
-      duration: 1,
-      sessionsCount: 20,
-      features: [
-        '20 حصة شهرياً',
-        'دعم فني على مدار الساعة',
-        'وصول للمواد التعليمية',
-        'تقارير الأداء اليومية',
-        'حصص إضافية مجانية',
-        'متابعة شخصية'
-      ],
-      isPopular: true,
-      status: 'active'
-    },
-    {
-      id: '3',
-      name: 'الباقة البريميوم',
-      nameEn: 'Premium Plan',
-      description: 'أفضل خطة لأقصى استفادة',
-      price: 1200,
-      currency: 'EGP',
-      duration: 1,
-      sessionsCount: 30,
-      features: [
-        '30 حصة شهرياً',
-        'دعم فني على مدار الساعة',
-        'وصول للمواد التعليمية',
-        'تقارير الأداء اليومية',
-        'حصص إضافية مجانية',
-        'متابعة شخصية',
-        'ورش عمل حصرية',
-        'أولوية في الحجز'
-      ],
-      isPopular: false,
-      status: 'active'
-    }
-  ]);
+  // const [plans, setPlans] = useState<Plan[]>([
+  //   {
+  //     id: '1',
+  //     name: 'الباقة الأساسية',
+  //     nameEn: 'Basic Plan',
+  //     description: 'خطة مثالية للمبتدئين',
+  //     price: 500,
+  //     currency: 'EGP',
+  //     duration: 1,
+  //     sessionsCount: 12,
+  // features: [
+  //   '12 حصة شهرياً',
+  //   'دعم فني على مدار الساعة',
+  //   'وصول للمواد التعليمية',
+  //   'تقارير الأداء الأسبوعية'
+  // ],
+  //     isPopular: false,
+  //     status: 'active'
+  //   },
+  //   {
+  //     id: '2',
+  //     name: 'الباقة المتقدمة',
+  //     nameEn: 'Advanced Plan',
+  //     description: 'خطة شاملة مع مزايا إضافية',
+  //     price: 800,
+  //     currency: 'EGP',
+  //     duration: 1,
+  //     sessionsCount: 20,
+  //     features: [
+  //       '20 حصة شهرياً',
+  //       'دعم فني على مدار الساعة',
+  //       'وصول للمواد التعليمية',
+  //       'تقارير الأداء اليومية',
+  //       'حصص إضافية مجانية',
+  //       'متابعة شخصية'
+  //     ],
+  //     isPopular: true,
+  //     status: 'active'
+  //   },
+  //   {
+  //     id: '3',
+  //     name: 'الباقة البريميوم',
+  //     nameEn: 'Premium Plan',
+  //     description: 'أفضل خطة لأقصى استفادة',
+  //     price: 1200,
+  //     currency: 'EGP',
+  //     duration: 1,
+  //     sessionsCount: 30,
+  //     features: [
+  //       '30 حصة شهرياً',
+  //       'دعم فني على مدار الساعة',
+  //       'وصول للمواد التعليمية',
+  //       'تقارير الأداء اليومية',
+  //       'حصص إضافية مجانية',
+  //       'متابعة شخصية',
+  //       'ورش عمل حصرية',
+  //       'أولوية في الحجز'
+  //     ],
+  //     isPopular: false,
+  //     status: 'active'
+  //   }
+  // ]);
+  const [plans, setPlans] = useState<Plan[]>([]);
 
- const handleOpenAdd = () => {
+  useEffect(() => {
+    const fetchPlans = async () => {
+      try {
+        const data = await getPlans();
+
+        // const formatted = data.map((item: any) => ({
+        //   id: item.id,
+        //   name: item.name_ar,
+        //   nameEn: item.name_en,
+        //   description: "",
+        //   price: Number(item.price),
+        //   currency: item.currency?.code || "EGP",
+        //   duration: item.duration,
+        //   sessionsCount: 0,
+        //   features: [],
+        //   isPopular: item.bestSeller,
+        //   status: item.active ? "active" : "inactive",
+        // }));
+        const formatted = data.map((item: any) => ({
+          id: item.id,
+
+          name: item.name_ar,
+          nameEn: item.name_en,
+
+          description: item.description || "",
+
+          price: Number(item.price),
+
+          currency: item.currency?.code || "EGP",
+
+          duration: item.duration,
+
+          sessionsCount: item.hours || 0,
+
+          features: item.features || [],
+
+          isPopular: item.bestSeller,
+          status: item.active ? "active" : "inactive",
+        }));
+        setPlans(formatted);
+      } catch (error) {
+        console.log(error);
+      }
+    };
+
+    fetchPlans();
+  }, []);
+
+  const handleOpenAdd = () => {
     setSelectedPlan(null);
     setIsModalOpen(true);
   };
 
   const handleOpenEdit = (plan: Plan) => {
-    setSelectedPlan(plan); 
+    setSelectedPlan(plan);
     setIsModalOpen(true);
   };
   const handleViewPlan = (plan: Plan) => {
@@ -120,31 +181,71 @@ export default function Plans() {
     setShowViewModal(true);
   };
 
+  // const handleSavePlan = (planData: Omit<Plan, "id"> & { id?: string }) => {
+  //   if (planData.id) {
+  //     setPlans((prev) =>
+  //       prev.map((p) => (p.id === planData.id ? (planData as Plan) : p)),
+  //     );
+  //   } else {
+  //     const newPlan: Plan = {
+  //       ...planData,
+  //       id: Math.random().toString(36).substr(2, 9),
+  //     };
+  //     setPlans((prev) => [...prev, newPlan]);
+  //   }
+  //   setIsModalOpen(false);
+  //   setSelectedPlan(null);
+  // };
 
-const handleSavePlan = (planData: Omit<Plan, 'id'> & { id?: string }) => {
-  if (planData.id) {
-    setPlans(prev => prev.map(p => p.id === planData.id ? (planData as Plan) : p));
-  } else {
-    const newPlan: Plan = {
-      ...planData,
-      id: Math.random().toString(36).substr(2, 9), 
-    };
-    setPlans(prev => [...prev, newPlan]);
-  }
-  setIsModalOpen(false);
-  setSelectedPlan(null);
-};
+  const handleSavePlan = async (
+    planData: Omit<Plan, "id"> & { id?: string },
+  ) => {
+    try {
+      if (planData.id) {
+        await updatePlan(planData.id, {
+          name_ar: planData.name,
+          name_en: planData.nameEn,
+          price: Number(planData.price),
+          duration: Number(planData.duration),
+          hours: Number(planData.sessionsCount),
+          active: planData.status === "active",
+          bestSeller: planData.isPopular,
+          features: planData.features,
+        });
 
-  const handleDeletePlan = (id: string) => {
-    if (confirm(text.confirmDelete[language])) {
-      setPlans(plans.filter(p => p.id !== id));
+        setPlans((prev) =>
+          prev.map((p) => (p.id === planData.id ? (planData as Plan) : p)),
+        );
+      } else {
+        const newPlan: Plan = {
+          ...planData,
+          id: Math.random().toString(36).substr(2, 9),
+        };
+        setPlans((prev) => [...prev, newPlan]);
+      }
+
+      setIsModalOpen(false);
+      setSelectedPlan(null);
+    } catch (error) {
+      console.log(error);
     }
   };
+  const handleDeletePlan = async (id: string) => {
+    if (!confirm(text.confirmDelete[language])) return;
 
+    try {
+      await deletePlans(id);
+      setPlans((prev) => prev.filter((p) => p.id !== id));
+    } catch (error) {
+      console.log(error);
+    }
+  };
   return (
     <div className="p-6 space-y-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-bold text-gray-900">{text.title[language]}</h1>
+        <h1 className="text-3xl font-bold text-gray-900">
+          {text.title[language]}
+        </h1>
         <button
           onClick={handleOpenAdd}
           className="flex items-center gap-2 px-6 py-3 btn-primary text-white rounded-xl transition-colors font-medium"
@@ -168,8 +269,8 @@ const handleSavePlan = (planData: Omit<Plan, 'id'> & { id?: string }) => {
               key={plan.id}
               className={`bg-white rounded-2xl shadow-sm border-2 transition-all hover:shadow-xl ${
                 plan.isPopular
-                  ? 'border-blue-500 ring-4 ring-blue-100'
-                  : 'border-gray-200'
+                  ? "border-blue-500 ring-4 ring-blue-100"
+                  : "border-gray-200"
               }`}
             >
               {plan.isPopular && (
@@ -182,25 +283,31 @@ const handleSavePlan = (planData: Omit<Plan, 'id'> & { id?: string }) => {
                 <div className="flex items-start justify-between mb-4">
                   <div className="flex-1 text-right">
                     <h3 className="text-2xl font-bold text-gray-900 mb-2">
-                      {language === 'ar' ? plan.name : plan.nameEn}
+                      {language === "ar" ? plan.name : plan.nameEn}
                     </h3>
                     <p className="text-gray-600 text-sm">{plan.description}</p>
                   </div>
-                  <span className={`px-3 py-1 rounded-full text-xs font-medium border ${
-                    plan.status === 'active'
-                      ? 'bg-green-50 text-green-700 border-green-200'
-                      : 'bg-gray-50 text-gray-700 border-gray-200'
-                  }`}>
+                  <span
+                    className={`px-3 py-1 rounded-full text-xs font-medium border ${
+                      plan.status === "active"
+                        ? "bg-green-50 text-green-700 border-green-200"
+                        : "bg-gray-50 text-gray-700 border-gray-200"
+                    }`}
+                  >
                     {text[plan.status][language]}
                   </span>
                 </div>
 
                 <div className="bg-gradient-to-br from-blue-50 to-cyan-50 rounded-xl p-6 mb-6 text-center">
                   <div className="flex items-baseline justify-center gap-2">
-                    <span className="text-5xl font-bold text-gray-900">{plan.price}</span>
+                    <span className="text-5xl font-bold text-gray-900">
+                      {plan.price}
+                    </span>
                     <div className="text-right">
                       <div className="text-gray-600">{plan.currency}</div>
-                      <div className="text-sm text-gray-500">/{text.month[language]}</div>
+                      <div className="text-sm text-gray-500">
+                        /{text.month[language]}
+                      </div>
                     </div>
                   </div>
                   <div className="mt-3 text-sm text-gray-600">
@@ -209,11 +316,18 @@ const handleSavePlan = (planData: Omit<Plan, 'id'> & { id?: string }) => {
                 </div>
 
                 <div className="space-y-3 mb-6">
-                  <h4 className="text-sm font-semibold text-gray-900 text-right">{text.features[language]}</h4>
+                  <h4 className="text-sm font-semibold text-gray-900 text-right">
+                    {text.features[language]}
+                  </h4>
                   {plan.features.map((feature, index) => (
-                    <div key={index} className="flex items-start gap-3 text-right">
+                    <div
+                      key={index}
+                      className="flex items-start gap-3 text-right"
+                    >
                       <CheckCircle className="w-5 h-5 text-green-500 flex-shrink-0 mt-0.5" />
-                      <span className="text-sm text-gray-700 flex-1">{feature}</span>
+                      <span className="text-sm text-gray-700 flex-1">
+                        {feature}
+                      </span>
                     </div>
                   ))}
                 </div>
@@ -250,9 +364,9 @@ const handleSavePlan = (planData: Omit<Plan, 'id'> & { id?: string }) => {
 
       <AddPlanModal
         isOpen={isModalOpen}
-        onClose={()=> {
-          setIsModalOpen(false)
-        setSelectedPlan(null);
+        onClose={() => {
+          setIsModalOpen(false);
+          setSelectedPlan(null);
         }}
         onSave={handleSavePlan}
         initialData={selectedPlan}
@@ -268,7 +382,6 @@ const handleSavePlan = (planData: Omit<Plan, 'id'> & { id?: string }) => {
             }}
             plan={selectedPlan}
           />
-        
         </>
       )}
     </div>

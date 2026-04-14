@@ -168,6 +168,7 @@
   "deleteConfirmStudent": "هل أنت متأكد من حذف هذا الطالب؟",
   "errorDeletingStudent": "حدث خطأ أثناء حذف الطالب",
   "plan": "الخطة",
+  "noPlan": "بدون خطة",
   "hours": "الساعات",
   "sessionCalendar": "تقويم الحصص",
   "sessionCalendarSubtitle": "إدارة وتتبع جميع الحصص الدراسية",
@@ -210,7 +211,6 @@
   "sidebar_agenda": "الأجندة",
   "sidebar_exams": "الامتحانات",
   "sidebar_assignments": "الواجبات",
-  "sidebar_subscriptions": "الاشتراكات",
   "sidebar_subscription_requests": "طلبات الاشتراك",
   "sidebar_all_subscriptions": "كل الاشتراكات",
   "sidebar_plans": "الخطط",
@@ -285,7 +285,7 @@
   "courses_table_files": "ملفات",
   "courses_table_actions": "إجراءات",
   "courses_empty": "لا توجد كورسات حالياً",
-  "courses_filter": " جرب تغيير فلتر البحث",
+  "courses_filter": "جرب تغيير فلتر البحث",
   "profile": "الملف الشخصى",
   "logout": "تسجيل الخروج",
   "teacherDashboard": "لوحة المعلم",
@@ -373,6 +373,8 @@
   "courses_manage_levels": "إدارة المستويات",
   "courses_no_levels": "لا توجد مستويات مضافة حالياً",
   "courses_add_level_title": "إضافة مستوى جديد",
+  "courses_level_name_placeholder": "أدخل اسم المستوى (مثلاً: تمهيدي)"
+}
   "courses_level_name_placeholder": "أدخل اسم المستوى (مثلاً: تمهيدي)",
   "planned": "مخططة",
   "sessionDetails": "تفاصيل الحصة",
