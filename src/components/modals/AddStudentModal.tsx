@@ -41,7 +41,7 @@ export default function AddStudentModal({ isOpen, onClose, onSubmit }: AddStuden
     { code: '+965', country: t('kuwait') },
   ];
 
-  const plans = plansData?.data || [];
+  const plans = plansData || [];
 
   const planOptions = [
     { value: '', label: t('noPlan') },

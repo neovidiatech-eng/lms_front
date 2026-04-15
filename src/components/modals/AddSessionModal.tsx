@@ -79,9 +79,9 @@ export default function AddSessionModal({ isOpen, onClose, onAdd }: AddSessionMo
 
   const selectedStudentData = students.find(s => s.id === selectedStudent);
   const selectedStudentPackage = selectedStudentData ? {
-    name: selectedStudentData.plan?.name || (language === 'ar' ? 'لا يوجد باقة' : 'No Package'),
-    sessionsRemaining: selectedStudentData.hours_remaining || 0,
-    totalSessions: selectedStudentData.hours || 0,
+    name: language === 'ar' ? selectedStudentData.plan?.name_ar : selectedStudentData.plan?.name_en || 'No Package',
+    sessionsRemaining: selectedStudentData.sessions_remaining || 0,
+    totalSessions: selectedStudentData.sessions || 0,
   } : null;
 
 
@@ -154,7 +154,7 @@ export default function AddSessionModal({ isOpen, onClose, onAdd }: AddSessionMo
                 <div className="grid grid-cols-3 gap-4 text-right">
                   <div>
                     <p className="text-xs text-blue-600 mb-1">{t('packageName')}</p>
-                    <p className="text-sm font-medium text-blue-900">{language === 'ar' ? selectedStudentData?.plan.name_ar : selectedStudentData?.plan.name_en}</p>
+                    <p className="text-sm font-medium text-blue-900">{language === 'ar' ? selectedStudentData?.plan?.name_ar : selectedStudentData?.plan?.name_en}</p>
                   </div>
                   <div>
                     <p className="text-xs text-blue-600 mb-1">{t('sessionsRemaining')}</p>

@@ -124,8 +124,5 @@ export interface Pagination {
 export interface GetSessionsResponse {
     message: string;
     status: number;
-    data: {
-        schedule: Schedule[];
-        pagination: Pagination;
-    };
+    data: Schedule[];
 }

@@ -1,22 +1,20 @@
 import { X, Calendar, Clock, User, GraduationCap, BookOpen, Video, MapPin, FileText } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { Schedule } from '../../types/scheduales';
-import { useGetSchedulesByTeacher } from '../../features/admin/hooks/useSchedules';
 
 interface ViewSessionModalProps {
   isOpen: boolean;
   onClose: () => void;
   session: Schedule | null;
   groupedSessions?: Schedule[];
+  allSessions: Schedule[];
 }
 
-export default function ViewSessionModal({ isOpen, onClose, session, groupedSessions }: ViewSessionModalProps) {
+export default function ViewSessionModal({ isOpen, onClose, session, groupedSessions, allSessions }: ViewSessionModalProps) {
   const { t, i18n } = useTranslation();
   const language = i18n.language.split('-')[0];
 
-  const teacherId = session?.teacherId || '';
-  const { data: teacherSchedules } = useGetSchedulesByTeacher(teacherId);
-  const teacherSessions = teacherSchedules?.data?.schedule || [];
+
 
   const getStatusStyle = (status: string) => {
     switch (status?.toLowerCase()) {
@@ -267,17 +265,17 @@ export default function ViewSessionModal({ isOpen, onClose, session, groupedSess
             </div>
 
             {/* Other sessions by same teacher */}
-            {teacherSessions.length > 1 && (
+            {allSessions.length > 1 && (
               <div className="bg-white border border-gray-200 rounded-2xl overflow-hidden">
                 <div className="bg-gray-50 px-6 py-4 border-b border-gray-200">
                   <h3 className="text-lg font-bold text-gray-900 text-right">
-                    {t('otherTeacherSessions')} ({teacherSessions.length})
+                    {t('otherTeacherSessions')} ({allSessions.length})
                   </h3>
                 </div>
 
                 <div className="p-4 max-h-72 overflow-y-auto no-scrollbar">
                   <div className="space-y-3">
-                    {teacherSessions
+                    {allSessions
                       .filter(s => s.id !== session.id)
                       .map((s) => {
                         const { date, time } = formatDateTime(s.start_time);

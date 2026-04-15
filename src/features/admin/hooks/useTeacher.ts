@@ -12,6 +12,7 @@ export const useTeacherById = (id: string) => {
     return useQuery({
         queryKey: ["teachers", id],
         queryFn: () => getTeacherById(id),
+        enabled: !!id,
     })
 }
 export const useUpdateTeacher = () => {

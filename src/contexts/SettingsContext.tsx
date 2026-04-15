@@ -34,7 +34,7 @@ export interface PlatformSettings {
 }
 
 const defaultSettings: PlatformSettings = {
-  name: 'أكاديمية التميز',
+  name: 'Neovidia',
   description: 'منصة تعليمية متكاملة لإدارة الكورسات والطلاب',
   logoUrl: '',
   faviconUrl: '',
@@ -43,7 +43,7 @@ const defaultSettings: PlatformSettings = {
   accentColor: '#06b6d4',
   fontFamily: 'Almarai',
   seo: {
-    metaTitle: 'أكاديمية التميز - منصة تعليمية',
+    metaTitle: 'Neovidia',
     metaDescription: 'منصة تعليمية متكاملة لإدارة الكورسات والطلاب والمعلمين',
     keywords: 'أكاديمية, تعليم, كورسات, طلاب, معلمين',
     ogImage: '',
@@ -84,7 +84,7 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
     try {
       const saved = localStorage.getItem(STORAGE_KEY);
       if (saved) return { ...defaultSettings, ...JSON.parse(saved) };
-    } catch {}
+    } catch { }
     return defaultSettings;
   });
 
