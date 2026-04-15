@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { Search, Plus, Eye, Trash2, Edit } from 'lucide-react';
 import Pagination from '../../../components/ui/Pagination';
 import { useTranslation } from 'react-i18next';
-import { useGetSchedules, useSearchSchedules, useCreateSchedule, useCreateRecurringSchedule, useUpdateSchedule, useDeleteSchedule, useDeleteGroupedSchedule } from '../hooks/useSchedules';
+import { useSearchSchedules, useCreateSchedule, useCreateRecurringSchedule, useUpdateSchedule, useDeleteSchedule, useDeleteGroupedSchedule } from '../hooks/useSchedules';
 import AddSessionModal from '../../../components/modals/AddSessionModal';
 import AddMultipleSessionsModal from '../../../components/modals/AddMultipleSessionsModal';
 import ViewSessionModal from '../../../components/modals/ViewSessionModal';
@@ -120,11 +120,10 @@ export default function Sessions() {
     }
   }, [searchTerm]);
 
-  const { data: allSchedules } = useGetSchedules();
   const { data: searchResults } = useSearchSchedules(debouncedSearch);
 
   const itemsPerPage = 5;
-  const scheduleData = (debouncedSearch ? searchResults?.data?.schedule : allSchedules?.data?.schedule) || [];
+  const scheduleData = (debouncedSearch ? searchResults?.data?.schedule : searchResults?.data?.schedule) || [];
 
   const displaySchedules: Schedule[] = [];
   const seenParents = new Set<string>();

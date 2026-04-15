@@ -6,6 +6,7 @@ import { Subject } from '../../../types/subject';
 import { useSubjects, useAddSubject, useUpdateSubject, useDeleteSubject } from '../hooks/useSubjects';
 import { SubjectFormData } from '../../../lib/schemas/SubjectsSchema';
 import { TableSkeleton } from '../../../components/ui/CustomSkeleton';
+import { useConfirm } from '../../../hooks/useConfirm';
 
 function getColorClasses(colorId: string) {
   return COLORS.find(c => c.id === colorId) || COLORS[0];
@@ -23,6 +24,7 @@ export default function Subjects() {
   const { mutate: addSubject } = useAddSubject();
   const { mutate: updateSubject } = useUpdateSubject();
   const { mutate: deleteSubject } = useDeleteSubject();
+  const { confirm, ConfirmDialog } = useConfirm();
 
   const subjects = data?.subjects ?? [];
 
@@ -50,10 +52,14 @@ export default function Subjects() {
     setEditingSubject(null);
   };
 
-  const handleDelete = (id: string) => {
+  const handleDelete = async (id: string) => {
     const subject = subjects.find(s => s.id === id);
     const name = subject ? (language === 'ar' ? subject.name_ar : subject.name_en) : '';
-    if (window.confirm(language === 'ar' ? `هل أنت متأكد من حذف "${name}"؟` : `Delete "${name}"?`)) {
+    const confirmed = await confirm({
+      title: language === 'ar' ? 'حذف مادة' : 'Delete Subject',
+      message: language === 'ar' ? `هل أنت متأكد من حذف "${name}"؟` : `Are you sure you want to delete "${name}"?`,
+    });
+    if (confirmed) {
       deleteSubject(id);
     }
   };
@@ -233,6 +239,7 @@ export default function Subjects() {
           onCancel={() => setEditingSubject(null)}
         />
       )}
+      {ConfirmDialog}
     </div>
   );
 }

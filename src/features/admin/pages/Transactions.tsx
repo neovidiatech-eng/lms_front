@@ -5,6 +5,7 @@ import { useSessions } from '../../../contexts/SessionsContext';
 import ViewTransactionModal from '../../../components/modals/ViewTransactionModal';
 import { TransactionFormData } from '../../../lib/schemas/TransactionSchema';
 import AddTransactionModal from '../../../components/modals/AddTransactionModal';
+import { useConfirm } from '../../../hooks/useConfirm';
 
 export interface Transaction {
   id: string;
@@ -97,6 +98,7 @@ export default function Transactions() {
 const [isModalOpen, setIsModalOpen] = useState(false);
 const [selectedTransaction, setSelectedTransaction] = useState<Transaction | null>(null);
   const [showViewModal, setShowViewModal] = useState(false);
+  const { confirm, ConfirmDialog } = useConfirm();
  
 
   const text = {
@@ -210,8 +212,12 @@ const [selectedTransaction, setSelectedTransaction] = useState<Transaction | nul
     return CURRENCIES.find(c => c.code === code)?.symbol || code;
   };
 
-  const handleDelete = (id: string) => {
-    if (window.confirm(text.confirmDelete[language])) {
+  const handleDelete = async (id: string) => {
+    const confirmed = await confirm({
+      title: language === 'ar' ? 'حذف معاملة' : 'Delete Transaction',
+      message: text.confirmDelete[language],
+    });
+    if (confirmed) {
       setTransactions(prev => prev.filter(t => t.id !== id));
     }
   };
@@ -529,6 +535,7 @@ const handleSaveTransaction = (data: TransactionFormData) => {
           selectedCurrency={selectedCurrency}
         />
       )}
+      {ConfirmDialog}
     </div>
   );
 }

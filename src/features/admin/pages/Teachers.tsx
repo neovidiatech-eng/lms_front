@@ -12,6 +12,7 @@ import { CreateTeacherInput, Teacher } from '../../../types/teachers';
 import { TeacherFormData } from '../../../lib/schemas/TeacherSchema';
 import { useCurrency } from '../hooks/useCurrency';
 import ErrorService from '../../../utils/ErrorService';
+import { useConfirm } from '../../../hooks/useConfirm';
 
 export default function Teachers() {
   const { t, i18n } = useTranslation();
@@ -40,6 +41,7 @@ export default function Teachers() {
   const deleteTeacherMutation = useDeleteTeacher();
   const createTeacherMutation = useCreateTeacher();
   const updateTeacherMutation = useUpdateTeacher();
+  const { confirm, ConfirmDialog } = useConfirm();
 
   // Bulletproof data extraction
   const teachers = useMemo(() => {
@@ -175,7 +177,11 @@ export default function Teachers() {
   };
 
   const handleDeleteTeacher = async (teacherId: string) => {
-    if (window.confirm(t('deleteConfirmTeacher'))) {
+    const confirmed = await confirm({
+      title: t('deleteTeacher'),
+      message: t('deleteConfirmTeacher'),
+    });
+    if (confirmed) {
       try {
         await deleteTeacherMutation.mutateAsync(teacherId);
         ErrorService.success(t('teacher Deleted Success'));
@@ -410,6 +416,7 @@ export default function Teachers() {
         onSubmit={handleUpdateTeacher}
         teacher={selectedTeacher}
       />
+      {ConfirmDialog}
     </div>
   );
 }

@@ -9,6 +9,7 @@ import {
   deleteSubscriptionRequest,
   getSubscriptionRequests,
 } from "../services/subscriptionRequestServices";
+import { useConfirm } from "../../../hooks/useConfirm";
 
 interface Subscription {
   id: string;
@@ -34,6 +35,7 @@ export default function AllSubscriptions() {
   const [selectedSubscription, setSelectedSubscription] =
     useState<Subscription | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const { confirm, ConfirmDialog } = useConfirm();
   const itemsPerPage = 10;
 
   const text = {
@@ -175,7 +177,11 @@ export default function AllSubscriptions() {
   // };
 
   const handleDelete = async (id: string) => {
-    if (!confirm(text.confirmDelete[language])) return;
+    const confirmed = await confirm({
+      title: language === "ar" ? "حذف اشتراك" : "Delete Subscription",
+      message: text.confirmDelete[language],
+    });
+    if (!confirmed) return;
 
     try {
       setDeletingId(id);
@@ -384,6 +390,7 @@ export default function AllSubscriptions() {
           />
         </>
       )}
+      {ConfirmDialog}
     </div>
   );
 }

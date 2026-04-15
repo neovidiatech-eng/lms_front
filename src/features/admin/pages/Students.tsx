@@ -10,6 +10,7 @@ import { useTranslation } from 'react-i18next';
 import { useStudents, useCreateStudent, useUpdateStudent, useDeleteStudent } from '../hooks/useStudents';
 import { Student } from '../../../types/student';
 import ErrorService from '../../../utils/ErrorService';
+import { useConfirm } from '../../../hooks/useConfirm';
 
 
 export default function Students() {
@@ -32,6 +33,7 @@ export default function Students() {
   const { mutateAsync: createStudent } = useCreateStudent();
   const { mutateAsync: updateStudent } = useUpdateStudent();
   const { mutateAsync: deleteStudent } = useDeleteStudent();
+  const { confirm, ConfirmDialog } = useConfirm();
 
   const stats = [
     {
@@ -46,20 +48,20 @@ export default function Students() {
     {
       id: 'active',
       label: t('activeStudents'),
-      value: studentsList.filter(student => student.status === 'pending').length,
+      value: studentsList.filter(student => student.status === 'approved').length,
       icon: UserCheck,
       bgColor: 'bg-green-50',
       iconColor: 'text-green-600',
       valueColor: 'text-green-600',
     },
     {
-      id: 'suspended',
-      label: t('suspendedStudents'),
-      value: 0,
+      id: 'pending',
+      label: t('pendingStudents'),
+      value: studentsList.filter(student => student.status === 'pending').length,
       icon: UserX,
-      bgColor: 'bg-red-50',
-      iconColor: 'text-red-600',
-      valueColor: 'text-red-600',
+      bgColor: 'bg-orange-50',
+      iconColor: 'text-orange-600',
+      valueColor: 'text-orange-600',
     },
     {
       id: 'plans',
@@ -116,11 +118,11 @@ export default function Students() {
   };
 
   const handleDeleteStudent = async (studentId: string) => {
-    if (
-      window.confirm(
-        t('deleteConfirmStudent')
-      )
-    ) {
+    const confirmed = await confirm({
+      title: t('deleteStudent'),
+      message: t('deleteConfirmStudent'),
+    });
+    if (confirmed) {
       try {
         await deleteStudent(studentId);
         ErrorService.success(t('studentDeletedSuccess'));
@@ -274,18 +276,18 @@ export default function Students() {
                   </td>
                   <td className="px-6 py-4">
                     <span className="inline-flex px-3 py-1 bg-purple-50 text-purple-700 rounded-full text-xs font-medium border border-purple-100">
-                      {student.plan.name_ar || student.plan.name_en || t('noPlan')}
+                      {student.plan?.name_ar || student.plan?.name_en || t('noPlan')}
                     </span>
                   </td>
                   <td className="px-6 py-4">
                     <div className="text-right">
                       <div className="text-sm font-medium text-gray-900">
-                        {student.hours_attended} / {student.hours}
+                        {student.sessions_attended} / {student.sessions}
                       </div>
                       <div className="w-24 h-1.5 bg-gray-100 rounded-full mt-1 overflow-hidden ml-auto">
                         <div
                           className="h-full bg-blue-500 rounded-full transition-all duration-500"
-                          style={{ width: `${student.hours > 0 ? (student.hours_attended / student.hours) * 100 : 0}%` }}
+                          style={{ width: `${student.sessions > 0 ? (student.sessions_attended / student.sessions) * 100 : 0}%` }}
                         />
                       </div>
                     </div>
@@ -295,16 +297,16 @@ export default function Students() {
                   </td>
                   <td className="px-6 py-4">
                     <span
-                      className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${student.status === 'active'
+                      className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${student.status === 'approved'
                         ? 'bg-green-100 text-green-700'
                         : student.status === 'pending'
                           ? 'bg-orange-100 text-orange-700'
                           : 'bg-gray-100 text-gray-700'
                         }`}
                     >
-                      <span className={`w-1.5 h-1.5 rounded-full mr-1.5 ${student.status === 'active' ? 'bg-green-500' : student.status === 'pending' ? 'bg-orange-500' : 'bg-gray-500'
+                      <span className={`w-1.5 h-1.5 rounded-full ${language === 'ar' ? 'ml-1.5' : 'mr-1.5'} ${student.status === 'approved' ? 'bg-green-500' : student.status === 'pending' ? 'bg-orange-500' : 'bg-gray-500'
                         }`} />
-                      {student.status === 'active' ? t('active') : student.status === 'pending' ? t('pending') : t('inactive')}
+                      {student.status === 'approved' ? t('active') : student.status === 'pending' ? t('pending') : t('inactive')}
                     </span>
                   </td>
                   <td className="px-6 py-4">
@@ -357,11 +359,12 @@ export default function Students() {
               name: studentData.name,
               email: studentData.email,
               phone: studentData.countryCode + studentData.phone.replace(/^0/, ''),
-              phone_code: studentData.countryCode,
+              code_country: studentData.countryCode,
               birth_date: (studentData.birthDate && studentData.birthDate !== "") ? new Date(studentData.birthDate).toISOString() : null,
               gender: studentData.gender,
               country: studentData.country,
-              active: studentData.status === 'active',
+              status: studentData.status,
+              active: studentData.status === 'approved',
             };
 
             // Only include planId if it's a valid GUID string (not empty)
@@ -400,7 +403,7 @@ export default function Students() {
               phone: selectedStudent.user.phone,
               countryCode: selectedStudent.user.code_country,
               country: selectedStudent.country ? selectedStudent.country.toLowerCase() : 'egypt',
-              status: (selectedStudent.status || (selectedStudent.active ? 'active' : 'inactive')) as 'active' | 'inactive' | 'pending',
+              status: (selectedStudent.status || 'pending') as any,
               gender: selectedStudent.gender || 'male',
               plan: selectedStudent.planId || '',
               birthDate: selectedStudent.birth_date ? selectedStudent.birth_date.split('T')[0] : '',
@@ -411,13 +414,14 @@ export default function Students() {
           try {
             const payload: any = {
               name: updatedData.name,
-              // Backend expects combined phone and separate phone_code
+              // Backend expects combined phone and separate code_country
               phone: updatedData.countryCode + updatedData.phone.replace(/^0/, ''),
-              phone_code: updatedData.countryCode,
+              code_country: updatedData.countryCode,
               country: updatedData.country,
               birth_date: (updatedData.birthDate && updatedData.birthDate !== "") ? new Date(updatedData.birthDate).toISOString() : null,
               gender: updatedData.gender,
-              active: updatedData.status === 'active',
+              status: updatedData.status,
+              active: updatedData.status === 'approved',
             };
 
             if (updatedData.plan && updatedData.plan.trim() !== "") {
@@ -438,6 +442,7 @@ export default function Students() {
           }
         }}
       />
+      {ConfirmDialog}
     </div>
   );
 }

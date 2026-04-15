@@ -51,12 +51,11 @@ export default function Header({ onMenuClick, userRole, isCollapsed }: HeaderPro
   }
 
   return (
-    <header 
-      className={`bg-white border-b border-gray-200 sticky top-0 z-40 transition-all duration-300 ${
-        isRtl 
-          ? (isCollapsed ? 'lg:mr-20' : 'lg:mr-72') 
+    <header
+      className={`bg-white border-b border-gray-200 sticky top-0 z-40 transition-all duration-300 ${isRtl
+          ? (isCollapsed ? 'lg:mr-20' : 'lg:mr-72')
           : (isCollapsed ? 'lg:ml-20' : 'lg:ml-72')
-      }`}
+        }`}
     >
       <div className="flex items-center justify-between px-4 py-3">
         <div className="flex items-center gap-4">
@@ -126,10 +125,6 @@ export default function Header({ onMenuClick, userRole, isCollapsed }: HeaderPro
                     <p className="text-xs text-gray-500 text-right">{email}</p>
                   </div>
                   <div className="py-2">
-                    <button className="w-full px-4 py-2 text-right hover:bg-gray-50 transition-colors flex items-center justify-end gap-2">
-                      <span className="text-sm text-gray-700"> {t('profile')}</span>
-                      <User className="w-4 h-4 text-gray-500" />
-                    </button>
                     <button onClick={handleLogout} className="w-full px-4 py-2 text-right hover:bg-red-50 transition-colors flex items-center justify-end gap-2 text-red-600">
                       <span className="text-sm font-medium"> {t('logout')}</span>
                       <LogOut className="w-4 h-4" />

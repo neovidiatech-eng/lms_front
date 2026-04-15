@@ -13,14 +13,14 @@ export type Plan = {
   description: string;
   price: string | number;
   duration: number;
-  hours: number;
+  sessionsCount: number;
   features: string[];
   currencyId: string;
   active: boolean;
   bestSeller: boolean;
-  currency: Currency;
-  created_at?: string;
-  updated_at?: string;
+  currency?: Currency;
+  createdAt: string;
+  updatedAt: string;
 };
 
 export type PlansResponse = {

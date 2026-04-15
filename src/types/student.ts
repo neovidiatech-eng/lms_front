@@ -1,4 +1,6 @@
-export type StudentStatus = 'pending' | 'active' | 'inactive';
+import { Plan } from "./plan";
+
+export type StudentStatus = 'pending' | 'approved' | 'rejected';
 
 export interface UserDetails {
     id: string;
@@ -22,14 +24,14 @@ export interface Student {
     active: boolean;
     createdAt: string;
     updatedAt: string;
-    hours: number;
-    hours_attended: number;
-    hours_remaining: number;
+    sessions: number;
+    sessions_attended: number;
+    sessions_remaining: number;
     planId: string | null;
     country: string;
     status: StudentStatus;
     user: UserDetails;
-    plan: any | null;
+    plan: Plan | null;
 }
 
 export interface StudentsFetchResponse {

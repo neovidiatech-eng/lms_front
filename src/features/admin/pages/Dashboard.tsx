@@ -1,20 +1,14 @@
 import { DollarSign, Calendar, Users, GraduationCap, Clock, FileText, CheckCircle, AlertCircle, Sparkles } from 'lucide-react';
 import { useState } from 'react';
-import { Outlet, useLocation } from 'react-router-dom';
-import DashboardLayout from '../../../components/layout/DashboardLayout';
 import { useSettings } from '../../../contexts/SettingsContext';
 import SubscribePlanModal from '../../../components/modals/SubscribePlanModal';
 import { useTranslation } from 'react-i18next';
 
 export default function Dashboard() {
   const { t } = useTranslation();
-  const location = useLocation();
   const { settings } = useSettings();
   const [showSubscribeModal, setShowSubscribeModal] = useState(false);
 
-  const isHome = location.pathname === '/dashboard' || location.pathname === '/dashboard/';
-
-  // Mock data - TODO: Replace with API calls
   const stats = {
     students: { total: 22, new: 0, active: 22 },
     teachers: { total: 7, new: 0, active: 7 },
@@ -243,9 +237,7 @@ export default function Dashboard() {
 
   return (
     <>
-      <DashboardLayout>
-        {isHome ? renderDashboardHome() : <Outlet />}
-      </DashboardLayout>
+      {renderDashboardHome()}
       <SubscribePlanModal isOpen={showSubscribeModal} onClose={() => setShowSubscribeModal(false)} />
     </>
   );

@@ -7,12 +7,14 @@ import { useCurrency, useAddCurrency, useUpdateCurrency, useDeleteCurrency, useC
 import { Currency } from '../../../types/currency';
 import { CurrencyFormData } from '../../../lib/schemas/CurrencySchema';
 import { TableSkeleton } from '../../../components/ui/CustomSkeleton';
+import { useConfirm } from '../../../hooks/useConfirm';
 
 export default function Currencies() {
   const { language } = useLanguage();
   const [showAddModal, setShowAddModal] = useState(false);
   const [showViewModal, setShowViewModal] = useState(false);
   const [selectedCurrency, setSelectedCurrency] = useState<Currency | null>(null);
+  const { confirm, ConfirmDialog } = useConfirm();
   const [searchQuery, setSearchQuery] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
 
@@ -64,13 +66,17 @@ export default function Currencies() {
     setSelectedCurrency(null);
   };
 
-  const handleDeleteCurrency = (id: string) => {
+  const handleDeleteCurrency = async (id: string) => {
     const currency = currencies.find(c => c.id === id);
     if (currency?.default) {
       alert(text.cannotDeleteDefault[language]);
       return;
     }
-    if (window.confirm(text.confirmDelete[language])) {
+    const confirmed = await confirm({
+      title: language === 'ar' ? 'حذف عملة' : 'Delete Currency',
+      message: text.confirmDelete[language],
+    });
+    if (confirmed) {
       deleteCurrency(id);
     }
   };
@@ -260,6 +266,7 @@ export default function Currencies() {
           currency={currencyDetails || selectedCurrency}
         />
       )}
+      {ConfirmDialog}
     </div>
   );
 }

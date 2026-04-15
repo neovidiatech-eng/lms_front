@@ -11,42 +11,56 @@ import {
 } from 'lucide-react';
 import { useState } from 'react';
 import SubscribePlanModal from '../../../components/modals/SubscribePlanModal';
+import { useProfile } from '../hooks/useProfile';
 
 export default function StudentProfile() {
-  const { i18n } = useTranslation();
+  const { i18n, t } = useTranslation();
   const { settings } = useSettings();
   const isRtl = i18n.language.split('-')[0] === 'ar';
 
   const [isPlanModalOpen, setIsPlanModalOpen] = useState(false);
 
-  // Mock Data for the Profile
+  const { data: profileResponse, isLoading, error } = useProfile();
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary" style={{ borderTopColor: settings.primaryColor }}></div>
+      </div>
+    );
+  }
+
+  if (error || !profileResponse?.data) {
+    return (
+      <div className="text-center py-20 bg-white rounded-2xl border border-dashed border-gray-300">
+        <div className="text-gray-400 mb-4">
+          <User className="w-12 h-12 mx-auto opacity-20" />
+        </div>
+        <p className="text-gray-500">{t('errors.failedToLoadProfile') || 'Failed to load profile'}</p>
+      </div>
+    );
+  }
+
+  const profileData = profileResponse.data;
+  const user = profileData.user;
+  const plan = profileData.plan;
+
   const studentInfo = {
-    name: isRtl ? 'أحمد محمد عبد الله' : 'Ahmed Mohamed Abdullah',
-    email: 'ahmed.student@example.com',
-    phone: '+20 123 456 7890',
-    birthDate: '2005-08-15',
-    country: isRtl ? 'مصر' : 'Egypt',
-    joinDate: '2023-11-01',
-    progress: 75,
+    name: user.name,
+    email: user.email,
+    phone: `${user.code_country} ${user.phone}`,
+    birthDate: profileData.birth_date ? profileData.birth_date.split('T')[0] : '-',
+    country: profileData.country,
+    progress: (profileData.sessions_attended / profileData.sessions) * 100,
   };
 
   const subscriptionInfo = {
-    planName: isRtl ? 'الباقة المميزة (Premium)' : 'Premium Plan',
-    status: isRtl ? 'نشط' : 'Active',
-    totalSessions: 30,
-    sessionsUsed: 20,
-    sessionsRemaining: 10,
-    features: isRtl ? [
-      'وصول غير محدود لجميع الكورسات',
-      'حصص مباشرة مع المعلم',
-      'مراجعة الواجبات والامتحانات',
-      'دعم فني 24/7'
-    ] : [
-      'Unlimited access to all courses',
-      'Live sessions with teacher',
-      'Assignments and exams review',
-      '24/7 Technical Support'
-    ],
+    planName: plan ? (isRtl ? plan.name_ar : plan.name_en) : (isRtl ? 'لا توجد باقة' : 'No Plan'),
+    status: isRtl ? (profileData.status === 'approved' ? 'نشط' : 'قيد الانتظار') : (profileData.status === 'approved' ? 'Active' : 'Pending'),
+    totalSessions: profileData.sessions,
+    sessionsUsed: profileData.sessions_attended,
+    sessionsRemaining: profileData.sessions_remaining,
+    features: plan?.features || [],
   };
 
   const teacherInfo = {
@@ -59,7 +73,7 @@ export default function StudentProfile() {
     status: isRtl ? 'متاح' : 'Available',
   };
 
-  const progressPercentage = (subscriptionInfo.sessionsUsed / subscriptionInfo.totalSessions) * 100;
+  const progressPercentage = (subscriptionInfo.sessionsUsed / subscriptionInfo.totalSessions) * 100 || 0;
 
   return (
     <div className="space-y-6 animate-fade-in pb-10">

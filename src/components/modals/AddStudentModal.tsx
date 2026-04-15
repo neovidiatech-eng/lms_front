@@ -20,7 +20,7 @@ export default function AddStudentModal({ isOpen, onClose, onSubmit }: AddStuden
     resolver: zodResolver(getStudentSchema(t)),
     defaultValues: {
       countryCode: '+20',
-      status: 'active',
+      status: 'approved',
       gender: '',
       plan: '',
       country: 'مصر'
@@ -64,8 +64,9 @@ export default function AddStudentModal({ isOpen, onClose, onSubmit }: AddStuden
   ];
 
   const statusOptions = [
-    { value: 'active', label: t('active') },
-    { value: 'inactive', label: t('inactive') },
+    { value: 'approved', label: t('active') },
+    { value: 'pending', label: t('pending') },
+    { value: 'rejected', label: t('rejected') },
   ];
 
   const countryCodeOptions = countryCodes.map((c) => ({

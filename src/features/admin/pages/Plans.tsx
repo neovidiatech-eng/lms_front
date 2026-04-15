@@ -4,6 +4,7 @@ import { useLanguage } from "../../../contexts/LanguageContext";
 import AddPlanModal from "../../../components/modals/AddPlanModal";
 import ViewPlanModal from "../../../components/modals/ViewPlanModal";
 import { deletePlans, getPlans, updatePlan } from "../services/PlansServices";
+import { useConfirm } from "../../../hooks/useConfirm";
 type CurrencyCode =
   | "EGP"
   | "USD"
@@ -32,6 +33,7 @@ export default function Plans() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [showViewModal, setShowViewModal] = useState(false);
   const [selectedPlan, setSelectedPlan] = useState<Plan | null>(null);
+  const { confirm, ConfirmDialog } = useConfirm();
 
   const text = {
     title: { ar: "خطط الاشتراك", en: "Subscription Plans" },
@@ -231,7 +233,11 @@ export default function Plans() {
     }
   };
   const handleDeletePlan = async (id: string) => {
-    if (!confirm(text.confirmDelete[language])) return;
+    const confirmed = await confirm({
+      title: language === "ar" ? "حذف خطة" : "Delete Plan",
+      message: text.confirmDelete[language],
+    });
+    if (!confirmed) return;
 
     try {
       await deletePlans(id);
@@ -384,6 +390,7 @@ export default function Plans() {
           />
         </>
       )}
+      {ConfirmDialog}
     </div>
   );
 }

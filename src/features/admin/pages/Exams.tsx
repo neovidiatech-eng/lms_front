@@ -3,6 +3,7 @@ import { Search, Plus, Trash2, Filter, Edit2 } from 'lucide-react';
 import { useLanguage } from '../../../contexts/LanguageContext';
 import Pagination from '../../../components/ui/Pagination';
 import AddExamModal from '../../../components/modals/ExamModal';
+import { useConfirm } from '../../../hooks/useConfirm';
 
 interface Exam {
   id: string;
@@ -23,6 +24,7 @@ export default function Exams() {
   const [showFilters, setShowFilters] = useState(false);
   const [showAddModal, setShowAddModal] = useState(false);
   const [editingExam, setEditingExam] = useState<Exam | null>(null);
+  const { confirm, ConfirmDialog } = useConfirm();
   const [filters, setFilters] = useState({
     status: '',
     subject: '',
@@ -156,8 +158,12 @@ const handleCloseModal = () => {
   setEditingExam(null);
 };
 
-  const handleDeleteExam = (examId: string) => {
-    if (window.confirm(language === 'ar' ? 'هل أنت متأكد من حذف هذا الامتحان؟' : 'Are you sure you want to delete this exam?')) {
+  const handleDeleteExam = async (examId: string) => {
+    const confirmed = await confirm({
+      title: language === 'ar' ? 'حذف امتحان' : 'Delete Exam',
+      message: language === 'ar' ? 'هل أنت متأكد من حذف هذا الامتحان؟' : 'Are you sure you want to delete this exam?',
+    });
+    if (confirmed) {
       setExams(exams.filter(exam => exam.id !== examId));
     }
   };
@@ -315,6 +321,7 @@ const handleCloseModal = () => {
           />
         </div>
       </div>
+      {ConfirmDialog}
     </div>
   );
 }

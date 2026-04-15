@@ -2,11 +2,11 @@ import { useState, useEffect } from 'react';
 import { Search, Eye } from 'lucide-react';
 import Pagination from '../../../components/ui/Pagination';
 import { useTranslation } from 'react-i18next';
-import {useSearchSchedules } from '../../../features/admin/hooks/useSchedules';
 import ViewSessionModal from '../../../components/modals/ViewSessionModal';
 import { Schedule } from '../../../types/scheduales';
 import { useSubjects } from '../../../features/admin/hooks/useSubjects';
 import { Subject } from '../../../types/subject';
+import { useStudentSessions } from '../hooks/useSessions';
 
 export default function Sessions() {
   const { t, i18n } = useTranslation();
@@ -26,7 +26,7 @@ export default function Sessions() {
     }
   }, [searchTerm]);
 
-  const { data: allSchedules } = useSearchSchedules(debouncedSearch);
+  const { data: allSchedules } = useStudentSessions(debouncedSearch);
 
   const itemsPerPage = 5;
   const scheduleData = (debouncedSearch ? allSchedules?.data?.schedule : allSchedules?.data?.schedule) || [];
@@ -148,56 +148,64 @@ export default function Sessions() {
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">
-              {currentSessions.map((session) => (
-                <tr key={session.id} className="hover:bg-gray-50 transition-colors">
-                  <td className="px-6 py-4">
-                    <span className="font-medium text-gray-900">{session.title}</span>
-                  </td>
-                  <td className="px-6 py-4 text-gray-700 text-right">{session.teacher.user.name}</td>
-                  <td className="px-6 py-4 text-right">
-                    <span className="text-primary font-medium">{getSubjectName(session.subjectId)}</span>
-                  </td>
-                  <td className="px-6 py-4 text-gray-700 text-right">
-                    {(() => {
-                      const { date, time } = formatDateTime(session.start_time);
-                      return (
-                        <div className="flex flex-col gap-1">
-                          <span className="font-medium text-gray-900">{date}</span>
-                          <div className="flex items-center gap-2">
-                            {time && <span className="text-sm text-gray-500" dir="ltr">{time}</span>}
+              {currentSessions.length > 0 ? (
+                currentSessions.map((session) => (
+                  <tr key={session.id} className="hover:bg-gray-50 transition-colors">
+                    <td className="px-6 py-4">
+                      <span className="font-medium text-gray-900">{session.title}</span>
+                    </td>
+                    <td className="px-6 py-4 text-gray-700 text-right">{session.teacher.user.name}</td>
+                    <td className="px-6 py-4 text-right">
+                      <span className="text-primary font-medium">{getSubjectName(session.subjectId)}</span>
+                    </td>
+                    <td className="px-6 py-4 text-gray-700 text-right">
+                      {(() => {
+                        const { date, time } = formatDateTime(session.start_time);
+                        return (
+                          <div className="flex flex-col gap-1">
+                            <span className="font-medium text-gray-900">{date}</span>
+                            <div className="flex items-center gap-2">
+                              {time && <span className="text-sm text-gray-500" dir="ltr">{time}</span>}
+                            </div>
                           </div>
-                        </div>
-                      );
-                    })()}
-                  </td>
-                  <td className="px-6 py-4 text-gray-700 text-right">
-                    {calculateDuration(session.start_time, session.end_time)} {t('minutes')}
-                  </td>
-                  <td className="px-6 py-4 text-right">
-                    <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium border ${getStatusStyle(session.status)}`}>
-                      {t(session.status?.toLowerCase() || '')}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4">
-                    <div className="flex items-center gap-2 justify-end">
-                      <button
-                        onClick={() => {
-                          const grouped = session.parent_recurring_id
-                            ? scheduleData.filter((s: Schedule) => s.parent_recurring_id === session.parent_recurring_id)
-                            : [session];
-                          setGroupedSessions(grouped);
-                          setSelectedSession(session);
-                          setShowViewModal(true);
-                        }}
-                        className="p-2 icon-btn-primary rounded-lg transition-colors"
-                        title={t('view')}
-                      >
-                        <Eye className="w-4 h-4" />
-                      </button>
-                    </div>
+                        );
+                      })()}
+                    </td>
+                    <td className="px-6 py-4 text-gray-700 text-right">
+                      {calculateDuration(session.start_time, session.end_time)} {t('minutes')}
+                    </td>
+                    <td className="px-6 py-4 text-right">
+                      <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium border ${getStatusStyle(session.status)}`}>
+                        {t(session.status?.toLowerCase() || '')}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4">
+                      <div className="flex items-center gap-2 justify-end">
+                        <button
+                          onClick={() => {
+                            const grouped = session.parent_recurring_id
+                              ? scheduleData.filter((s: Schedule) => s.parent_recurring_id === session.parent_recurring_id)
+                              : [session];
+                            setGroupedSessions(grouped);
+                            setSelectedSession(session);
+                            setShowViewModal(true);
+                          }}
+                          className="p-2 icon-btn-primary rounded-lg transition-colors"
+                          title={t('view')}
+                        >
+                          <Eye className="w-4 h-4" />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan={7} className="px-6 py-4 text-center text-gray-500">
+                    {t('No Sessions')}
                   </td>
                 </tr>
-              ))}
+              )}
             </tbody>
           </table>
         </div>
