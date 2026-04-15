@@ -10,6 +10,7 @@ import ErrorService from '../../../utils/ErrorService';
 import { useStaff, useAddStaff, useUpdateStaff, useDeleteStaff } from '../hooks/useStaff';
 import { StuffItem } from '../../../types/sttuf';
 import { UserFormData } from '../../../lib/schemas/UserSchema';
+import { useConfirm } from '../../../hooks/useConfirm';
 
 /** Map a StuffItem from the API to the flat shape the modals & table need */
 const toModalUser = (item: StuffItem) => ({
@@ -40,6 +41,7 @@ export default function Users() {
   const addStaff = useAddStaff();
   const updateStaff = useUpdateStaff();
   const deleteStaff = useDeleteStaff();
+  const { confirm, ConfirmDialog } = useConfirm();
 
   const allUsers: ModalUser[] = (staffData?.stuff ?? []).map(toModalUser);
 
@@ -92,7 +94,11 @@ export default function Users() {
   };
 
   const handleDeleteUser = async (userId: string) => {
-    if (window.confirm(t('deleteConfirmUser'))) {
+    const confirmed = await confirm({
+      title: t('deleteUser'),
+      message: t('deleteConfirmUser'),
+    });
+    if (confirmed) {
       deleteStaff.mutate(userId, {
         onSuccess: () => ErrorService.success(t('userDeletedSuccess')),
       });
@@ -304,6 +310,7 @@ export default function Users() {
           userData={selectedUser}
         />
       )}
+      {ConfirmDialog}
     </div>
   );
 }

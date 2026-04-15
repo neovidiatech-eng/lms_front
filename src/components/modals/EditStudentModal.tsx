@@ -82,9 +82,9 @@ export default function EditStudentModal({
   ];
 
   const statusOptions = [
-    { value: 'active', label: language === 'ar' ? 'نشط' : 'Active' },
-    { value: 'inactive', label: language === 'ar' ? 'متوقف' : 'Inactive' },
+    { value: 'approved', label: language === 'ar' ? 'نشط' : 'Active' },
     { value: 'pending', label: language === 'ar' ? 'قيد الانتظار' : 'Pending' },
+    { value: 'rejected', label: language === 'ar' ? 'مرفوض' : 'Rejected' },
   ];
 
   return (

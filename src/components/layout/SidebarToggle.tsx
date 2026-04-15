@@ -13,12 +13,13 @@ export default function SidebarToggle({ isCollapsed, onToggle }: SidebarTogglePr
   return (
     <button
       onClick={onToggle}
-      className={`absolute bottom-8 ${isRtl ? '-left-3' : '-right-3'} w-6 h-6 bg-white border border-gray-200 rounded-full flex items-center justify-center shadow-sm hover:shadow-md transition-all z-50`}
+      className={`absolute top-24 ${isRtl ? '-left-4' : '-right-4'} w-8 h-8 bg-white border border-gray-200 rounded-full flex items-center justify-center shadow-md hover:shadow-lg transition-all z-50 group hover:scale-110`}
+      title={isCollapsed ? (isRtl ? ' تكبير' : 'Expand') : (isRtl ? 'تصغير' : 'Collapse')}
     >
       {isCollapsed ? (
-        isRtl ? <ChevronLeft className="w-4 h-4 text-gray-600" /> : <ChevronRight className="w-4 h-4 text-gray-600" />
+        isRtl ? <ChevronLeft className="w-5 h-5 text-gray-600 group-hover:text-blue-600" /> : <ChevronRight className="w-5 h-5 text-gray-600 group-hover:text-blue-600" />
       ) : (
-        isRtl ? <ChevronRight className="w-4 h-4 text-gray-600" /> : <ChevronLeft className="w-4 h-4 text-gray-600" />
+        isRtl ? <ChevronRight className="w-5 h-5 text-gray-600 group-hover:text-blue-600" /> : <ChevronLeft className="w-5 h-5 text-gray-600 group-hover:text-blue-600" />
       )}
     </button>
   );

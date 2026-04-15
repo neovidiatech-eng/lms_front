@@ -2,53 +2,83 @@ import { useTranslation } from 'react-i18next';
 import { useSettings } from '../../../contexts/SettingsContext';
 import {
   Mail, Phone, Calendar, MapPin,
-  Package, Clock, CheckCircle, Award, RefreshCw
+  Package, Clock, CheckCircle, Award, RefreshCw,
+  GraduationCap,
+  User,
+  BookOpen,
+  ShieldCheck,
+  Star
 } from 'lucide-react';
 import { useState } from 'react';
 import SubscribePlanModal from '../../../components/modals/SubscribePlanModal';
+import { useProfile } from '../hooks/useProfile';
 
 export default function StudentProfile() {
-  const { t, i18n } = useTranslation();
+  const { i18n, t } = useTranslation();
   const { settings } = useSettings();
   const isRtl = i18n.language.split('-')[0] === 'ar';
 
   const [isPlanModalOpen, setIsPlanModalOpen] = useState(false);
 
-  // Mock Data for the Profile
+  const { data: profileResponse, isLoading, error } = useProfile();
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary" style={{ borderTopColor: settings.primaryColor }}></div>
+      </div>
+    );
+  }
+
+  if (error || !profileResponse?.data) {
+    return (
+      <div className="text-center py-20 bg-white rounded-2xl border border-dashed border-gray-300">
+        <div className="text-gray-400 mb-4">
+          <User className="w-12 h-12 mx-auto opacity-20" />
+        </div>
+        <p className="text-gray-500">{t('errors.failedToLoadProfile') || 'Failed to load profile'}</p>
+      </div>
+    );
+  }
+
+  const profileData = profileResponse.data;
+  const user = profileData.user;
+  const plan = profileData.plan;
+
   const studentInfo = {
-    name: isRtl ? 'أحمد محمد عبد الله' : 'Ahmed Mohamed Abdullah',
-    email: 'ahmed.student@example.com',
-    phone: '+20 123 456 7890',
-    birthDate: '2005-08-15',
-    country: isRtl ? 'مصر' : 'Egypt',
-    joinDate: '2023-11-01',
-    progress: 75,
+    name: user.name,
+    email: user.email,
+    phone: `${user.code_country} ${user.phone}`,
+    birthDate: profileData.birth_date ? profileData.birth_date.split('T')[0] : '-',
+    country: profileData.country,
+    progress: (profileData.sessions_attended / profileData.sessions) * 100,
   };
 
   const subscriptionInfo = {
-    planName: isRtl ? 'الباقة المميزة (Premium)' : 'Premium Plan',
-    status: isRtl ? 'نشط' : 'Active',
-    totalSessions: 30,
-    sessionsUsed: 20,
-    sessionsRemaining: 10,
-    features: isRtl ? [
-      'وصول غير محدود لجميع الكورسات',
-      'حصص مباشرة مع المعلم',
-      'مراجعة الواجبات والامتحانات',
-      'دعم فني 24/7'
-    ] : [
-      'Unlimited access to all courses',
-      'Live sessions with teacher',
-      'Assignments and exams review',
-      '24/7 Technical Support'
-    ],
+    planName: plan ? (isRtl ? plan.name_ar : plan.name_en) : (isRtl ? 'لا توجد باقة' : 'No Plan'),
+    status: isRtl ? (profileData.status === 'approved' ? 'نشط' : 'قيد الانتظار') : (profileData.status === 'approved' ? 'Active' : 'Pending'),
+    totalSessions: profileData.sessions,
+    sessionsUsed: profileData.sessions_attended,
+    sessionsRemaining: profileData.sessions_remaining,
+    features: plan?.features || [],
   };
-  const progressPercentage = (subscriptionInfo.sessionsUsed / subscriptionInfo.totalSessions) * 100;
+
+  const teacherInfo = {
+    name: isRtl ? 'أ. مصطفى كمال' : 'Mr. Mustafa Kamal',
+    subject: isRtl ? 'الرياضيات - المرحلة الثانوية' : 'Mathematics - High School',
+    experience: isRtl ? '10 سنوات خبرة' : '10 Years Experience',
+    rating: 4.9,
+    sessionsCompleted: 24,
+    nextSession: '2024-04-12T10:00:00Z',
+    status: isRtl ? 'متاح' : 'Available',
+  };
+
+  const progressPercentage = (subscriptionInfo.sessionsUsed / subscriptionInfo.totalSessions) * 100 || 0;
 
   return (
     <div className="space-y-6 animate-fade-in pb-10">
       <div className="flex justify-between items-center">
-        <h1 className="text-2xl font-bold text-gray-900">{t('sidebar_profile')}</h1>
+        <h1 className="text-2xl font-bold text-gray-900">{isRtl ? 'الملف الشخصي' : 'Profile'}</h1>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -73,7 +103,7 @@ export default function StudentProfile() {
 
             <div className="text-center mb-6">
               <h2 className="text-xl font-bold text-gray-900">{studentInfo.name}</h2>
-              <p className="text-sm text-gray-500 mt-1">{t('studentLabel')}</p>
+              <p className="text-sm text-gray-500 mt-1">{isRtl ? 'طالب' : 'Student'}</p>
             </div>
 
             <div className="space-y-4">
@@ -173,9 +203,84 @@ export default function StudentProfile() {
             </div>
           </div>
 
+          {/* Teacher Info Card */}
+          <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-lg font-bold text-gray-900 flex items-center gap-2">
+                <GraduationCap className="w-6 h-6" style={{ color: settings.primaryColor }} />
+                {isRtl ? 'المعلم الخاص بك' : 'Your Teacher'}
+              </h2>
+              <div className="flex items-center gap-1 bg-yellow-50 px-2 py-1 rounded-lg border border-yellow-100">
+                <Star className="w-4 h-4 text-yellow-500 fill-yellow-500" />
+                <span className="text-sm font-bold text-yellow-700">{teacherInfo.rating}</span>
+              </div>
+            </div>
 
+            <div className="flex flex-col md:flex-row items-center md:items-start gap-6">
+              <div className="relative">
+                <div className="w-24 h-24 bg-gray-100 rounded-2xl flex items-center justify-center text-gray-400 shrink-0 overflow-hidden border-2 border-dashed border-gray-200">
+                  <User className="w-12 h-12" />
+                </div>
+                <div className="absolute -bottom-2 -left-2 px-2 py-0.5 bg-green-500 text-white text-[10px] font-bold rounded-lg border-2 border-white uppercase flex items-center gap-1">
+                  <div className="w-1.5 h-1.5 bg-white rounded-full animate-pulse" />
+                  {teacherInfo.status}
+                </div>
+              </div>
+
+              <div className="flex-1 text-center md:text-right">
+                <div className="flex flex-col md:flex-row items-center justify-between gap-4 mb-4">
+                  <div className="text-right">
+                    <h3 className="text-xl font-bold text-gray-900 mb-1">{teacherInfo.name}</h3>
+                    <p className="text-gray-600 text-sm flex items-center justify-center md:justify-start gap-2">
+                      <BookOpen className="w-4 h-4" style={{ color: settings.primaryColor }} />
+                      {teacherInfo.subject}
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-4 text-sm">
+                    <div className="text-center md:text-right">
+                      <p className="text-gray-500 text-xs mb-0.5">{isRtl ? 'الحصص المكتملة' : 'Sessions Done'}</p>
+                      <p className="font-bold text-gray-900">{teacherInfo.sessionsCompleted}</p>
+                    </div>
+                    <div className="w-px h-8 bg-gray-200" />
+                    <div className="text-center md:text-right">
+                      <p className="text-gray-500 text-xs mb-0.5">{isRtl ? 'الخبرة' : 'Experience'}</p>
+                      <p className="font-bold text-gray-900">{teacherInfo.experience}</p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="p-3 bg-gray-50 rounded-xl border border-gray-100 flex items-center gap-3 text-right">
+                    <div className="w-10 h-10 rounded-lg bg-white flex items-center justify-center shadow-sm">
+                      <ShieldCheck className="w-5 h-5 text-green-500" />
+                    </div>
+                    <div>
+                      <p className="text-[10px] text-gray-500 uppercase font-bold tracking-wider">{isRtl ? 'معلم معتمد' : 'Verified Teacher'}</p>
+                      <p className="text-xs font-semibold text-gray-700">{isRtl ? 'هوية محققة' : 'Identity Verified'}</p>
+                    </div>
+                  </div>
+                  <div className="p-3 bg-blue-50/50 rounded-xl border border-blue-100 flex items-center gap-3 text-right">
+                    <div className="w-10 h-10 rounded-lg bg-white flex items-center justify-center shadow-sm">
+                      <Calendar className="w-5 h-5 text-blue-500" />
+                    </div>
+                    <div>
+                      <p className="text-[10px] text-blue-500 uppercase font-bold tracking-wider">{isRtl ? 'الجلسة القادمة' : 'Next Session'}</p>
+                      <p className="text-xs font-semibold text-gray-700 leading-tight">
+                        {new Date(teacherInfo.nextSession).toLocaleDateString(isRtl ? 'ar-EG' : 'en-US', {
+                          weekday: 'long',
+                          month: 'long',
+                          day: 'numeric'
+                        })}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
+
       <SubscribePlanModal
         isOpen={isPlanModalOpen}
         onClose={() => setIsPlanModalOpen(false)}

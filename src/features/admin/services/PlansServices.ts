@@ -1,7 +1,8 @@
 import api from "../../../lib/axios";
+import { Plan } from "../../../types/plan";
 
 // get plans
-export const getPlans = async () => {
+export const getPlans = async (): Promise<Plan[]> => {
   try {
     const response = await api.get("/subscription/plans");
     const data = response.data.data;
@@ -26,7 +27,7 @@ export const deletePlans = async (id: string) => {
 };
 
 // update plan
-export const updatePlan = async (id: string, data: any) => {
+export const updatePlan = async (id: string, data: Partial<Plan>) => {
   try {
     const res = await api.patch(`/subscription/plans/${id}`, data);
     console.log(res.data);

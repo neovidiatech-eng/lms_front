@@ -5,7 +5,6 @@ import { useSettings } from '../../contexts/SettingsContext';
 import { adminDashboardRoutes } from './adminDashboardRoutes';
 import { useTranslation } from 'react-i18next';
 import SidebarToggle from '../../components/layout/SidebarToggle';
-
 interface AdminSidebarProps {
   isOpen: boolean;
   onClose: () => void;

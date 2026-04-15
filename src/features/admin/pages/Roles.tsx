@@ -6,6 +6,8 @@ import { useDeleteRole, useAddRole, useSearchRoles, useUpdateRole } from "../hoo
 import AddRoleModal from "../../../components/modals/AddRoleModal";
 import { Role } from "../../../types/roles";
 import { RoleFormData } from "../../../lib/schemas/RoleSchema";
+import { TableSkeleton } from "../../../components/ui/CustomSkeleton";
+import { useConfirm } from "../../../hooks/useConfirm";
 
 export default function Roles() {
     const { t } = useTranslation();
@@ -18,6 +20,7 @@ export default function Roles() {
     const { mutate: addRole, isPending: isAdding } = useAddRole();
     const { mutate: updateRole, isPending: isUpdating } = useUpdateRole();
     const { mutate: deleteRole } = useDeleteRole();
+    const { confirm, ConfirmDialog } = useConfirm();
 
     const itemsPerPage = 7;
     useEffect(() => {
@@ -30,8 +33,6 @@ export default function Roles() {
 
 
 
-    if (isLoading) return <div className="p-6">Loading...</div>;
-
     const filteredRoles = roles?.data || [];
 
     const totalPages = Math.ceil(filteredRoles.length / itemsPerPage);
@@ -41,8 +42,12 @@ export default function Roles() {
         startIndex + itemsPerPage
     );
 
-    const handleDeleteRole = (id: string) => {
-        if (window.confirm(t("deleteConfirmRole"))) {
+    const handleDeleteRole = async (id: string) => {
+        const confirmed = await confirm({
+            title: t("deleteRole"),
+            message: t("deleteConfirmRole"),
+        });
+        if (confirmed) {
             deleteRole({ id });
         }
     };
@@ -86,82 +91,82 @@ export default function Roles() {
                 className={`w-full pr-12 text-right pl-12 py-3 mb-10 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent`}
             />
 
-            {/* Table */}
+            {/* Table or Skeleton */}
             <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
                 <div className="overflow-x-auto">
-                    <table className="w-full">
+                    {isLoading ? (
+                        <TableSkeleton rows={itemsPerPage} columns={2} />
+                    ) : (
+                        <table className="w-full">
+                            {/* HEADER */}
+                            <thead className="bg-gray-50 border-b border-gray-200">
+                                <tr>
+                                    <th className="px-6 py-4 text-right text-sm font-semibold text-gray-700">
+                                        {t("roleName")}
+                                    </th>
 
-                        {/* HEADER */}
-                        <thead className="bg-gray-50 border-b border-gray-200">
-                            <tr>
-                                <th className="px-6 py-4 text-right text-sm font-semibold text-gray-700">
-                                    {t("roleName")}
-                                </th>
+                                    <th className="px-6 py-4 text-right text-sm font-semibold text-gray-700">
+                                        {t("actions")}
+                                    </th>
+                                </tr>
+                            </thead>
 
-                                <th className="px-6 py-4 text-right text-sm font-semibold text-gray-700">
-                                    {t("actions")}
-                                </th>
-                            </tr>
-                        </thead>
+                            {/* BODY */}
+                            <tbody className="divide-y divide-gray-200">
+                                {currentRoles.length > 0 ? (
+                                    currentRoles.map((role: any) => (
+                                        <tr
+                                            key={role.id}
+                                            className="hover:bg-gray-50 transition-colors"
+                                        >
+                                            {/* ROLE NAME */}
+                                            <td className="px-6 py-4">
+                                                <span className="text-sm font-medium text-gray-900">
+                                                    {role.name}
+                                                </span>
+                                            </td>
 
-                        {/* BODY */}
-                        <tbody className="divide-y divide-gray-200">
+                                            {/* ACTIONS */}
+                                            <td className="px-6 py-4">
+                                                <div className="flex items-center gap-2 justify-start">
+                                                    <button
+                                                        onClick={() => handleEditClick(role)}
+                                                        className="p-2 hover:bg-blue-50 rounded-lg transition-colors group"
+                                                    >
+                                                        <Pencil className="w-4 h-4 text-gray-400 group-hover:text-blue-600" />
+                                                    </button>
 
-                            {currentRoles.length > 0 ? (
-                                currentRoles.map((role: any) => (
-                                    <tr
-                                        key={role.id}
-                                        className="hover:bg-gray-50 transition-colors"
-                                    >
-                                        {/* ROLE NAME */}
-                                        <td className="px-6 py-4">
-                                            <span className="text-sm font-medium text-gray-900">
-                                                {role.name}
-                                            </span>
-                                        </td>
-
-                                        {/* ACTIONS */}
-                                        <td className="px-6 py-4">
-                                            <div className="flex items-center gap-2 justify-start">
-
-                                                <button
-                                                    onClick={() => handleEditClick(role)}
-                                                    className="p-2 hover:bg-blue-50 rounded-lg transition-colors group"
-                                                >
-                                                    <Pencil className="w-4 h-4 text-gray-400 group-hover:text-blue-600" />
-                                                </button>
-
-                                                <button
-                                                    onClick={() => handleDeleteRole(role.id)}
-                                                    className="p-2 hover:bg-red-50 rounded-lg transition-colors group"
-                                                >
-                                                    <Trash2 className="w-4 h-4 text-gray-400 group-hover:text-red-600" />
-                                                </button>
-
-                                            </div>
+                                                    <button
+                                                        onClick={() => handleDeleteRole(role.id)}
+                                                        className="p-2 hover:bg-red-50 rounded-lg transition-colors group"
+                                                    >
+                                                        <Trash2 className="w-4 h-4 text-gray-400 group-hover:text-red-600" />
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    ))
+                                ) : (
+                                    <tr>
+                                        <td colSpan={2} className="px-6 py-12 text-center text-gray-500">
+                                            {t("noData")}
                                         </td>
                                     </tr>
-                                ))
-                            ) : (
-                                <tr>
-                                    <td colSpan={2} className="px-6 py-12 text-center text-gray-500">
-                                        {t("noData")}
-                                    </td>
-                                </tr>
-                            )}
-
-                        </tbody>
-                    </table>
+                                )}
+                            </tbody>
+                        </table>
+                    )}
                 </div>
 
-                {/* Pagination */}
-                <Pagination
-                    currentPage={currentPage}
-                    totalPages={totalPages}
-                    totalItems={filteredRoles.length}
-                    itemsPerPage={itemsPerPage}
-                    onPageChange={setCurrentPage}
-                />
+                {!isLoading && (
+                    <Pagination
+                        currentPage={currentPage}
+                        totalPages={totalPages}
+                        totalItems={filteredRoles.length}
+                        itemsPerPage={itemsPerPage}
+                        onPageChange={setCurrentPage}
+                    />
+                )}
             </div>
             {/* Modal */}
             <AddRoleModal
@@ -171,6 +176,7 @@ export default function Roles() {
                 initialData={selectedRole}
                 isLoading={isAdding || isUpdating}
             />
+            {ConfirmDialog}
         </div>
     );
 }

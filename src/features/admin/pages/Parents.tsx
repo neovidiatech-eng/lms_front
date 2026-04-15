@@ -5,6 +5,7 @@ import AddParentModal from '../../../components/modals/AddParentModal';
 import EditParentModal from '../../../components/modals/EditParentModal';
 import ViewParentModal from '../../../components/modals/ViewParentModal';
 import Pagination from '../../../components/ui/Pagination';
+import { useConfirm } from '../../../hooks/useConfirm';
 
 interface Parent {
   id: string;
@@ -25,6 +26,7 @@ export default function Parents() {
   const [showViewModal, setShowViewModal] = useState(false);
   const [selectedParent, setSelectedParent] = useState<Parent | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
+  const { confirm, ConfirmDialog } = useConfirm();
   const itemsPerPage = 7;
 
   const [parents, setParents] = useState<Parent[]>([
@@ -94,8 +96,12 @@ export default function Parents() {
     }
   };
 
-  const handleDeleteParent = (id: string) => {
-    if (confirm(language === 'ar' ? 'هل أنت متأكد من حذف ولي الأمر؟' : 'Are you sure you want to delete this parent?')) {
+  const handleDeleteParent = async (id: string) => {
+    const confirmed = await confirm({
+      title: language === 'ar' ? 'حذف ولي أمر' : 'Delete Parent',
+      message: language === 'ar' ? 'هل أنت متأكد من حذف ولي الأمر؟' : 'Are you sure you want to delete this parent?',
+    });
+    if (confirmed) {
       setParents(parents.filter(p => p.id !== id));
     }
   };
@@ -252,6 +258,7 @@ export default function Parents() {
           }}
         />
       )}
+      {ConfirmDialog}
     </div>
   );
 }

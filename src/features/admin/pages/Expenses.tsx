@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useConfirm } from '../../../hooks/useConfirm';
 import {
   Plus,
   Edit,
@@ -16,6 +17,7 @@ import { ExpenseService } from "../services/ExpenseService";
 
 export default function Expenses() {
   const { language } = useLanguage();
+  const { confirm, ConfirmDialog } = useConfirm();
   const [showModal, setShowModal] = useState(false);
   const [showViewModal, setShowViewModal] = useState(false);
   const [selectedExpense, setSelectedExpense] = useState<Expense | null>(null);
@@ -139,10 +141,13 @@ export default function Expenses() {
     setSelectedExpense(null);
   };
 
-  const handleDeleteExpense = (id: string) => {
-    if (window.confirm(text.confirmDelete[language])) {
-      setExpenses(expenses.filter((exp) => exp.id !== id));
-    }
+  const handleDeleteExpense = async (id: string) => {
+    const ok = await confirm({
+      title: language === 'ar' ? 'حذف المصروف' : 'Delete Expense',
+      message: text.confirmDelete[language],
+    });
+    if (!ok) return;
+    setExpenses(expenses.filter((exp) => exp.id !== id));
   };
 
   // const handleViewExpense = (expense: Expense) => {
@@ -395,6 +400,7 @@ export default function Expenses() {
           expense={selectedExpense}
         />
       )}
+      {ConfirmDialog}
     </div>
   );
 }

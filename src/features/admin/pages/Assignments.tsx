@@ -3,6 +3,7 @@ import { Search, Plus, Trash2, Filter, Edit2 } from 'lucide-react';
 import { useLanguage } from '../../../contexts/LanguageContext';
 import Pagination from '../../../components/ui/Pagination';
 import AddAssignmentModal from '../../../components/modals/AddAssignmentModal';
+import { useConfirm } from '../../../hooks/useConfirm';
 
 interface Assignment {
   id: string;
@@ -22,6 +23,7 @@ export default function Assignments() {
   const [showFilters, setShowFilters] = useState(false);
   const [showAddModal, setShowAddModal] = useState(false);
   const [editingAssignment, setEditingAssignment] = useState<Assignment | null>(null);
+  const { confirm, ConfirmDialog } = useConfirm();
   
   const [filters, setFilters] = useState({
     status: '',
@@ -187,8 +189,12 @@ export default function Assignments() {
     setEditingAssignment(assignment);
   };
 
-  const handleDeleteAssignment = (assignmentId: string) => {
-    if (window.confirm(language === 'ar' ? 'هل أنت متأكد من حذف هذا الواجب؟' : 'Are you sure you want to delete this assignment?')) {
+  const handleDeleteAssignment = async (assignmentId: string) => {
+    const confirmed = await confirm({
+      title: language === 'ar' ? 'حذف واجب' : 'Delete Assignment',
+      message: language === 'ar' ? 'هل أنت متأكد من حذف هذا الواجب؟' : 'Are you sure you want to delete this assignment?',
+    });
+    if (confirmed) {
       setAssignments(assignments.filter(assignment => assignment.id !== assignmentId));
     }
   };
@@ -354,6 +360,7 @@ export default function Assignments() {
           />
         </div>
       </div>
+      {ConfirmDialog}
     </div>
   );
 }

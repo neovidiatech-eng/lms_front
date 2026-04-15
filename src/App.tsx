@@ -24,6 +24,8 @@ const VerifyAccount = lazy(() => import('./pages/VerifyAccount'));
 const AdminDashboard = lazy(() => import('./pages/AdminDashboard/AdminDashboard'));
 const StudentDashboard = lazy(() => import('./pages/StudentDashboard/StudentDashboard'));
 const TeacherDashboard = lazy(() => import('./pages/TeacherDashboard/TeacherDashboard'));
+import AuthGuard from './components/guards/AuthGuard';
+import GuestGuard from './components/guards/GuestGuard';
 
 // Centralized Loading Fallback UI
 const LoadingFallback = () => (
@@ -64,12 +66,6 @@ function App() {
     setIsAuthenticated(true);
   };
 
-  const getRedirectPath = () => {
-    const role = localStorage.getItem("role");
-    if (role === "teacher") return "/teacher-dashboard";
-    if (role === "student") return "/student-dashboard";
-    return "/dashboard";
-  };
 
 
   return (
@@ -82,56 +78,58 @@ function App() {
                 {!isAuthenticated && <LanguageSwitcher />}
                 <Suspense fallback={<LoadingFallback />}>
                   <Routes>
-                    <Route element={!isAuthenticated ? <AuthLayout /> : <Navigate to={getRedirectPath()} replace />}>
-                      <Route path="/login" element={<Login onLoginSuccess={handleLogin} />} />
-                      <Route path="/register" element={<Register onRegisterSuccess={handleLogin} />} />
-                      <Route path="/forgot-password" element={<ForgotPassword />} />
-                      <Route path="/reset-password" element={<ResetPassword />} />
-                      <Route path="/verify-account" element={<VerifyAccount onVerifySuccess={handleLogin} />} />
-                    </Route>
-                    <Route
-                      path="/dashboard"
-                      element={isAuthenticated ? <AdminDashboard /> : <Navigate to="/login" replace />}
-                    >
-                      <Route index element={null} />
-                      {adminDashboardRoutes.flatMap(route => {
-                        if (route.subItems) {
-                          return route.subItems.map(subItem => (
-                            <Route key={subItem.id} path={subItem.path} element={subItem.element} />
-                          ));
-                        }
-                        return route.element ? [<Route key={route.id} path={route.path} element={route.element} />] : [];
-                      })}
+                    {/* Auth Routes */}
+                    <Route element={<GuestGuard />}>
+                      <Route element={<AuthLayout />}>
+                        <Route path="/login" element={<Login onLoginSuccess={handleLogin} />} />
+                        <Route path="/register" element={<Register onRegisterSuccess={handleLogin} />} />
+                        <Route path="/forgot-password" element={<ForgotPassword />} />
+                        <Route path="/reset-password" element={<ResetPassword />} />
+                        <Route path="/verify-account" element={<VerifyAccount onVerifySuccess={handleLogin} />} />
+                      </Route>
                     </Route>
 
-                    <Route
-                      path="/student-dashboard"
-                      element={isAuthenticated ? <StudentDashboard /> : <Navigate to="/login" replace />}
-                    >
-                      <Route index element={null} />
-                      {studentDashboardRoutes.flatMap(route => {
-                        if (route.subItems) {
-                          return route.subItems.map(subItem => (
-                            <Route key={subItem.id} path={subItem.path} element={subItem.element} />
-                          ));
-                        }
-                        return route.element ? [<Route key={route.id} path={route.path} element={route.element} />] : [];
-                      })}
+                    {/* Protected Dashboard Routes */}
+                    <Route element={<AuthGuard allowedRoles={['super_admin', 'admin']} />}>
+                      <Route path="/dashboard" element={<AdminDashboard />}>
+                        <Route index element={null} />
+                        {adminDashboardRoutes.flatMap(route => {
+                          if (route.subItems) {
+                            return route.subItems.map(subItem => (
+                              <Route key={subItem.id} path={subItem.path} element={subItem.element} />
+                            ));
+                          }
+                          return route.element ? [<Route key={route.id} path={route.path} element={route.element} />] : [];
+                        })}
+                      </Route>
                     </Route>
 
-                    <Route
-                      path="/teacher-dashboard"
-                      element={isAuthenticated ? <TeacherDashboard /> : <Navigate to="/login" replace />}
-                    >
-                      <Route index element={null} />
-                      {teacherDashboardRoutes.flatMap(route => {
-                        if (route.subItems) {
-                          return route.subItems.map(subItem => (
-                            <Route key={subItem.id} path={subItem.path} element={subItem.element} />
-                          ));
-                        }
-                        return route.element ? [<Route key={route.id} path={route.path} element={route.element} />] : [];
-                      })}
+                    <Route element={<AuthGuard allowedRoles={['student']} />}>
+                      <Route path="/student-dashboard" element={<StudentDashboard />}>
+                        <Route index element={null} />
+                        {studentDashboardRoutes.flatMap(route => {
+                          if (route.subItems) {
+                            return route.subItems.map(subItem => (
+                              <Route key={subItem.id} path={subItem.path} element={subItem.element} />
+                            ));
+                          }
+                          return route.element ? [<Route key={route.id} path={route.path} element={route.element} />] : [];
+                        })}
+                      </Route>
+                    </Route>
+
+                    <Route element={<AuthGuard allowedRoles={['teacher']} />}>
+                      <Route path="/teacher-dashboard" element={<TeacherDashboard />}>
+                        <Route index element={null} />
+                        {teacherDashboardRoutes.flatMap(route => {
+                          if (route.subItems) {
+                            return route.subItems.map(subItem => (
+                              <Route key={subItem.id} path={subItem.path} element={subItem.element} />
+                            ));
+                          }
+                          return route.element ? [<Route key={route.id} path={route.path} element={route.element} />] : [];
+                        })}
+                      </Route>
                     </Route>
 
                     <Route path="/" element={<Navigate to="/login" replace />} />
