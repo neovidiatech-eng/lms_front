@@ -29,8 +29,7 @@ export default function Sessions() {
   const { data: allSchedules } = useStudentSessions(debouncedSearch);
 
   const itemsPerPage = 5;
-  const scheduleData = (debouncedSearch ? allSchedules?.data?.schedule : allSchedules?.data?.schedule) || [];
-
+  const scheduleData = allSchedules?.data || [];
   const displaySchedules: Schedule[] = [];
   const seenParents = new Set<string>();
 
@@ -180,7 +179,7 @@ export default function Sessions() {
                       </span>
                     </td>
                     <td className="px-6 py-4">
-                      <div className="flex items-center gap-2 justify-end">
+                      <div className="flex items-center gap-2 justify-start">
                         <button
                           onClick={() => {
                             const grouped = session.parent_recurring_id
@@ -224,6 +223,7 @@ export default function Sessions() {
         onClose={() => { setShowViewModal(false); setSelectedSession(null); setGroupedSessions([]); }}
         session={selectedSession}
         groupedSessions={groupedSessions}
+        allSessions={scheduleData}
       />
     </div>
   );

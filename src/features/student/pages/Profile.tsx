@@ -9,9 +9,10 @@ import {
   ShieldCheck,
   Star
 } from 'lucide-react';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import SubscribePlanModal from '../../../components/modals/SubscribePlanModal';
 import { useProfile } from '../hooks/useProfile';
+import { useTeacherById } from '../../admin/hooks/useTeacher';
 
 export default function StudentProfile() {
   const { i18n, t } = useTranslation();
@@ -21,7 +22,45 @@ export default function StudentProfile() {
   const [isPlanModalOpen, setIsPlanModalOpen] = useState(false);
 
   const { data: profileResponse, isLoading, error } = useProfile();
+  const progressPercentage = useMemo(() => {
+    if (!profileResponse?.data?.sessions) return 0;
 
+    return (profileResponse.data.sessions_attended / profileResponse.data.sessions) * 100;
+  }, [profileResponse]);
+
+
+  const profileData = profileResponse?.data;
+  const user = profileData?.user;
+  const plan = profileData?.plan;
+
+  const studentInfo = {
+    name: user?.name,
+    email: user?.email,
+    phone: `${user?.code_country} ${user?.phone}`,
+    birthDate: profileData?.birth_date ? profileData?.birth_date.split('T')[0] : '-',
+    country: profileData?.country,
+    progress: (Number(profileData?.sessions_attended)  / Number(profileData?.sessions)) * 100,
+  };
+
+  const subscriptionInfo = {
+    planName: plan ? (isRtl ? plan.name_ar : plan.name_en) : (isRtl ? 'لا توجد باقة' : 'No Plan'),
+    status: isRtl ? (profileData?.status === 'approved' ? 'نشط' : 'قيد الانتظار') : (profileData?.status === 'approved' ? 'Active' : 'Pending'),
+    totalSessions: profileData?.sessions,
+    sessionsUsed: profileData?.sessions_attended,
+    sessionsRemaining: profileData?.sessions_remaining,
+    features: plan?.features || [],
+  };
+  const uniqueTeacher = profileData?.schedules?.[0]?.teacher;
+
+  const teacherInfo = {
+    name: uniqueTeacher?.user?.name,
+    hour_price: uniqueTeacher?.hour_price,
+    status: profileData?.schedules?.[0]?.status,
+    subject: isRtl ? profileData?.schedules?.[0]?.subject?.name_ar : profileData?.schedules?.[0]?.subject?.name_en,
+  };
+  const { data: teacherData } = useTeacherById(uniqueTeacher?.id);
+
+  
   if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
@@ -40,40 +79,6 @@ export default function StudentProfile() {
       </div>
     );
   }
-
-  const profileData = profileResponse.data;
-  const user = profileData.user;
-  const plan = profileData.plan;
-
-  const studentInfo = {
-    name: user.name,
-    email: user.email,
-    phone: `${user.code_country} ${user.phone}`,
-    birthDate: profileData.birth_date ? profileData.birth_date.split('T')[0] : '-',
-    country: profileData.country,
-    progress: (profileData.sessions_attended / profileData.sessions) * 100,
-  };
-
-  const subscriptionInfo = {
-    planName: plan ? (isRtl ? plan.name_ar : plan.name_en) : (isRtl ? 'لا توجد باقة' : 'No Plan'),
-    status: isRtl ? (profileData.status === 'approved' ? 'نشط' : 'قيد الانتظار') : (profileData.status === 'approved' ? 'Active' : 'Pending'),
-    totalSessions: profileData.sessions,
-    sessionsUsed: profileData.sessions_attended,
-    sessionsRemaining: profileData.sessions_remaining,
-    features: plan?.features || [],
-  };
-
-  const teacherInfo = {
-    name: isRtl ? 'أ. مصطفى كمال' : 'Mr. Mustafa Kamal',
-    subject: isRtl ? 'الرياضيات - المرحلة الثانوية' : 'Mathematics - High School',
-    experience: isRtl ? '10 سنوات خبرة' : '10 Years Experience',
-    rating: 4.9,
-    sessionsCompleted: 24,
-    nextSession: '2024-04-12T10:00:00Z',
-    status: isRtl ? 'متاح' : 'Available',
-  };
-
-  const progressPercentage = (subscriptionInfo.sessionsUsed / subscriptionInfo.totalSessions) * 100 || 0;
 
   return (
     <div className="space-y-6 animate-fade-in pb-10">
@@ -96,7 +101,7 @@ export default function StudentProfile() {
                   className="w-full h-full rounded-full flex items-center justify-center text-white text-3xl font-bold"
                   style={{ backgroundColor: settings.primaryColor }}
                 >
-                  {studentInfo.name.charAt(0)}
+                  {studentInfo?.name?.charAt(0)}
                 </div>
               </div>
             </div>
@@ -181,7 +186,7 @@ export default function StudentProfile() {
                     width: `${Math.round(progressPercentage)}%`,
                     backgroundColor: settings.primaryColor
                   }}
-                ></div>
+                />
               </div>
               <p className="text-xs text-gray-500 mt-2">
                 {isRtl
@@ -212,7 +217,7 @@ export default function StudentProfile() {
               </h2>
               <div className="flex items-center gap-1 bg-yellow-50 px-2 py-1 rounded-lg border border-yellow-100">
                 <Star className="w-4 h-4 text-yellow-500 fill-yellow-500" />
-                <span className="text-sm font-bold text-yellow-700">{teacherInfo.rating}</span>
+                <span className="text-sm font-bold text-yellow-700">{teacherInfo.status}</span>
               </div>
             </div>
 
@@ -223,30 +228,23 @@ export default function StudentProfile() {
                 </div>
                 <div className="absolute -bottom-2 -left-2 px-2 py-0.5 bg-green-500 text-white text-[10px] font-bold rounded-lg border-2 border-white uppercase flex items-center gap-1">
                   <div className="w-1.5 h-1.5 bg-white rounded-full animate-pulse" />
-                  {teacherInfo.status}
+                  {teacherData?.user.name}
                 </div>
               </div>
 
               <div className="flex-1 text-center md:text-right">
                 <div className="flex flex-col md:flex-row items-center justify-between gap-4 mb-4">
                   <div className="text-right">
-                    <h3 className="text-xl font-bold text-gray-900 mb-1">{teacherInfo.name}</h3>
-                    <p className="text-gray-600 text-sm flex items-center justify-center md:justify-start gap-2">
+                    <h3 className="text-xl font-bold text-gray-900 mb-1">
+                      {teacherData?.user?.name || (isRtl ? 'جاري التحميل...' : 'Loading...')}
+                    </h3>
+
+                    <p className="text-gray-600 text-sm flex items-center gap-2">
                       <BookOpen className="w-4 h-4" style={{ color: settings.primaryColor }} />
                       {teacherInfo.subject}
                     </p>
                   </div>
-                  <div className="flex items-center gap-4 text-sm">
-                    <div className="text-center md:text-right">
-                      <p className="text-gray-500 text-xs mb-0.5">{isRtl ? 'الحصص المكتملة' : 'Sessions Done'}</p>
-                      <p className="font-bold text-gray-900">{teacherInfo.sessionsCompleted}</p>
-                    </div>
-                    <div className="w-px h-8 bg-gray-200" />
-                    <div className="text-center md:text-right">
-                      <p className="text-gray-500 text-xs mb-0.5">{isRtl ? 'الخبرة' : 'Experience'}</p>
-                      <p className="font-bold text-gray-900">{teacherInfo.experience}</p>
-                    </div>
-                  </div>
+
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -266,7 +264,7 @@ export default function StudentProfile() {
                     <div>
                       <p className="text-[10px] text-blue-500 uppercase font-bold tracking-wider">{isRtl ? 'الجلسة القادمة' : 'Next Session'}</p>
                       <p className="text-xs font-semibold text-gray-700 leading-tight">
-                        {new Date(teacherInfo.nextSession).toLocaleDateString(isRtl ? 'ar-EG' : 'en-US', {
+                        {new Date(profileData?.schedules?.[0].start_time).toLocaleDateString(isRtl ? 'ar-EG' : 'en-US', {
                           weekday: 'long',
                           month: 'long',
                           day: 'numeric'

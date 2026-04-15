@@ -9,6 +9,7 @@ import { useTeacher } from '../../features/admin/hooks/useTeacher';
 import { useStudents } from '../../features/admin/hooks/useStudents';
 import { getMultipleSessionsSchema, MultipleSessionsFormData, MultipleSessionsPayload } from '../../lib/schemas/SessionSchema';
 import { DayOfWeek } from '../../types/scheduales';
+import ErrorService from '../../utils/ErrorService';
 
 export interface SessionPreviewItem {
   date: string;
@@ -86,10 +87,12 @@ export default function AddMultipleSessionsModal({ isOpen, onClose, onAdd }: Add
 
   const selectedStudentData = students.find(s => s.id === watchedStudent);
   const selectedStudentPackage = selectedStudentData ? {
-    name: selectedStudentData.plan?.name || (language === 'ar' ? 'لا يوجد باقة' : 'No Package'),
-    sessionsRemaining: selectedStudentData.hours_remaining || 0,
-    totalSessions: selectedStudentData.hours || 0,
+    name: language === 'ar' ? selectedStudentData.plan?.name_ar : selectedStudentData.plan?.name_en || 'No Package',
+    sessionsRemaining: selectedStudentData.sessions_remaining || 0,
+    totalSessions: selectedStudentData.sessions || 0,
   } : null;
+
+
 
   const sessionPreview = useMemo(() => {
     if (!watchedMonthYear) return [];
@@ -128,11 +131,11 @@ export default function AddMultipleSessionsModal({ isOpen, onClose, onAdd }: Add
 
   const onSubmit = (data: MultipleSessionsFormData) => {
     if (sessionPreview.length === 0) {
-      alert(t('addMultipleSessions_selectOneDayMin'));
+      ErrorService.warning(t('addMultipleSessions_selectOneDayMin'));
       return;
     }
     if (sessionsExceedPackage) {
-      alert(t('addMultipleSessions_sessionsExceedPackage'));
+      ErrorService.error(t('addMultipleSessions_sessionsExceedPackage'));
       return;
     }
 
