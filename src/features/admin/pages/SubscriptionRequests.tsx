@@ -85,14 +85,14 @@ export default function SubscriptionRequests() {
 
         const formatted = data.map((item: any) => ({
           id: item.id,
-          studentName: item.user?.name || "—",
-          parentName: item.user?.name || "—",
-          phone: item.user?.phone || "—",
-          email: item.user?.email || "—",
-          planName: item.plan?.name_ar || item.plan?.name_en,
-          planPrice: item.plan?.price,
-          sessionsCount: item.plan?.hours,
-          requestDate: item.createdAt?.split("T")[0],
+          studentName: typeof item.user?.name === 'string' ? item.user.name : "—",
+          parentName: typeof item.user?.name === 'string' ? item.user.name : "—",
+          phone: typeof item.user?.phone === 'string' ? item.user.phone : "—",
+          email: typeof item.user?.email === 'string' ? item.user.email : "—",
+          planName: item.plan?.name_ar || item.plan?.name_en || "—",
+          planPrice: item.plan?.price || "—",
+          sessionsCount: typeof item.plan?.hours === 'number' ? item.plan.hours : 0,
+          requestDate: typeof item.createdAt === 'string' ? item.createdAt.split("T")[0] : "—",
           status: item.status,
         }));
         setRequests(formatted);

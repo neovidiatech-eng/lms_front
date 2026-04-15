@@ -1,9 +1,10 @@
 import { useState, lazy, Suspense } from 'react';
-import { Outlet, useLocation } from 'react-router-dom';
+import { Outlet, useLocation, Routes, Route } from 'react-router-dom';
 import Header from '../../components/layout/Header';
 import AdminSidebar from './AdminSidebar';
 import SubscribePlanModal from '../../components/modals/SubscribePlanModal';
 import { useTranslation } from 'react-i18next';
+import { adminDashboardRoutes } from './adminDashboardRoutes';
 
 // --- Lazy Loading Dashboard Home ---
 const AdminDashboardHome = lazy(() => import('../../features/admin/pages/Dashboard'));
@@ -15,7 +16,6 @@ export default function AdminDashboard() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [isCollapsed, setIsCollapsed] = useState(false);
 
-  const isHome = location.pathname === '/dashboard' || location.pathname === '/dashboard/';
   const language = i18n.language.split('-')[0];
   const isRtl = language === 'ar';
 
@@ -39,7 +39,18 @@ export default function AdminDashboard() {
       <main className={`${isRtl ? (isCollapsed ? 'lg:mr-20' : 'lg:mr-72') : (isCollapsed ? 'lg:ml-20' : 'lg:ml-72')} transition-all duration-300`}>
         <div className="p-6">
           <Suspense fallback={<div className="flex items-center justify-center min-h-[400px] animate-pulse text-gray-400">Loading...</div>}>
-            {isHome ? <AdminDashboardHome /> : <Outlet />}
+            <Routes>
+              <Route index element={<AdminDashboardHome />} />
+              {adminDashboardRoutes.flatMap(route => {
+                if (route.subItems) {
+                  return route.subItems.map(subItem => (
+                    <Route key={subItem.id} path={subItem.path} element={subItem.element} />
+                  ));
+                }
+                return route.element ? [<Route key={route.id} path={route.path} element={route.element} />] : [];
+              })}
+            </Routes>
+            <Outlet />
           </Suspense>
         </div>
       </main>
@@ -48,3 +59,4 @@ export default function AdminDashboard() {
     </div>
   );
 }
+

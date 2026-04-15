@@ -1,20 +1,17 @@
 import { Calendar, FileText, CheckCircle, AlertCircle, Sparkles, ClipboardList, Package, Play, BookOpen } from 'lucide-react';
 import { useState } from 'react';
-import { Outlet, useLocation } from 'react-router-dom';
+import { Outlet, useLocation, Routes, Route } from 'react-router-dom';
 import { useSettings } from '../../contexts/SettingsContext';
 import SubscribePlanModal from '../../components/modals/SubscribePlanModal';
 import { useTranslation } from 'react-i18next';
 import StudentDashboardLayout from './StudentDashboardLayout';
+import { studentDashboardRoutes } from './studentDashboardRoutes';
 
 export default function StudentDashboard() {
   const { t } = useTranslation();
   const location = useLocation();
   const { settings } = useSettings();
   const [showSubscribeModal, setShowSubscribeModal] = useState(false);
-
-  const isHome =
-    location.pathname === '/student-dashboard' ||
-    location.pathname === '/student-dashboard/';
 
   // Student-specific mock stats
   const stats = {
@@ -250,9 +247,21 @@ export default function StudentDashboard() {
   return (
     <>
       <StudentDashboardLayout>
-        {isHome ? renderStudentHome() : <Outlet />}
+        <Routes>
+          <Route index element={renderStudentHome()} />
+          {studentDashboardRoutes.flatMap(route => {
+            if (route.subItems) {
+              return route.subItems.map(subItem => (
+                <Route key={subItem.id} path={subItem.path} element={subItem.element} />
+              ));
+            }
+            return route.element ? [<Route key={route.id} path={route.path} element={route.element} />] : [];
+          })}
+        </Routes>
+        <Outlet />
       </StudentDashboardLayout>
       <SubscribePlanModal isOpen={showSubscribeModal} onClose={() => setShowSubscribeModal(false)} />
     </>
   );
 }
+

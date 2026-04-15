@@ -8,9 +8,10 @@ import { useEffect } from 'react';
 import ErrorBoundary from './components/layout/ErrorBoundary';
 import ErrorService from './utils/ErrorService';
 import LanguageSwitcher from './components/ui/LanguageSwitcher';
-import { adminDashboardRoutes } from './pages/AdminDashboard/adminDashboardRoutes';
-import { studentDashboardRoutes } from './pages/StudentDashboard/studentDashboardRoutes';
-import { teacherDashboardRoutes } from './pages/TeacherDashboard/teacherDashboardRoutes.tsx';
+// import { adminDashboardRoutes } from './pages/AdminDashboard/adminDashboardRoutes';
+// import { studentDashboardRoutes } from './pages/StudentDashboard/studentDashboardRoutes';
+// import { teacherDashboardRoutes } from './pages/TeacherDashboard/teacherDashboardRoutes.tsx';
+
 import { GoogleOAuthProvider } from '@react-oauth/google';
 import { googleClientId } from './components/constants';
 
@@ -91,46 +92,19 @@ function App() {
 
                     {/* Protected Dashboard Routes */}
                     <Route element={<AuthGuard allowedRoles={['super_admin', 'admin']} />}>
-                      <Route path="/dashboard" element={<AdminDashboard />}>
-                        <Route index element={null} />
-                        {adminDashboardRoutes.flatMap(route => {
-                          if (route.subItems) {
-                            return route.subItems.map(subItem => (
-                              <Route key={subItem.id} path={subItem.path} element={subItem.element} />
-                            ));
-                          }
-                          return route.element ? [<Route key={route.id} path={route.path} element={route.element} />] : [];
-                        })}
-                      </Route>
+                      <Route path="/dashboard/*" element={<AdminDashboard />} />
                     </Route>
+
 
                     <Route element={<AuthGuard allowedRoles={['student']} />}>
-                      <Route path="/student-dashboard" element={<StudentDashboard />}>
-                        <Route index element={null} />
-                        {studentDashboardRoutes.flatMap(route => {
-                          if (route.subItems) {
-                            return route.subItems.map(subItem => (
-                              <Route key={subItem.id} path={subItem.path} element={subItem.element} />
-                            ));
-                          }
-                          return route.element ? [<Route key={route.id} path={route.path} element={route.element} />] : [];
-                        })}
-                      </Route>
+                      <Route path="/student-dashboard/*" element={<StudentDashboard />} />
                     </Route>
 
+
                     <Route element={<AuthGuard allowedRoles={['teacher']} />}>
-                      <Route path="/teacher-dashboard" element={<TeacherDashboard />}>
-                        <Route index element={null} />
-                        {teacherDashboardRoutes.flatMap(route => {
-                          if (route.subItems) {
-                            return route.subItems.map(subItem => (
-                              <Route key={subItem.id} path={subItem.path} element={subItem.element} />
-                            ));
-                          }
-                          return route.element ? [<Route key={route.id} path={route.path} element={route.element} />] : [];
-                        })}
-                      </Route>
+                      <Route path="/teacher-dashboard/*" element={<TeacherDashboard />} />
                     </Route>
+
 
                     <Route path="/" element={<Navigate to="/login" replace />} />
                     <Route path="*" element={<Navigate to="/login" replace />} />

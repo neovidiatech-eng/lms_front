@@ -1,9 +1,9 @@
-import { useState } from 'react';
+import { useState, lazy, useMemo, useCallback } from 'react';
 import { Search, Eye, Pencil, Trash2, Plus, Users, UserCheck, UserX, ClipboardList } from 'lucide-react';
 import WhatsAppPhone from '../../../components/ui/WhatsAppPhone';
-import AddStudentModal from '../../../components/modals/AddStudentModal';
-import ViewStudentModal from '../../../components/modals/ViewStudentModal';
-import EditStudentModal from '../../../components/modals/EditStudentModal';
+// import AddStudentModal from '../../../components/modals/AddStudentModal';
+// import ViewStudentModal from '../../../components/modals/ViewStudentModal';
+// import EditStudentModal from '../../../components/modals/EditStudentModal';
 import Pagination from '../../../components/ui/Pagination';
 import CustomSelect from '../../../components/ui/CustomSelect';
 import { useTranslation } from 'react-i18next';
@@ -11,6 +11,11 @@ import { useStudents, useCreateStudent, useUpdateStudent, useDeleteStudent } fro
 import { Student } from '../../../types/student';
 import ErrorService from '../../../utils/ErrorService';
 import { useConfirm } from '../../../hooks/useConfirm';
+
+const AddStudentModal = lazy(() => import('../../../components/modals/AddStudentModal'));
+const ViewStudentModal = lazy(() => import('../../../components/modals/ViewStudentModal'));
+const EditStudentModal = lazy(() => import('../../../components/modals/EditStudentModal'));
+
 
 
 export default function Students() {
@@ -35,7 +40,7 @@ export default function Students() {
   const { mutateAsync: deleteStudent } = useDeleteStudent();
   const { confirm, ConfirmDialog } = useConfirm();
 
-  const stats = [
+  const stats = useMemo(() => [
     {
       id: 'total',
       label: t('totalStudents'),
@@ -66,14 +71,14 @@ export default function Students() {
     {
       id: 'plans',
       label: t('numberOfPlans'),
-      value: 3
-      ,
+      value: 3,
       icon: ClipboardList,
       bgColor: 'bg-purple-50',
       iconColor: 'text-purple-600',
       valueColor: 'text-purple-600',
     },
-  ];
+  ], [studentsList, t]);
+
 
   const grades = [
     { id: 'all', label: t('allPlans'), labelEn: 'All Plans' },
@@ -87,21 +92,28 @@ export default function Students() {
     { id: 'saudi', label: t('saudiArabia'), labelEn: 'Saudi Arabia' },
   ];
 
-  const filteredStudents = studentsList.filter(student => {
-    const matchesSearch =
-      student.user.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      student.user.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      student.user.phone?.includes(searchTerm);
+  const filteredStudents = useMemo(() => {
+    return studentsList.filter(student => {
+      const matchesSearch =
+        student.user.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        student.user.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        student.user.phone?.includes(searchTerm);
 
-    const matchesGrade = selectedGrade === 'all' || student.planId === selectedGrade;
-    const matchesCountry = selectedCountry === 'all' || student.country === selectedCountry;
+      const matchesGrade = selectedGrade === 'all' || student.planId === selectedGrade;
+      const matchesCountry = selectedCountry === 'all' || student.country === selectedCountry;
 
-    return matchesSearch && matchesGrade && matchesCountry;
-  });
-  const totalPages = Math.ceil((filteredStudents?.length || 0) / itemsPerPage);
-  const startIndex = (currentPage - 1) * itemsPerPage;
-  const endIndex = startIndex + itemsPerPage;
-  const currentStudents = filteredStudents?.slice(startIndex, endIndex);
+      return matchesSearch && matchesGrade && matchesCountry;
+    });
+  }, [studentsList, searchTerm, selectedGrade, selectedCountry]);
+
+  const totalPages = useMemo(() => Math.ceil((filteredStudents?.length || 0) / itemsPerPage), [filteredStudents, itemsPerPage]);
+  
+  const currentStudents = useMemo(() => {
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    const endIndex = startIndex + itemsPerPage;
+    return filteredStudents?.slice(startIndex, endIndex);
+  }, [filteredStudents, currentPage, itemsPerPage]);
+
 
   const handlePageChange = (page: number) => {
     setCurrentPage(page);

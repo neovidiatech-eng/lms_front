@@ -1,9 +1,9 @@
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo, useEffect, lazy, useCallback } from 'react';
 import { Search, Eye, Pencil, Trash2, Plus, Users, UserCheck, UserX } from 'lucide-react';
 import WhatsAppPhone from '../../../components/ui/WhatsAppPhone';
-import AddTeacherModal from '../../../components/modals/AddTeacherModal';
-import ViewTeacherModal from '../../../components/modals/ViewTeacherModal';
-import EditTeacherModal from '../../../components/modals/EditTeacherModal';
+// import AddTeacherModal from '../../../components/modals/AddTeacherModal';
+// import ViewTeacherModal from '../../../components/modals/ViewTeacherModal';
+// import EditTeacherModal from '../../../components/modals/EditTeacherModal';
 import Pagination from '../../../components/ui/Pagination';
 import CustomSelect from '../../../components/ui/CustomSelect';
 import { useTranslation } from 'react-i18next';
@@ -13,6 +13,11 @@ import { TeacherFormData } from '../../../lib/schemas/TeacherSchema';
 import { useCurrency } from '../hooks/useCurrency';
 import ErrorService from '../../../utils/ErrorService';
 import { useConfirm } from '../../../hooks/useConfirm';
+
+const AddTeacherModal = lazy(() => import('../../../components/modals/AddTeacherModal'));
+const ViewTeacherModal = lazy(() => import('../../../components/modals/ViewTeacherModal'));
+const EditTeacherModal = lazy(() => import('../../../components/modals/EditTeacherModal'));
+
 
 export default function Teachers() {
   const { t, i18n } = useTranslation();
@@ -117,13 +122,17 @@ export default function Teachers() {
     });
   }, [teachers, searchTerm, selectedStatus]);
 
-  const totalPages = Math.max(1, Math.ceil(filteredTeachers.length / itemsPerPage));
-  const startIndex = (currentPage - 1) * itemsPerPage;
-  const currentTeachers = filteredTeachers.slice(startIndex, startIndex + itemsPerPage);
+  const totalPages = useMemo(() => Math.max(1, Math.ceil(filteredTeachers.length / itemsPerPage)), [filteredTeachers, itemsPerPage]);
+  
+  const currentTeachers = useMemo(() => {
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    return filteredTeachers.slice(startIndex, startIndex + itemsPerPage);
+  }, [filteredTeachers, currentPage, itemsPerPage]);
 
-  const handlePageChange = (page: number) => {
+  const handlePageChange = useCallback((page: number) => {
     setCurrentPage(page);
-  };
+  }, []);
+
 
   const handleViewTeacher = (teacher: Teacher) => {
     setSelectedTeacher(teacher);

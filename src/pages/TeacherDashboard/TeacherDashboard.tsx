@@ -1,8 +1,9 @@
 import { Suspense } from 'react';
-import { Outlet, useLocation } from 'react-router-dom';
+import { Outlet, useLocation, Routes, Route } from 'react-router-dom';
 import TeacherDashboardLayout from './TeacherDashboardLayout';
 import ErrorBoundary from '../../components/layout/ErrorBoundary';
 import TeacherDashboardHome from '../../features/teacher/pages/Home';
+import { teacherDashboardRoutes } from './teacherDashboardRoutes.tsx';
 
 const LoadingFallback = () => (
   <div className="flex items-center justify-center min-h-[400px]">
@@ -11,16 +12,25 @@ const LoadingFallback = () => (
 );
 
 export default function TeacherDashboard() {
-  const location = useLocation();
-  const isHome = location.pathname === '/teacher-dashboard' || location.pathname === '/teacher-dashboard/';
-
   return (
     <ErrorBoundary>
       <TeacherDashboardLayout>
         <Suspense fallback={<LoadingFallback />}>
-          {isHome ? <TeacherDashboardHome /> : <Outlet />}
+          <Routes>
+            <Route index element={<TeacherDashboardHome />} />
+            {teacherDashboardRoutes.flatMap(route => {
+              if (route.subItems) {
+                return route.subItems.map(subItem => (
+                  <Route key={subItem.id} path={subItem.path} element={subItem.element} />
+                ));
+              }
+              return route.element ? [<Route key={route.id} path={route.path} element={route.element} />] : [];
+            })}
+          </Routes>
+          <Outlet />
         </Suspense>
       </TeacherDashboardLayout>
     </ErrorBoundary>
   );
 }
+

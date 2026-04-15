@@ -18,7 +18,7 @@ export default function WhatsAppPhone({ phone, className = '', showIcon = false 
       title={language === 'ar' ? 'فتح واتساب' : 'Open WhatsApp'}
     >
       {showIcon && <MessageCircle className="w-4 h-4" />}
-      <span>{phone}</span>
+      <span>{typeof phone === 'string' || typeof phone === 'number' ? phone : ''}</span>
     </button>
   );
 }

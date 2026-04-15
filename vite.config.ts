@@ -7,4 +7,18 @@ export default defineConfig({
   optimizeDeps: {
     exclude: ['lucide-react'],
   },
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          'vendor-react': ['react', 'react-dom', 'react-router-dom'],
+          'vendor-antd': ['antd'],
+          'vendor-ui': ['lucide-react', 'framer-motion'],
+          'vendor-utils': ['axios', '@tanstack/react-query', 'i18next'],
+        },
+      },
+    },
+    chunkSizeWarningLimit: 1000,
+  },
 });
+
