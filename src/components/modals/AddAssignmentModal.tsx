@@ -6,28 +6,33 @@ import DatePickerField from '../ui/DatePickerField';
 import { AssignmentFormData, getAssignmentSchema } from '../../lib/schemas/AssignmentSchema';
 import { Resolver, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-
-interface Assignment extends AssignmentFormData {
-  id: string;
-}
+import { useGetStudents, useGetSubjects, useCreateAssignment, useUpdateAssignment } from '../../hooks/useAssignment';
+import { Assignment } from '../../types/assignment';
 
 interface AddAssignmentModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onAdd: (assignment: Assignment) => void;
   initialData?: Assignment | null;
 }
 
-export default function AddAssignmentModal({ isOpen, onClose, onAdd, initialData }: AddAssignmentModalProps) {
+export default function AddAssignmentModal({ isOpen, onClose, initialData }: AddAssignmentModalProps) {
   const { language, t } = useLanguage();
+  
+  const { data: studentsData, isLoading: isLoadingStudents } = useGetStudents();
+  const { data: subjectsData, isLoading: isLoadingSubjects } = useGetSubjects();
+  
+  const createMutation = useCreateAssignment();
+  const updateMutation = useUpdateAssignment();
 
-  const mockStudents = [
-    { value: 'أحمد محمد', label: language === 'ar' ? 'أحمد محمد' : 'Ahmed Mohamed' },
-    { value: 'سارة محمود', label: language === 'ar' ? 'سارة محمود' : 'Sarah Mahmoud' },
-    { value: 'زياد علي', label: language === 'ar' ? 'زياد علي' : 'Zeyad Ali' },
-    { value: 'مريم إبراهيم', label: language === 'ar' ? 'مريم إبراهيم' : 'Maryam Ibrahim' },
-    { value: 'ياسين حسن', label: language === 'ar' ? 'ياسين حسن' : 'Yassin Hassan' },
-  ];
+  const studentsOptions = (studentsData?.data?.studentsData || []).map(s => ({
+    value: s.id,
+    label: s.user?.name || s.id
+  }));
+
+  const subjectsOptions = (subjectsData?.subjects || []).map(s => ({
+    value: s.id,
+    label: language === 'ar' ? s.name_ar : s.name_en || s.name_ar
+  }));
 
   const {
     register,
@@ -40,14 +45,12 @@ export default function AddAssignmentModal({ isOpen, onClose, onAdd, initialData
     resolver: zodResolver(getAssignmentSchema(t)) as Resolver<AssignmentFormData>,
     defaultValues: {
       status: 'pending',
-      teacher: 'أ. محمد الأحمدي' // Default teacher name
     },
   });
 
   const text = {
-    title: { ar: 'إضافة واجب جديد', en: 'Add New Assignment' },
+    title: { ar: initialData ? 'تعديل الواجب' : 'إضافة واجب جديد', en: initialData ? 'Edit Assignment' : 'Add New Assignment' },
     student: { ar: 'اختر الطالب', en: 'Select Student' },
-    teacher: { ar: 'المعلم', en: 'Teacher' },
     subject: { ar: 'المادة', en: 'Subject' },
     assignmentTitle: { ar: 'العنوان', en: 'Title' },
     description: { ar: 'الوصف', en: 'Description' },
@@ -57,18 +60,25 @@ export default function AddAssignmentModal({ isOpen, onClose, onAdd, initialData
     submitted: { ar: 'تم التسليم', en: 'Submitted' },
     graded: { ar: 'تم التصحيح', en: 'Graded' },
     cancel: { ar: 'إلغاء', en: 'Cancel' },
-    add: { ar: 'إضافة', en: 'Add' }
+    submit: { ar: initialData ? 'تعديل' : 'إضافة', en: initialData ? 'Update' : 'Add' },
+    loading: { ar: 'جاري التحميل...', en: 'Loading...' }
   };
 
   useEffect(() => {
     if (isOpen) {
       if (initialData) {
-        reset(initialData);
+        reset({
+          studentId: initialData.studentId || initialData.student?.id || '',
+          subjectId: initialData.subjectId || initialData.subject?.id || '',
+          title: initialData.title || '',
+          description: initialData.description || '',
+          dueDate: initialData.dueDate ? initialData.dueDate.split('T')[0] : '',
+          status: (initialData.status as any) || 'pending',
+        });
       } else {
         reset({
-          studentName: '',
-          teacher: 'أ. محمد الأحمدي',
-          subject: '',
+          studentId: '',
+          subjectId: '',
           title: '',
           description: '',
           dueDate: '',
@@ -79,12 +89,19 @@ export default function AddAssignmentModal({ isOpen, onClose, onAdd, initialData
   }, [initialData, reset, isOpen]);
 
   const handleOnSubmit = (data: AssignmentFormData) => {
-    onAdd({
-      id: Date.now().toString(),
-      ...data
-    });
-
-    onClose();
+    if (initialData) {
+      updateMutation.mutate({ id: initialData.id, ...data } as any, {
+        onSuccess: () => {
+          onClose();
+        }
+      });
+    } else {
+      createMutation.mutate(data, {
+        onSuccess: () => {
+          onClose();
+        }
+      });
+    }
   };
 
   if (!isOpen) return null;
@@ -96,7 +113,7 @@ export default function AddAssignmentModal({ isOpen, onClose, onAdd, initialData
           <h2 className="text-2xl font-bold text-white">{text.title[language]}</h2>
           <button
             onClick={onClose}
-            className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+            className="p-2 hover:bg-white/20 rounded-lg transition-colors"
           >
             <X className="w-6 h-6 text-white" />
           </button>
@@ -107,24 +124,25 @@ export default function AddAssignmentModal({ isOpen, onClose, onAdd, initialData
             <div>
               <CustomSelect
                 label={text.student[language]}
-                value={watch('studentName')}
-                onChange={(val) => setValue('studentName', val, { shouldValidate: true })}
-                options={mockStudents}
+                value={watch('studentId')}
+                onChange={(val) => setValue('studentId', val, { shouldValidate: true })}
+                options={studentsOptions}
+                disabled={isLoadingStudents}
+                placeholder={isLoadingStudents ? text.loading[language] : text.student[language]}
               />
-              {errors.studentName && <p className="text-red-500 text-xs mt-1 text-right">{errors.studentName.message}</p>}
+              {errors.studentId && <p className="text-red-500 text-xs mt-1 text-right">{errors.studentId.message}</p>}
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2 text-right">
-                {text.subject[language]}
-              </label>
-              <input
-                type="text"
-                {...register('subject')}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent text-right"
-                dir="rtl"
+              <CustomSelect
+                label={text.subject[language]}
+                value={watch('subjectId')}
+                onChange={(val) => setValue('subjectId', val, { shouldValidate: true })}
+                options={subjectsOptions}
+                disabled={isLoadingSubjects}
+                placeholder={isLoadingSubjects ? text.loading[language] : text.subject[language]}
               />
-              {errors.subject && <p className="text-red-500 text-xs mt-1 text-right">{errors.subject.message}</p>}
+              {errors.subjectId && <p className="text-red-500 text-xs mt-1 text-right">{errors.subjectId.message}</p>}
             </div>
           </div>
 
@@ -180,15 +198,17 @@ export default function AddAssignmentModal({ isOpen, onClose, onAdd, initialData
             <button
               type="button"
               onClick={onClose}
-              className="flex-1 px-6 py-3 border border-gray-300 rounded-xl hover:bg-gray-50 transition-colors font-medium"
+              disabled={createMutation.isPending || updateMutation.isPending}
+              className="flex-1 px-6 py-3 border border-gray-300 rounded-xl hover:bg-gray-50 transition-colors font-medium disabled:opacity-50"
             >
               {text.cancel[language]}
             </button>
             <button
               type="submit"
-              className="flex-1 px-6 py-3 btn-primary text-white rounded-xl transition-colors font-medium"
+              disabled={createMutation.isPending || updateMutation.isPending}
+              className="flex-1 px-6 py-3 btn-primary text-white rounded-xl transition-colors font-medium disabled:opacity-50"
             >
-              {text.add[language]}
+              {(createMutation.isPending || updateMutation.isPending) ? text.loading[language] : text.submit[language]}
             </button>
           </div>
         </form>

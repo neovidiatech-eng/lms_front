@@ -4,17 +4,8 @@ import { useLanguage } from '../../../contexts/LanguageContext';
 import Pagination from '../../../components/ui/Pagination';
 import AddAssignmentModal from '../../../components/modals/AddAssignmentModal';
 import { useConfirm } from '../../../hooks/useConfirm';
-
-interface Assignment {
-  id: string;
-  studentName: string;
-  subject: string;
-  teacher: string;
-  title: string;
-  description: string;
-  dueDate: string;
-  status: 'pending' | 'submitted' | 'graded';
-}
+import { useGetAssignments, useDeleteAssignment } from '../../../hooks/useAssignment';
+import { Assignment } from '../../../types/assignment';
 
 export default function Assignments() {
   const { language } = useLanguage();
@@ -24,6 +15,7 @@ export default function Assignments() {
   const [showAddModal, setShowAddModal] = useState(false);
   const [editingAssignment, setEditingAssignment] = useState<Assignment | null>(null);
   const { confirm, ConfirmDialog } = useConfirm();
+  const deleteMutation = useDeleteAssignment();
 
   const [filters, setFilters] = useState({
     status: '',
@@ -33,98 +25,9 @@ export default function Assignments() {
   });
   const itemsPerPage = 10;
 
-  const [assignments, setAssignments] = useState<Assignment[]>([
-    {
-      id: '1',
-      studentName: 'Ahmed Gamal',
-      subject: 'القرآن الكريم',
-      teacher: 'مها محمد',
-      title: 'rrr',
-      description: 'rr',
-      dueDate: '2026-01-12',
-      status: 'pending'
-    },
-    {
-      id: '2',
-      studentName: 'هدير عبده',
-      subject: 'اللغة العربية',
-      teacher: 'مها محمد',
-      title: 'test',
-      description: 'test',
-      dueDate: '2026-01-10',
-      status: 'pending'
-    },
-    {
-      id: '3',
-      studentName: 'هدير عبده',
-      subject: 'القرآن الكريم',
-      teacher: 'مها محمد',
-      title: 'twee',
-      description: 'eee',
-      dueDate: '2026-01-10',
-      status: 'pending'
-    },
-    {
-      id: '4',
-      studentName: 'Ahmed Gamal',
-      subject: 'القرآن الكريم',
-      teacher: 'مها محمد',
-      title: 'فش',
-      description: 'سس',
-      dueDate: '2026-01-09',
-      status: 'pending'
-    },
-    {
-      id: '5',
-      studentName: 'Ahmed Gamal',
-      subject: 'القرآن الكريم',
-      teacher: 'مها محمد',
-      title: 'drrr',
-      description: 'rrrr',
-      dueDate: '2026-01-08',
-      status: 'pending'
-    },
-    {
-      id: '6',
-      studentName: 'هدير عبده',
-      subject: 'اللغة العربية',
-      teacher: 'مها محمد',
-      title: 'rfr',
-      description: 'rrr',
-      dueDate: '2026-01-09',
-      status: 'pending'
-    },
-    {
-      id: '7',
-      studentName: 'عمر',
-      subject: 'نسيت',
-      teacher: 'محمد عبدالرازق',
-      title: 'ff',
-      description: 'ff',
-      dueDate: '2026-01-10',
-      status: 'pending'
-    },
-    {
-      id: '8',
-      studentName: 'احمد المصري',
-      subject: 'نسيت',
-      teacher: 'Ahmed Ali',
-      title: 'tee',
-      description: 'eee',
-      dueDate: '2026-01-01',
-      status: 'pending'
-    },
-    {
-      id: '9',
-      studentName: 'احمد جمال',
-      subject: 'القرآن الكريم',
-      teacher: 'ابراهيم مسلم',
-      title: 'واجب الوحدة الثالثة',
-      description: 'حل الأسئلة من 1 الى 10',
-      dueDate: '2025-12-30',
-      status: 'pending'
-    }
-  ]);
+  const { data: assignmentsData, isLoading } = useGetAssignments();
+  const assignments = assignmentsData?.data || [];
+
 
   const text = {
     title: { ar: 'الواجبات', en: 'Assignments' },
@@ -146,19 +49,23 @@ export default function Assignments() {
     of: { ar: 'من', en: 'of' },
     total: { ar: 'الإجمالي', en: 'Total' },
     previous: { ar: 'السابق', en: 'Previous' },
-    next: { ar: 'التالي', en: 'Next' }
+    next: { ar: 'التالي', en: 'Next' },
+    loading: { ar: 'جاري التحميل...', en: 'Loading...' }
   };
 
   const filteredAssignments = assignments.filter(assignment => {
+    const studentName = assignment.student?.user?.name || '';
+    const subjectName = language === 'ar' ? assignment.subject?.name_ar : assignment.subject?.name_en || assignment.subject?.name_ar;
+
     const matchesSearch =
-      assignment.studentName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      studentName.toLowerCase().includes(searchTerm.toLowerCase()) ||
       assignment.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      assignment.subject.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (subjectName || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
       assignment.description.toLowerCase().includes(searchTerm.toLowerCase());
 
     const matchesStatus = !filters.status || assignment.status === filters.status;
-    const matchesSubject = !filters.subject || assignment.subject === filters.subject;
-    const matchesStudent = !filters.student || assignment.studentName === filters.student;
+    const matchesSubject = !filters.subject || (subjectName || '').toLowerCase().includes(filters.subject.toLowerCase());
+    const matchesStudent = !filters.student || studentName.toLowerCase().includes(filters.student.toLowerCase());
 
     return matchesSearch && matchesStatus && matchesSubject && matchesStudent;
   });
@@ -172,16 +79,6 @@ export default function Assignments() {
     setCurrentPage(page);
   };
 
-  const handleAddAssignment = (newAssignment: Assignment) => {
-    if (editingAssignment) {
-      setAssignments(assignments.map(e => e.id === editingAssignment.id ? newAssignment : e));
-    } else {
-      setAssignments([...assignments, newAssignment]);
-    }
-    handleCloseModal();
-  };
-
-
   const handleEditAssignment = (assignment: Assignment) => {
     setShowAddModal(true);
     setEditingAssignment(assignment);
@@ -193,7 +90,7 @@ export default function Assignments() {
       message: language === 'ar' ? 'هل أنت متأكد من حذف هذا الواجب؟' : 'Are you sure you want to delete this assignment?',
     });
     if (confirmed) {
-      setAssignments(assignments.filter(assignment => assignment.id !== assignmentId));
+      deleteMutation.mutate(assignmentId);
     }
   };
 
@@ -217,8 +114,7 @@ export default function Assignments() {
 
       <AddAssignmentModal
         isOpen={showAddModal}
-        onClose={() => setShowAddModal(false)}
-        onAdd={handleAddAssignment}
+        onClose={handleCloseModal}
         initialData={editingAssignment}
       />
 
@@ -278,63 +174,79 @@ export default function Assignments() {
           )}
         </div>
 
-        <div className="overflow-x-auto">
-          <table className="w-full" dir="rtl">
-            <thead className="bg-gray-50 border-b border-gray-200">
-              <tr>
-                <th className="px-6 py-4 text-right text-sm font-semibold text-gray-900">{text.columnStudent[language]}</th>
-                <th className="px-6 py-4 text-right text-sm font-semibold text-gray-900">{text.columnSubject[language]}</th>
-                <th className="px-6 py-4 text-right text-sm font-semibold text-gray-900">{text.columnTitle[language]}</th>
-                <th className="px-6 py-4 text-right text-sm font-semibold text-gray-900">{text.columnDescription[language]}</th>
-                <th className="px-6 py-4 text-right text-sm font-semibold text-gray-900">{text.columnDueDate[language]}</th>
-                <th className="px-6 py-4 text-right text-sm font-semibold text-gray-900">{text.columnStatus[language]}</th>
-                <th className="px-6 py-4 text-right text-sm font-semibold text-gray-900">{text.columnActions[language]}</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-200">
-              {currentAssignments.map((assignment) => (
-                <tr key={assignment.id} className="hover:bg-gray-50 transition-colors">
-                  <td className="px-6 py-4 text-gray-900 font-medium">{assignment.studentName}</td>
-                  <td className="px-6 py-4">
-                    <span className="text-primary font-medium hover:underline cursor-pointer">
-                      {assignment.subject}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 text-gray-900 font-medium">{assignment.title}</td>
-                  <td className="px-6 py-4 text-gray-600">{assignment.description}</td>
-                  <td className="px-6 py-4 text-gray-600">{assignment.dueDate}</td>
-                  <td className="px-6 py-4">
-                    <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${assignment.status === 'pending'
-                      ? 'bg-yellow-100 text-yellow-800'
-                      : assignment.status === 'submitted'
-                        ? 'bg-blue-100 text-blue-800'
-                        : 'bg-green-100 text-green-800'
-                      }`}>
-                      {text[assignment.status][language]}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4">
-                    <div className="flex items-center gap-2 justify-start">
-                      <button
-                        onClick={() => handleEditAssignment(assignment)}
-                        className="p-2 icon-btn-primary rounded-lg transition-colors"
-                        title="تعديل"
-                      >
-                        <Edit2 className="w-5 h-5" />
-                      </button>
-                      <button
-                        onClick={() => handleDeleteAssignment(assignment.id)}
-                        className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-                        title="حذف"
-                      >
-                        <Trash2 className="w-5 h-5" />
-                      </button>
-                    </div>
-                  </td>
+        <div className="overflow-x-auto min-h-[400px]">
+          {isLoading ? (
+            <div className="flex items-center justify-center h-64 text-gray-500 font-medium">
+              {text.loading[language]}
+            </div>
+          ) : currentAssignments.length === 0 ? (
+            <div className="flex items-center justify-center h-64 text-gray-500 font-medium flex-col gap-2">
+              <Search className="w-12 h-12 text-gray-300" />
+              <span>{language === 'ar' ? 'لا توجد واجبات تطابق بحثك' : 'No assignments match your search'}</span>
+            </div>
+          ) : (
+            <table className="w-full" dir="rtl">
+              <thead className="bg-gray-50 border-b border-gray-200">
+                <tr>
+                  <th className="px-6 py-4 text-right text-sm font-semibold text-gray-900">{text.columnStudent[language]}</th>
+                  <th className="px-6 py-4 text-right text-sm font-semibold text-gray-900">{text.columnSubject[language]}</th>
+                  <th className="px-6 py-4 text-right text-sm font-semibold text-gray-900">{text.columnTeacher[language]}</th>
+                  <th className="px-6 py-4 text-right text-sm font-semibold text-gray-900">{text.columnTitle[language]}</th>
+                  <th className="px-6 py-4 text-right text-sm font-semibold text-gray-900">{text.columnDescription[language]}</th>
+                  <th className="px-6 py-4 text-right text-sm font-semibold text-gray-900">{text.columnDueDate[language]}</th>
+                  <th className="px-6 py-4 text-right text-sm font-semibold text-gray-900">{text.columnStatus[language]}</th>
+                  <th className="px-6 py-4 text-right text-sm font-semibold text-gray-900">{text.columnActions[language]}</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody className="divide-y divide-gray-200">
+                {currentAssignments.map((assignment) => (
+                  <tr key={assignment.id} className="hover:bg-gray-50 transition-colors">
+                    <td className="px-6 py-4 text-gray-900 font-medium">{assignment.student?.user?.name}</td>
+                    <td className="px-6 py-4">
+                      <span className="text-primary font-medium hover:underline cursor-pointer">
+                        {language === 'ar' ? assignment.subject?.name_ar : assignment.subject?.name_en || assignment.subject?.name_ar}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 text-gray-900 font-medium">{assignment.teacher?.user?.name}</td>
+                    <td className="px-6 py-4 text-gray-900 font-medium">{assignment.title}</td>
+                    <td className="px-6 py-4 text-gray-600">{assignment.description}</td>
+                    <td className="px-6 py-4 text-gray-600">
+                      {new Date(assignment.dueDate).toLocaleDateString(language === 'ar' ? 'ar-EG' : 'en-US')}
+                    </td>
+                    <td className="px-6 py-4">
+                      <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${assignment.status === 'pending'
+                        ? 'bg-yellow-100 text-yellow-800'
+                        : assignment.status === 'submitted'
+                          ? 'bg-blue-100 text-blue-800'
+                          : 'bg-green-100 text-green-800'
+                        }`}>
+                        {text[assignment.status as keyof typeof text] ? (text[assignment.status as keyof typeof text] as any)[language] : assignment.status}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4">
+                      <div className="flex items-center gap-2 justify-start">
+                        <button
+                          onClick={() => handleEditAssignment(assignment)}
+                          className="p-2 icon-btn-primary rounded-lg transition-colors"
+                          title="تعديل"
+                        >
+                          <Edit2 className="w-5 h-5" />
+                        </button>
+                        <button
+                          onClick={() => handleDeleteAssignment(assignment.id)}
+                          disabled={deleteMutation.isPending}
+                          className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors disabled:opacity-50"
+                          title="حذف"
+                        >
+                          <Trash2 className="w-5 h-5" />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
         </div>
 
         <div className="p-6 border-t border-gray-200">
