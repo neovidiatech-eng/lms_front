@@ -1,4 +1,4 @@
-import { useState, lazy, useMemo, useCallback } from 'react';
+import { useState, lazy, useMemo } from 'react';
 import { Search, Eye, Pencil, Trash2, Plus, Users, UserCheck, UserX, ClipboardList } from 'lucide-react';
 import WhatsAppPhone from '../../../components/ui/WhatsAppPhone';
 // import AddStudentModal from '../../../components/modals/AddStudentModal';
@@ -33,7 +33,7 @@ export default function Students() {
 
   const { data: apiResponse } = useStudents();
 
-  const rawData: any = apiResponse?.data;
+  const rawData: any = apiResponse?.data.studentsData;
   const studentsList: Student[] = Array.isArray(rawData) ? rawData : (rawData?.students || rawData?.data || []);
   const { mutateAsync: createStudent } = useCreateStudent();
   const { mutateAsync: updateStudent } = useUpdateStudent();
@@ -107,7 +107,7 @@ export default function Students() {
   }, [studentsList, searchTerm, selectedGrade, selectedCountry]);
 
   const totalPages = useMemo(() => Math.ceil((filteredStudents?.length || 0) / itemsPerPage), [filteredStudents, itemsPerPage]);
-  
+
   const currentStudents = useMemo(() => {
     const startIndex = (currentPage - 1) * itemsPerPage;
     const endIndex = startIndex + itemsPerPage;

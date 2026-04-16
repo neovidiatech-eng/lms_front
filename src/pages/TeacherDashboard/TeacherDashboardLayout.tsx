@@ -22,17 +22,17 @@ export default function TeacherDashboardLayout({ children }: TeacherDashboardLay
         onMenuClick={() => setSidebarOpen(!sidebarOpen)}
         isCollapsed={isCollapsed}
       />
-      
+
       <div className="flex-1 flex overflow-hidden">
-        <TeacherSidebar 
-          isOpen={sidebarOpen} 
-          onClose={() => setSidebarOpen(false)} 
+        <TeacherSidebar
+          isOpen={sidebarOpen}
+          onClose={() => setSidebarOpen(false)}
           isCollapsed={isCollapsed}
           setIsCollapsed={setIsCollapsed}
         />
-        
+
         <main className={`flex-1 overflow-x-hidden overflow-y-auto w-full max-w-[100vw] transition-all duration-300 ${isRtl ? (isCollapsed ? 'lg:pr-20' : 'lg:pr-72') : (isCollapsed ? 'lg:pl-20' : 'lg:pl-72')}`}>
-          <div className="p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto min-h-full">
+          <div className={`transition-all duration-300 ${isCollapsed ? 'p-4' : 'p-6'}`}>
             {children}
           </div>
         </main>

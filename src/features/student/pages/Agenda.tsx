@@ -10,6 +10,7 @@ import { useLanguage } from "../../../contexts/LanguageContext";
 import { useAgenda } from "../../../features/admin/hooks/useAgenda";
 import { AgendaSession } from "../../../types/Agenda";
 import SessionsDayModal from "../../../components/modals/SessionsDayModal";
+import { formatDateLocal, getLocalDateKey } from "../../../utils/dateUtils";
 
 export default function Agenda() {
   const { t, language } = useLanguage();
@@ -20,7 +21,7 @@ export default function Agenda() {
   // 📌 Month range
   const startDate = useMemo(() => {
     const d = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
-    return d.toISOString().split("T")[0];
+    return formatDateLocal(d);
   }, [currentDate]);
 
   const endDate = useMemo(() => {
@@ -29,7 +30,7 @@ export default function Agenda() {
       currentDate.getMonth() + 1,
       0,
     );
-    return d.toISOString().split("T")[0];
+    return formatDateLocal(d);
   }, [currentDate]);
 
   const {
@@ -43,7 +44,7 @@ export default function Agenda() {
     const grouped: Record<string, AgendaSession[]> = {};
 
     allSessions.forEach((session) => {
-      const dateKey = session.start_time.split("T")[0];
+      const dateKey = getLocalDateKey(session.start_time);
 
       if (!grouped[dateKey]) grouped[dateKey] = [];
       grouped[dateKey].push(session);
@@ -72,7 +73,7 @@ export default function Agenda() {
     t("sat"),
   ];
 
-  const formatKey = (date: Date) => date.toISOString().split("T")[0];
+  const formatKey = (date: Date) => formatDateLocal(date);
 
   // 📌 Build calendar days
   const getDaysInMonth = (date: Date) => {
@@ -95,7 +96,7 @@ export default function Agenda() {
 
   const days = getDaysInMonth(currentDate);
 
-  const todayKey = new Date().toISOString().split("T")[0];
+  const todayKey = formatDateLocal(new Date());
   const todaySessions = sessionsByDate[todayKey] || [];
 
   // 📌 Loading

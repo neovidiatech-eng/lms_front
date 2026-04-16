@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Search, Plus, Trash2, Filter, Edit2 } from 'lucide-react';
+import { Search, Trash2, Filter, Edit2 } from 'lucide-react';
 import { useLanguage } from '../../../contexts/LanguageContext';
 import Pagination from '../../../components/ui/Pagination';
 import AddAssignmentModal from '../../../components/modals/AddAssignmentModal';
@@ -206,13 +206,6 @@ export default function Assignments() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h1 className="text-3xl font-bold text-gray-900">{text.title[language]}</h1>
-        <button
-          onClick={() => setShowAddModal(true)}
-          className="flex items-center gap-2 px-6 py-3 btn-primary text-white rounded-xl transition-colors font-medium"
-        >
-          <Plus className="w-5 h-5" />
-          {text.addAssignment[language]}
-        </button>
       </div>
 
       <AddAssignmentModal
@@ -305,10 +298,10 @@ export default function Assignments() {
                   <td className="px-6 py-4 text-gray-600">{assignment.dueDate}</td>
                   <td className="px-6 py-4">
                     <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${assignment.status === 'pending'
-                        ? 'bg-yellow-100 text-yellow-800'
-                        : assignment.status === 'submitted'
-                          ? 'bg-blue-100 text-blue-800'
-                          : 'bg-green-100 text-green-800'
+                      ? 'bg-yellow-100 text-yellow-800'
+                      : assignment.status === 'submitted'
+                        ? 'bg-blue-100 text-blue-800'
+                        : 'bg-green-100 text-green-800'
                       }`}>
                       {text[assignment.status][language]}
                     </span>

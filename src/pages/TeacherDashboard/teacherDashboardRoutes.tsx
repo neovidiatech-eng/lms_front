@@ -7,7 +7,9 @@ import {
   MessageSquare,
   Send,
   Users,
-  Clock
+  Play,
+  Calendar,
+  ClipboardList
 } from 'lucide-react';
 import { RouteConfig } from '../../components/constants/dashboardRoutes';
 
@@ -23,7 +25,6 @@ const AssignmentsPage = lazy(() => import('../../features/teacher/pages/Assignme
 const StudentsPage = lazy(() => import('../../features/teacher/pages/Students'));
 const ChatPage = lazy(() => import('../../features/teacher/pages/Chat'));
 const RequestsPage = lazy(() => import('../../features/teacher/pages/Requests'));
-const AvailabilityPage = lazy(() => import('../../features/admin/pages/TeacherAvailability'));
 
 export const teacherDashboardRoutes: RouteConfig[] = [
   {
@@ -41,13 +42,6 @@ export const teacherDashboardRoutes: RouteConfig[] = [
     element: <LMSCoursesPage />,
   },
   {
-    id: 'teacher-availability',
-    label: 'sidebar_available',
-    icon: Clock,
-    path: 'availability',
-    element: <AvailabilityPage />,
-  },
-  {
     id: 'academic-content',
     label: 'sidebar_academic_content',
     icon: FileText,
@@ -57,25 +51,33 @@ export const teacherDashboardRoutes: RouteConfig[] = [
         id: 'sessions',
         label: 'sidebar_sessions',
         path: 'sessions',
-        element: <SessionsPage />
+        element: <SessionsPage />,
+        icon: Play
+
       },
       {
         id: 'agenda',
         label: 'sidebar_agenda',
         path: 'agenda',
-        element: <AgendaPage />
+        element: <AgendaPage />,
+        icon: Calendar,
+
       },
       {
         id: 'exams',
         label: 'sidebar_exams',
         path: 'exams',
-        element: <ExamsPage />
+        element: <ExamsPage />,
+        icon: FileText,
+
       },
       {
         id: 'assignments',
         label: 'sidebar_assignments',
         path: 'assignments',
-        element: <AssignmentsPage />
+        element: <AssignmentsPage />,
+        icon: ClipboardList,
+
       }
     ]
   },

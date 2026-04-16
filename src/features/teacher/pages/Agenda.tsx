@@ -6,10 +6,12 @@ import {
   Clock,
 } from "lucide-react";
 
+
 import { useLanguage } from "../../../contexts/LanguageContext";
 import { useAgenda } from "../../../features/admin/hooks/useAgenda";
 import { AgendaSession } from "../../../types/Agenda";
 import SessionsDayModal from "../../../components/modals/SessionsDayModal";
+import { formatDateLocal, getLocalDateKey } from "../../../utils/dateUtils";
 
 export default function Agenda() {
   const { t, language } = useLanguage();
@@ -20,7 +22,7 @@ export default function Agenda() {
   // 📌 Month range
   const startDate = useMemo(() => {
     const d = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
-    return d.toISOString().split("T")[0];
+    return formatDateLocal(d);
   }, [currentDate]);
 
   const endDate = useMemo(() => {
@@ -29,7 +31,7 @@ export default function Agenda() {
       currentDate.getMonth() + 1,
       0,
     );
-    return d.toISOString().split("T")[0];
+    return formatDateLocal(d);
   }, [currentDate]);
 
   const {
@@ -43,7 +45,7 @@ export default function Agenda() {
     const grouped: Record<string, AgendaSession[]> = {};
 
     allSessions.forEach((session) => {
-      const dateKey = session.start_time.split("T")[0];
+      const dateKey = getLocalDateKey(session.start_time);
 
       if (!grouped[dateKey]) grouped[dateKey] = [];
       grouped[dateKey].push(session);
@@ -72,7 +74,7 @@ export default function Agenda() {
     t("sat"),
   ];
 
-  const formatKey = (date: Date) => date.toISOString().split("T")[0];
+  const formatKey = (date: Date) => formatDateLocal(date);
 
   // 📌 Build calendar days
   const getDaysInMonth = (date: Date) => {
@@ -95,7 +97,7 @@ export default function Agenda() {
 
   const days = getDaysInMonth(currentDate);
 
-  const todayKey = new Date().toISOString().split("T")[0];
+  const todayKey = formatDateLocal(new Date());
   const todaySessions = sessionsByDate[todayKey] || [];
 
   // 📌 Loading
@@ -204,8 +206,8 @@ export default function Agenda() {
                 <div
                   key={i}
                   className={`aspect-square border p-2 ${isToday(d)
-                      ? "bg-green-50 border-green-300"
-                      : "hover:bg-gray-50"
+                    ? "bg-green-50 border-green-300"
+                    : "hover:bg-gray-50"
                     }`}
                 >
                   <div className="text-sm font-medium">{d.getDate()}</div>
@@ -249,14 +251,14 @@ export default function Agenda() {
                   key={s.id}
                   className="bg-blue-50 border rounded-xl p-4 text-right"
                 >
-                  <p className="font-bold">{s.title}</p>
+                  <p className="font-bold text-lg">{s.title}</p>
 
-                  <p className="text-sm text-gray-600">
-                    {new Date(s.start_time).toLocaleTimeString()} -{" "}
-                    {new Date(s.end_time).toLocaleTimeString()}
+                  <p className="text-sm text-gray-600  ">
+                    {language === "ar" ? new Date(s.start_time).toLocaleTimeString("ar-EG") : new Date(s.start_time).toLocaleTimeString("en-US")} -  {"   "}
+                    {language === "ar" ? new Date(s.end_time).toLocaleTimeString("ar-EG") : new Date(s.end_time).toLocaleTimeString("en-US")}
                   </p>
 
-                  <p className="text-xs mt-1">{s.status}</p>
+                  <p className="text-lg mt-1">{s.status}</p>
 
                   {s.link && (
                     <button

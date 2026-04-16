@@ -1,18 +1,12 @@
 import { useState, useEffect } from 'react';
-import { Search, Plus, Eye, Trash2, Edit } from 'lucide-react';
+import { Search, Eye } from 'lucide-react';
 import Pagination from '../../../components/ui/Pagination';
 import { useTranslation } from 'react-i18next';
-import { useGetSchedules, useSearchSchedules, useCreateSchedule, useCreateRecurringSchedule, useUpdateSchedule, useDeleteSchedule, useDeleteGroupedSchedule } from '../../../features/admin/hooks/useSchedules';
-import AddSessionModal from '../../../components/modals/AddSessionModal';
-import AddMultipleSessionsModal from '../../../components/modals/AddMultipleSessionsModal';
 import ViewSessionModal from '../../../components/modals/ViewSessionModal';
-import EditSessionModal from '../../../components/modals/EditSessionModal';
-import ConfirmModal from '../../../components/modals/ConfirmModal';
-import { Schedule, UpdateSchedulePayload } from '../../../types/scheduales';
-import { SessionFormData, MultipleSessionsPayload } from '../../../lib/schemas/SessionSchema';
-import ErrorService from '../../../utils/ErrorService';
+import { Schedule } from '../../../types/scheduales';
 import { useSubjects } from '../../../features/admin/hooks/useSubjects';
 import { Subject } from '../../../types/subject';
+import { useUserSessions } from '../../../hooks/useSessions';
 
 
 
@@ -22,95 +16,13 @@ export default function Sessions() {
   const [searchTerm, setSearchTerm] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
-  const [showAddModal, setShowAddModal] = useState(false);
-  const [showAddMultipleModal, setShowAddMultipleModal] = useState(false);
   const [showViewModal, setShowViewModal] = useState(false);
-  const [showEditModal, setShowEditModal] = useState(false);
   const [selectedSession, setSelectedSession] = useState<Schedule | null>(null);
   const [groupedSessions, setGroupedSessions] = useState<Schedule[]>([]);
-  const [sessionToDelete, setSessionToDelete] = useState<Schedule | null>(null);
 
-  const createSchedule = useCreateSchedule();
-  const createRecurringSchedule = useCreateRecurringSchedule();
-  const updateSchedule = useUpdateSchedule();
-  const deleteSchedule = useDeleteSchedule();
-  const deleteGroupedSchedule = useDeleteGroupedSchedule();
+  const { data: sessionResponse } = useUserSessions(debouncedSearch);
 
-  const handleUpdateSession = async (id: string, data: UpdateSchedulePayload) => {
-    try {
-      await updateSchedule.mutateAsync({ id, data });
-      ErrorService.success(t('sessionUpdatedSuccess'));
-      setShowEditModal(false);
-      setSelectedSession(null);
-    } catch (error) {
-      console.error('Update session failed:', error);
-    }
-  };
 
-  const handleDeleteSession = (session: Schedule) => {
-    setSessionToDelete(session);
-  };
-
-  const confirmDelete = async () => {
-    if (!sessionToDelete) return;
-    try {
-      if (sessionToDelete.is_recurring) {
-        await deleteGroupedSchedule.mutateAsync(sessionToDelete.parent_recurring_id || sessionToDelete.id);
-      } else {
-        await deleteSchedule.mutateAsync(sessionToDelete.id);
-      }
-      ErrorService.success(t('sessionDeletedSuccess'));
-      setSessionToDelete(null);
-    } catch (error) {
-      console.error('Delete session failed:', error);
-    }
-  };
-
-  const handleAddSession = async (data: SessionFormData) => {
-    try {
-      await createSchedule.mutateAsync({
-        studentId: data.student,
-        teacherId: data.teacher,
-        subject_id: data.subject,
-        title: data.title,
-        description: data.description || '',
-        link: data.meetingLink || '',
-        notes: data.notes || '',
-        start_time: `${data.sessionDate}T${data.startTime}:00.000Z`,
-        type: data.type,
-        notification_Time: data.notification_Time
-      });
-      ErrorService.success(t('sessionAddedSuccess'));
-      setShowAddModal(false);
-    } catch (error) {
-      console.error('Add session failed:', error);
-    }
-  };
-
-  const handleAddMultipleSessions = async (data: MultipleSessionsPayload) => {
-    const { formData, sessions } = data;
-    try {
-      await createRecurringSchedule.mutateAsync({
-        studentId: formData.student,
-        teacherId: formData.teacher,
-        subject_id: formData.subject,
-        title: formData.title,
-        description: formData.description || '',
-        link: formData.meetingLink || '',
-        notes: formData.notes || '',
-        startTime: sessions[0]?.time || '00:00',
-        days: data.selectedDays,
-        startDate: formData.monthYear ? `${formData.monthYear}-01` : new Date().toISOString().split('T')[0],
-        endDate: formData.monthYear ? `${formData.monthYear}-28` : new Date().toISOString().split('T')[0],
-        notification_Time: formData.notification_Time || '10',
-        type: formData.type
-      });
-      ErrorService.success(t('sessionsAddedSuccess'));
-      setShowAddMultipleModal(false);
-    } catch (error) {
-      console.error('Add multiple sessions failed:', error);
-    }
-  };
 
   useEffect(() => {
     if (searchTerm.length > 2) {
@@ -120,11 +32,8 @@ export default function Sessions() {
     }
   }, [searchTerm]);
 
-  const { data: allSchedules } = useGetSchedules();
-  const { data: searchResults } = useSearchSchedules(debouncedSearch);
-
   const itemsPerPage = 5;
-  const scheduleData = (debouncedSearch ? searchResults?.data?.schedule : allSchedules?.data?.schedule) || [];
+  const scheduleData = sessionResponse?.data || [];
 
   const displaySchedules: Schedule[] = [];
   const seenParents = new Set<string>();
@@ -230,23 +139,6 @@ export default function Sessions() {
                 className={`w-full ${language === 'ar' ? 'pr-12 text-right' : 'pl-12'} py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent`}
               />
             </div>
-
-            <div className="flex items-center gap-3 w-full md:w-auto">
-              <button
-                onClick={() => setShowAddModal(true)}
-                className="flex flex-1 md:flex-none items-center justify-center gap-2 px-6 py-3 btn-primary text-white rounded-xl transition-colors font-medium whitespace-nowrap"
-              >
-                <Plus className="w-5 h-5" />
-                {t('singleSession')}
-              </button>
-              <button
-                onClick={() => setShowAddMultipleModal(true)}
-                className="flex flex-1 md:flex-none items-center justify-center gap-2 px-6 py-3 btn-primary text-white rounded-xl transition-colors font-medium whitespace-nowrap"
-              >
-                <Plus className="w-5 h-5" />
-                {t('multipleSessions')}
-              </button>
-            </div>
           </div>
         </div>
 
@@ -295,7 +187,7 @@ export default function Sessions() {
                     </span>
                   </td>
                   <td className="px-6 py-4">
-                    <div className="flex items-center gap-2 justify-end">
+                    <div className="flex items-center gap-2 justify-start">
                       <button
                         onClick={() => {
                           const grouped = session.parent_recurring_id
@@ -310,23 +202,8 @@ export default function Sessions() {
                       >
                         <Eye className="w-4 h-4" />
                       </button>
-                      <button
-                        onClick={() => {
-                          setSelectedSession(session);
-                          setShowEditModal(true);
-                        }}
-                        className="p-2 text-amber-600 hover:bg-amber-50 rounded-lg transition-colors"
-                        title={t('edit')}
-                      >
-                        <Edit className="w-4 h-4" />
-                      </button>
-                      <button
-                        onClick={() => handleDeleteSession(session)}
-                        className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-                        title={t('delete')}
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </button>
+
+
                     </div>
                   </td>
                 </tr>
@@ -343,36 +220,13 @@ export default function Sessions() {
           onPageChange={handlePageChange}
         />
       </div>
-      <AddSessionModal
-        isOpen={showAddModal}
-        onClose={() => setShowAddModal(false)}
-        onAdd={handleAddSession}
-      />
-
-      <AddMultipleSessionsModal
-        isOpen={showAddMultipleModal}
-        onClose={() => setShowAddMultipleModal(false)}
-        onAdd={handleAddMultipleSessions}
-      />
 
       <ViewSessionModal
         isOpen={showViewModal}
         onClose={() => { setShowViewModal(false); setSelectedSession(null); setGroupedSessions([]); }}
         session={selectedSession}
         groupedSessions={groupedSessions}
-      />
-
-      <EditSessionModal
-        isOpen={showEditModal}
-        onClose={() => { setShowEditModal(false); setSelectedSession(null); }}
-        session={selectedSession}
-        onSave={handleUpdateSession}
-      />
-
-      <ConfirmModal
-        isOpen={!!sessionToDelete}
-        onClose={() => setSessionToDelete(null)}
-        onConfirm={confirmDelete}
+        allSessions={scheduleData}
       />
     </div>
   );

@@ -41,7 +41,7 @@ export default function AddSessionModal({ isOpen, onClose, onAdd }: AddSessionMo
   const { data: studentsData } = useStudents();
   const { data: teachersData } = useTeacher();
 
-  const students = studentsData?.data?.students || [];
+  const students = studentsData?.data?.studentsData || [];
   const teachers = teachersData?.teachers || [];
 
   const studentOptions = students.map(s => ({ value: s.id, label: s.user.name }));

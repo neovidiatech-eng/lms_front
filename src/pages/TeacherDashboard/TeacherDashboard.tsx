@@ -1,5 +1,5 @@
 import { Suspense } from 'react';
-import { Outlet, useLocation, Routes, Route } from 'react-router-dom';
+import { Outlet, Routes, Route } from 'react-router-dom';
 import TeacherDashboardLayout from './TeacherDashboardLayout';
 import ErrorBoundary from '../../components/layout/ErrorBoundary';
 import TeacherDashboardHome from '../../features/teacher/pages/Home';
