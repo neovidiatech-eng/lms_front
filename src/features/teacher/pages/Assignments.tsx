@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Search, Trash2, Filter, Edit2 } from 'lucide-react';
+import { Search, Trash2, Filter, Edit2, Plus } from 'lucide-react';
 import { useLanguage } from '../../../contexts/LanguageContext';
 import Pagination from '../../../components/ui/Pagination';
 import AddAssignmentModal from '../../../components/modals/AddAssignmentModal';
@@ -206,6 +206,13 @@ export default function Assignments() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h1 className="text-3xl font-bold text-gray-900">{text.title[language]}</h1>
+        <button
+          onClick={() => setShowAddModal(true)}
+          className="flex items-center gap-2 px-6 py-3 btn-primary text-white rounded-xl transition-colors font-medium"
+        >
+          <Plus className="w-5 h-5" />
+          {text.addAssignment[language]}
+        </button>
       </div>
 
       <AddAssignmentModal

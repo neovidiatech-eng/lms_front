@@ -426,9 +426,9 @@ export default function Students() {
           try {
             const payload: any = {
               name: updatedData.name,
-              // Backend expects combined phone and separate code_country
+              // Backend expects combined phone and separate codeCountry
               phone: updatedData.countryCode + updatedData.phone.replace(/^0/, ''),
-              code_country: updatedData.countryCode,
+              codeCountry: updatedData.countryCode,
               country: updatedData.country,
               birth_date: (updatedData.birthDate && updatedData.birthDate !== "") ? new Date(updatedData.birthDate).toISOString() : null,
               gender: updatedData.gender,

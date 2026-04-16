@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo } from "react";
 import {
   CheckCircle,
   XCircle,
@@ -13,11 +13,8 @@ import {
 } from "lucide-react";
 import { useLanguage } from "../../../contexts/LanguageContext";
 import CustomSelect from "../../../components/ui/CustomSelect";
-import {
-  TeacherApi,
-  TeacherService,
-} from "../services/TeacherAvailabilityServices";
 import { mapTeachersToSessions } from "../../../utils/teacherMapper";
+import { useTeacherAvailability } from "../hooks/useTeacherAvailabilty";
 
 // const TEACHERS = [
 //   { id: "1", name: "Mohammed", subject: "الرياضيات", color: "bg-blue-500" },
@@ -60,7 +57,7 @@ const HOURS = Array.from({ length: 14 }, (_, i) => {
 });
 
 function getWeekDates(weekOffset: number): Date[] {
-  const today = new Date(2026, 2, 2);
+  const today = new Date(2026, 3, 1); // Start from April 1st, 2026
   const startOfWeek = new Date(today);
   const day = today.getDay();
   startOfWeek.setDate(today.getDate() - day + weekOffset * 7);
@@ -72,7 +69,7 @@ function getWeekDates(weekOffset: number): Date[] {
 }
 
 function getMonthDates(monthOffset: number): Date[] {
-  const today = new Date(2026, 2, 2);
+  const today = new Date(2026, 3, 1); // Start from April 1st, 2026
   const year = today.getFullYear();
   const month = today.getMonth() + monthOffset;
   const firstDay = new Date(year, month, 1);
@@ -104,12 +101,14 @@ interface SessionData {
   sessionName: string;
   studentName: string;
   teacherName: string;
+  teacherId: string;
   subject: string;
   day: string;
   date: string;
   time: string;
   endTime: string;
   meetingLink?: string;
+  status?: string;
 }
 
 interface Teacher {
@@ -143,13 +142,17 @@ function TeacherDetailModal({
   // const teacherSessions = sessions.filter(
   //   (s) => s.teacherName === teacher.name,
   // );
-  const teacherSessions = sessions.filter((s) => s.teacherName === teacher.id);
+  const teacherSessions = sessions.filter((s) => s.teacherId === teacher.id);
 
   const weekSessions = teacherSessions.filter((s) =>
     weekDates.some((d) => formatDate(d) === s.date),
   );
 
-  const monthName = new Date(2026, 2 + monthOffset, 1).toLocaleDateString(
+  const monthName = new Date(
+    new Date().getFullYear(),
+    new Date().getMonth() + monthOffset,
+    1,
+  ).toLocaleDateString(
     language === "ar" ? "ar-SA" : "en-US",
     { month: "long", year: "numeric" },
   );
@@ -183,7 +186,7 @@ function TeacherDetailModal({
     return teacherSessions.filter((s) => s.date === dateStr);
   };
 
-  const today = formatDate(new Date(2026, 2, 2));
+  const today = formatDate(new Date());
 
   return (
     <div
@@ -479,13 +482,12 @@ function TeacherDetailModal({
                   return (
                     <div
                       key={formatDate(date)}
-                      className={`relative rounded-xl p-1.5 min-h-[60px] border transition-all ${
-                        isToday
+                      className={`relative rounded-xl p-1.5 min-h-[60px] border transition-all ${isToday
                           ? "bg-primary-light border-primary"
                           : hasSessions
                             ? "bg-red-50 border-red-200"
                             : "bg-white border-gray-100 hover:border-gray-200"
-                      }`}
+                        }`}
                     >
                       <span
                         className={`text-xs font-medium block text-center mb-1 ${isToday ? "text-primary" : hasSessions ? "text-red-700" : "text-gray-500"}`}
@@ -568,27 +570,13 @@ export default function TeacherAvailability() {
 
   const weekDates = getWeekDates(weekOffset);
   const DAYS = language === "ar" ? DAYS_AR : DAYS_EN;
-  const [apiSessions, setApiSessions] = useState<any[]>([]);
-  const sessions = apiSessions;
-  const [loading, setLoading] = useState(false);
-  // const [teachers, setTeachers] = useState<Teacher[]>([]);
-  const [teachers, setTeachers] = useState<TeacherApi[]>([]);
-  // const UI_TEACHERS: Teacher[] = useMemo(() => {
-  //   return teachers.map((t, index) => ({
-  //     id: t.id,
-  //     name: "Teacher " + (index + 1), // ثابت
-  //     subject: "General",
-  //     color: [
-  //       "bg-blue-500",
-  //       "bg-green-500",
-  //       "bg-orange-500",
-  //       "bg-red-500",
-  //       "bg-teal-500",
-  //       "bg-yellow-500",
-  //       "bg-pink-500",
-  //     ][index % 7],
-  //   }));
-  // }, [teachers]);
+  const { data: teachersData, isLoading: loading, isError, error } = useTeacherAvailability(
+    "2026-04-01",
+    "2026-05-01"
+  );
+
+  const teachers = useMemo(() => teachersData || [], [teachersData]);
+  const sessions = useMemo(() => mapTeachersToSessions(teachers), [teachers]);
 
   const UI_TEACHERS: Teacher[] = useMemo(() => {
     return teachers.map((t, index) => ({
@@ -607,37 +595,12 @@ export default function TeacherAvailability() {
     }));
   }, [teachers]);
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        setLoading(true);
-
-        const startDate = "2026-04-01";
-        const endDate = "2026-05-01";
-
-        const teachersRes = await TeacherService.getTeachersCalendar(
-          startDate,
-          endDate,
-        );
-
-        setTeachers(teachersRes);
-
-        const mappedSessions = mapTeachersToSessions(teachersRes);
-        setApiSessions(mappedSessions);
-      } catch (err) {
-        console.error(err);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchData();
-  }, []);
   const busySlots = useMemo(() => {
     const slots: Record<
       string,
       {
         teacherName: string;
+        teacherId: string;
         studentName: string;
         time: string;
         endTime: string;
@@ -645,10 +608,11 @@ export default function TeacherAvailability() {
       }[]
     > = {};
     sessions.forEach((session) => {
-      const key = `${session.date}-${session.teacherName}`;
+      const key = `${session.date}-${session.teacherId}`;
       if (!slots[key]) slots[key] = [];
       slots[key].push({
         teacherName: session.teacherName,
+        teacherId: session.teacherId,
         studentName: session.studentName,
         time: session.time,
         endTime: session.endTime,
@@ -658,13 +622,63 @@ export default function TeacherAvailability() {
     return slots;
   }, [sessions]);
 
+  const teacherStats = useMemo(() => {
+    return UI_TEACHERS.map((teacher) => {
+      const teacherSessions = sessions.filter(
+        (s) => s.teacherId === teacher.id,
+      );
+
+      const weekSessions = teacherSessions.filter((s) => {
+        const sessionDate = new Date(s.date);
+        return weekDates.some((d) => formatDate(d) === formatDate(sessionDate));
+      });
+
+      return {
+        ...teacher,
+        totalSessions: teacherSessions.length,
+        weekSessions: weekSessions.length,
+        busyHours: weekSessions.length,
+      };
+    });
+  }, [sessions, weekDates, UI_TEACHERS]);
+
+  const teacherOptions = useMemo(() => {
+    return [
+      {
+        value: "all",
+        label: language === "ar" ? "كل المعلمين" : "All Teachers",
+      },
+      ...UI_TEACHERS.map((t) => ({
+        value: t.id,
+        label: t.name,
+        searchText: t.name,
+      })),
+    ];
+  }, [UI_TEACHERS, language]);
+
+  if (loading) {
+    return (
+      <div className="p-10 text-center text-gray-600 font-bold">
+        Loading Teacher Availability...
+      </div>
+    );
+  }
+
+  if (isError) {
+    return (
+      <div className="p-10 text-center text-red-500 font-bold">
+        {error?.message || "Failed to load teacher availability"}
+      </div>
+    );
+  }
+
   const isTeacherBusy = (
-    teacherName: string,
+    teacherId: string,
     date: Date,
     hour: number,
   ): boolean => {
     const dateStr = formatDate(date);
-    const key = `${dateStr}-${teacherName}`;
+    const key = `${dateStr}-${teacherId}`;
     const daySlots = busySlots[key] || [];
     return daySlots.some((slot) => {
       const start = parseTime(slot.time);
@@ -673,9 +687,9 @@ export default function TeacherAvailability() {
     });
   };
 
-  const getSlotInfo = (teacherName: string, date: Date, hour: number) => {
+  const getSlotInfo = (teacherId: string, date: Date, hour: number) => {
     const dateStr = formatDate(date);
-    const key = `${dateStr}-${teacherName}`;
+    const key = `${dateStr}-${teacherId}`;
     const daySlots = busySlots[key] || [];
     return daySlots.find((slot) => {
       const start = parseTime(slot.time);
@@ -706,46 +720,7 @@ export default function TeacherAvailability() {
   //     };
   //   });
   // }, [sessions, weekDates]);
-  const teacherStats = useMemo(() => {
-    return UI_TEACHERS.map((teacher) => {
-      const teacherSessions = sessions.filter(
-        (s) => s.teacherName === teacher.id,
-      );
 
-      const weekSessions = teacherSessions.filter((s) => {
-        const sessionDate = new Date(s.date);
-        return weekDates.some((d) => formatDate(d) === formatDate(sessionDate));
-      });
-
-      return {
-        ...teacher,
-        totalSessions: teacherSessions.length,
-        weekSessions: weekSessions.length,
-        busyHours: weekSessions.length,
-      };
-    });
-  }, [sessions, weekDates, UI_TEACHERS]);
-  // const teacherOptions = [
-  //   {
-  //     value: "all",
-  //     label: language === "ar" ? "كل المعلمين" : "All Teachers",
-  //   },
-  // ...TEACHERS.map((t) => ({
-  //   value: t.id,
-  //   label: t.name,
-  //   searchText: t.name,
-  // })),
-  const teacherOptions = [
-    {
-      value: "all",
-      label: language === "ar" ? "كل المعلمين" : "All Teachers",
-    },
-    ...UI_TEACHERS.map((t) => ({
-      value: t.id,
-      label: t.name,
-      searchText: t.name,
-    })),
-  ];
 
   return (
     <div className="p-6 space-y-6" dir="rtl">
@@ -832,19 +807,25 @@ export default function TeacherAvailability() {
                     //     s.teacherName === teacher.name && s.date === dateStr,
                     // );
                     const hasSessions = sessions.some(
-                      (s) => s.teacherName === teacher.id && s.date === dateStr,
+                      (s) => s.teacherId === teacher.id && s.date === dateStr,
                     );
                     return (
                       <div
                         key={day}
-                        className={`flex-1 min-w-0 py-1.5 rounded-lg text-center text-xs font-medium ${
-                          hasSessions
+                        className={`flex-1 min-w-0 py-1.5 rounded-lg text-center text-xs font-medium ${hasSessions
                             ? `${teacher.color} text-white`
                             : "bg-gray-100 text-gray-400"
-                        }`}
-                        title={day}
+                          }`}
+                        title={hasSessions ? (language === "ar" ? "مشغول" : "Busy") : day}
                       >
-                        {day.slice(0, 1)}
+                        <div className="flex flex-col items-center">
+                          <span>{day.slice(0, 1)}</span>
+                          {hasSessions && (
+                            <span className="text-[8px] mt-0.5 font-bold uppercase">
+                              {language === "ar" ? "مشغول" : "Busy"}
+                            </span>
+                          )}
+                        </div>
                       </div>
                     );
                   })}
@@ -1006,10 +987,15 @@ export default function TeacherAvailability() {
                             <td key={idx} className="px-1 py-1 text-center">
                               {busy && info ? (
                                 <div className="bg-red-100 border border-red-200 rounded-md px-1 py-1 group relative cursor-default">
-                                  <div className="flex items-center justify-center gap-1">
-                                    <XCircle className="w-3 h-3 text-red-500 flex-shrink-0" />
-                                    <span className="text-red-700 text-xs font-medium truncate max-w-[60px]">
-                                      {info.studentName.split(" ")[0]}
+                                  <div className="flex flex-col items-center justify-center">
+                                    <div className="flex items-center gap-1">
+                                      <XCircle className="w-3 h-3 text-red-500 flex-shrink-0" />
+                                      <span className="text-red-700 text-[10px] font-bold">
+                                        {language === "ar" ? "مشغول" : "Busy"}
+                                      </span>
+                                    </div>
+                                    <span className="text-red-600 text-[9px] truncate max-w-[70px]">
+                                      {info.studentName}
                                     </span>
                                   </div>
                                   <div className="absolute z-10 bottom-full right-0 mb-1 bg-gray-900 text-white text-xs rounded-lg p-2 w-40 hidden group-hover:block shadow-lg">

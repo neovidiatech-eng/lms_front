@@ -8,10 +8,10 @@ import {
 
 
 import { useLanguage } from "../../../contexts/LanguageContext";
-import { useAgenda } from "../../../features/admin/hooks/useAgenda";
 import { AgendaSession } from "../../../types/Agenda";
 import SessionsDayModal from "../../../components/modals/SessionsDayModal";
 import { formatDateLocal, getLocalDateKey } from "../../../utils/dateUtils";
+import { useTeacherAgenda } from "../hooks/useTeacherAgende";
 
 export default function Agenda() {
   const { t, language } = useLanguage();
@@ -35,16 +35,17 @@ export default function Agenda() {
   }, [currentDate]);
 
   const {
-    sessions: allSessions,
-    loading,
-    error,
-  } = useAgenda(startDate, endDate);
+    data: allSessions,
+    isLoading,
+    isError,
+    error
+  } = useTeacherAgenda(startDate, endDate);
 
   // 📌 Group sessions by date
   const sessionsByDate = useMemo(() => {
     const grouped: Record<string, AgendaSession[]> = {};
 
-    allSessions.forEach((session) => {
+    allSessions?.data.sessions.forEach((session) => {
       const dateKey = getLocalDateKey(session.start_time);
 
       if (!grouped[dateKey]) grouped[dateKey] = [];
@@ -57,12 +58,13 @@ export default function Agenda() {
   // 📌 Stats
   const stats = useMemo(() => {
     return {
-      total: allSessions.length,
-      scheduled: allSessions.filter((s) => s.status === "scheduled").length,
-      planned: allSessions.filter((s) => s.status === "planned").length,
-      cancelled: allSessions.filter((s) => s.status === "cancelled").length,
+      total: allSessions?.data.count || 0,
+      scheduled: allSessions?.data.sessions.filter((s) => s.status === "scheduled").length || 0,
+      planned: allSessions?.data.sessions.filter((s) => s.status === "planned").length || 0,
+      cancelled: allSessions?.data.sessions.filter((s) => s.status === "cancelled").length || 0,
     };
   }, [allSessions]);
+
 
   const weekDays = [
     t("sun"),
@@ -101,15 +103,15 @@ export default function Agenda() {
   const todaySessions = sessionsByDate[todayKey] || [];
 
   // 📌 Loading
-  if (loading) {
+  if (isLoading) {
     return (
       <div className="p-10 text-center text-gray-600">Loading agenda...</div>
     );
   }
 
   // 📌 Error
-  if (error) {
-    return <div className="p-10 text-center text-red-500">{error}</div>;
+  if (isError) {
+    return <div className="p-10 text-center text-red-500">{error.message}</div>;
   }
 
   return (
