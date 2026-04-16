@@ -399,5 +399,6 @@
   "packageInfo": "تفاصيل الباقة",
   "packageName": "الباقة",
   "sessionsRemaining": "الحصص المتبقية",
-  "scheduledDays": "أيام الحصة"
+  "scheduledDays": "أيام الحصة",
+  "pendingStudents": "الطلاب المعلقين"
 }

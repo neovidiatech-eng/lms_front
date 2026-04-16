@@ -1,8 +1,7 @@
 import { useState } from 'react';
-import { Search, Plus, Trash2, Filter, Edit2 } from 'lucide-react';
+import { Search, Filter } from 'lucide-react';
 import { useLanguage } from '../../../contexts/LanguageContext';
 import Pagination from '../../../components/ui/Pagination';
-import AddAssignmentModal from '../../../components/modals/AddAssignmentModal';
 import { useConfirm } from '../../../hooks/useConfirm';
 
 interface Assignment {
@@ -21,10 +20,7 @@ export default function Assignments() {
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const [showFilters, setShowFilters] = useState(false);
-  const [showAddModal, setShowAddModal] = useState(false);
-  const [editingAssignment, setEditingAssignment] = useState<Assignment | null>(null);
-  const { confirm, ConfirmDialog } = useConfirm();
-  
+
   const [filters, setFilters] = useState({
     status: '',
     subject: '',
@@ -174,55 +170,12 @@ export default function Assignments() {
     setCurrentPage(page);
   };
 
-  const handleAddAssignment = (newAssignment: Assignment) => {
-    if (editingAssignment) {
-      setAssignments(assignments.map(e => e.id === editingAssignment.id ? newAssignment : e));
-    } else {
-      setAssignments([...assignments, newAssignment]);
-    }
-    handleCloseModal();
-  };
-
-
-  const handleEditAssignment = (assignment: Assignment) => {
-    setShowAddModal(true);
-    setEditingAssignment(assignment);
-  };
-
-  const handleDeleteAssignment = async (assignmentId: string) => {
-    const confirmed = await confirm({
-      title: language === 'ar' ? 'حذف واجب' : 'Delete Assignment',
-      message: language === 'ar' ? 'هل أنت متأكد من حذف هذا الواجب؟' : 'Are you sure you want to delete this assignment?',
-    });
-    if (confirmed) {
-      setAssignments(assignments.filter(assignment => assignment.id !== assignmentId));
-    }
-  };
-
-  const handleCloseModal = () => {
-    setShowAddModal(false);
-    setEditingAssignment(null);
-  };
 
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h1 className="text-3xl font-bold text-gray-900">{text.title[language]}</h1>
-        <button
-          onClick={() => setShowAddModal(true)}
-          className="flex items-center gap-2 px-6 py-3 btn-primary text-white rounded-xl transition-colors font-medium"
-        >
-          <Plus className="w-5 h-5" />
-          {text.addAssignment[language]}
-        </button>
       </div>
-
-      <AddAssignmentModal
-        isOpen={showAddModal}
-        onClose={() => setShowAddModal(false)}
-        onAdd={handleAddAssignment}
-        initialData={editingAssignment}
-      />
 
       <div className="bg-white rounded-2xl shadow-sm border border-gray-200">
         <div className="p-6 border-b border-gray-200">
@@ -299,7 +252,6 @@ export default function Assignments() {
                 <th className="px-6 py-4 text-right text-sm font-semibold text-gray-900">{text.columnDescription[language]}</th>
                 <th className="px-6 py-4 text-right text-sm font-semibold text-gray-900">{text.columnDueDate[language]}</th>
                 <th className="px-6 py-4 text-right text-sm font-semibold text-gray-900">{text.columnStatus[language]}</th>
-                <th className="px-6 py-4 text-right text-sm font-semibold text-gray-900">{text.columnActions[language]}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200">
@@ -316,33 +268,14 @@ export default function Assignments() {
                   <td className="px-6 py-4 text-gray-600">{assignment.description}</td>
                   <td className="px-6 py-4 text-gray-600">{assignment.dueDate}</td>
                   <td className="px-6 py-4">
-                    <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${
-                      assignment.status === 'pending'
-                        ? 'bg-yellow-100 text-yellow-800'
-                        : assignment.status === 'submitted'
+                    <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${assignment.status === 'pending'
+                      ? 'bg-yellow-100 text-yellow-800'
+                      : assignment.status === 'submitted'
                         ? 'bg-blue-100 text-blue-800'
                         : 'bg-green-100 text-green-800'
-                    }`}>
+                      }`}>
                       {text[assignment.status][language]}
                     </span>
-                  </td>
-                  <td className="px-6 py-4">
-                    <div className="flex items-center gap-2 justify-start">
-                      <button
-                        onClick={() => handleEditAssignment(assignment)}
-                        className="p-2 icon-btn-primary rounded-lg transition-colors"
-                        title="تعديل"
-                      >
-                        <Edit2 className="w-5 h-5" />
-                      </button>
-                      <button
-                        onClick={() => handleDeleteAssignment(assignment.id)}
-                        className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-                        title="حذف"
-                      >
-                        <Trash2 className="w-5 h-5" />
-                      </button>
-                    </div>
                   </td>
                 </tr>
               ))}
@@ -360,7 +293,6 @@ export default function Assignments() {
           />
         </div>
       </div>
-      {ConfirmDialog}
     </div>
   );
 }

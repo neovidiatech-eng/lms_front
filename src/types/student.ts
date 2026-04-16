@@ -38,7 +38,7 @@ export interface StudentsFetchResponse {
     message: string;
     status: number;
     data: {
-        students: Student[];
+        studentsData: Student[];
         pagination: {
             page: number;
             limit: number;

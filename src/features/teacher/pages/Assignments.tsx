@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Search, Plus, Trash2, Filter, Edit2 } from 'lucide-react';
+import { Search, Trash2, Filter, Edit2, Plus } from 'lucide-react';
 import { useLanguage } from '../../../contexts/LanguageContext';
 import Pagination from '../../../components/ui/Pagination';
 import AddAssignmentModal from '../../../components/modals/AddAssignmentModal';
@@ -305,10 +305,10 @@ export default function Assignments() {
                   <td className="px-6 py-4 text-gray-600">{assignment.dueDate}</td>
                   <td className="px-6 py-4">
                     <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${assignment.status === 'pending'
-                        ? 'bg-yellow-100 text-yellow-800'
-                        : assignment.status === 'submitted'
-                          ? 'bg-blue-100 text-blue-800'
-                          : 'bg-green-100 text-green-800'
+                      ? 'bg-yellow-100 text-yellow-800'
+                      : assignment.status === 'submitted'
+                        ? 'bg-blue-100 text-blue-800'
+                        : 'bg-green-100 text-green-800'
                       }`}>
                       {text[assignment.status][language]}
                     </span>

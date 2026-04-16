@@ -75,7 +75,7 @@ export default function EditStudentModal({
   ];
 
   const planOptions = [
-    ...(plansData?.data || []).map((p: any) => ({
+    ...(plansData || []).map((p: any) => ({
       value: p.id,
       label: language === 'ar' ? p.name_ar : p.name_en,
     }))

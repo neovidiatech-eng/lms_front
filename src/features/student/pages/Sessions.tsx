@@ -6,7 +6,7 @@ import ViewSessionModal from '../../../components/modals/ViewSessionModal';
 import { Schedule } from '../../../types/scheduales';
 import { useSubjects } from '../../../features/admin/hooks/useSubjects';
 import { Subject } from '../../../types/subject';
-import { useStudentSessions } from '../hooks/useSessions';
+import { useUserSessions } from '../../../hooks/useSessions';
 
 export default function Sessions() {
   const { t, i18n } = useTranslation();
@@ -26,9 +26,10 @@ export default function Sessions() {
     }
   }, [searchTerm]);
 
-  const { data: allSchedules } = useStudentSessions(debouncedSearch);
+  const { data: allSchedules } = useUserSessions(debouncedSearch);
 
   const itemsPerPage = 5;
+
   const scheduleData = allSchedules?.data || [];
   const displaySchedules: Schedule[] = [];
   const seenParents = new Set<string>();
