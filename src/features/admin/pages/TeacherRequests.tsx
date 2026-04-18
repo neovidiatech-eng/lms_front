@@ -141,7 +141,7 @@ const typeFilterOptions = [
 ];
 
   return (
-    <div className="p-6 space-y-6" dir="rtl">
+    <div className="p-6 space-y-6" dir={language === 'ar' ? 'rtl' : 'ltr'}>
       <div className="flex items-center justify-between flex-wrap gap-4">
         <div>
           <h1 className="text-3xl font-bold text-gray-900">{language === 'ar' ? 'طلبات المعلمين' : 'Teacher Requests'}</h1>
@@ -187,7 +187,7 @@ const typeFilterOptions = [
             placeholder={language === 'ar' ? 'بحث باسم المعلم...' : 'Search teacher name...'}
             value={searchQuery}
             onChange={e => setSearchQuery(e.target.value)}
-            className="w-full px-4 py-3 pr-12 border border-gray-300 rounded-xl focus:ring-2 focus:ring-primary text-right"
+            className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-primary text-start"
           />
         </div>
          
@@ -215,12 +215,12 @@ const typeFilterOptions = [
             <table className="w-full">
               <thead className="bg-gray-50 border-b border-gray-200">
                 <tr>
-                  <th className="px-5 py-4 text-right text-sm font-semibold text-gray-800">{language === 'ar' ? 'المعلم' : 'Teacher'}</th>
-                  <th className="px-5 py-4 text-right text-sm font-semibold text-gray-800">{language === 'ar' ? 'نوع الطلب' : 'Type'}</th>
-                  <th className="px-5 py-4 text-right text-sm font-semibold text-gray-800">{language === 'ar' ? 'الفترة' : 'Period'}</th>
-                  <th className="px-5 py-4 text-right text-sm font-semibold text-gray-800">{language === 'ar' ? 'الحصص المتأثرة' : 'Affected Sessions'}</th>
-                  <th className="px-5 py-4 text-right text-sm font-semibold text-gray-800">{language === 'ar' ? 'الحالة' : 'Status'}</th>
-                  <th className="px-5 py-4 text-right text-sm font-semibold text-gray-800">{language === 'ar' ? 'الإجراءات' : 'Actions'}</th>
+                  <th className="px-5 py-4 text-start text-sm font-semibold text-gray-800">{language === 'ar' ? 'المعلم' : 'Teacher'}</th>
+                  <th className="px-5 py-4 text-start text-sm font-semibold text-gray-800">{language === 'ar' ? 'نوع الطلب' : 'Type'}</th>
+                  <th className="px-5 py-4 text-start text-sm font-semibold text-gray-800">{language === 'ar' ? 'الفترة' : 'Period'}</th>
+                  <th className="px-5 py-4 text-start text-sm font-semibold text-gray-800">{language === 'ar' ? 'الحصص المتأثرة' : 'Affected Sessions'}</th>
+                  <th className="px-5 py-4 text-start text-sm font-semibold text-gray-800">{language === 'ar' ? 'الحالة' : 'Status'}</th>
+                  <th className="px-5 py-4 text-start text-sm font-semibold text-gray-800">{language === 'ar' ? 'الإجراءات' : 'Actions'}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100">
@@ -242,13 +242,13 @@ const typeFilterOptions = [
                         {REQUEST_TYPES[request.type][language]}
                       </span>
                     </td>
-                    <td className="px-5 py-4 text-right">
+                    <td className="px-5 py-4 text-start">
                       <p className="text-sm text-gray-900">{request.fromDate}</p>
                       {request.fromDate !== request.toDate && (
                         <p className="text-xs text-gray-400">{language === 'ar' ? 'حتى' : 'to'} {request.toDate}</p>
                       )}
                     </td>
-                    <td className="px-5 py-4 text-right">
+                    <td className="px-5 py-4 text-start">
                       <span className="inline-flex items-center gap-1 px-2 py-1 bg-orange-100 text-orange-700 rounded-lg text-xs font-medium">
                         <Calendar className="w-3 h-3" />
                         {request.sessionCount} {language === 'ar' ? 'حصة' : 'sessions'}
@@ -306,8 +306,8 @@ const typeFilterOptions = [
               <h2 className="text-lg font-bold text-gray-900">{language === 'ar' ? 'تفاصيل الطلب' : 'Request Details'}</h2>
             </div>
             <div className="p-6 space-y-4">
-              <div className="flex items-center gap-3 justify-end">
-                <div className="text-right">
+              <div className="flex items-center gap-3 justify-start">
+                <div className="text-start">
                   <p className="font-bold text-gray-900 text-lg">{selectedRequest.teacherName}</p>
                   <p className="text-sm text-gray-500">{selectedRequest.teacherSubject}</p>
                 </div>
@@ -317,34 +317,34 @@ const typeFilterOptions = [
               </div>
 
               <div className="grid grid-cols-2 gap-3">
-                <div className="bg-gray-50 rounded-xl p-3 text-right">
+                <div className="bg-gray-50 rounded-xl p-3 text-start">
                   <p className="text-xs text-gray-500 mb-1">{language === 'ar' ? 'نوع الطلب' : 'Type'}</p>
                   <span className={`inline-flex px-2 py-0.5 rounded-full text-xs font-medium ${REQUEST_TYPES[selectedRequest.type].color}`}>
                     {REQUEST_TYPES[selectedRequest.type][language]}
                   </span>
                 </div>
-                <div className="bg-gray-50 rounded-xl p-3 text-right">
+                <div className="bg-gray-50 rounded-xl p-3 text-start">
                   <p className="text-xs text-gray-500 mb-1">{language === 'ar' ? 'الحالة' : 'Status'}</p>
                   <span className={`inline-flex px-2 py-0.5 rounded-full text-xs font-medium ${getStatusBadge(selectedRequest.status)}`}>
                     {getStatusLabel(selectedRequest.status)}
                   </span>
                 </div>
-                <div className="bg-gray-50 rounded-xl p-3 text-right">
+                <div className="bg-gray-50 rounded-xl p-3 text-start">
                   <p className="text-xs text-gray-500 mb-1">{language === 'ar' ? 'من تاريخ' : 'From'}</p>
                   <p className="font-medium text-gray-900 text-sm">{selectedRequest.fromDate}</p>
                 </div>
-                <div className="bg-gray-50 rounded-xl p-3 text-right">
+                <div className="bg-gray-50 rounded-xl p-3 text-start">
                   <p className="text-xs text-gray-500 mb-1">{language === 'ar' ? 'إلى تاريخ' : 'To'}</p>
                   <p className="font-medium text-gray-900 text-sm">{selectedRequest.toDate}</p>
                 </div>
               </div>
 
-              <div className="bg-orange-50 border border-orange-200 rounded-xl p-4 text-right">
+              <div className="bg-orange-50 border border-orange-200 rounded-xl p-4 text-start">
                 <p className="text-xs text-orange-600 mb-1">{language === 'ar' ? 'الحصص المتأثرة' : 'Affected Sessions'}</p>
                 <p className="font-bold text-orange-700 text-xl">{selectedRequest.sessionCount} {language === 'ar' ? 'حصة' : 'sessions'}</p>
               </div>
 
-              <div className="bg-gray-50 rounded-xl p-4 text-right">
+              <div className="bg-gray-50 rounded-xl p-4 text-start">
                 <p className="text-xs text-gray-500 mb-2">{language === 'ar' ? 'السبب' : 'Reason'}</p>
                 <p className="text-gray-800 text-sm">{selectedRequest.reason}</p>
               </div>

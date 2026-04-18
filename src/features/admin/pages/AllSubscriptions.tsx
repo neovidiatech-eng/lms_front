@@ -5,6 +5,7 @@ import Pagination from "../../../components/ui/Pagination";
 import ViewSubscriptionDetailsModal from "../../../components/modals/ViewSubscriptionDetailsModal";
 import EditSubscriptionModal from "../../../components/modals/EditSubscriptionModal";
 import CustomSelect from "../../../components/ui/CustomSelect";
+import { TableSkeleton } from "../../../components/ui/CustomSkeleton";
 import {
   deleteSubscriptionRequest,
   getSubscriptionRequests,
@@ -34,6 +35,7 @@ export default function AllSubscriptions() {
   const [showEditModal, setShowEditModal] = useState(false);
   const [selectedSubscription, setSelectedSubscription] =
     useState<Subscription | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const { confirm, ConfirmDialog } = useConfirm();
   const itemsPerPage = 10;
@@ -100,16 +102,18 @@ export default function AllSubscriptions() {
         return "expired";
     }
   };
+
   useEffect(() => {
     const fetchData = async () => {
       try {
+        setIsLoading(true);
         const data = await getSubscriptionRequests();
-
         const formatted = data.map((item: any) => mapSubscriptionToUI(item));
-
         setSubscriptions(formatted);
       } catch (err) {
         console.error(err);
+      } finally {
+        setIsLoading(false);
       }
     };
 
@@ -170,12 +174,6 @@ export default function AllSubscriptions() {
     );
   };
 
-  // const handleDelete = (id: string) => {
-  //   if (confirm(text.confirmDelete[language])) {
-  //     setSubscriptions((prev) => prev.filter((sub) => sub.id !== id));
-  //   }
-  // };
-
   const handleDelete = async (id: string) => {
     const confirmed = await confirm({
       title: language === "ar" ? "حذف اشتراك" : "Delete Subscription",
@@ -185,14 +183,13 @@ export default function AllSubscriptions() {
 
     try {
       setDeletingId(id);
-
       await deleteSubscriptionRequest(id);
-
       setSubscriptions((prev) => prev.filter((sub) => sub.id !== id));
     } finally {
       setDeletingId(null);
     }
   };
+
   return (
     <div className="p-6 space-y-6">
       <div className="flex items-center justify-between">
@@ -210,7 +207,7 @@ export default function AllSubscriptions() {
               placeholder={text.search[language]}
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pr-10 pl-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent text-right"
+              className="w-full pr-10 pl-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent text-right transition-all"
             />
           </div>
           <div className="w-full md:w-[220px]">
@@ -232,7 +229,9 @@ export default function AllSubscriptions() {
           </div>
         </div>
 
-        {paginatedSubscriptions.length === 0 ? (
+        {isLoading ? (
+          <TableSkeleton rows={itemsPerPage} columns={9} />
+        ) : paginatedSubscriptions.length === 0 ? (
           <div className="text-center py-12">
             <CreditCard className="w-16 h-16 text-gray-300 mx-auto mb-4" />
             <p className="text-gray-500 text-lg">
@@ -240,124 +239,130 @@ export default function AllSubscriptions() {
             </p>
           </div>
         ) : (
-          <>
-            <div className="overflow-x-auto">
-              <table className="w-full" dir="rtl">
-                <thead>
-                  <tr className="border-b border-gray-200">
-                    <th className="px-4 py-3 text-right text-sm font-semibold text-gray-700">
-                      {text.studentName[language]}
-                    </th>
-                    <th className="px-4 py-3 text-right text-sm font-semibold text-gray-700">
-                      {text.plan[language]}
-                    </th>
-                    <th className="px-4 py-3 text-right text-sm font-semibold text-gray-700">
-                      {text.price[language]}
-                    </th>
-                    <th className="px-4 py-3 text-right text-sm font-semibold text-gray-700">
-                      {text.sessionsCount[language]}
-                    </th>
-                    <th className="px-4 py-3 text-right text-sm font-semibold text-gray-700">
-                      {text.startDate[language]}
-                    </th>
-                    <th className="px-4 py-3 text-right text-sm font-semibold text-gray-700">
-                      {text.endDate[language]}
-                    </th>
-                    <th className="px-4 py-3 text-right text-sm font-semibold text-gray-700">
-                      {text.status[language]}
-                    </th>
-                    <th className="px-4 py-3 text-right text-sm font-semibold text-gray-700">
-                      {text.progress[language]}
-                    </th>
-                    <th className="px-4 py-3 text-right text-sm font-semibold text-gray-700">
-                      {text.actions[language]}
-                    </th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {paginatedSubscriptions.map((subscription) => (
-                    <tr
-                      key={subscription.id}
-                      className="border-b border-gray-100 hover:bg-gray-50 transition-colors"
-                    >
-                      <td className="px-4 py-4 text-right text-sm font-medium text-gray-900">
-                        {subscription.studentName}
-                      </td>
-                      <td className="px-4 py-4 text-right text-sm text-gray-900">
-                        {subscription.planName}
-                      </td>
-                      <td className="px-4 py-4 text-right text-sm font-semibold text-gray-900">
-                        {subscription.planPrice}
-                      </td>
-                      <td className="px-4 py-4 text-right text-sm text-gray-900">
-                        <span className="font-semibold">
-                          {subscription.totalSessions}
-                        </span>{" "}
-                        {text.session[language]}
-                      </td>
-                      <td className="px-4 py-4 text-right text-sm text-gray-900">
-                        {subscription.startDate}
-                      </td>
-                      <td className="px-4 py-4 text-right text-sm text-gray-900">
-                        {subscription.endDate}
-                      </td>
-                      <td className="px-4 py-4">
-                        <span
-                          className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium border ${getStatusStyle(subscription.status)}`}
+          <div className="overflow-x-auto">
+            <table className="w-full" dir="rtl">
+              <thead>
+                <tr className="border-b border-gray-200 bg-gray-50">
+                  <th className="px-4 py-4 text-start text-sm font-semibold text-gray-700">
+                    {text.studentName[language]}
+                  </th>
+                  <th className="px-4 py-4 text-start text-sm font-semibold text-gray-700">
+                    {text.plan[language]}
+                  </th>
+                  <th className="px-4 py-4 text-start text-sm font-semibold text-gray-700">
+                    {text.price[language]}
+                  </th>
+                  <th className="px-4 py-4 text-start text-sm font-semibold text-gray-700">
+                    {text.sessionsCount[language]}
+                  </th>
+                  <th className="px-4 py-4 text-start text-sm font-semibold text-gray-700">
+                    {text.startDate[language]}
+                  </th>
+                  <th className="px-4 py-4 text-start text-sm font-semibold text-gray-700">
+                    {text.endDate[language]}
+                  </th>
+                  <th className="px-4 py-4 text-start text-sm font-semibold text-gray-700">
+                    {text.status[language]}
+                  </th>
+                  <th className="px-4 py-4 text-start text-sm font-semibold text-gray-700">
+                    {text.progress[language]}
+                  </th>
+                  <th className="px-4 py-4 text-start text-sm font-semibold text-gray-700">
+                    {text.actions[language]}
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-100">
+                {paginatedSubscriptions.map((subscription) => (
+                  <tr
+                    key={subscription.id}
+                    className="hover:bg-gray-50 transition-colors"
+                  >
+                    <td className="px-4 py-4 text-start text-sm font-medium text-gray-900">
+                      {subscription.studentName}
+                    </td>
+                    <td className="px-4 py-4 text-start text-sm text-gray-900">
+                      {subscription.planName}
+                    </td>
+                    <td className="px-4 py-4 text-start text-sm font-semibold text-gray-900">
+                      {subscription.planPrice}
+                    </td>
+                    <td className="px-4 py-4 text-start text-sm text-gray-900">
+                      <span className="font-semibold">
+                        {subscription.totalSessions}
+                      </span>{" "}
+                      {text.session[language]}
+                    </td>
+                    <td className="px-4 py-4 text-start text-sm text-gray-900">
+                      {subscription.startDate}
+                    </td>
+                    <td className="px-4 py-4 text-start text-sm text-gray-900">
+                      {subscription.endDate}
+                    </td>
+                    <td className="px-4 py-4 text-start">
+                      <span
+                        className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium border ${getStatusStyle(
+                          subscription.status
+                        )}`}
+                      >
+                        {text[subscription.status][language]}
+                      </span>
+                    </td>
+                    <td className="px-4 py-4 text-start">
+                      <div className="w-32">
+                        <div className="flex items-center justify-between mb-1">
+                          <span className="text-xs text-gray-600">
+                            {subscription.sessionsRemaining}/
+                            {subscription.totalSessions}
+                          </span>
+                        </div>
+                        <div className="w-full bg-gray-200 rounded-full h-2">
+                          <div
+                            className="progress-primary h-2 rounded-full transition-all"
+                            style={{
+                              width: `${calculateProgress(
+                                subscription.sessionsRemaining,
+                                subscription.totalSessions
+                              )}%`,
+                            }}
+                          ></div>
+                        </div>
+                      </div>
+                    </td>
+                    <td className="px-4 py-4">
+                      <div className="flex items-center gap-2 justify-end">
+                        <button
+                          onClick={() => handleView(subscription)}
+                          className="p-2 icon-btn-primary rounded-lg transition-colors group"
+                          title={text.view[language]}
                         >
-                          {text[subscription.status][language]}
-                        </span>
-                      </td>
-                      <td className="px-4 py-4">
-                        <div className="w-32">
-                          <div className="flex items-center justify-between mb-1">
-                            <span className="text-xs text-gray-600">
-                              {subscription.sessionsRemaining}/
-                              {subscription.totalSessions}
-                            </span>
-                          </div>
-                          <div className="w-full bg-gray-200 rounded-full h-2">
-                            <div
-                              className="progress-primary h-2 rounded-full transition-all"
-                              style={{
-                                width: `${calculateProgress(subscription.sessionsRemaining, subscription.totalSessions)}%`,
-                              }}
-                            ></div>
-                          </div>
-                        </div>
-                      </td>
-                      <td className="px-4 py-4">
-                        <div className="flex items-center gap-2 justify-start">
-                          <button
-                            onClick={() => handleView(subscription)}
-                            className="p-2 icon-btn-primary rounded-lg transition-colors"
-                            title={text.view[language]}
-                          >
-                            <Eye className="w-5 h-5" />
-                          </button>
-                          <button
-                            onClick={() => handleEdit(subscription)}
-                            className="p-2 text-green-600 hover:bg-green-50 rounded-lg transition-colors"
-                            title={text.edit[language]}
-                          >
-                            <Edit className="w-5 h-5" />
-                          </button>
+                          <Eye className="w-5 h-5" />
+                        </button>
+                        <button
+                          onClick={() => handleEdit(subscription)}
+                          className="p-2 text-green-600 hover:bg-green-50 rounded-lg transition-colors group"
+                          title={text.edit[language]}
+                        >
+                          <Edit className="w-5 h-5" />
+                        </button>
+                        <button
+                          disabled={deletingId === subscription.id}
+                          onClick={() => handleDelete(subscription.id)}
+                          className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors disabled:opacity-50 group"
+                        >
+                          <Trash2 className="w-5 h-5" />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
 
-                          <button
-                            disabled={deletingId === subscription.id}
-                            onClick={() => handleDelete(subscription.id)}
-                            className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors disabled:opacity-50"
-                          >
-                            <Trash2 className="w-5 h-5" />
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-
+        {!isLoading && paginatedSubscriptions.length > 0 && (
+          <div className="mt-6 border-t border-gray-100 pt-6">
             <Pagination
               currentPage={currentPage}
               totalPages={totalPages}
@@ -365,7 +370,7 @@ export default function AllSubscriptions() {
               itemsPerPage={itemsPerPage}
               onPageChange={setCurrentPage}
             />
-          </>
+          </div>
         )}
       </div>
 

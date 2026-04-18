@@ -81,13 +81,13 @@ export default function EditSessionModal({ isOpen, onClose, session, onSave }: E
           <div className="p-6 space-y-6">
             {/* Read-only info */}
             <div className="bg-gray-50 rounded-xl p-4 border border-gray-200">
-              <h3 className="text-lg font-bold text-gray-900 text-right mb-3">{t('sessionInfo')}</h3>
+              <h3 className="text-lg font-bold text-gray-900 text-start mb-3">{t('sessionInfo')}</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="text-right">
+                <div className="text-start">
                   <p className="text-xs text-gray-500">{t('studentLabel')}</p>
                   <p className="font-semibold text-gray-900">{session.student?.user?.name || '—'}</p>
                 </div>
-                <div className="text-right">
+                <div className="text-start">
                   <p className="text-xs text-gray-500">{t('teacherLabel')}</p>
                   <p className="font-semibold text-gray-900">{session.teacher?.user?.name || '—'}</p>
                 </div>
@@ -97,30 +97,30 @@ export default function EditSessionModal({ isOpen, onClose, session, onSave }: E
             {/* Editable fields */}
             <div className="space-y-4">
               {/* Title */}
-              <div className="text-right">
+              <div className="text-start">
                 <label className="block text-sm font-medium text-gray-700 mb-2">{t('sessionTitleLabel')} *</label>
                 <input
                   type="text"
                   value={formData.title}
                   onChange={(e) => handleChange('title', e.target.value)}
-                  className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent text-right"
+                  className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent text-start"
                 />
               </div>
 
               {/* Description */}
-              <div className="text-right">
+              <div className="text-start">
                 <label className="block text-sm font-medium text-gray-700 mb-2">{t('description')}</label>
                 <textarea
                   value={formData.description}
                   onChange={(e) => handleChange('description', e.target.value)}
                   rows={2}
-                  className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent text-right resize-none"
+                  className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent text-start resize-none"
                 />
               </div>
 
               {/* Status & Type */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="text-right">
+                <div className="text-start">
                   <label className="block text-sm font-medium text-gray-700 mb-2">{t('status')}</label>
                   <CustomSelect
                     value={formData.status}
@@ -132,7 +132,7 @@ export default function EditSessionModal({ isOpen, onClose, session, onSave }: E
                     ]}
                   />
                 </div>
-                <div className="text-right">
+                <div className="text-start">
                   <label className="block text-sm font-medium text-gray-700 mb-2">{t('type')}</label>
                   <CustomSelect
                     value={formData.type}
@@ -147,7 +147,7 @@ export default function EditSessionModal({ isOpen, onClose, session, onSave }: E
 
               {/* Start Time */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="text-right">
+                <div className="text-start">
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     <Clock className="w-4 h-4 inline ml-2" />
                     {t('startTime')}
@@ -160,7 +160,7 @@ export default function EditSessionModal({ isOpen, onClose, session, onSave }: E
                     dir="ltr"
                   />
                 </div>
-                <div className="text-right">
+                <div className="text-start">
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     <Clock className="w-4 h-4 inline ml-2" />
                     {t('endTime')}
@@ -176,7 +176,7 @@ export default function EditSessionModal({ isOpen, onClose, session, onSave }: E
               </div>
 
               {/* Meeting Link */}
-              <div className="text-right">
+              <div className="text-start">
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   <LinkIcon className="w-4 h-4 inline ml-2" />
                   {t('meetingLink')}
@@ -192,13 +192,13 @@ export default function EditSessionModal({ isOpen, onClose, session, onSave }: E
               </div>
 
               {/* Notes */}
-              <div className="text-right">
+              <div className="text-start">
                 <label className="block text-sm font-medium text-gray-700 mb-2">{t('notes')}</label>
                 <textarea
                   value={formData.notes}
                   onChange={(e) => handleChange('notes', e.target.value)}
                   rows={2}
-                  className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent text-right resize-none"
+                  className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent text-start resize-none"
                 />
               </div>
             </div>

@@ -121,7 +121,7 @@ export default function AddTransactionModal({ isOpen, onClose, onSave, currencie
 
         <form onSubmit={handleSubmit(onSubmit)} className="p-6 space-y-5">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2 text-right">{text.type[language]}</label>
+            <label className="block text-sm font-medium text-gray-700 mb-2 text-start">{text.type[language]}</label>
             <Controller
               name="type"
               control={control}
@@ -139,30 +139,30 @@ export default function AddTransactionModal({ isOpen, onClose, onSave, currencie
 
           {watchType === 'income' && (
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2 text-right">اسم الطالب *</label>
+              <label className="block text-sm font-medium text-gray-700 mb-2 text-start">اسم الطالب *</label>
               <input
                 type="text"
                 {...register('studentName')}
-                className={`w-full px-4 py-2.5 border rounded-lg text-right ${errors.studentName ? 'border-red-500' : 'border-gray-300'}`}
+                className={`w-full px-4 py-2.5 border rounded-lg text-start ${errors.studentName ? 'border-red-500' : 'border-gray-300'}`}
               />
-              {errors.studentName && <p className="text-red-500 text-xs mt-1 text-right">{errors.studentName.message}</p>}
+              {errors.studentName && <p className="text-red-500 text-xs mt-1 text-start">{errors.studentName.message}</p>}
             </div>
           )}
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2 text-right">{text.teacher[language]} *</label>
+            <label className="block text-sm font-medium text-gray-700 mb-2 text-start">{text.teacher[language]} *</label>
             <input
               type="text"
               {...register('teacherName')}
-              className={`w-full px-4 py-2.5 border rounded-lg text-right ${errors.teacherName ? 'border-red-500' : 'border-gray-300'}`}
+              className={`w-full px-4 py-2.5 border rounded-lg text-start ${errors.teacherName ? 'border-red-500' : 'border-gray-300'}`}
             />
-            {errors.teacherName && <p className="text-red-500 text-xs mt-1 text-right">{errors.teacherName.message}</p>}
+            {errors.teacherName && <p className="text-red-500 text-xs mt-1 text-start">{errors.teacherName.message}</p>}
           </div>
 
           {watchType === 'teacher_expense' && (
             <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 space-y-4">
               <div className="grid grid-cols-3 gap-3">
-                <input type="number" placeholder="الحصص" {...register('sessionCount')} className="px-3 py-2 border rounded-lg text-right text-sm" />
+                <input type="number" placeholder="الحصص" {...register('sessionCount')} className="px-3 py-2 border rounded-lg text-start text-sm" />
                 <Controller
                   name="sessionDuration"
                   control={control}
@@ -177,7 +177,7 @@ export default function AddTransactionModal({ isOpen, onClose, onSave, currencie
                     />
                   )}
                 />
-                <input type="number" step="0.01" placeholder="السعر" {...register('ratePerHour')} className="px-3 py-2 border rounded-lg text-right text-sm" />
+                <input type="number" step="0.01" placeholder="السعر" {...register('ratePerHour')} className="px-3 py-2 border rounded-lg text-start text-sm" />
               </div>
               <button type="button" onClick={handleAutoCalculate} className="w-full py-2 bg-blue-600 text-white rounded-lg text-sm font-medium">
                 {language === 'ar' ? 'احسب المبلغ تلقائياً' : 'Auto Calculate'}
@@ -187,17 +187,17 @@ export default function AddTransactionModal({ isOpen, onClose, onSave, currencie
 
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2 text-right">{text.amount[language]} *</label>
+              <label className="block text-sm font-medium text-gray-700 mb-2 text-start">{text.amount[language]} *</label>
               <input
                 type="number"
                 step="0.01"
                 {...register('amount', { valueAsNumber: true })}
-                className={`w-full px-4 py-2.5 border rounded-lg text-right ${errors.amount ? 'border-red-500' : 'border-gray-300'}`}
+                className={`w-full px-4 py-2.5 border rounded-lg text-start ${errors.amount ? 'border-red-500' : 'border-gray-300'}`}
               />
-              {errors.amount && <p className="text-red-500 text-xs mt-1 text-right">{errors.amount.message}</p>}
+              {errors.amount && <p className="text-red-500 text-xs mt-1 text-start">{errors.amount.message}</p>}
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2 text-right">{text.currency[language]}</label>
+              <label className="block text-sm font-medium text-gray-700 mb-2 text-start">{text.currency[language]}</label>
               <Controller
                 name="currency"
                 control={control}
@@ -230,13 +230,13 @@ export default function AddTransactionModal({ isOpen, onClose, onSave, currencie
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2 text-right">{text.paymentMethod[language]}</label>
-              <input type="text" {...register('paymentMethod')} className="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-right" />
+              <label className="block text-sm font-medium text-gray-700 mb-2 text-start">{text.paymentMethod[language]}</label>
+              <input type="text" {...register('paymentMethod')} className="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-start" />
             </div>
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2 text-right">{text.status[language]}</label>
+            <label className="block text-sm font-medium text-gray-700 mb-2 text-start">{text.status[language]}</label>
             <Controller
               name="status"
               control={control}
@@ -253,10 +253,10 @@ export default function AddTransactionModal({ isOpen, onClose, onSave, currencie
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2 text-right">{text.notes[language]}</label>
+            <label className="block text-sm font-medium text-gray-700 mb-2 text-start">{text.notes[language]}</label>
             <textarea
               {...register('notes')}
-              className="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-right resize-none"
+              className="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-start resize-none"
               rows={3}
             />
           </div>

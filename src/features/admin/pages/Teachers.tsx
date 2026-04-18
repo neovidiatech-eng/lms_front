@@ -11,8 +11,8 @@ import { useTeacher, useDeleteTeacher, useCreateTeacher, useUpdateTeacher } from
 import { CreateTeacherInput, Teacher } from '../../../types/teachers';
 import { TeacherFormData } from '../../../lib/schemas/TeacherSchema';
 import { useCurrency } from '../hooks/useCurrency';
-import ErrorService from '../../../utils/ErrorService';
 import { useConfirm } from '../../../hooks/useConfirm';
+import { TableSkeleton } from '../../../components/ui/CustomSkeleton';
 
 const AddTeacherModal = lazy(() => import('../../../components/modals/AddTeacherModal'));
 const ViewTeacherModal = lazy(() => import('../../../components/modals/ViewTeacherModal'));
@@ -123,7 +123,7 @@ export default function Teachers() {
   }, [teachers, searchTerm, selectedStatus]);
 
   const totalPages = useMemo(() => Math.max(1, Math.ceil(filteredTeachers.length / itemsPerPage)), [filteredTeachers, itemsPerPage]);
-  
+
   const currentTeachers = useMemo(() => {
     const startIndex = (currentPage - 1) * itemsPerPage;
     return filteredTeachers.slice(startIndex, startIndex + itemsPerPage);
@@ -163,7 +163,6 @@ export default function Teachers() {
     try {
       const apiData = mapFormToApi(formData);
       await createTeacherMutation.mutateAsync(apiData);
-      ErrorService.success(t('teacher Added Success'));
       setIsAddModalOpen(false);
     } catch (error) {
       console.error('Error adding teacher:', error);
@@ -176,7 +175,6 @@ export default function Teachers() {
     try {
       const apiData = mapFormToApi(formData);
       await updateTeacherMutation.mutateAsync({ id: selectedTeacher.id, data: apiData });
-      ErrorService.success(t('teacher Updated Success'));
       setIsEditModalOpen(false);
       setSelectedTeacher(null);
     } catch (error) {
@@ -193,7 +191,6 @@ export default function Teachers() {
     if (confirmed) {
       try {
         await deleteTeacherMutation.mutateAsync(teacherId);
-        ErrorService.success(t('teacher Deleted Success'));
       } catch (error) {
         console.error('Error deleting teacher:', error);
         // Detailed error is handled by axios interceptor
@@ -201,28 +198,14 @@ export default function Teachers() {
     }
   };
 
-  if (isLoading) {
-    return (
-      <div className="p-6 lg:p-8 flex items-center justify-center min-h-[60vh]">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
-      </div>
-    );
-  }
 
-  if (isError) {
-    return (
-      <div className="p-6 lg:p-8 flex items-center justify-center min-h-[60vh]">
-        <p className="text-red-500 text-lg">{t('errorLoadingData')}</p>
-      </div>
-    );
-  }
 
 
   return (
     <div className="p-6 lg:p-8">
       {/* Header */}
       <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-8">
-        <div className="text-right">
+        <div className="text-start">
           <h1 className="text-3xl font-bold text-gray-900">
             {t('teacherManagement')}
           </h1>
@@ -249,7 +232,7 @@ export default function Teachers() {
             className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow"
           >
             <div className="flex items-center justify-between">
-              <div className="text-right flex-1">
+              <div className="text-start flex-1">
                 <p className="text-sm text-gray-600 mb-2">{card.label}</p>
                 <p className={`text-3xl font-bold ${card.valueColor}`}>{card.value}</p>
               </div>
@@ -271,10 +254,9 @@ export default function Teachers() {
               placeholder={t('searchTeachersPlaceholder')}
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-12 pr-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary text-right"
-              dir="rtl"
+              className={`w-full ${language === 'ar' ? 'pr-12' : 'pl-12'} py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary text-start`}
             />
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+            <Search className={`absolute ${language === 'ar' ? 'right-4' : 'left-4'} top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400`} />
           </div>
 
           {/* Status Filter */}
@@ -287,115 +269,129 @@ export default function Teachers() {
             className="h-[46px]"
           />
         </div>
-      </div>
+        {/* Teachers Table Section */}
+        <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+          {isLoading ? (
+            <TableSkeleton rows={itemsPerPage} columns={6} />
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead className="bg-gray-50 border-b border-gray-200">
+                  <tr>
+                    <th className="px-6 py-4 text-start text-sm font-semibold text-gray-700">
+                      {t('teacherInfo')}
+                    </th>
+                    <th className="px-6 py-4 text-start text-sm font-semibold text-gray-700">
+                      {t('email')}
+                    </th>
+                    <th className="px-6 py-4 text-start text-sm font-semibold text-gray-700">
+                      {t('phone')}
+                    </th>
+                    <th className="px-6 py-4 text-start text-sm font-semibold text-gray-700">
+                      {t('amount')}
+                    </th>
+                    <th className="px-6 py-4 text-start text-sm font-semibold text-gray-700">
+                      {t('status')}
+                    </th>
+                    <th className="px-6 py-4 text-start text-sm font-semibold text-gray-700">
+                      {t('actions')}
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-200">
+                  {isError ? (
+                    <tr>
+                      <td colSpan={6} className="px-6 py-12 text-center text-red-500">
+                        {t('errorLoadingData')}
+                      </td>
+                    </tr>
+                  ) : currentTeachers.length === 0 ? (
+                    <tr>
+                      <td colSpan={6} className="px-6 py-12 text-center text-gray-500">
+                        {t('noTeachersFound')}
+                      </td>
+                    </tr>
+                  ) : (
+                    currentTeachers.map((teacher) => (
+                      <tr key={teacher.id} className="hover:bg-gray-50 transition-colors">
+                        <td className="px-6 py-4">
+                          <div className="flex items-center gap-3 justify-start">
+                            <div className="w-10 h-10 rounded-full bg-blue-50 flex items-center justify-center flex-shrink-0">
+                              <Users className="w-5 h-5 text-blue-600" />
+                            </div>
+                            <div className="text-start">
+                              <div className="text-sm font-bold text-gray-900">{teacher.user?.name || '-'}</div>
+                            </div>
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 text-start">
+                          <span className="text-sm text-gray-600">{teacher.user?.email || '-'}</span>
+                        </td>
+                        <td className="px-6 py-4 text-start">
+                          <WhatsAppPhone
+                            phone={`${teacher.user?.code_country || ''} ${teacher.user?.phone || ''}`.trim()}
+                            className="text-sm text-green-600 hover:text-green-700"
+                          />
+                        </td>
+                        <td className="px-6 py-4 text-start">
+                          <span className="text-sm font-medium text-gray-900">
+                            {currencyLookup[teacher.currencyId] || teacher.currencyId || '-'} {teacher.hour_price?.toFixed(2) ?? '0.00'}
+                          </span>
+                        </td>
+                        <td className="px-6 py-4 text-start">
+                          <span
+                            className={`inline-flex px-3 py-1 rounded-full text-xs font-medium ${teacher.active
+                              ? 'bg-green-100 text-green-700'
+                              : 'bg-orange-100 text-orange-700'
+                              }`}
+                          >
+                            {teacher.active ? t('active') : t('inactive')}
+                          </span>
+                        </td>
 
-      {/* Teachers Table */}
-      <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead className="bg-gray-50 border-b border-gray-200">
-              <tr>
-                <th className="px-6 py-4 text-right text-sm font-semibold text-gray-700">
-                  {t('teacherInfo')}
-                </th>
-                <th className="px-6 py-4 text-right text-sm font-semibold text-gray-700">
-                  {t('email')}
-                </th>
-                <th className="px-6 py-4 text-right text-sm font-semibold text-gray-700">
-                  {t('phone')}
-                </th>
-                <th className="px-6 py-4 text-right text-sm font-semibold text-gray-700">
-                  {t('amount')}
-                </th>
-                <th className="px-6 py-4 text-right text-sm font-semibold text-gray-700">
-                  {t('status')}
-                </th>
-                <th className="px-6 py-4 text-right text-sm font-semibold text-gray-700">
-                  {t('actions')}
-                </th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-200">
-              {currentTeachers.map((teacher) => (
-                <tr key={teacher.id} className="hover:bg-gray-50 transition-colors">
-                  <td className="px-6 py-4">
-                    <div className="flex items-center gap-3 justify-end">
-                      <span className="text-sm font-medium text-gray-900">{teacher.user?.name || '-'}</span>
-                      <div className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center flex-shrink-0">
-                        <Users className="w-5 h-5 text-gray-500" />
-                      </div>
-                    </div>
-                  </td>
-                  <td className="px-6 py-4">
-                    <span className="text-sm text-gray-600">{teacher.user?.email || '-'}</span>
-                  </td>
-                  <td className="px-6 py-4">
-                    <WhatsAppPhone
-                      phone={`${teacher.user?.code_country || ''} ${teacher.user?.phone || ''}`.trim()}
-                      className="text-sm text-green-600 hover:text-green-700"
-                    />
-                  </td>
-                  <td className="px-6 py-4">
-                    <span className="text-sm font-medium text-gray-900">
-                      {currencyLookup[teacher.currencyId] || teacher.currencyId || '-'} {teacher.hour_price?.toFixed(2) ?? '0.00'}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4">
-                    <span
-                      className={`inline-flex px-3 py-1 rounded-full text-xs font-medium ${teacher.active
-                        ? 'bg-green-100 text-green-700'
-                        : 'bg-orange-100 text-orange-700'
-                        }`}
-                    >
-                      {teacher.active ? t('active') : t('inactive')}
-                    </span>
-                  </td>
+                        <td className="px-6 py-4">
+                          <div className="flex items-center gap-2 justify-start">
+                            <button
+                              onClick={() => handleViewTeacher(teacher)}
+                              className="p-2 hover:bg-gray-100 rounded-lg transition-colors group"
+                              title={t('view')}
+                            >
+                              <Eye className="w-4 h-4 text-gray-400 group-hover:text-gray-600" />
+                            </button>
+                            <button
+                              onClick={() => handleEditTeacher(teacher)}
+                              className="p-2 hover:bg-primary-light rounded-lg transition-colors group"
+                              title={t('edit')}
+                            >
+                              <Pencil className="w-4 h-4 text-gray-400 group-hover:text-blue-600" />
+                            </button>
+                            <button
+                              onClick={() => handleDeleteTeacher(teacher.id)}
+                              className="p-2 hover:bg-red-50 rounded-lg transition-colors group"
+                              title={t('delete')}
+                            >
+                              <Trash2 className="w-4 h-4 text-gray-400 group-hover:text-red-600" />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
+          )}
 
-                  <td className="px-6 py-4">
-                    <div className="flex items-center gap-2 justify-start mt-2">
-                      <button
-                        onClick={() => handleViewTeacher(teacher)}
-                        className="p-2 hover:bg-gray-100 rounded-lg transition-colors group"
-                        title={t('view')}
-                      >
-                        <Eye className="w-4 h-4 text-gray-400 group-hover:text-gray-600" />
-                      </button>
-                      <button
-                        onClick={() => handleEditTeacher(teacher)}
-                        className="p-2 hover:bg-primary-light rounded-lg transition-colors group"
-                        title={t('edit')}
-                      >
-                        <Pencil className="w-4 h-4 text-gray-400 group-hover:text-blue-600" />
-                      </button>
-                      <button
-                        onClick={() => handleDeleteTeacher(teacher.id)}
-                        className="p-2 hover:bg-red-50 rounded-lg transition-colors group"
-                        title={t('delete')}
-                      >
-                        <Trash2 className="w-4 h-4 text-gray-400 group-hover:text-red-600" />
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-              {currentTeachers.length === 0 && (
-                <tr>
-                  <td colSpan={6} className="px-6 py-12 text-center text-gray-500">
-                    {t('noTeachersFound')}
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
+          {!isLoading && (
+            <Pagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              totalItems={filteredTeachers.length}
+              itemsPerPage={itemsPerPage}
+              onPageChange={handlePageChange}
+            />
+          )}
         </div>
-
-        <Pagination
-          currentPage={currentPage}
-          totalPages={totalPages}
-          totalItems={filteredTeachers.length}
-          itemsPerPage={itemsPerPage}
-          onPageChange={handlePageChange}
-        />
       </div>
 
       {/* Add Teacher Modal */}

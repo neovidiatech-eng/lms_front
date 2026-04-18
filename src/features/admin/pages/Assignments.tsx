@@ -2,7 +2,6 @@ import { useState } from 'react';
 import { Search, Filter } from 'lucide-react';
 import { useLanguage } from '../../../contexts/LanguageContext';
 import Pagination from '../../../components/ui/Pagination';
-import { useConfirm } from '../../../hooks/useConfirm';
 
 interface Assignment {
   id: string;
@@ -29,7 +28,7 @@ export default function Assignments() {
   });
   const itemsPerPage = 10;
 
-  const [assignments, setAssignments] = useState<Assignment[]>([
+  const [assignments] = useState<Assignment[]>([
     {
       id: '1',
       studentName: 'Ahmed Gamal',
@@ -187,7 +186,7 @@ export default function Assignments() {
                 placeholder={text.search[language]}
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-4 pr-12 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent text-right"
+                className="w-full pl-4 pr-12 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent text-start"
                 dir="rtl"
               />
             </div>
@@ -205,7 +204,7 @@ export default function Assignments() {
               <select
                 value={filters.status}
                 onChange={(e) => setFilters({ ...filters, status: e.target.value })}
-                className="px-4 py-2 border border-gray-300 rounded-lg text-right"
+                className="px-4 py-2 border border-gray-300 rounded-lg text-start"
                 dir="rtl"
               >
                 <option value="">{text.columnStatus[language]}</option>
@@ -218,7 +217,7 @@ export default function Assignments() {
                 placeholder={text.columnTeacher[language]}
                 value={filters.subject}
                 onChange={(e) => setFilters({ ...filters, subject: e.target.value })}
-                className="px-4 py-2 border border-gray-300 rounded-lg text-right"
+                className="px-4 py-2 border border-gray-300 rounded-lg text-start"
                 dir="rtl"
               />
               <input
@@ -226,7 +225,7 @@ export default function Assignments() {
                 placeholder={text.columnSubject[language]}
                 value={filters.teacher}
                 onChange={(e) => setFilters({ ...filters, teacher: e.target.value })}
-                className="px-4 py-2 border border-gray-300 rounded-lg text-right"
+                className="px-4 py-2 border border-gray-300 rounded-lg text-start"
                 dir="rtl"
               />
               <input
@@ -234,7 +233,7 @@ export default function Assignments() {
                 placeholder={text.columnStudent[language]}
                 value={filters.student}
                 onChange={(e) => setFilters({ ...filters, student: e.target.value })}
-                className="px-4 py-2 border border-gray-300 rounded-lg text-right"
+                className="px-4 py-2 border border-gray-300 rounded-lg text-start"
                 dir="rtl"
               />
             </div>
@@ -245,29 +244,29 @@ export default function Assignments() {
           <table className="w-full" dir="rtl">
             <thead className="bg-gray-50 border-b border-gray-200">
               <tr>
-                <th className="px-6 py-4 text-right text-sm font-semibold text-gray-900">{text.columnStudent[language]}</th>
-                <th className="px-6 py-4 text-right text-sm font-semibold text-gray-900">{text.columnTeacher[language]}</th>
-                <th className="px-6 py-4 text-right text-sm font-semibold text-gray-900">{text.columnSubject[language]}</th>
-                <th className="px-6 py-4 text-right text-sm font-semibold text-gray-900">{text.columnTitle[language]}</th>
-                <th className="px-6 py-4 text-right text-sm font-semibold text-gray-900">{text.columnDescription[language]}</th>
-                <th className="px-6 py-4 text-right text-sm font-semibold text-gray-900">{text.columnDueDate[language]}</th>
-                <th className="px-6 py-4 text-right text-sm font-semibold text-gray-900">{text.columnStatus[language]}</th>
+                <th className="px-6 py-4 text-start text-sm font-semibold text-gray-900">{text.columnStudent[language]}</th>
+                <th className="px-6 py-4 text-start text-sm font-semibold text-gray-900">{text.columnTeacher[language]}</th>
+                <th className="px-6 py-4 text-start text-sm font-semibold text-gray-900">{text.columnSubject[language]}</th>
+                <th className="px-6 py-4 text-start text-sm font-semibold text-gray-900">{text.columnTitle[language]}</th>
+                <th className="px-6 py-4 text-start text-sm font-semibold text-gray-900">{text.columnDescription[language]}</th>
+                <th className="px-6 py-4 text-start text-sm font-semibold text-gray-900">{text.columnDueDate[language]}</th>
+                <th className="px-6 py-4 text-start text-sm font-semibold text-gray-900">{text.columnStatus[language]}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200">
               {currentAssignments.map((assignment) => (
                 <tr key={assignment.id} className="hover:bg-gray-50 transition-colors">
-                  <td className="px-6 py-4 text-gray-900 font-medium">{assignment.studentName}</td>
-                  <td className="px-6 py-4 text-gray-900">{assignment.teacher}</td>
-                  <td className="px-6 py-4">
+                  <td className="px-6 py-4 text-start text-gray-900 font-medium">{assignment.studentName}</td>
+                  <td className="px-6 py-4 text-start text-gray-900">{assignment.teacher}</td>
+                  <td className="px-6 py-4 text-start">
                     <span className="text-primary font-medium hover:underline cursor-pointer">
                       {assignment.subject}
                     </span>
                   </td>
-                  <td className="px-6 py-4 text-gray-900 font-medium">{assignment.title}</td>
-                  <td className="px-6 py-4 text-gray-600">{assignment.description}</td>
-                  <td className="px-6 py-4 text-gray-600">{assignment.dueDate}</td>
-                  <td className="px-6 py-4">
+                  <td className="px-6 py-4 text-start text-gray-900 font-medium">{assignment.title}</td>
+                  <td className="px-6 py-4 text-start text-gray-600">{assignment.description}</td>
+                  <td className="px-6 py-4 text-start text-gray-600">{assignment.dueDate}</td>
+                  <td className="px-6 py-4 text-start">
                     <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${assignment.status === 'pending'
                       ? 'bg-yellow-100 text-yellow-800'
                       : assignment.status === 'submitted'

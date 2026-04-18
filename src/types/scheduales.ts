@@ -69,9 +69,9 @@ export interface Student {
     active: boolean;
     createdAt: string;
     updatedAt: string;
-    hours: number;
-    hours_attended: number;
-    hours_remaining: number;
+    sessions: number;
+    sessions_attended: number;
+    sessions_remaining: number;
     planId: string | null;
     country: string;
     status: string;
@@ -89,6 +89,16 @@ export interface Teacher {
     updatedAt: string;
     roleId: string | null;
     user: User;
+}
+
+export interface ScheduleSubject {
+    id: string;
+    name_en: string;
+    name_ar: string;
+    active: boolean;
+    color: string;
+    createdAt: string;
+    updatedAt: string;
 }
 
 export interface Schedule {
@@ -111,6 +121,7 @@ export interface Schedule {
     parent_recurring_id: string | null;
     student: Student;
     teacher: Teacher;
+    subject?: ScheduleSubject;
 }
 
 export interface Pagination {
@@ -121,7 +132,24 @@ export interface Pagination {
     hasNextPage: boolean;
 }
 
+export interface SessionsPagination {
+    page: number;
+    limit: number;
+    totalItems: number;
+    totalPages: number;
+    hasNextPage: boolean;
+}
+
 export interface GetSessionsResponse {
+    message: string;
+    status: number;
+    data: {
+        schedule: Schedule[];
+        pagination: SessionsPagination;
+    };
+}
+
+export interface GetUserSchedulesResponse {
     message: string;
     status: number;
     data: Schedule[];

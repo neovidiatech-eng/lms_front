@@ -78,7 +78,7 @@ export default function Subjects() {
   }
 
   return (
-    <div className="p-6 lg:p-8" dir="rtl">
+    <div className="p-6 lg:p-8" dir={language === 'ar' ? 'rtl' : 'ltr'}>
       <div className="flex items-center justify-between flex-wrap gap-4 mb-8">
         <div>
           <h1 className="text-3xl font-bold text-gray-900">{language === 'ar' ? 'إدارة المواد الدراسية' : 'Subject Management'}</h1>
@@ -132,8 +132,8 @@ export default function Subjects() {
               value={searchQuery}
               onChange={e => setSearchQuery(e.target.value)}
               placeholder={language === 'ar' ? 'بحث في المواد...' : 'Search subjects...'}
-              dir="rtl"
-              className="w-full px-4 py-3 pr-12 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 text-right"
+              dir={language === 'ar' ? 'rtl' : 'ltr'}
+              className={`w-full px-4 py-3 ${language === 'ar' ? 'pr-12' : 'pl-12'} border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 text-start`}
             />
           </div>
           <div className="flex gap-2">
@@ -201,10 +201,10 @@ export default function Subjects() {
                     </div>
                   </div>
 
-                  <div className="text-right">
+                  <div className="text-start">
                     <h3 className="text-lg font-bold text-gray-900 mb-0.5">{subject.name_ar}</h3>
                     {subject.name_en && <p className="text-sm text-gray-400 mb-3">{subject.name_en}</p>}
-                    <div className="flex items-center justify-end gap-2">
+                    <div className="flex items-center justify-start gap-2">
                       <button
                         onClick={() => toggleStatus(subject)}
                         className={`inline-flex px-3 py-1 rounded-full text-xs font-medium transition-colors cursor-pointer ${subject.active

@@ -10,7 +10,7 @@ import EditSessionModal from '../../../components/modals/EditSessionModal';
 import ConfirmModal from '../../../components/modals/ConfirmModal';
 import { Schedule, UpdateSchedulePayload } from '../../../types/scheduales';
 import { SessionFormData, MultipleSessionsPayload } from '../../../lib/schemas/SessionSchema';
-import ErrorService from '../../../utils/ErrorService';
+
 import { useSubjects } from '../hooks/useSubjects';
 import { Subject } from '../../../types/subject';
 
@@ -39,7 +39,6 @@ export default function Sessions() {
   const handleUpdateSession = async (id: string, data: UpdateSchedulePayload) => {
     try {
       await updateSchedule.mutateAsync({ id, data });
-      ErrorService.success(t('sessionUpdatedSuccess'));
       setShowEditModal(false);
       setSelectedSession(null);
     } catch (error) {
@@ -59,7 +58,6 @@ export default function Sessions() {
       } else {
         await deleteSchedule.mutateAsync(sessionToDelete.id);
       }
-      ErrorService.success(t('sessionDeletedSuccess'));
       setSessionToDelete(null);
     } catch (error) {
       console.error('Delete session failed:', error);
@@ -80,7 +78,6 @@ export default function Sessions() {
         type: data.type,
         notification_Time: data.notification_Time
       });
-      ErrorService.success(t('sessionAddedSuccess'));
       setShowAddModal(false);
     } catch (error) {
       console.error('Add session failed:', error);
@@ -105,7 +102,6 @@ export default function Sessions() {
         notification_Time: formData.notification_Time || '10',
         type: formData.type
       });
-      ErrorService.success(t('sessionsAddedSuccess'));
       setShowAddMultipleModal(false);
     } catch (error) {
       console.error('Add multiple sessions failed:', error);
@@ -123,26 +119,29 @@ export default function Sessions() {
   const { data: searchResults } = useSearchSchedules(debouncedSearch);
 
   const itemsPerPage = 5;
-  const scheduleData = (debouncedSearch ? searchResults?.data?.schedule : searchResults?.data?.schedule) || [];
+  const scheduleData: Schedule[] = searchResults?.data?.schedule ?? [];
 
-  const displaySchedules: Schedule[] = [];
+  const groupedSchedules: Schedule[] = [];
   const seenParents = new Set<string>();
 
   scheduleData.forEach((schedule: Schedule) => {
     if (schedule.parent_recurring_id) {
       if (!seenParents.has(schedule.parent_recurring_id)) {
         seenParents.add(schedule.parent_recurring_id);
-        displaySchedules.push(schedule);
+        groupedSchedules.push(schedule);
       }
     } else {
-      displaySchedules.push(schedule);
+      groupedSchedules.push(schedule);
     }
   });
 
-  const totalPages = Math.ceil(displaySchedules.length / itemsPerPage);
-  const startIndex = (currentPage - 1) * itemsPerPage;
-  const endIndex = startIndex + itemsPerPage;
-  const currentSessions = displaySchedules.slice(startIndex, endIndex);
+  const totalItems = groupedSchedules.length;
+  const totalPages = Math.ceil(totalItems / itemsPerPage);
+
+  const displaySchedules = groupedSchedules.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
 
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
@@ -192,6 +191,7 @@ export default function Sessions() {
   const getStatusStyle = (status: string) => {
     switch (status?.toLowerCase()) {
       case 'scheduled': return 'bg-blue-50 text-blue-700 border-blue-200';
+      case 'planned': return 'bg-blue-50 text-blue-700 border-blue-200';
       case 'completed': return 'bg-green-50 text-green-700 border-green-200';
       case 'cancelled': return 'bg-red-50 text-red-700 border-red-200';
       default: return 'bg-gray-50 text-gray-700 border-gray-200';
@@ -201,9 +201,12 @@ export default function Sessions() {
   const { data: subjects } = useSubjects();
   const dynamicsubjects = subjects?.subjects || [];
 
-  const getSubjectName = (subId: string) => {
-    const subject = dynamicsubjects.find((s: Subject) => s.id === subId);
-    return subject ? subject.name_ar : "subject";
+  const getSubjectName = (session: Schedule) => {
+    if (session.subject) {
+      return language === 'ar' ? session.subject.name_ar : session.subject.name_en;
+    }
+    const subject = dynamicsubjects.find((s: Subject) => s.id === session.subjectId);
+    return subject ? (language === 'ar' ? subject.name_ar : subject.name_en) : 'subject';
   };
 
 
@@ -264,15 +267,22 @@ export default function Sessions() {
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">
-              {currentSessions.map((session) => (
+              {displaySchedules.map((session) => (
                 <tr key={session.id} className="hover:bg-gray-50 transition-colors">
                   <td className="px-6 py-4">
-                    <span className="font-medium text-gray-900">{session.title}</span>
+                    <div className="flex items-center gap-2">
+                      <span className="font-medium text-gray-900">{session.title}</span>
+                      {/* {(session.is_recurring || session.parent_recurring_id) && (
+                          <span title={language === 'ar' ? 'جلسة متكررة' : 'Recurring Session'} className="flex items-center justify-center p-1 bg-indigo-50 text-indigo-500 rounded text-xs">
+                            <RefreshCw className="w-3 h-3" />
+                          </span>
+                       )} */}
+                    </div>
                   </td>
                   <td className="px-6 py-4 text-gray-700 text-right">{session.student.user.name}</td>
                   <td className="px-6 py-4 text-gray-700 text-right">{session.teacher.user.name}</td>
                   <td className="px-6 py-4 text-right">
-                    <span className="text-primary font-medium">{getSubjectName(session.subjectId)}</span>
+                    <span className="text-primary font-medium">{getSubjectName(session)}</span>
                   </td>
                   <td className="px-6 py-4 text-gray-700 text-right">
                     {(() => {
@@ -339,7 +349,7 @@ export default function Sessions() {
         <Pagination
           currentPage={currentPage}
           totalPages={totalPages}
-          totalItems={scheduleData.length}
+          totalItems={totalItems}
           itemsPerPage={itemsPerPage}
           onPageChange={handlePageChange}
         />

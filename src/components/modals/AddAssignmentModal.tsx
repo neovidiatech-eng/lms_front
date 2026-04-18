@@ -130,7 +130,7 @@ export default function AddAssignmentModal({ isOpen, onClose, initialData }: Add
                 disabled={isLoadingStudents}
                 placeholder={isLoadingStudents ? text.loading[language] : text.student[language]}
               />
-              {errors.studentId && <p className="text-red-500 text-xs mt-1 text-right">{errors.studentId.message}</p>}
+              {errors.studentId && <p className="text-red-500 text-xs mt-1 text-start">{errors.studentId.message}</p>}
             </div>
 
             <div>
@@ -142,34 +142,34 @@ export default function AddAssignmentModal({ isOpen, onClose, initialData }: Add
                 disabled={isLoadingSubjects}
                 placeholder={isLoadingSubjects ? text.loading[language] : text.subject[language]}
               />
-              {errors.subjectId && <p className="text-red-500 text-xs mt-1 text-right">{errors.subjectId.message}</p>}
+              {errors.subjectId && <p className="text-red-500 text-xs mt-1 text-start">{errors.subjectId.message}</p>}
             </div>
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2 text-right">
+            <label className="block text-sm font-medium text-gray-700 mb-2 text-start">
               {text.assignmentTitle[language]}
             </label>
             <input
               type="text"
               {...register('title')}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent text-right"
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent text-start"
               dir="rtl"
             />
-            {errors.title && <p className="text-red-500 text-xs mt-1 text-right">{errors.title.message}</p>}
+            {errors.title && <p className="text-red-500 text-xs mt-1 text-start">{errors.title.message}</p>}
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2 text-right">
+            <label className="block text-sm font-medium text-gray-700 mb-2 text-start">
               {text.description[language]}
             </label>
             <textarea
               rows={3}
               {...register('description')}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent text-right resize-none"
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent text-start resize-none"
               dir="rtl"
             />
-            {errors.description && <p className="text-red-500 text-xs mt-1 text-right">{errors.description.message}</p>}
+            {errors.description && <p className="text-red-500 text-xs mt-1 text-start">{errors.description.message}</p>}
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -180,7 +180,7 @@ export default function AddAssignmentModal({ isOpen, onClose, initialData }: Add
                 onChange={(val) => setValue('dueDate', val, { shouldValidate: true })}
                 error={errors.dueDate?.message}
               />
-              {errors.dueDate && <p className="text-red-500 text-xs mt-1 text-right">{errors.dueDate.message}</p>}
+              {errors.dueDate && <p className="text-red-500 text-xs mt-1 text-start">{errors.dueDate.message}</p>}
             </div>
             <CustomSelect
               label={text.status[language]}

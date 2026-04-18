@@ -1,7 +1,7 @@
 import api from "../lib/axios"
-import { GetSessionsResponse } from "../types/scheduales"
+import { GetUserSchedulesResponse } from "../types/scheduales"
 
-export const getUserSessions = async (search: string): Promise<GetSessionsResponse> => {
-    const response = await api.get<GetSessionsResponse>(`/schedules/user/schedules?search=${search}`)
+export const getUserSessions = async (search: string): Promise<GetUserSchedulesResponse> => {
+    const response = await api.get<GetUserSchedulesResponse>(`/schedules/user/schedules?search=${search}`)
     return response.data
 }

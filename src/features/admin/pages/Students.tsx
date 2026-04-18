@@ -9,8 +9,8 @@ import CustomSelect from '../../../components/ui/CustomSelect';
 import { useTranslation } from 'react-i18next';
 import { useStudents, useCreateStudent, useUpdateStudent, useDeleteStudent } from '../hooks/useStudents';
 import { Student } from '../../../types/student';
-import ErrorService from '../../../utils/ErrorService';
 import { useConfirm } from '../../../hooks/useConfirm';
+import { TableSkeleton } from '../../../components/ui/CustomSkeleton';
 
 const AddStudentModal = lazy(() => import('../../../components/modals/AddStudentModal'));
 const ViewStudentModal = lazy(() => import('../../../components/modals/ViewStudentModal'));
@@ -31,7 +31,7 @@ export default function Students() {
   const [selectedStudent, setSelectedStudent] = useState<Student | null>(null);
   const itemsPerPage = 7;
 
-  const { data: apiResponse } = useStudents();
+  const { data: apiResponse, isLoading } = useStudents();
 
   const rawData: any = apiResponse?.data.studentsData;
   const studentsList: Student[] = Array.isArray(rawData) ? rawData : (rawData?.students || rawData?.data || []);
@@ -137,7 +137,6 @@ export default function Students() {
     if (confirmed) {
       try {
         await deleteStudent(studentId);
-        ErrorService.success(t('studentDeletedSuccess'));
       } catch (error) {
         console.error('Error deleting student:', error);
         // Detailed error is handled by axios interceptor
@@ -151,7 +150,7 @@ export default function Students() {
     <div className="p-6 lg:p-8">
       {/* Header */}
       <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-8">
-        <div className="text-right">
+        <div className="text-start">
           <h1 className="text-3xl font-bold text-gray-900">
             {t('studentManagement')}
           </h1>
@@ -182,7 +181,7 @@ export default function Students() {
                 <stat.icon className={`w-6 h-6 ${stat.iconColor}`} />
               </div>
             </div>
-            <div className="text-right">
+            <div className="text-start">
               <p className={`text-4xl font-bold ${stat.valueColor} mb-2`}>{stat.value}</p>
               <p className="text-sm font-medium text-gray-700">{stat.label}</p>
             </div>
@@ -201,7 +200,7 @@ export default function Students() {
               placeholder={t('searchUsersPlaceholder')}
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pr-12 pl-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary text-right"
+              className={`w-full ${language === 'ar' ? 'pr-12 pl-4' : 'pl-12 pr-4'} py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary text-start`}
             />
           </div>
 
@@ -235,130 +234,147 @@ export default function Students() {
         </div>
       </div>
 
-      {/* Students Table */}
+      {/* Students Table Section */}
       <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead className="bg-gray-50 border-b border-gray-200">
-              <tr>
-                <th className="px-6 py-4 text-right text-sm font-semibold text-gray-700">
-                  {t('studentInfo')}
-                </th>
-                <th className="px-6 py-4 text-right text-sm font-semibold text-gray-700">
-                  {t('phone')}
-                </th>
-                <th className="px-6 py-4 text-right text-sm font-semibold text-gray-700">
-                  {t('plan')}
-                </th>
-                <th className="px-6 py-4 text-right text-sm font-semibold text-gray-700">
-                  {t('hours')}
-                </th>
-                <th className="px-6 py-4 text-right text-sm font-semibold text-gray-700">
-                  {t('country')}
-                </th>
-                <th className="px-6 py-4 text-right text-sm font-semibold text-gray-700">
-                  {t('status')}
-                </th>
-                <th className="px-6 py-4 text-right text-sm font-semibold text-gray-700">
-                  {t('actions')}
-                </th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-200">
-              {currentStudents.map((student) => (
-                <tr key={student.id} className="hover:bg-gray-50 transition-colors">
-                  <td className="px-6 py-4">
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-full bg-blue-50 flex items-center justify-center flex-shrink-0">
-                        <span className="text-blue-600 text-sm font-semibold">
-                          {student.user.name ? student.user.name.charAt(0).toUpperCase() : '?'}
-                        </span>
-                      </div>
-                      <div className="text-right">
-                        <div className="font-medium text-gray-900">{student.user.name}</div>
-                        <div className="text-xs text-gray-500">{student.user.email}</div>
-                      </div>
-                    </div>
-                  </td>
-                  <td className="px-6 py-4">
-                    <WhatsAppPhone
-                      phone={`${student.user.code_country} ${student.user.phone}`}
-                      className="text-sm text-gray-900"
-                    />
-                  </td>
-                  <td className="px-6 py-4">
-                    <span className="inline-flex px-3 py-1 bg-purple-50 text-purple-700 rounded-full text-xs font-medium border border-purple-100">
-                      {student.plan?.name_ar || student.plan?.name_en || t('noPlan')}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4">
-                    <div className="text-right">
-                      <div className="text-sm font-medium text-gray-900">
-                        {student.sessions_attended} / {student.sessions}
-                      </div>
-                      <div className="w-24 h-1.5 bg-gray-100 rounded-full mt-1 overflow-hidden ml-auto">
-                        <div
-                          className="h-full bg-blue-500 rounded-full transition-all duration-500"
-                          style={{ width: `${student.sessions > 0 ? (student.sessions_attended / student.sessions) * 100 : 0}%` }}
-                        />
-                      </div>
-                    </div>
-                  </td>
-                  <td className="px-6 py-4">
-                    <span className="text-sm text-gray-600">{student.country}</span>
-                  </td>
-                  <td className="px-6 py-4">
-                    <span
-                      className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${student.status === 'approved'
-                        ? 'bg-green-100 text-green-700'
-                        : student.status === 'pending'
-                          ? 'bg-orange-100 text-orange-700'
-                          : 'bg-gray-100 text-gray-700'
-                        }`}
-                    >
-                      <span className={`w-1.5 h-1.5 rounded-full ${language === 'ar' ? 'ml-1.5' : 'mr-1.5'} ${student.status === 'approved' ? 'bg-green-500' : student.status === 'pending' ? 'bg-orange-500' : 'bg-gray-500'
-                        }`} />
-                      {student.status === 'approved' ? t('active') : student.status === 'pending' ? t('pending') : t('inactive')}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4">
-                    <div className="flex items-center gap-2 justify-end">
-                      <button
-                        onClick={() => handleViewStudent(student)}
-                        className="p-2 hover:bg-gray-100 rounded-lg transition-colors group"
-                        title={t('view')}
-                      >
-                        <Eye className="w-4 h-4 text-gray-400 group-hover:text-gray-600" />
-                      </button>
-                      <button
-                        onClick={() => handleEditStudent(student)}
-                        className="p-2 hover:bg-primary-light rounded-lg transition-colors group"
-                        title={t('edit')}
-                      >
-                        <Pencil className="w-4 h-4 text-gray-400 group-hover:text-blue-600" />
-                      </button>
-                      <button
-                        onClick={() => handleDeleteStudent(student.id)}
-                        className="p-2 hover:bg-red-50 rounded-lg transition-colors group"
-                        title={t('delete')}
-                      >
-                        <Trash2 className="w-4 h-4 text-gray-400 group-hover:text-red-600" />
-                      </button>
-                    </div>
-                  </td>
+        {isLoading ? (
+          <TableSkeleton rows={itemsPerPage} columns={7} />
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead className="bg-gray-50 border-b border-gray-200">
+                <tr>
+                  <th className="px-6 py-4 text-start text-sm font-semibold text-gray-700">
+                    {t('studentInfo')}
+                  </th>
+                  <th className="px-6 py-4 text-start text-sm font-semibold text-gray-700">
+                    {t('phone')}
+                  </th>
+                  <th className="px-6 py-4 text-start text-sm font-semibold text-gray-700">
+                    {t('plan')}
+                  </th>
+                  <th className="px-6 py-4 text-start text-sm font-semibold text-gray-700">
+                    {t('hours')}
+                  </th>
+                  <th className="px-6 py-4 text-start text-sm font-semibold text-gray-700">
+                    {t('country')}
+                  </th>
+                  <th className="px-6 py-4 text-start text-sm font-semibold text-gray-700">
+                    {t('status')}
+                  </th>
+                  <th className="px-6 py-4 text-start text-sm font-semibold text-gray-700">
+                    {t('actions')}
+                  </th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+              </thead>
+              <tbody className="divide-y divide-gray-200">
+                {currentStudents.length === 0 ? (
+                  <tr>
+                    <td colSpan={7} className="px-6 py-12 text-center text-gray-500 bg-gray-50/30">
+                      <div className="flex flex-col items-center gap-2">
+                        <Users className="w-12 h-12 text-gray-200" />
+                        <p>{t('noData')}</p>
+                      </div>
+                    </td>
+                  </tr>
+                ) : (
+                  currentStudents.map((student) => (
+                    <tr key={student.id} className="hover:bg-gray-50 transition-colors">
+                      <td className="px-6 py-4">
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 rounded-full bg-blue-50 flex items-center justify-center flex-shrink-0">
+                            <span className="text-blue-600 text-sm font-semibold">
+                              {student.user.name ? student.user.name.charAt(0).toUpperCase() : '?'}
+                            </span>
+                          </div>
+                          <div className="text-start">
+                            <div className="font-medium text-gray-900">{student.user.name}</div>
+                            <div className="text-xs text-gray-500">{student.user.email}</div>
+                          </div>
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 text-start">
+                        <WhatsAppPhone
+                          phone={`${student.user.code_country} ${student.user.phone}`}
+                          className="text-sm text-gray-900"
+                        />
+                      </td>
+                      <td className="px-6 py-4 text-start">
+                        <span className="inline-flex px-3 py-1 bg-purple-50 text-purple-700 rounded-full text-xs font-medium border border-purple-100">
+                          {student.plan?.name_ar || student.plan?.name_en || t('noPlan')}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 text-start">
+                        <div className="text-start">
+                          <div className="text-sm font-medium text-gray-900">
+                            {student.sessions_attended} / {student.sessions}
+                          </div>
+                          <div className="w-24 h-1.5 bg-gray-100 rounded-full mt-1 overflow-hidden">
+                            <div
+                              className="h-full bg-blue-500 rounded-full transition-all duration-500"
+                              style={{ width: `${student.sessions > 0 ? (student.sessions_attended / student.sessions) * 100 : 0}%` }}
+                            />
+                          </div>
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 text-start">
+                        <span className="text-sm text-gray-600">{student.country}</span>
+                      </td>
+                      <td className="px-6 py-4 text-start">
+                        <span
+                          className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${student.status === 'approved'
+                            ? 'bg-green-100 text-green-700'
+                            : student.status === 'pending'
+                              ? 'bg-orange-100 text-orange-700'
+                              : 'bg-gray-100 text-gray-700'
+                            }`}
+                        >
+                          <span className={`w-1.5 h-1.5 rounded-full ${language === 'ar' ? 'ml-1.5' : 'mr-1.5'} ${student.status === 'approved' ? 'bg-green-500' : student.status === 'pending' ? 'bg-orange-500' : 'bg-gray-500'
+                            }`} />
+                          {student.status === 'approved' ? t('active') : student.status === 'pending' ? t('pending') : t('inactive')}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4">
+                        <div className="flex items-center gap-2 justify-start">
+                          <button
+                            onClick={() => handleViewStudent(student)}
+                            className="p-2 hover:bg-gray-100 rounded-lg transition-colors group"
+                            title={t('view')}
+                          >
+                            <Eye className="w-4 h-4 text-gray-400 group-hover:text-gray-600" />
+                          </button>
+                          <button
+                            onClick={() => handleEditStudent(student)}
+                            className="p-2 hover:bg-primary-light rounded-lg transition-colors group"
+                            title={t('edit')}
+                          >
+                            <Pencil className="w-4 h-4 text-gray-400 group-hover:text-blue-600" />
+                          </button>
+                          <button
+                            onClick={() => handleDeleteStudent(student.id)}
+                            className="p-2 hover:bg-red-50 rounded-lg transition-colors group"
+                            title={t('delete')}
+                          >
+                            <Trash2 className="w-4 h-4 text-gray-400 group-hover:text-red-600" />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
+        )}
 
-        <Pagination
-          currentPage={currentPage}
-          totalPages={totalPages}
-          totalItems={filteredStudents.length}
-          itemsPerPage={itemsPerPage}
-          onPageChange={handlePageChange}
-        />
+        {!isLoading && (
+          <Pagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            totalItems={filteredStudents.length}
+            itemsPerPage={itemsPerPage}
+            onPageChange={handlePageChange}
+          />
+        )}
       </div>
 
       {/* Modals */}
@@ -370,12 +386,11 @@ export default function Students() {
             const payload: any = {
               name: studentData.name,
               email: studentData.email,
-              phone: studentData.countryCode + studentData.phone.replace(/^0/, ''),
-              code_country: studentData.countryCode,
+              phone: studentData.phone,
+              phone_code: studentData.phone_code,
               birth_date: (studentData.birthDate && studentData.birthDate !== "") ? new Date(studentData.birthDate).toISOString() : null,
               gender: studentData.gender,
               country: studentData.country,
-              status: studentData.status,
               active: studentData.status === 'approved',
             };
 
@@ -389,7 +404,6 @@ export default function Students() {
             }
             await createStudent(payload);
             setIsAddModalOpen(false);
-            ErrorService.success(t('studentAddedSuccess'));
           } catch (error) {
             console.error('Error adding student:', error);
             // Detailed error is handled by axios interceptor
@@ -413,7 +427,7 @@ export default function Students() {
               name: selectedStudent.user.name,
               email: selectedStudent.user.email,
               phone: selectedStudent.user.phone,
-              countryCode: selectedStudent.user.code_country,
+              phone_code: selectedStudent.user.code_country,
               country: selectedStudent.country ? selectedStudent.country.toLowerCase() : 'egypt',
               status: (selectedStudent.status || 'pending') as any,
               gender: selectedStudent.gender || 'male',
@@ -426,13 +440,12 @@ export default function Students() {
           try {
             const payload: any = {
               name: updatedData.name,
-              // Backend expects combined phone and separate codeCountry
-              phone: updatedData.countryCode + updatedData.phone.replace(/^0/, ''),
-              codeCountry: updatedData.countryCode,
+              // Backend expects separate phone and phone_code
+              phone: updatedData.phone,
+              phone_code: updatedData.phone_code,
               country: updatedData.country,
               birth_date: (updatedData.birthDate && updatedData.birthDate !== "") ? new Date(updatedData.birthDate).toISOString() : null,
               gender: updatedData.gender,
-              status: updatedData.status,
               active: updatedData.status === 'approved',
             };
 
@@ -446,7 +459,6 @@ export default function Students() {
               payload.password = updatedData.password;
             }
             await updateStudent({ id: updatedData.id, data: payload });
-            ErrorService.success(t('studentUpdatedSuccess'));
             setIsEditModalOpen(false);
           } catch (error) {
             console.error('Error updating student:', error);

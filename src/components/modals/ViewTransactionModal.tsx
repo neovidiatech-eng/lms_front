@@ -133,7 +133,7 @@ export default function ViewTransactionModal({ isOpen, onClose, transaction, cur
 
           {transaction.type === 'teacher_expense' && transaction.sessionCount && (
             <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
-              <h3 className="font-semibold text-blue-800 mb-3 text-right">{language === 'ar' ? 'تفاصيل الحساب' : 'Calculation Details'}</h3>
+              <h3 className="font-semibold text-blue-800 mb-3 text-start">{language === 'ar' ? 'تفاصيل الحساب' : 'Calculation Details'}</h3>
               <div className="grid grid-cols-3 gap-3 text-center">
                 <div>
                   <p className="text-xs text-gray-500">{text.sessionCount[language]}</p>

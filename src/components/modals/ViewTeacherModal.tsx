@@ -120,29 +120,29 @@ export default function ViewTeacherModal({ isOpen, onClose, teacher }: ViewTeach
                 <div className="p-2 rounded-lg bg-blue-50 w-fit mb-3">
                   <GraduationCap className="w-5 h-5 text-blue-600" />
                 </div>
-                <p className="text-sm text-gray-600 mb-1 text-right">{t('students') || (language === 'ar' ? 'عدد الطلاب' : 'Students')}</p>
-                <p className="text-2xl font-bold text-gray-900 text-right">{uniqueStudents.length}</p>
+                <p className="text-sm text-gray-600 mb-1 text-start">{t('students') || (language === 'ar' ? 'عدد الطلاب' : 'Students')}</p>
+                <p className="text-2xl font-bold text-gray-900 text-start">{uniqueStudents.length}</p>
               </div>
               <div className="bg-white rounded-xl p-4 border border-gray-200 hover:shadow-md transition-shadow">
                 <div className="p-2 rounded-lg bg-orange-50 w-fit mb-3">
                   <Calendar className="w-5 h-5 text-orange-600" />
                 </div>
-                <p className="text-sm text-gray-600 mb-1 text-right">{t('todaySessions') || (language === 'ar' ? 'حصص اليوم' : "Today's Sessions")}</p>
-                <p className="text-2xl font-bold text-gray-900 text-right">{todaySessions.length}</p>
+                <p className="text-sm text-gray-600 mb-1 text-start">{t('todaySessions') || (language === 'ar' ? 'حصص اليوم' : "Today's Sessions")}</p>
+                <p className="text-2xl font-bold text-gray-900 text-start">{todaySessions.length}</p>
               </div>
               <div className="bg-white rounded-xl p-4 border border-gray-200 hover:shadow-md transition-shadow">
                 <div className="p-2 rounded-lg bg-green-50 w-fit mb-3">
                   <CheckCircle className="w-5 h-5 text-green-600" />
                 </div>
-                <p className="text-sm text-gray-600 mb-1 text-right">{t('completedSessions') || (language === 'ar' ? 'حصص مكتملة' : 'Completed')}</p>
-                <p className="text-2xl font-bold text-gray-900 text-right">{completedSessions.length}</p>
+                <p className="text-sm text-gray-600 mb-1 text-start">{t('completedSessions') || (language === 'ar' ? 'حصص مكتملة' : 'Completed')}</p>
+                <p className="text-2xl font-bold text-gray-900 text-start">{completedSessions.length}</p>
               </div>
               <div className="bg-white rounded-xl p-4 border border-gray-200 hover:shadow-md transition-shadow">
                 <div className="p-2 rounded-lg bg-yellow-50 w-fit mb-3">
                   <Clock className="w-5 h-5 text-yellow-600" />
                 </div>
-                <p className="text-sm text-gray-600 mb-1 text-right">{t('upcomingSessions') || (language === 'ar' ? 'حصص قادمة' : 'Upcoming')}</p>
-                <p className="text-2xl font-bold text-gray-900 text-right">{upcomingSessions.length}</p>
+                <p className="text-sm text-gray-600 mb-1 text-start">{t('upcomingSessions') || (language === 'ar' ? 'حصص قادمة' : 'Upcoming')}</p>
+                <p className="text-2xl font-bold text-gray-900 text-start">{upcomingSessions.length}</p>
               </div>
             </div>
           </div>
@@ -153,7 +153,7 @@ export default function ViewTeacherModal({ isOpen, onClose, teacher }: ViewTeach
               <h4 className="text-lg font-bold text-gray-900">{t('earningsDetails') || (language === 'ar' ? 'تفاصيل الأرباح' : 'Earnings Details')}</h4>
             </div>
 
-            <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 mb-4 text-right">
+            <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 mb-4 text-start">
               <p className="text-xs text-blue-700 font-semibold mb-1">{t('formula') || (language === 'ar' ? 'المعادلة الحسابية' : 'Formula')}</p>
               <p className="text-sm text-blue-800 font-mono">
                 {language === 'ar'
@@ -164,39 +164,39 @@ export default function ViewTeacherModal({ isOpen, onClose, teacher }: ViewTeach
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
               <div className="rounded-xl p-5 bg-blue-50 text-blue-700">
-                <p className="text-sm mb-2 text-right opacity-80">{t('totalHours') || (language === 'ar' ? 'إجمالي الساعات' : 'Total Hours')}</p>
-                <p className="text-2xl font-bold text-right">{totalHours.toFixed(1)} {language === 'ar' ? 'ساعة' : 'hrs'}</p>
+                <p className="text-sm mb-2 text-start opacity-80">{t('totalHours') || (language === 'ar' ? 'إجمالي الساعات' : 'Total Hours')}</p>
+                <p className="text-2xl font-bold text-start">{totalHours.toFixed(1)} {language === 'ar' ? 'ساعة' : 'hrs'}</p>
               </div>
               <div className="rounded-xl p-5 bg-white text-gray-900 border border-gray-200">
-                <p className="text-sm mb-2 text-right opacity-80">{t('ratePerHour') || (language === 'ar' ? 'السعر / ساعة' : 'Rate / Hour')}</p>
-                <p className="text-2xl font-bold text-right">{hourPrice.toFixed(2)} {currencySymbol}</p>
+                <p className="text-sm mb-2 text-start opacity-80">{t('ratePerHour') || (language === 'ar' ? 'السعر / ساعة' : 'Rate / Hour')}</p>
+                <p className="text-2xl font-bold text-start">{hourPrice.toFixed(2)} {currencySymbol}</p>
               </div>
               <div className="rounded-xl p-5 bg-green-50 text-green-700">
-                <p className="text-sm mb-2 text-right opacity-80">{t('totalOwed') || (language === 'ar' ? 'إجمالي المستحق' : 'Total Owed')}</p>
-                <p className="text-2xl font-bold text-right">{totalOwed.toFixed(2)} {currencySymbol}</p>
+                <p className="text-sm mb-2 text-start opacity-80">{t('totalOwed') || (language === 'ar' ? 'إجمالي المستحق' : 'Total Owed')}</p>
+                <p className="text-2xl font-bold text-start">{totalOwed.toFixed(2)} {currencySymbol}</p>
               </div>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
               <div className="rounded-xl p-5 bg-green-50 text-green-700">
-                <p className="text-sm mb-2 text-right opacity-80">{t('completedEarnings') || (language === 'ar' ? 'أرباح الحصص المكتملة' : 'Completed Earnings')}</p>
-                <p className="text-2xl font-bold text-right">{totalEarnings.toFixed(2)} {currencySymbol}</p>
-                <p className="text-xs opacity-60 text-right mt-1">{completedHours.toFixed(1)} {language === 'ar' ? 'ساعة' : 'hrs'}</p>
+                <p className="text-sm mb-2 text-start opacity-80">{t('completedEarnings') || (language === 'ar' ? 'أرباح الحصص المكتملة' : 'Completed Earnings')}</p>
+                <p className="text-2xl font-bold text-start">{totalEarnings.toFixed(2)} {currencySymbol}</p>
+                <p className="text-xs opacity-60 text-start mt-1">{completedHours.toFixed(1)} {language === 'ar' ? 'ساعة' : 'hrs'}</p>
               </div>
               <div className="rounded-xl p-5 bg-orange-50 text-orange-700">
-                <p className="text-sm mb-2 text-right opacity-80">{t('pendingEarnings') || (language === 'ar' ? 'أرباح معلقة' : 'Pending Earnings')}</p>
-                <p className="text-2xl font-bold text-right">{pendingEarnings.toFixed(2)} {currencySymbol}</p>
-                <p className="text-xs opacity-60 text-right mt-1">{pendingHours.toFixed(1)} {language === 'ar' ? 'ساعة' : 'hrs'}</p>
+                <p className="text-sm mb-2 text-start opacity-80">{t('pendingEarnings') || (language === 'ar' ? 'أرباح معلقة' : 'Pending Earnings')}</p>
+                <p className="text-2xl font-bold text-start">{pendingEarnings.toFixed(2)} {currencySymbol}</p>
+                <p className="text-xs opacity-60 text-start mt-1">{pendingHours.toFixed(1)} {language === 'ar' ? 'ساعة' : 'hrs'}</p>
               </div>
               <div className="rounded-xl p-5 bg-gray-50 text-gray-700 border border-gray-200">
-                <p className="text-sm mb-2 text-right opacity-80">{t('availableForWithdrawal') || (language === 'ar' ? 'رصيد متاح للسحب' : 'Available for Withdrawal')}</p>
-                <p className="text-2xl font-bold text-right">{totalEarnings.toFixed(2)} {currencySymbol}</p>
+                <p className="text-sm mb-2 text-start opacity-80">{t('availableForWithdrawal') || (language === 'ar' ? 'رصيد متاح للسحب' : 'Available for Withdrawal')}</p>
+                <p className="text-2xl font-bold text-start">{totalEarnings.toFixed(2)} {currencySymbol}</p>
               </div>
             </div>
 
             <div className="rounded-xl p-5 bg-red-50 text-red-700">
-              <p className="text-sm mb-2 text-right opacity-80">{t('pendingWithdrawalRequests') || (language === 'ar' ? 'طلبات سحب معلقة' : 'Pending Withdrawal Requests')}</p>
-              <p className="text-2xl font-bold text-right">0.00 {currencySymbol}</p>
+              <p className="text-sm mb-2 text-start opacity-80">{t('pendingWithdrawalRequests') || (language === 'ar' ? 'طلبات سحب معلقة' : 'Pending Withdrawal Requests')}</p>
+              <p className="text-2xl font-bold text-start">0.00 {currencySymbol}</p>
             </div>
           </div>
 
@@ -212,7 +212,7 @@ export default function ViewTeacherModal({ isOpen, onClose, teacher }: ViewTeach
                       <span className={`w-2 h-2 rounded-full ${session.date < today ? 'bg-green-400' : session.date === today ? 'bg-blue-400' : 'bg-yellow-400'}`} />
                       <span className="text-xs text-gray-500">{session.time} - {session.endTime}</span>
                     </div>
-                    <div className="text-right">
+                    <div className="text-start">
                       <p className="text-sm font-medium text-gray-900">{session.studentName}</p>
                       <p className="text-xs text-gray-400">{session.date} · {session.subject}</p>
                     </div>

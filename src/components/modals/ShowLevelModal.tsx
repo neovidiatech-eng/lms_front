@@ -80,7 +80,7 @@ const LevelsModal = ({
                                 value={newLevelName}
                                 onChange={e => setNewLevelName(e.target.value)}
                                 placeholder={t('courses_level_name_placeholder')}
-                                className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary/50 focus:bg-white transition-all text-right"
+                                className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary/50 focus:bg-white transition-all text-start"
                                 onKeyDown={e => e.key === 'Enter' && handleAddLevel()}
                             />
 

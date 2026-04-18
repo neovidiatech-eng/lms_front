@@ -164,11 +164,11 @@ export default function AddMultipleSessionsModal({ isOpen, onClose, onAdd }: Add
         </div>
 
         <form onSubmit={handleSubmit(onSubmit)} className="p-6 space-y-6">
-          <div className="space-y-2 text-right">
+          <div className="space-y-2 text-start">
             <label className="text-sm font-medium">{t('addMultipleSessions_sessionName')} *</label>
             <input
               {...register('title')}
-              className={`w-full px-4 py-3 border rounded-xl focus:ring-2 focus:ring-primary text-right ${errors.title ? 'border-red-500' : 'border-gray-200'}`}
+              className={`w-full px-4 py-3 border rounded-xl focus:ring-2 focus:ring-primary text-start ${errors.title ? 'border-red-500' : 'border-gray-200'}`}
               placeholder={t('addMultipleSessions_sessionNamePlaceholder')}
             />
             {errors.title && <p className="text-red-500 text-xs mt-1">{errors.title.message}</p>}
@@ -208,7 +208,7 @@ export default function AddMultipleSessionsModal({ isOpen, onClose, onAdd }: Add
           </div>
 
           {selectedStudentPackage && (
-            <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 text-right">
+            <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 text-start">
               <p className="text-sm font-bold text-blue-900 mb-2">{t('addMultipleSessions_packageDetails')}</p>
               <div className="flex justify-between text-xs text-blue-700">
                 <span>{t('addMultipleSessions_totalSessions')}: {selectedStudentPackage.totalSessions}</span>
@@ -233,7 +233,7 @@ export default function AddMultipleSessionsModal({ isOpen, onClose, onAdd }: Add
             )}
           />
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-right">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-start">
             <div>
               <Controller
                 name="type"
@@ -275,20 +275,20 @@ export default function AddMultipleSessionsModal({ isOpen, onClose, onAdd }: Add
               />
             </div>
 
-            <div className="text-right">
+            <div className="text-start">
               <label className="block text-sm font-medium mb-2">{t('addMultipleSessions_meetingLink')}</label>
-              <input type="url" {...register('meetingLink')} className="w-full px-4 py-3 border border-gray-200 rounded-xl text-left" dir="ltr" />
+              <input type="url" {...register('meetingLink')} className="w-full px-4 py-3 border border-gray-200 rounded-xl text-end" dir="ltr" />
               {errors.meetingLink && <p className="text-red-500 text-xs mt-1">{errors.meetingLink.message}</p>}
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-right">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-start">
             <div>
               <label className="block text-sm font-medium mb-2">{t('description') || (language === 'ar' ? 'الوصف' : 'Description')}</label>
               <textarea
                 {...register('description')}
                 rows={2}
-                className={`w-full px-4 py-3 border rounded-xl text-right resize-none ${errors.description ? 'border-red-500' : 'border-gray-200'}`}
+                className={`w-full px-4 py-3 border rounded-xl text-start resize-none ${errors.description ? 'border-red-500' : 'border-gray-200'}`}
               />
               {errors.description && <p className="text-red-500 text-xs mt-1">{errors.description.message}</p>}
             </div>
@@ -297,13 +297,13 @@ export default function AddMultipleSessionsModal({ isOpen, onClose, onAdd }: Add
               <textarea
                 {...register('notes')}
                 rows={2}
-                className={`w-full px-4 py-3 border rounded-xl text-right resize-none ${errors.notes ? 'border-red-500' : 'border-gray-200'}`}
+                className={`w-full px-4 py-3 border rounded-xl text-start resize-none ${errors.notes ? 'border-red-500' : 'border-gray-200'}`}
               />
               {errors.notes && <p className="text-red-500 text-xs mt-1">{errors.notes.message}</p>}
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-right">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-start">
             <div>
               <Controller
                 name="monthYear"
@@ -337,7 +337,7 @@ export default function AddMultipleSessionsModal({ isOpen, onClose, onAdd }: Add
             </div>
           </div>
 
-          <div className="space-y-3 text-right">
+          <div className="space-y-3 text-start">
             <label className="text-sm font-medium">{t('addMultipleSessions_weekDays')} *</label>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
               {weekDays.map((day) => (
@@ -369,7 +369,7 @@ export default function AddMultipleSessionsModal({ isOpen, onClose, onAdd }: Add
 
           {sessionPreview.length > 0 && (
             <div className="bg-gray-50 rounded-xl p-4 space-y-3">
-              <h3 className="font-bold text-right">{t('addMultipleSessions_preview')} ({sessionPreview.length} {t('addMultipleSessions_sessionUnit')})</h3>
+              <h3 className="font-bold text-start">{t('addMultipleSessions_preview')} ({sessionPreview.length} {t('addMultipleSessions_sessionUnit')})</h3>
               <div className="max-h-40  overflow-y-auto no-scrollbar space-y-2 px-2">
                 {sessionPreview.map((s, i) => (
                   <div key={i} className="flex justify-between bg-white p-2 rounded border text-sm">

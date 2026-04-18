@@ -414,9 +414,9 @@ export default function LMSCoursesPage() {
                         <span className="text-xs bg-gray-100 text-gray-500 px-2 py-1 rounded-full">{course.attachments.length} {t('file')}</span>
                       )}
                     </div>
-                    <h3 className="font-bold text-gray-900 mb-1 text-right">{course.title}</h3>
+                    <h3 className="font-bold text-gray-900 mb-1 text-start">{course.title}</h3>
                     {course.description && (
-                      <p className="text-xs text-gray-500 line-clamp-2 text-right mb-3">{course.description}</p>
+                      <p className="text-xs text-gray-500 line-clamp-2 text-start mb-3">{course.description}</p>
                     )}
                     <div className="pt-3 border-t border-gray-100">
                       <button
@@ -442,11 +442,11 @@ export default function LMSCoursesPage() {
             <table className="w-full">
               <thead className="bg-gray-50 border-b border-gray-100">
                 <tr>
-                  <th className="text-right px-4 py-3 text-xs font-semibold text-gray-600">{t('courses_table_course')}</th>
-                  <th className="text-right px-4 py-3 text-xs font-semibold text-gray-600">{t('courses_table_subject')}</th>
-                  <th className="text-right px-4 py-3 text-xs font-semibold text-gray-600">{t('courses_table_level')}</th>
-                  <th className="text-right px-4 py-3 text-xs font-semibold text-gray-600">{t('courses_table_files')}</th>
-                  {!isStudent && <th className="text-right px-4 py-3 text-xs font-semibold text-gray-600">{t('courses_table_actions')}</th>}
+                  <th className="text-start px-4 py-3 text-xs font-semibold text-gray-600">{t('courses_table_course')}</th>
+                  <th className="text-start px-4 py-3 text-xs font-semibold text-gray-600">{t('courses_table_subject')}</th>
+                  <th className="text-start px-4 py-3 text-xs font-semibold text-gray-600">{t('courses_table_level')}</th>
+                  <th className="text-start px-4 py-3 text-xs font-semibold text-gray-600">{t('courses_table_files')}</th>
+                  {!isStudent && <th className="text-start px-4 py-3 text-xs font-semibold text-gray-600">{t('courses_table_actions')}</th>}
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-50">

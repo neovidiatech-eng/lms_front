@@ -159,7 +159,7 @@ export default function Exams() {
               <select
                 value={filters.status}
                 onChange={(e) => setFilters({ ...filters, status: e.target.value })}
-                className="px-4 py-2 border border-gray-300 rounded-lg text-right"
+                className="px-4 py-2 border border-gray-300 rounded-lg text-start"
                 dir="rtl"
               >
                 <option value="">{text.columnStatus[language]}</option>
@@ -171,7 +171,7 @@ export default function Exams() {
                 placeholder={text.columnSubject[language]}
                 value={filters.subject}
                 onChange={(e) => setFilters({ ...filters, subject: e.target.value })}
-                className="px-4 py-2 border border-gray-300 rounded-lg text-right"
+                className="px-4 py-2 border border-gray-300 rounded-lg text-start"
                 dir="rtl"
               />
               <input
@@ -179,7 +179,7 @@ export default function Exams() {
                 placeholder={text.columnTeacher[language]}
                 value={filters.teacher}
                 onChange={(e) => setFilters({ ...filters, teacher: e.target.value })}
-                className="px-4 py-2 border border-gray-300 rounded-lg text-right"
+                className="px-4 py-2 border border-gray-300 rounded-lg text-start"
                 dir="rtl"
               />
             </div>
@@ -190,29 +190,29 @@ export default function Exams() {
           <table className="w-full" dir="rtl">
             <thead className="bg-gray-50 border-b border-gray-200">
               <tr>
-                <th className="px-6 py-4 text-right text-sm font-semibold text-gray-900">{text.columnTitle[language]}</th>
-                <th className="px-6 py-4 text-right text-sm font-semibold text-gray-900">{text.columnSubject[language]}</th>
-                <th className="px-6 py-4 text-right text-sm font-semibold text-gray-900">{text.columnTeacher[language]}</th>
-                <th className="px-6 py-4 text-right text-sm font-semibold text-gray-900">{text.columnDueDate[language]}</th>
-                <th className="px-6 py-4 text-right text-sm font-semibold text-gray-900">{text.columnDuration[language]}</th>
-                <th className="px-6 py-4 text-right text-sm font-semibold text-gray-900">{text.columnGrade[language]}</th>
-                <th className="px-6 py-4 text-right text-sm font-semibold text-gray-900">{text.columnStatus[language]}</th>
+                <th className="px-6 py-4 text-start text-sm font-semibold text-gray-900">{text.columnTitle[language]}</th>
+                <th className="px-6 py-4 text-start text-sm font-semibold text-gray-900">{text.columnSubject[language]}</th>
+                <th className="px-6 py-4 text-start text-sm font-semibold text-gray-900">{text.columnTeacher[language]}</th>
+                <th className="px-6 py-4 text-start text-sm font-semibold text-gray-900">{text.columnDueDate[language]}</th>
+                <th className="px-6 py-4 text-start text-sm font-semibold text-gray-900">{text.columnDuration[language]}</th>
+                <th className="px-6 py-4 text-start text-sm font-semibold text-gray-900">{text.columnGrade[language]}</th>
+                <th className="px-6 py-4 text-start text-sm font-semibold text-gray-900">{text.columnStatus[language]}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200">
               {currentExams.map((exam) => (
                 <tr key={exam.id} className="hover:bg-gray-50 transition-colors">
-                  <td className="px-6 py-4 text-gray-900 font-medium">{exam.title}</td>
-                  <td className="px-6 py-4">
+                  <td className="px-6 py-4 text-start text-gray-900 font-medium">{exam.title}</td>
+                  <td className="px-6 py-4 text-start">
                     <span className="text-primary font-medium hover:underline cursor-pointer">
                       {exam.subject}
                     </span>
                   </td>
-                  <td className="px-6 py-4 text-gray-900">{exam.teacher}</td>
-                  <td className="px-6 py-4 text-gray-600">{exam.dueDate}</td>
-                  <td className="px-6 py-4 text-gray-600">{exam.duration}</td>
-                  <td className="px-6 py-4 text-gray-900 font-medium">{exam.grade}</td>
-                  <td className="px-6 py-4">
+                  <td className="px-6 py-4 text-start text-gray-900">{exam.teacher}</td>
+                  <td className="px-6 py-4 text-start text-gray-600">{exam.dueDate}</td>
+                  <td className="px-6 py-4 text-start text-gray-600">{exam.duration}</td>
+                  <td className="px-6 py-4 text-start text-gray-900 font-medium">{exam.grade}</td>
+                  <td className="px-6 py-4 text-start">
                     <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${exam.status === 'upcoming'
                         ? 'bg-yellow-100 text-yellow-800'
                         : 'bg-green-100 text-green-800'

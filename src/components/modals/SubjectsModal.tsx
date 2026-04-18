@@ -25,7 +25,7 @@ interface SubjectFormProps {
 }
 
 export default function SubjectForm({ initial, onSave, onCancel, title }: SubjectFormProps) {
-  const { language, t } = useLanguage();
+  const {t } = useLanguage();
   const { register, handleSubmit, setValue, watch, reset, formState: { errors } } = useForm<SubjectFormData>({
     resolver: zodResolver(getSubjectSchema(t)) as Resolver<SubjectFormData>,
     defaultValues: {
@@ -54,15 +54,16 @@ export default function SubjectForm({ initial, onSave, onCancel, title }: Subjec
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4" onClick={onCancel}>
       <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden" onClick={e => e.stopPropagation()}>
         <div className="flex items-center justify-between px-6 py-4 bg-primary rounded-t-2xl">
+
+          <h2 className="text-lg font-bold text-white">{title}</h2>
           <button onClick={onCancel} className="p-2 hover:bg-white/20 rounded-lg transition-colors">
             <X className="w-5 h-5 text-white/80" />
           </button>
-          <h2 className="text-lg font-bold text-white">{title}</h2>
         </div>
 
         <form onSubmit={handleSubmit(onSave)} className="p-6 space-y-5 max-h-[80vh] overflow-y-auto no-scrollbar">
           <div>
-            <label className="block text-sm font-medium text-gray-700 text-right mb-1.5">
+            <label className="block text-sm font-medium text-gray-700 text-start mb-1.5">
               {t('subjectNameAr')}
               <span className="text-red-500 mr-1">*</span>
             </label>
@@ -70,13 +71,13 @@ export default function SubjectForm({ initial, onSave, onCancel, title }: Subjec
               type="text"
               {...register('name_ar')}
               dir="rtl"
-              className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 text-right"
+              className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 text-start"
             />
-            {errors.name_ar && <p className="text-red-500 text-xs mt-1 text-right">{errors.name_ar.message}</p>}
+            {errors.name_ar && <p className="text-red-500 text-xs mt-1 text-start">{errors.name_ar.message}</p>}
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 text-right mb-1.5">
+            <label className="block text-sm font-medium text-gray-700 text-start mb-1.5">
               {t('subjectNameEn')}
             </label>
             <input
@@ -84,11 +85,11 @@ export default function SubjectForm({ initial, onSave, onCancel, title }: Subjec
               {...register('name_en')}
               className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500"
             />
-            {errors.name_en && <p className="text-red-500 text-xs mt-1 text-right">{errors.name_en.message}</p>}
+            {errors.name_en && <p className="text-red-500 text-xs mt-1 text-start">{errors.name_en.message}</p>}
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 text-right mb-2">
+            <label className="block text-sm font-medium text-gray-700 text-start mb-2">
               {t('color')}
             </label>
             <div className="grid grid-cols-4 gap-2">
@@ -110,7 +111,7 @@ export default function SubjectForm({ initial, onSave, onCancel, title }: Subjec
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 text-right mb-1.5">
+            <label className="block text-sm font-medium text-gray-700 text-start mb-1.5">
               {t('status')}
             </label>
             <div className="flex gap-3">

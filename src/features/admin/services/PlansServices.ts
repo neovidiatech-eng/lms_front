@@ -26,8 +26,19 @@ export const deletePlans = async (id: string) => {
   }
 };
 
+export interface UpdatePlanPayload {
+  name_ar?: string;
+  name_en?: string;
+  price?: number;
+  duration?: number;
+  hours?: number;
+  active?: boolean;
+  bestSeller?: boolean;
+  features?: string[];
+}
+
 // update plan
-export const updatePlan = async (id: string, data: Partial<Plan>) => {
+export const updatePlan = async (id: string, data: UpdatePlanPayload) => {
   try {
     const res = await api.patch(`/subscription/plans/${id}`, data);
     console.log(res.data);

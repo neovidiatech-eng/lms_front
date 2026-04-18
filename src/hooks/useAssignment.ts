@@ -37,9 +37,6 @@ export const useDeleteAssignment = () => {
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ["assignments"] });
             ErrorService.success("Assignment deleted successfully");
-        },
-        onError: (error: any) => {
-            ErrorService.handleError(error);
         }
     });
 };
@@ -51,9 +48,6 @@ export const useCreateAssignment = () => {
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ["assignments"] });
             ErrorService.success("Assignment created successfully");
-        },
-        onError: (error: any) => {
-            ErrorService.handleError(error);
         }
     });
 };
@@ -65,9 +59,6 @@ export const useUpdateAssignment = () => {
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ["assignments"] });
             ErrorService.success("Assignment updated successfully");
-        },
-        onError: (error: any) => {
-            ErrorService.handleError(error);
         }
     });
 };

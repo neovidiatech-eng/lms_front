@@ -149,7 +149,7 @@ export default function SubscribePlanModal({ isOpen, onClose }: SubscribePlanMod
                     <div className="text-center mb-8">
                       <div className="flex justify-center items-baseline gap-2">
                         <span className="text-5xl font-extrabold text-gray-900">{plan.price}</span>
-                        <div className="text-right flex flex-col items-start leading-none gap-1">
+                        <div className="text-start flex flex-col items-start leading-none gap-1">
                           <span className="text-gray-500 font-medium">{plan.currency}</span>
                           <span className="text-sm text-gray-400">/{text.month[language]}</span>
                         </div>
@@ -163,7 +163,7 @@ export default function SubscribePlanModal({ isOpen, onClose }: SubscribePlanMod
                       {plan.features.map((feature, index) => (
                         <div key={index} className="flex items-start gap-3">
                           <CheckCircle className="w-5 h-5 text-blue-500 flex-shrink-0 mt-0.5" />
-                          <span className="text-gray-700 text-right w-full">{feature}</span>
+                          <span className="text-gray-700 text-start w-full">{feature}</span>
                         </div>
                       ))}
                     </div>

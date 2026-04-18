@@ -1,4 +1,5 @@
-import { X, User, Mail, Phone, Users, Lock, Hash } from 'lucide-react';
+import { useState } from 'react';
+import { X, User, Mail, Phone, Users, Lock, Hash, Eye, EyeOff } from 'lucide-react';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { ParentFormData, getParentSchema } from '../../lib/schemas/ParentSchema';
 import { Resolver, useForm, Controller } from 'react-hook-form'; // أضفت Controller
@@ -13,6 +14,7 @@ interface EditParentModalProps {
 
 export default function EditParentModal({ parent, onClose, onSubmit }: EditParentModalProps) {
   const { language, t } = useLanguage();
+  const [showPassword, setShowPassword] = useState(false);
 
   const { register, handleSubmit, control, formState: { errors } } = useForm<ParentFormData>({
     resolver: zodResolver(getParentSchema(t)) as Resolver<ParentFormData>,
@@ -60,67 +62,88 @@ export default function EditParentModal({ parent, onClose, onSubmit }: EditParen
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* الاسم */}
             <div className="md:col-span-2">
-              <label className="block text-sm font-semibold text-gray-700 mb-2 text-right">{text.name[language]}</label>
+              <label className="block text-sm font-semibold text-gray-700 mb-2 text-start">{text.name[language]}</label>
               <div className="relative">
                 <User className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-                <input type="text" {...register('name')} className="w-full pr-12 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 text-right" />
-                {errors.name && <p className="text-red-500 text-xs mt-1 text-right">{errors.name.message}</p>}
+                <input type="text" {...register('name')} className="w-full pr-12 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 text-start" />
+                {errors.name && <p className="text-red-500 text-xs mt-1 text-start">{errors.name.message}</p>}
               </div>
             </div>
 
             {/* البريد الإلكتروني */}
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2 text-right">{text.email[language]}</label>
+              <label className="block text-sm font-semibold text-gray-700 mb-2 text-start">{text.email[language]}</label>
               <div className="relative">
                 <Mail className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-                <input type="email" {...register('email')} className="w-full pr-12 py-3 border border-gray-200 rounded-xl text-right" />
-                {errors.email && <p className="text-red-500 text-xs mt-1 text-right">{errors.email.message}</p>}
+                <input type="email" {...register('email')} className="w-full pr-12 py-3 border border-gray-200 rounded-xl text-start" />
+                {errors.email && <p className="text-red-500 text-xs mt-1 text-start">{errors.email.message}</p>}
               </div>
             </div>
 
             {/* الهاتف */}
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2 text-right">{text.phone[language]}</label>
+              <label className="block text-sm font-semibold text-gray-700 mb-2 text-start">{text.phone[language]}</label>
               <div className="relative">
                 <Phone className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-                <input type="tel" {...register('phone')} className="w-full pr-12 py-3 border border-gray-200 rounded-xl text-right" />
-                {errors.phone && <p className="text-red-500 text-xs mt-1 text-right">{errors.phone.message}</p>}
+                <input type="tel" {...register('phone')} className="w-full pr-12 py-3 border border-gray-200 rounded-xl text-start" />
+                {errors.phone && <p className="text-red-500 text-xs mt-1 text-start">{errors.phone.message}</p>}
               </div>
             </div>
 
             {/* عدد الأطفال (مهم جداً للـ Validation) */}
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2 text-right">{text.childrenCount[language]}</label>
+              <label className="block text-sm font-semibold text-gray-700 mb-2 text-start">{text.childrenCount[language]}</label>
               <div className="relative">
                 <Hash className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-                <input type="number" {...register('numberOfChildren', { valueAsNumber: true })} className="w-full pr-12 py-3 border border-gray-200 rounded-xl text-right" />
-                {errors.numberOfChildren && <p className="text-red-500 text-xs mt-1 text-right">{errors.numberOfChildren.message}</p>}
+                <input type="number" {...register('numberOfChildren', { valueAsNumber: true })} className="w-full pr-12 py-3 border border-gray-200 rounded-xl text-start" />
+                {errors.numberOfChildren && <p className="text-red-500 text-xs mt-1 text-start">{errors.numberOfChildren.message}</p>}
               </div>
             </div>
 
             {/* واتساب */}
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2 text-right">{text.username[language]}</label>
+              <label className="block text-sm font-semibold text-gray-700 mb-2 text-start">{text.username[language]}</label>
               <div className="relative">
                 <Phone className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-                <input type="text" {...register('username')} className="w-full pr-12 py-3 border border-gray-200 rounded-xl text-right" />
-                {errors.username && <p className="text-red-500 text-xs mt-1 text-right">{errors.username.message}</p>}
+                <input type="text" {...register('username')} className="w-full pr-12 py-3 border border-gray-200 rounded-xl text-start" />
+                {errors.username && <p className="text-red-500 text-xs mt-1 text-start">{errors.username.message}</p>}
               </div>
             </div>
 
             {/* كلمة المرور */}
             <div className="md:col-span-2">
-              <label className="block text-sm font-semibold text-gray-700 mb-2 text-right">{text.password[language]}</label>
+              <label className="block text-sm font-semibold text-gray-700 mb-2 text-start">
+                {text.password[language]}
+              </label>
               <div className="relative">
-                <Lock className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-                <input type="password" {...register('password')} className="w-full pr-12 py-3 border border-gray-200 rounded-xl text-right" />
-                {errors.password && <p className="text-red-500 text-xs mt-1 text-right">{errors.password.message}</p>}
+                <Lock className="absolute start-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5 pointer-events-none" />
+                <input
+                  type={showPassword ? "text" : "password"}
+                  {...register("password")}
+                  className={`w-full px-12 py-3 border rounded-xl text-start focus:outline-none focus:ring-2 transition-all ${errors.password
+                      ? "border-red-500 focus:ring-red-100"
+                      : "border-gray-200 focus:ring-purple-100 focus:border-purple-500"
+                    }`}
+                  dir="ltr"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute end-4 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+                >
+                  {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                </button>
               </div>
+              {errors.password && (
+                <p className="text-red-500 text-xs mt-1 text-start">
+                  {errors.password.message}
+                </p>
+              )}
             </div>
 
             {/* الطلاب المرتبطين (باستخدام Controller لضمان إرسال Array) */}
             <div className="md:col-span-2">
-              <label className="block text-sm font-semibold text-gray-700 mb-2 text-right">{text.linkedStudents[language]}</label>
+              <label className="block text-sm font-semibold text-gray-700 mb-2 text-start">{text.linkedStudents[language]}</label>
               <div className="relative">
                 <Users className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5 z-10 pointer-events-none" />
                 <Controller
@@ -138,7 +161,7 @@ export default function EditParentModal({ parent, onClose, onSubmit }: EditParen
                     />
                   )}
                 />
-                {errors.studentNames && <p className="text-red-500 text-xs mt-1 text-right">{errors.studentNames.message}</p>}
+                {errors.studentNames && <p className="text-red-500 text-xs mt-1 text-start">{errors.studentNames.message}</p>}
               </div>
             </div>
           </div>

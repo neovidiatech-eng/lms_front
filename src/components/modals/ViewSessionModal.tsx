@@ -7,10 +7,10 @@ interface ViewSessionModalProps {
   onClose: () => void;
   session: Schedule | null;
   groupedSessions?: Schedule[];
-  allSessions: Schedule[];
+  allSessions?: Schedule[];
 }
 
-export default function ViewSessionModal({ isOpen, onClose, session, groupedSessions, allSessions }: ViewSessionModalProps) {
+export default function ViewSessionModal({ isOpen, onClose, session, groupedSessions, allSessions = [] }: ViewSessionModalProps) {
   const { t, i18n } = useTranslation();
   const language = i18n.language.split('-')[0];
 
@@ -78,14 +78,14 @@ export default function ViewSessionModal({ isOpen, onClose, session, groupedSess
           <div className="space-y-6">
             {/* Session Info Card */}
             <div className="bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-200 rounded-2xl p-6">
-              <h3 className="text-2xl font-bold text-gray-900 text-right mb-6">{session.title}</h3>
+              <h3 className="text-2xl font-bold text-gray-900 text-start mb-6">{session.title}</h3>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="flex items-center gap-3 bg-white rounded-xl p-4 shadow-sm">
                   <div className="flex-shrink-0 w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
                     <User className="w-5 h-5 text-blue-600" />
                   </div>
-                  <div className="flex-1 text-right">
+                  <div className="flex-1 text-start">
                     <p className="text-xs text-gray-500">{t('studentLabel')}</p>
                     <p className="font-semibold text-gray-900">{session.student?.user?.name || '—'}</p>
                   </div>
@@ -95,7 +95,7 @@ export default function ViewSessionModal({ isOpen, onClose, session, groupedSess
                   <div className="flex-shrink-0 w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
                     <GraduationCap className="w-5 h-5 text-green-600" />
                   </div>
-                  <div className="flex-1 text-right">
+                  <div className="flex-1 text-start">
                     <p className="text-xs text-gray-500">{t('teacherLabel')}</p>
                     <p className="font-semibold text-gray-900">{session.teacher?.user?.name || '—'}</p>
                   </div>
@@ -105,7 +105,7 @@ export default function ViewSessionModal({ isOpen, onClose, session, groupedSess
                   <div className="flex-shrink-0 w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
                     <BookOpen className="w-5 h-5 text-purple-600" />
                   </div>
-                  <div className="flex-1 text-right">
+                  <div className="flex-1 text-start">
                     <p className="text-xs text-gray-500">{t('subjectLabel')}</p>
                     <p className="font-semibold text-gray-900">{session.description || '—'}</p>
                   </div>
@@ -115,7 +115,7 @@ export default function ViewSessionModal({ isOpen, onClose, session, groupedSess
                   <div className="flex-shrink-0 w-10 h-10 bg-cyan-100 rounded-lg flex items-center justify-center">
                     <FileText className="w-5 h-5 text-cyan-600" />
                   </div>
-                  <div className="flex-1 text-right">
+                  <div className="flex-1 text-start">
                     <p className="text-xs text-gray-500">{t('type') || (language === 'ar' ? 'نوع الحصة' : 'Type')}</p>
                     <p className="font-semibold text-gray-900">{t(session.type?.toLowerCase() || '') || session.type || '—'}</p>
                   </div>
@@ -125,7 +125,7 @@ export default function ViewSessionModal({ isOpen, onClose, session, groupedSess
                   <div className="flex-shrink-0 w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center">
                     <Clock className="w-5 h-5 text-orange-600" />
                   </div>
-                  <div className="flex-1 text-right">
+                  <div className="flex-1 text-start">
                     <p className="text-xs text-gray-500">{t('duration')}</p>
                     <p className="font-semibold text-gray-900">{duration} {t('minutes')}</p>
                   </div>
@@ -135,7 +135,7 @@ export default function ViewSessionModal({ isOpen, onClose, session, groupedSess
                   <div className="flex-shrink-0 w-10 h-10 bg-indigo-100 rounded-lg flex items-center justify-center">
                     <Calendar className="w-5 h-5 text-indigo-600" />
                   </div>
-                  <div className="flex-1 text-right">
+                  <div className="flex-1 text-start">
                     <p className="text-xs text-gray-500">{t('dateTime')}</p>
                     <p className="font-semibold text-gray-900">{sessionDate}</p>
                     <p className="text-sm text-gray-500" dir="ltr">{sessionTime} — {endTime}</p>
@@ -146,7 +146,7 @@ export default function ViewSessionModal({ isOpen, onClose, session, groupedSess
                   <div className="flex-shrink-0 w-10 h-10 bg-pink-100 rounded-lg flex items-center justify-center">
                     <MapPin className="w-5 h-5 text-pink-600" />
                   </div>
-                  <div className="flex-1 text-right">
+                  <div className="flex-1 text-start">
                     <p className="text-xs text-gray-500">{t('status')}</p>
                     <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium border ${getStatusStyle(session.status)}`}>
                       {t(session.status?.toLowerCase() || '')}
@@ -159,7 +159,7 @@ export default function ViewSessionModal({ isOpen, onClose, session, groupedSess
                   <div className="flex-shrink-0 w-10 h-10 bg-rose-100 rounded-lg flex items-center justify-center">
                     <Clock className="w-5 h-5 text-rose-600" />
                   </div>
-                  <div className="flex-1 text-right">
+                  <div className="flex-1 text-start">
                     <p className="text-xs text-gray-500">{t('notificationTime') || (language === 'ar' ? 'وقت التنبيه' : 'Notification Time')}</p>
                     <p className="font-semibold text-gray-900">10 {t('minutes')}</p>
                   </div>
@@ -167,10 +167,10 @@ export default function ViewSessionModal({ isOpen, onClose, session, groupedSess
               </div>
 
               {/* Meeting Link & Recurring Info */}
-              {session.is_recurring && groupedSessions && groupedSessions.length > 1 ? (
+              {(session.is_recurring || session.parent_recurring_id) && groupedSessions && groupedSessions.length > 1 ? (
                 <div className="mt-6 bg-white border border-gray-200 rounded-2xl overflow-hidden">
                   <div className="bg-gray-50 px-6 py-4 border-b border-gray-200 flex items-center justify-between">
-                    <h4 className="font-bold text-gray-900 text-right">{t('recurringSessions') || (language === 'ar' ? 'الجلسات المتكررة' : 'Recurring Sessions')} ({groupedSessions.length})</h4>
+                    <h4 className="font-bold text-gray-900 text-start">{t('recurringSessions') || (language === 'ar' ? 'الجلسات المتكررة' : 'Recurring Sessions')} ({groupedSessions.length})</h4>
                   </div>
                   <div className="p-4 max-h-96 overflow-y-auto no-scrollbar">
                     <div className="space-y-3">
@@ -185,18 +185,18 @@ export default function ViewSessionModal({ isOpen, onClose, session, groupedSess
                             <div className="flex items-center justify-between gap-4" dir="rtl">
                               <div className="flex items-center gap-3">
                                 <div>
-                                  <p className="text-xs text-gray-500 text-right">{t('scheduledDays') || (language === 'ar' ? 'اليوم' : 'Day')}</p>
-                                  <p className="font-bold text-gray-900 text-right">{t(s.day_of_week?.toLowerCase() || '') || s.day_of_week || '—'}</p>
+                                  <p className="text-xs text-gray-500 text-start">{t('scheduledDays') || (language === 'ar' ? 'اليوم' : 'Day')}</p>
+                                  <p className="font-bold text-gray-900 text-start">{t(s.day_of_week?.toLowerCase() || '') || s.day_of_week || '—'}</p>
                                 </div>
 
                                 <div className="border-r border-gray-300 pr-4">
-                                  <p className="text-xs text-gray-500 text-right">{t('date') || (language === 'ar' ? 'التاريخ' : 'Date')}</p>
-                                  <p className="font-medium text-gray-900 text-right">{date}</p>
+                                  <p className="text-xs text-gray-500 text-start">{t('date') || (language === 'ar' ? 'التاريخ' : 'Date')}</p>
+                                  <p className="font-medium text-gray-900 text-start">{date}</p>
                                 </div>
 
                                 <div className="border-r border-gray-300 pr-4">
-                                  <p className="text-xs text-gray-500 text-right">{t('time') || (language === 'ar' ? 'الوقت' : 'Time')}</p>
-                                  <p className="font-medium text-gray-900 text-right" dir="ltr">
+                                  <p className="text-xs text-gray-500 text-start">{t('time') || (language === 'ar' ? 'الوقت' : 'Time')}</p>
+                                  <p className="font-medium text-gray-900 text-start" dir="ltr">
                                     {time} - {endT}
                                   </p>
                                 </div>
@@ -233,7 +233,7 @@ export default function ViewSessionModal({ isOpen, onClose, session, groupedSess
               ) : (
                 session.link && (
                   <div className="mt-4 bg-white rounded-xl p-4 shadow-sm border border-gray-100">
-                    <p className="text-xs text-gray-500 text-right mb-2">{t('meetingLink')}</p>
+                    <p className="text-xs text-gray-500 text-start mb-2">{t('meetingLink')}</p>
                     <div className="flex items-center gap-3">
                       <a
                         href={session.link}
@@ -244,7 +244,7 @@ export default function ViewSessionModal({ isOpen, onClose, session, groupedSess
                         <Video className="w-4 h-4" />
                         {t('openLink')}
                       </a>
-                      <div className="flex-1 text-sm text-gray-600 break-all text-right" dir="ltr">
+                      <div className="flex-1 text-sm text-gray-600 break-all text-start" dir="ltr">
                         {session.link}
                       </div>
                     </div>
@@ -259,7 +259,7 @@ export default function ViewSessionModal({ isOpen, onClose, session, groupedSess
                     <p className="text-xs text-gray-500">{t('notes')}</p>
                     <FileText className="w-4 h-4 text-gray-400" />
                   </div>
-                  <p className="text-gray-700 text-right">{session.notes}</p>
+                  <p className="text-gray-700 text-start">{session.notes}</p>
                 </div>
               )}
             </div>
@@ -268,7 +268,7 @@ export default function ViewSessionModal({ isOpen, onClose, session, groupedSess
             {allSessions.length > 1 && (
               <div className="bg-white border border-gray-200 rounded-2xl overflow-hidden">
                 <div className="bg-gray-50 px-6 py-4 border-b border-gray-200">
-                  <h3 className="text-lg font-bold text-gray-900 text-right">
+                  <h3 className="text-lg font-bold text-gray-900 text-start">
                     {t('otherTeacherSessions')} ({allSessions.length})
                   </h3>
                 </div>
@@ -288,19 +288,19 @@ export default function ViewSessionModal({ isOpen, onClose, session, groupedSess
                             <div className="flex items-center justify-between gap-4" dir="rtl">
                               <div className="flex items-center gap-4 flex-1">
                                 <div>
-                                  <p className="font-bold text-gray-900 text-right">{s.title}</p>
-                                  <p className="text-xs text-gray-500 text-right">{s.student?.user?.name}</p>
+                                  <p className="font-bold text-gray-900 text-start">{s.title}</p>
+                                  <p className="text-xs text-gray-500 text-start">{s.student?.user?.name}</p>
                                 </div>
 
                                 <div className="border-r border-gray-300 pr-4">
-                                  <p className="text-xs text-gray-500 text-right">{t('dateTime')}</p>
-                                  <p className="font-medium text-gray-900 text-right text-sm">{date}</p>
+                                  <p className="text-xs text-gray-500 text-start">{t('dateTime')}</p>
+                                  <p className="font-medium text-gray-900 text-start text-sm">{date}</p>
                                   <p className="text-xs text-gray-500" dir="ltr">{time}</p>
                                 </div>
 
                                 <div className="border-r border-gray-300 pr-4">
-                                  <p className="text-xs text-gray-500 text-right">{t('duration')}</p>
-                                  <p className="font-medium text-gray-900 text-right text-sm">{dur} {t('minutes')}</p>
+                                  <p className="text-xs text-gray-500 text-start">{t('duration')}</p>
+                                  <p className="font-medium text-gray-900 text-start text-sm">{dur} {t('minutes')}</p>
                                 </div>
 
                                 <div>

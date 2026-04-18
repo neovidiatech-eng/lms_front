@@ -1,9 +1,10 @@
-import { Suspense } from 'react';
+import { Suspense, lazy } from 'react';
 import { Outlet, Routes, Route } from 'react-router-dom';
 import TeacherDashboardLayout from './TeacherDashboardLayout';
 import ErrorBoundary from '../../components/layout/ErrorBoundary';
-import TeacherDashboardHome from '../../features/teacher/pages/Home';
 import { teacherDashboardRoutes } from './teacherDashboardRoutes.tsx';
+
+const TeacherDashboardHome = lazy(() => import('../../features/teacher/pages/Home'));
 
 const LoadingFallback = () => (
   <div className="flex items-center justify-center min-h-[400px]">

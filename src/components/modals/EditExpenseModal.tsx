@@ -103,7 +103,7 @@ export default function EditExpenseModal({ isOpen, onClose, expense, onSave }: E
 
         <form onSubmit={handleSubmit} className="p-6 space-y-6">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2 text-right">
+            <label className="block text-sm font-medium text-gray-700 mb-2 text-start">
               {text.description[language]} *
             </label>
             <input
@@ -111,14 +111,14 @@ export default function EditExpenseModal({ isOpen, onClose, expense, onSave }: E
               value={formData.description}
               onChange={(e) => setFormData({ ...formData, description: e.target.value })}
               placeholder={text.descriptionPlaceholder[language]}
-              className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-right"
+              className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-start"
               required
             />
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2 text-right">
+              <label className="block text-sm font-medium text-gray-700 mb-2 text-start">
                 {text.category[language]} *
               </label>
               <CustomSelect
@@ -132,7 +132,7 @@ export default function EditExpenseModal({ isOpen, onClose, expense, onSave }: E
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2 text-right">
+              <label className="block text-sm font-medium text-gray-700 mb-2 text-start">
                 {text.currency[language]} *
               </label>
               <CustomSelect
@@ -147,7 +147,7 @@ export default function EditExpenseModal({ isOpen, onClose, expense, onSave }: E
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2 text-right">
+            <label className="block text-sm font-medium text-gray-700 mb-2 text-start">
               {text.amount[language]} *
             </label>
             <input
@@ -156,7 +156,7 @@ export default function EditExpenseModal({ isOpen, onClose, expense, onSave }: E
               value={formData.amount}
               onChange={(e) => setFormData({ ...formData, amount: e.target.value })}
               placeholder="0.00"
-              className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-right"
+              className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-start"
               min="0"
               required
             />
@@ -171,7 +171,7 @@ export default function EditExpenseModal({ isOpen, onClose, expense, onSave }: E
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2 text-right">
+            <label className="block text-sm font-medium text-gray-700 mb-2 text-start">
               {text.paymentMethod[language]}
             </label>
             <input
@@ -179,12 +179,12 @@ export default function EditExpenseModal({ isOpen, onClose, expense, onSave }: E
               value={formData.paymentMethod}
               onChange={(e) => setFormData({ ...formData, paymentMethod: e.target.value })}
               placeholder={text.paymentMethodPlaceholder[language]}
-              className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-right"
+              className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-start"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2 text-right">
+            <label className="block text-sm font-medium text-gray-700 mb-2 text-start">
               {text.status[language]} *
             </label>
             <CustomSelect

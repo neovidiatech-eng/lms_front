@@ -5,6 +5,7 @@ import Pagination from "../../../components/ui/Pagination";
 import WhatsAppPhone from "../../../components/ui/WhatsAppPhone";
 import ViewSubscriptionRequestModal from "../../../components/modals/ViewSubscriptionRequestModal";
 import CustomSelect from "../../../components/ui/CustomSelect";
+import { TableSkeleton } from "../../../components/ui/CustomSkeleton";
 import {
   changeSubscriptionRequestStatus,
   getSubscriptionRequests,
@@ -32,6 +33,7 @@ export default function SubscriptionRequests() {
     "all" | "pending" | "approved" | "rejected"
   >("all");
   const [viewModalOpen, setViewModalOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [selectedRequest, setSelectedRequest] =
     useState<SubscriptionRequest | null>(null);
   const itemsPerPage = 10;
@@ -75,9 +77,8 @@ export default function SubscriptionRequests() {
   useEffect(() => {
     const fetchRequests = async () => {
       try {
+        setIsLoading(true);
         const data = await getSubscriptionRequests();
-        console.log(data);
-
         if (!Array.isArray(data)) {
           console.error("Invalid data:", data);
           return;
@@ -98,11 +99,14 @@ export default function SubscriptionRequests() {
         setRequests(formatted);
       } catch (error) {
         console.log(error);
+      } finally {
+        setIsLoading(false);
       }
     };
 
     fetchRequests();
   }, []);
+
   const filteredRequests = requests.filter((request) => {
     const matchesSearch =
       request.studentName.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -135,11 +139,8 @@ export default function SubscriptionRequests() {
   const handleApprove = async (id: string) => {
     try {
       await changeSubscriptionRequestStatus(id, "approved");
-
       setRequests((prev) =>
-        prev.map((req) =>
-          req.id === id ? { ...req, status: "approved" } : req,
-        ),
+        prev.map((req) => (req.id === id ? { ...req, status: "approved" } : req))
       );
     } catch (error) {
       console.log(error);
@@ -149,16 +150,14 @@ export default function SubscriptionRequests() {
   const handleReject = async (id: string) => {
     try {
       await changeSubscriptionRequestStatus(id, "rejected");
-
       setRequests((prev) =>
-        prev.map((req) =>
-          req.id === id ? { ...req, status: "rejected" } : req,
-        ),
+        prev.map((req) => (req.id === id ? { ...req, status: "rejected" } : req))
       );
     } catch (error) {
       console.log(error);
     }
   };
+
   const handleView = (request: SubscriptionRequest) => {
     setSelectedRequest(request);
     setViewModalOpen(true);
@@ -181,7 +180,7 @@ export default function SubscriptionRequests() {
               placeholder={text.search[language]}
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pr-10 pl-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent text-right"
+              className={`w-full ${language === 'ar' ? 'pr-10 pl-4' : 'pl-10 pr-4'} py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent text-start transition-all`}
             />
           </div>
 
@@ -190,7 +189,7 @@ export default function SubscriptionRequests() {
               value={statusFilter}
               onChange={(value) =>
                 setStatusFilter(
-                  value as "all" | "pending" | "approved" | "rejected",
+                  value as "all" | "pending" | "approved" | "rejected"
                 )
               }
               options={[
@@ -200,135 +199,132 @@ export default function SubscriptionRequests() {
                 { value: "rejected", label: text.rejected[language] },
               ]}
               placeholder={text.filter[language]}
-              className="px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent text-right"
             />
           </div>
         </div>
 
-        {paginatedRequests.length === 0 ? (
+        {isLoading ? (
+          <TableSkeleton rows={itemsPerPage} columns={9} />
+        ) : paginatedRequests.length === 0 ? (
           <div className="text-center py-12">
             <Clock className="w-16 h-16 text-gray-300 mx-auto mb-4" />
             <p className="text-gray-500 text-lg">{text.noRequests[language]}</p>
           </div>
         ) : (
-          <>
-            <div className="overflow-x-auto">
-              <table className="w-full" dir="rtl">
-                <thead>
-                  <tr className="border-b border-gray-200">
-                    <th className="px-4 py-3 text-right text-sm font-semibold text-gray-700">
-                      {text.studentName[language]}
-                    </th>
-                    <th className="px-4 py-3 text-right text-sm font-semibold text-gray-700">
-                      {text.phone[language]}
-                    </th>
-                    <th className="px-4 py-3 text-right text-sm font-semibold text-gray-700">
-                      {text.email[language]}
-                    </th>
-                    <th className="px-4 py-3 text-right text-sm font-semibold text-gray-700">
-                      {text.plan[language]}
-                    </th>
-                    <th className="px-4 py-3 text-right text-sm font-semibold text-gray-700">
-                      {text.price[language]}
-                    </th>
-                    <th className="px-4 py-3 text-right text-sm font-semibold text-gray-700">
-                      {text.sessionsCount[language]}
-                    </th>
-                    <th className="px-4 py-3 text-right text-sm font-semibold text-gray-700">
-                      {text.requestDate[language]}
-                    </th>
-                    <th className="px-4 py-3 text-right text-sm font-semibold text-gray-700">
-                      {text.status[language]}
-                    </th>
-                    <th className="px-4 py-3 text-right text-sm font-semibold text-gray-700">
-                      {text.actions[language]}
-                    </th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {paginatedRequests.map((request) => (
-                    <tr
-                      key={request.id}
-                      className="border-b border-gray-100 hover:bg-gray-50 transition-colors"
-                    >
-                      <td className="px-4 py-4 text-right text-sm font-medium text-gray-900">
-                        {request.studentName}
-                      </td>
-                      <td
-                        className="px-4 py-4 text-right text-sm text-gray-600"
-                        dir="ltr"
+          <div className="overflow-x-auto">
+            <table className="w-full" dir={language === 'ar' ? 'rtl' : 'ltr'}>
+              <thead>
+                <tr className="border-b border-gray-200 bg-gray-50">
+                  <th className="px-4 py-4 text-start text-sm font-semibold text-gray-700">
+                    {text.studentName[language]}
+                  </th>
+                  <th className="px-4 py-4 text-start text-sm font-semibold text-gray-700">
+                    {text.phone[language]}
+                  </th>
+                  <th className="px-4 py-4 text-start text-sm font-semibold text-gray-700">
+                    {text.email[language]}
+                  </th>
+                  <th className="px-4 py-4 text-start text-sm font-semibold text-gray-700">
+                    {text.plan[language]}
+                  </th>
+                  <th className="px-4 py-4 text-start text-sm font-semibold text-gray-700">
+                    {text.price[language]}
+                  </th>
+                  <th className="px-4 py-4 text-start text-sm font-semibold text-gray-700">
+                    {text.sessionsCount[language]}
+                  </th>
+                  <th className="px-4 py-4 text-start text-sm font-semibold text-gray-700">
+                    {text.requestDate[language]}
+                  </th>
+                  <th className="px-4 py-4 text-start text-sm font-semibold text-gray-700">
+                    {text.status[language]}
+                  </th>
+                  <th className="px-4 py-4 text-start text-sm font-semibold text-gray-700">
+                    {text.actions[language]}
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-100">
+                {paginatedRequests.map((request) => (
+                  <tr
+                    key={request.id}
+                    className="hover:bg-gray-50 transition-colors"
+                  >
+                    <td className="px-4 py-4 text-start text-sm font-medium text-gray-900">
+                      {request.studentName}
+                    </td>
+                    <td className="px-4 py-4 text-start text-sm text-gray-600" dir="ltr">
+                      <WhatsAppPhone phone={request.phone} />
+                    </td>
+                    <td className="px-4 py-4 text-start text-sm text-gray-600" dir="ltr">
+                      {request.email}
+                    </td>
+                    <td className="px-4 py-4 text-start text-sm text-gray-900">
+                      {request.planName}
+                    </td>
+                    <td className="px-4 py-4 text-start text-sm font-semibold text-gray-900">
+                      {request.planPrice}
+                    </td>
+                    <td className="px-4 py-4 text-start text-sm text-gray-900">
+                      <span className="font-semibold">{request.sessionsCount}</span>{" "}
+                      {text.session[language]}
+                    </td>
+                    <td className="px-4 py-4 text-start text-sm text-gray-900">
+                      {request.requestDate}
+                    </td>
+                    <td className="px-4 py-4 text-start">
+                      <span
+                        className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium border ${getStatusStyle(
+                          request.status
+                        )}`}
                       >
-                        <WhatsAppPhone phone={request.phone} />
-                      </td>
-                      <td
-                        className="px-4 py-4 text-right text-sm text-gray-600"
-                        dir="ltr"
-                      >
-                        {request.email}
-                      </td>
-                      <td className="px-4 py-4 text-right text-sm text-gray-900">
-                        {request.planName}
-                      </td>
-                      <td className="px-4 py-4 text-right text-sm font-semibold text-gray-900">
-                        {request.planPrice}
-                      </td>
-                      <td className="px-4 py-4 text-right text-sm text-gray-900">
-                        <span className="font-semibold">
-                          {request.sessionsCount}
-                        </span>{" "}
-                        {text.session[language]}
-                      </td>
-                      <td className="px-4 py-4 text-right text-sm text-gray-900">
-                        {request.requestDate}
-                      </td>
-                      <td className="px-4 py-4">
-                        <span
-                          className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium border ${getStatusStyle(request.status)}`}
+                        {text[request.status][language]}
+                      </span>
+                    </td>
+                    <td className="px-4 py-4">
+                      <div className="flex items-center gap-2 justify-start">
+                        <button
+                          onClick={() => handleView(request)}
+                          className="p-2 icon-btn-primary rounded-lg transition-colors group"
+                          title={text.view[language]}
                         >
-                          {text[request.status][language]}
-                        </span>
-                      </td>
-                      <td className="px-4 py-4">
-                        <div className="flex items-center gap-2 justify-start">
-                          <button
-                            onClick={() => handleView(request)}
-                            className="p-2 icon-btn-primary rounded-lg transition-colors"
-                            title={text.view[language]}
-                          >
-                            <Eye className="w-5 h-5" />
-                          </button>
-                          <button
-                            onClick={() => handleReject(request.id)}
-                            disabled={request.status !== "pending"}
-                            className={`p-2 rounded-lg transition-colors ${
-                              request.status === "pending"
-                                ? "text-red-600 hover:bg-red-50"
-                                : "text-gray-300 cursor-not-allowed"
-                            }`}
-                            title={text.reject[language]}
-                          >
-                            <XCircle className="w-5 h-5" />
-                          </button>
-                          <button
-                            onClick={() => handleApprove(request.id)}
-                            disabled={request.status !== "pending"}
-                            className={`p-2 rounded-lg transition-colors ${
-                              request.status === "pending"
-                                ? "text-green-600 hover:bg-green-50"
-                                : "text-gray-300 cursor-not-allowed"
-                            }`}
-                            title={text.approve[language]}
-                          >
-                            <CheckCircle className="w-5 h-5" />
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+                          <Eye className="w-5 h-5" />
+                        </button>
+                        <button
+                          onClick={() => handleReject(request.id)}
+                          disabled={request.status !== "pending"}
+                          className={`p-2 rounded-lg transition-colors ${
+                            request.status === "pending"
+                              ? "text-red-600 hover:bg-red-50"
+                              : "text-gray-300 cursor-not-allowed"
+                          }`}
+                          title={text.reject[language]}
+                        >
+                          <XCircle className="w-5 h-5" />
+                        </button>
+                        <button
+                          onClick={() => handleApprove(request.id)}
+                          disabled={request.status !== "pending"}
+                          className={`p-2 rounded-lg transition-colors ${
+                            request.status === "pending"
+                              ? "text-green-600 hover:bg-green-50"
+                              : "text-gray-300 cursor-not-allowed"
+                          }`}
+                          title={text.approve[language]}
+                        >
+                          <CheckCircle className="w-5 h-5" />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
 
+        {!isLoading && paginatedRequests.length > 0 && (
+          <div className="mt-6 border-t border-gray-100 pt-6">
             <Pagination
               currentPage={currentPage}
               totalPages={totalPages}
@@ -336,7 +332,7 @@ export default function SubscriptionRequests() {
               itemsPerPage={itemsPerPage}
               onPageChange={setCurrentPage}
             />
-          </>
+          </div>
         )}
       </div>
 
@@ -353,5 +349,3 @@ export default function SubscriptionRequests() {
     </div>
   );
 }
-
-// https://perfect-due.com/api-docs/

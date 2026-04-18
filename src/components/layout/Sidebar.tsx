@@ -76,7 +76,7 @@ export default function Sidebar({ isOpen, onClose, isCollapsed, setIsCollapsed }
                 {settings.name.charAt(0)}
               </div>
             )}
-            <div className={`text-right transition-all duration-300 ${isCollapsed ? 'opacity-0 invisible w-0' : 'opacity-100'}`}>
+            <div className={`text-start transition-all duration-300 ${isCollapsed ? 'opacity-0 invisible w-0' : 'opacity-100'}`}>
               <h2 className="text-lg font-bold text-gray-900 line-clamp-1">{settings.name}</h2>
               <p className="text-xs text-gray-500">لوحة التحكم</p>
             </div>
@@ -98,7 +98,7 @@ export default function Sidebar({ isOpen, onClose, isCollapsed, setIsCollapsed }
                       {item.icon && <item.icon className={`w-5 h-5 flex-shrink-0 transition-all ${isCollapsed ? 'mx-auto' : ''}`} />}
                       {!isCollapsed && (
                         <>
-                          <span className={`text-sm font-medium flex-1 ${language === 'ar' ? 'text-right' : 'text-left'}`}>
+                          <span className={`text-sm font-medium flex-1 ${language === 'ar' ? 'text-start' : 'text-end'}`}>
                             {t(item.label)}
                           </span>
                           <ChevronDown
@@ -141,7 +141,7 @@ export default function Sidebar({ isOpen, onClose, isCollapsed, setIsCollapsed }
                   >
                     {item.icon && <item.icon className={`w-5 h-5 flex-shrink-0 transition-all ${isCollapsed ? 'mx-auto' : ''}`} />}
                     {!isCollapsed && (
-                      <span className={`text-sm font-medium flex-1 ${language === 'ar' ? 'text-right' : 'text-left'}`}>
+                      <span className={`text-sm font-medium flex-1 ${language === 'ar' ? 'text-start' : 'text-end'}`}>
                         {t(item.label)}
                       </span>
                     )}

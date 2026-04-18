@@ -86,33 +86,33 @@ export default function ViewUserModal({ isOpen, onClose, userData }: ViewUserMod
             {/* Contact Information */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="bg-gray-50 p-4 rounded-xl">
-                <label className="block text-sm font-medium text-gray-500 mb-1 text-right">
+                <label className="block text-sm font-medium text-gray-500 mb-1 text-start">
                   {language === 'ar' ? 'البريد الإلكتروني' : 'Email'}
                 </label>
-                <p className="text-gray-900 font-medium text-right">{userData.email}</p>
+                <p className="text-gray-900 font-medium text-start">{userData.email}</p>
               </div>
 
               <div className="bg-gray-50 p-4 rounded-xl">
-                <label className="block text-sm font-medium text-gray-500 mb-1 text-right">
+                <label className="block text-sm font-medium text-gray-500 mb-1 text-start">
                   {language === 'ar' ? 'رقم الهاتف' : 'Phone Number'}
                 </label>
-                <div className="flex items-center justify-end gap-2">
+                <div className="flex items-center justify-start gap-2">
                   <WhatsAppPhone phone={`${userData.countryCode || '+20'} ${userData.phone}`} />
                 </div>
               </div>
 
               <div className="bg-gray-50 p-4 rounded-xl">
-                <label className="block text-sm font-medium text-gray-500 mb-1 text-right">
+                <label className="block text-sm font-medium text-gray-500 mb-1 text-start">
                   {language === 'ar' ? 'الدور' : 'Role'}
                 </label>
-                <p className="text-gray-900 font-medium text-right">{getRoleLabel(userData.role)}</p>
+                <p className="text-gray-900 font-medium text-start">{getRoleLabel(userData.role)}</p>
               </div>
 
               <div className="bg-gray-50 p-4 rounded-xl">
-                <label className="block text-sm font-medium text-gray-500 mb-1 text-right">
+                <label className="block text-sm font-medium text-gray-500 mb-1 text-start">
                   {language === 'ar' ? 'الحالة' : 'Status'}
                 </label>
-                <div className="flex items-center justify-end gap-2">
+                <div className="flex items-center justify-start gap-2">
                   <span
                     className={`px-3 py-1 rounded-full text-sm font-medium ${userData.status === 'active'
                       ? 'bg-green-100 text-green-700'
@@ -134,7 +134,7 @@ export default function ViewUserModal({ isOpen, onClose, userData }: ViewUserMod
             {/* Permissions */}
             {userData.permissions && userData.permissions.length > 0 && (
               <div>
-                <label className="block text-lg font-semibold text-gray-900 mb-4 text-right">
+                <label className="block text-lg font-semibold text-gray-900 mb-4 text-start">
                   {language === 'ar' ? 'الصلاحيات' : 'Permissions'}
                 </label>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -149,7 +149,7 @@ export default function ViewUserModal({ isOpen, onClose, userData }: ViewUserMod
                         key={key}
                         className="bg-blue-50 border border-blue-200 p-3 rounded-xl"
                       >
-                        <p className="text-sm font-medium text-blue-900 text-right">
+                        <p className="text-sm font-medium text-blue-900 text-start">
                           {language === 'ar' ? group.title : group.titleEn}
                         </p>
                       </div>

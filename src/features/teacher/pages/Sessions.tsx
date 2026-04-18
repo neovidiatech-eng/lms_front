@@ -7,6 +7,7 @@ import { Schedule } from '../../../types/scheduales';
 import { useSubjects } from '../../../features/admin/hooks/useSubjects';
 import { Subject } from '../../../types/subject';
 import { useUserSessions } from '../../../hooks/useSessions';
+import { TableSkeleton } from '../../../components/ui/CustomSkeleton';
 
 
 
@@ -20,7 +21,7 @@ export default function Sessions() {
   const [selectedSession, setSelectedSession] = useState<Schedule | null>(null);
   const [groupedSessions, setGroupedSessions] = useState<Schedule[]>([]);
 
-  const { data: sessionResponse } = useUserSessions(debouncedSearch);
+  const { data: sessionResponse, isLoading } = useUserSessions(debouncedSearch);
 
 
 
@@ -102,6 +103,7 @@ export default function Sessions() {
   const getStatusStyle = (status: string) => {
     switch (status?.toLowerCase()) {
       case 'scheduled': return 'bg-blue-50 text-blue-700 border-blue-200';
+      case 'planned': return 'bg-blue-50 text-blue-700 border-blue-200';
       case 'completed': return 'bg-green-50 text-green-700 border-green-200';
       case 'cancelled': return 'bg-red-50 text-red-700 border-red-200';
       default: return 'bg-gray-50 text-gray-700 border-gray-200';
@@ -111,9 +113,12 @@ export default function Sessions() {
   const { data: subjects } = useSubjects();
   const dynamicsubjects = subjects?.subjects || [];
 
-  const getSubjectName = (subId: string) => {
-    const subject = dynamicsubjects.find((s: Subject) => s.id === subId);
-    return subject ? subject.name_ar : "subject";
+  const getSubjectName = (session: Schedule) => {
+    if (session.subject) {
+      return language === 'ar' ? session.subject.name_ar : session.subject.name_en;
+    }
+    const subject = dynamicsubjects.find((s: Subject) => s.id === session.subjectId);
+    return subject ? (language === 'ar' ? subject.name_ar : subject.name_en) : 'subject';
   };
 
 
@@ -143,50 +148,54 @@ export default function Sessions() {
         </div>
 
         <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead className="bg-gray-50 border-b border-gray-100">
-              <tr>
-                <th className="px-6 py-4 text-right text-sm font-semibold text-gray-700">{t('sessionTitleLabel')}</th>
-                <th className="px-6 py-4 text-right text-sm font-semibold text-gray-700">{t('studentLabel')}</th>
-                <th className="px-6 py-4 text-right text-sm font-semibold text-gray-700">{t('subjectLabel')}</th>
-                <th className="px-6 py-4 text-right text-sm font-semibold text-gray-700">{t('dateTime')}</th>
-                <th className="px-6 py-4 text-right text-sm font-semibold text-gray-700">{t('duration')}</th>
-                <th className="px-6 py-4 text-right text-sm font-semibold text-gray-700">{t('status')}</th>
-                <th className="px-6 py-4 text-right text-sm font-semibold text-gray-700">{t('actions')}</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-100">
-              {currentSessions.map((session) => (
-                <tr key={session.id} className="hover:bg-gray-50 transition-colors">
-                  <td className="px-6 py-4">
-                    <span className="font-medium text-gray-900">{session.title}</span>
-                  </td>
-                  <td className="px-6 py-4 text-gray-700 text-right">{session.student.user.name}</td>
-                  <td className="px-6 py-4 text-right">
-                    <span className="text-primary font-medium">{getSubjectName(session.subjectId)}</span>
-                  </td>
-                  <td className="px-6 py-4 text-gray-700 text-right">
-                    {(() => {
-                      const { date, time } = formatDateTime(session.start_time);
-                      return (
-                        <div className="flex flex-col gap-1">
-                          <span className="font-medium text-gray-900">{date}</span>
-                          <div className="flex items-center gap-2">
-                            {time && <span className="text-sm text-gray-500" dir="ltr">{time}</span>}
-                          </div>
-                        </div>
-                      );
-                    })()}
-                  </td>
-                  <td className="px-6 py-4 text-gray-700 text-right">
-                    {calculateDuration(session.start_time, session.end_time)} {t('minutes')}
-                  </td>
-                  <td className="px-6 py-4 text-right">
-                    <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium border ${getStatusStyle(session.status)}`}>
-                      {t(session.status?.toLowerCase() || '')}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4">
+          {isLoading ? (
+            <TableSkeleton rows={itemsPerPage} columns={7} />
+          ) : (
+            <table className="w-full" dir={language === 'ar' ? 'rtl' : 'ltr'}>
+              <thead className="bg-gray-50 border-b border-gray-100">
+                <tr>
+                  <th className="px-6 py-4 text-start text-sm font-semibold text-gray-700">{t('sessionTitleLabel')}</th>
+                  <th className="px-6 py-4 text-start text-sm font-semibold text-gray-700">{t('studentLabel')}</th>
+                  <th className="px-6 py-4 text-start text-sm font-semibold text-gray-700">{t('subjectLabel')}</th>
+                  <th className="px-6 py-4 text-start text-sm font-semibold text-gray-700">{t('dateTime')}</th>
+                  <th className="px-6 py-4 text-start text-sm font-semibold text-gray-700">{t('duration')}</th>
+                  <th className="px-6 py-4 text-start text-sm font-semibold text-gray-700">{t('status')}</th>
+                  <th className="px-6 py-4 text-start text-sm font-semibold text-gray-700">{t('actions')}</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-100">
+                {currentSessions.length > 0 ? (
+                  currentSessions.map((session) => (
+                    <tr key={session.id} className="hover:bg-gray-50 transition-colors">
+                      <td className="px-6 py-4 text-start">
+                        <span className="font-medium text-gray-900">{session.title}</span>
+                      </td>
+                      <td className="px-6 py-4 text-gray-700 text-start">{session.student.user.name}</td>
+                      <td className="px-6 py-4 text-start">
+                        <span className="text-primary font-medium">{getSubjectName(session)}</span>
+                      </td>
+                      <td className="px-6 py-4 text-gray-700 text-start">
+                        {(() => {
+                          const { date, time } = formatDateTime(session.start_time);
+                          return (
+                            <div className="flex flex-col gap-1 items-start">
+                              <span className="font-medium text-gray-900">{date}</span>
+                              <div className="flex items-center gap-2">
+                                {time && <span className="text-sm text-gray-500" dir="ltr">{time}</span>}
+                              </div>
+                            </div>
+                          );
+                        })()}
+                      </td>
+                      <td className="px-6 py-4 text-gray-700 text-start">
+                        {calculateDuration(session.start_time, session.end_time)} {t('minutes')}
+                      </td>
+                      <td className="px-6 py-4 text-start">
+                        <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium border ${getStatusStyle(session.status)}`}>
+                          {t(session.status?.toLowerCase() || '')}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 text-start">
                     <div className="flex items-center gap-2 justify-start">
                       <button
                         onClick={() => {
@@ -204,12 +213,20 @@ export default function Sessions() {
                       </button>
 
 
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+                        </div>
+                      </td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td colSpan={7} className="px-6 py-4 text-center text-gray-500">
+                      {t('No Sessions')}
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          )}
         </div>
 
         <Pagination

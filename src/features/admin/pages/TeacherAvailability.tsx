@@ -207,7 +207,7 @@ function TeacherDetailModal({
             <X className="w-5 h-5 text-white" />
           </button>
           <div className="flex items-center gap-4">
-            <div className="text-right">
+            <div className="text-start">
               <h2 className="text-xl font-bold text-white">{teacher.name}</h2>
               <p className="text-white text-opacity-80 text-sm">
                 {teacher.subject}
@@ -278,7 +278,7 @@ function TeacherDetailModal({
           </button>
         </div>
 
-        <div className="flex-1 overflow-auto p-6" dir="rtl">
+        <div className="flex-1 overflow-auto p-6" dir={language === 'ar' ? 'rtl' : 'ltr'}>
           {tab === "week" ? (
             <>
               <div className="flex items-center justify-between mb-4">
@@ -355,7 +355,7 @@ function TeacherDetailModal({
                 <table className="w-full text-xs">
                   <thead>
                     <tr className="bg-gray-50 border-b border-gray-200">
-                      <th className="px-3 py-2.5 text-right text-gray-600 font-medium w-20 sticky right-0 bg-gray-50 border-l border-gray-200">
+                      <th className="px-3 py-2.5 text-start text-gray-600 font-medium w-20 sticky right-0 bg-gray-50 border-l border-gray-200">
                         {language === "ar" ? "الوقت" : "Time"}
                       </th>
                       {weekDates.map((date, idx) => {
@@ -382,7 +382,7 @@ function TeacherDetailModal({
                         key={hour.value}
                         className="border-b border-gray-100 hover:bg-gray-50"
                       >
-                        <td className="px-3 py-1.5 text-right text-gray-500 whitespace-nowrap sticky right-0 bg-white border-l border-gray-200">
+                        <td className="px-3 py-1.5 text-start text-gray-500 whitespace-nowrap sticky right-0 bg-white border-l border-gray-200">
                           {hour.label}
                         </td>
                         {weekDates.map((date, idx) => {
@@ -656,14 +656,6 @@ export default function TeacherAvailability() {
     ];
   }, [UI_TEACHERS, language]);
 
-  if (loading) {
-    return (
-      <div className="p-10 text-center text-gray-600 font-bold">
-        Loading Teacher Availability...
-      </div>
-    );
-  }
-
   if (isError) {
     return (
       <div className="p-10 text-center text-red-500 font-bold">
@@ -723,7 +715,7 @@ export default function TeacherAvailability() {
 
 
   return (
-    <div className="p-6 space-y-6" dir="rtl">
+    <div className="p-6 space-y-6" dir={language === 'ar' ? 'rtl' : 'ltr'}>
       <div className="flex items-center justify-between flex-wrap gap-4">
         <div>
           <h1 className="text-3xl font-bold text-gray-900">
@@ -753,7 +745,28 @@ export default function TeacherAvailability() {
 
       {viewMode === "teacher" ? (
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
-          {teacherStats.map((teacher) => (
+          {loading ? (
+            Array(6).fill(null).map((_, idx) => (
+              <div key={`skeleton-${idx}`} className="bg-white rounded-2xl border border-gray-200 p-6 h-[256px] animate-pulse">
+                <div className="flex gap-3 mb-6">
+                  <div className="w-10 h-10 bg-gray-200 rounded-full"></div>
+                  <div className="flex-1 space-y-2 mt-2">
+                    <div className="h-4 bg-gray-200 rounded w-1/2"></div>
+                    <div className="h-3 bg-gray-200 rounded w-1/3"></div>
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-3 mb-6">
+                  <div className="bg-gray-100 rounded-xl h-16"></div>
+                  <div className="bg-gray-100 rounded-xl h-16"></div>
+                </div>
+                <div className="flex gap-1 mb-4 h-8 bg-gray-100 rounded-lg"></div>
+              </div>
+            ))
+          ) : teacherStats.length === 0 ? (
+            <p className="col-span-full py-10 text-center text-gray-500">
+              {language === "ar" ? "لا يوجد معلمون متاحون" : "No teachers available"}
+            </p>
+          ) : teacherStats.map((teacher) => (
             <div
               key={teacher.id}
               className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden hover:shadow-md transition-shadow"
@@ -911,7 +924,26 @@ export default function TeacherAvailability() {
             </div>
           </div>
 
-          {displayedTeachers.map((teacher) => (
+          {loading ? (
+            <div className="space-y-4">
+              {Array(4).fill(null).map((_, idx) => (
+                <div key={`week-skel-${idx}`} className="bg-white rounded-2xl border border-gray-200 p-6 mb-4 animate-pulse">
+                   <div className="flex gap-3 items-center justify-between mb-4">
+                     <div className="flex items-center gap-3">
+                       <div className="w-32 h-4 bg-gray-200 rounded"></div>
+                       <div className="w-8 h-8 rounded-full bg-gray-200"></div>
+                     </div>
+                     <div className="w-20 h-8 bg-gray-200 rounded-lg"></div>
+                   </div>
+                   <div className="h-32 bg-gray-100 rounded-xl"></div>
+                </div>
+              ))}
+            </div>
+          ) : displayedTeachers.length === 0 ? (
+            <p className="col-span-full py-10 text-center text-gray-500">
+              {language === "ar" ? "لا يوجد معلمون متاحون" : "No teachers available"}
+            </p>
+          ) : displayedTeachers.map((teacher) => (
             <div
               key={teacher.id}
               className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden"
@@ -928,10 +960,10 @@ export default function TeacherAvailability() {
                 </button>
                 <div className="flex items-center gap-3">
                   <div>
-                    <p className="text-white font-bold text-sm text-right">
+                    <p className="text-white font-bold text-sm text-start">
                       {teacher.name}
                     </p>
-                    <p className="text-white text-xs opacity-80 text-right">
+                    <p className="text-white text-xs opacity-80 text-start">
                       {teacher.subject}
                     </p>
                   </div>
@@ -947,7 +979,7 @@ export default function TeacherAvailability() {
                 <table className="w-full text-xs">
                   <thead>
                     <tr className="bg-gray-50 border-b border-gray-200">
-                      <th className="px-3 py-2 text-right text-gray-600 font-medium w-20 sticky right-0 bg-gray-50 border-l border-gray-200">
+                      <th className="px-3 py-2 text-start text-gray-600 font-medium w-20 sticky right-0 bg-gray-50 border-l border-gray-200">
                         {language === "ar" ? "الوقت" : "Time"}
                       </th>
                       {weekDates.map((date, idx) => (
@@ -966,7 +998,7 @@ export default function TeacherAvailability() {
                   <tbody>
                     {HOURS.map((hour) => (
                       <tr key={hour.value} className="border-b border-gray-100">
-                        <td className="px-3 py-1.5 text-right text-gray-500 whitespace-nowrap sticky right-0 bg-white border-l border-gray-200">
+                        <td className="px-3 py-1.5 text-start text-gray-500 whitespace-nowrap sticky right-0 bg-white border-l border-gray-200">
                           {hour.label}
                         </td>
                         {weekDates.map((date, idx) => {

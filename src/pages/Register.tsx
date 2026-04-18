@@ -5,7 +5,7 @@ import {
   Check
 } from "lucide-react";
 import { useLanguage } from "../contexts/LanguageContext";
-import { ConfigProvider, DatePicker, Input, Select, message } from "antd";
+import { ConfigProvider, DatePicker, Input, Select } from "antd";
 import localeAr from 'antd/es/locale/ar_EG';
 import localeEn from 'antd/es/locale/en_US';
 import dayjs from 'dayjs';
@@ -17,6 +17,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { getRegisterSchema, RegisterInput } from "../lib/schemas/RegisterSchema";
 import { googleRegister, register as registerService } from "../services/AuthServices";
 import { GoogleLogin } from "@react-oauth/google";
+import ErrorService from "../utils/ErrorService";
 
 interface RegisterProps {
   onRegisterSuccess: () => void;
@@ -78,7 +79,7 @@ export default function Register({ onRegisterSuccess }: RegisterProps) {
     try {
       const result = await registerService(data);
       if (result.status === 201 || result.status === 200) {
-        message.success(t("registeredSuccess"));
+        ErrorService.success(t("registered Success"));
         // Store email for verification step
         sessionStorage.setItem("verify_email", data.email);
         navigate("/verify-account");
@@ -325,7 +326,7 @@ export default function Register({ onRegisterSuccess }: RegisterProps) {
                           {language === "ar" ? pkg.name_ar : pkg.name_en}
                         </div>
                         <div className="text-gray-600 text-sm">
-                          {pkg.duration} {t("sessionsCount")} • {pkg.currency.symbol} {pkg.price}
+                          {pkg.duration} {t("sessionsCount")} • {pkg.currency?.symbol} {pkg.price}
                         </div>
                       </div>
                       {selectedPackage === pkg.id && (
@@ -372,6 +373,7 @@ export default function Register({ onRegisterSuccess }: RegisterProps) {
                       if (token) {
                         localStorage.setItem("token", token);
                         onRegisterSuccess();
+                        ErrorService.success(t('registeredSuccess'));
                         navigate("/login");
                       }
                     } catch (error) {

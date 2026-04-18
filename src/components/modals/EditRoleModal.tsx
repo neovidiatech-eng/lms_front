@@ -99,7 +99,7 @@
 //                 {...register('name')}
 //                 className={`w-full px-4 py-3 rounded-xl border ${
 //                   errors.name ? 'border-red-500 focus:ring-red-500' : 'border-gray-200 focus:ring-primary'
-//                 } focus:outline-none focus:ring-2 bg-gray-50/50 transition-all text-right`}
+//                 } focus:outline-none focus:ring-2 bg-gray-50/50 transition-all text-start`}
 //                 placeholder={t('roleName')}
 //               />
 //               {errors.name && (
@@ -117,7 +117,7 @@
 //                 rows={3}
 //                 className={`w-full px-4 py-3 rounded-xl border ${
 //                   errors.description ? 'border-red-500 focus:ring-red-500' : 'border-gray-200 focus:ring-primary'
-//                 } focus:outline-none focus:ring-2 bg-gray-50/50 transition-all text-right resize-none`}
+//                 } focus:outline-none focus:ring-2 bg-gray-50/50 transition-all text-start resize-none`}
 //                 placeholder={t('description')}
 //               />
 //               {errors.description && (
