@@ -184,7 +184,7 @@ export default function Assignments() {
               <span>{language === 'ar' ? 'لا توجد واجبات تطابق بحثك' : 'No assignments match your search'}</span>
             </div>
           ) : (
-            <table className="w-full" dir="rtl">
+            <table className="w-full" dir={language === "ar" ? "rtl" : "ltr"}>
               <thead className="bg-gray-50 border-b border-gray-200">
                 <tr>
                   <th className="px-6 py-4 text-start text-sm font-semibold text-gray-900">{text.columnStudent[language]}</th>

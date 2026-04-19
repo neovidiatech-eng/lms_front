@@ -93,7 +93,7 @@ export default function AddTeacherModal({ isOpen, onClose, onSubmit }: AddTeache
 
         {/* Form */}
         <form onSubmit={handleSubmit(handleOnSubmit)} className="p-6">
-          <div className="space-y-6">
+          <div className="space-y-6" dir={language === "ar" ? "rtl" : "ltr"}>
             {/* Row 1: Name and Email */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {/* Email */}

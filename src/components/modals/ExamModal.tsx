@@ -138,8 +138,6 @@ export default function AddExamModal({ isOpen, onClose, onAdd, initialData }: Ad
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2 text-start">{text.dueDate[language]}</label>
-              <input type="date" {...register('dueDate')} className="w-full px-4 py-2 border border-gray-300 rounded-lg text-start" dir="rtl" />
               {errors.dueDate && <p className="text-red-500 text-xs mt-1 text-start">{errors.dueDate.message}</p>}
               <DatePickerField
                 label={text.dueDate[language]}
