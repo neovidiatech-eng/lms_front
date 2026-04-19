@@ -31,7 +31,7 @@ function FileCard({ att }: { att: AttachedFile }) {
       <div className="p-2.5 bg-blue-50 group-hover:bg-blue-100 rounded-xl transition-colors flex-shrink-0">
         <Icon className="w-5 h-5 text-blue-500" />
       </div>
-      <div className="flex-1 min-w-0 text-right">
+      <div className="flex-1 min-w-0 text-start">
         <p className="text-sm font-medium text-gray-800 truncate">{att.name}</p>
         <p className="text-xs text-gray-400 mt-0.5">{formatFileSize(att.size)}</p>
       </div>
@@ -102,7 +102,7 @@ export default function CourseViewer({ course, levels, onBack }: Props) {
         {/* Main info */}
         <div className="lg:col-span-2 space-y-4">
           <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
-            <h1 className="text-2xl font-bold text-gray-900 text-right mb-3">{course.title}</h1>
+            <h1 className="text-2xl font-bold text-gray-900 text-start mb-3">{course.title}</h1>
 
             <div className="flex items-center gap-3 flex-wrap mb-4">
               {level && (
@@ -120,18 +120,18 @@ export default function CourseViewer({ course, levels, onBack }: Props) {
 
             {course.description ? (
               <div>
-                <h2 className="text-sm font-semibold text-gray-700 mb-2 text-right">الوصف</h2>
-                <p className="text-gray-600 text-sm leading-relaxed text-right">{course.description}</p>
+                <h2 className="text-sm font-semibold text-gray-700 mb-2 text-start">الوصف</h2>
+                <p className="text-gray-600 text-sm leading-relaxed text-start">{course.description}</p>
               </div>
             ) : (
-              <p className="text-gray-400 text-sm text-right">لا يوجد وصف لهذا الكورس</p>
+              <p className="text-gray-400 text-sm text-start">لا يوجد وصف لهذا الكورس</p>
             )}
           </div>
 
           {/* Video link if not embeddable */}
           {course.videoUrl && !embedUrl && (
             <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
-              <h2 className="text-sm font-semibold text-gray-700 mb-3 text-right">رابط الفيديو</h2>
+              <h2 className="text-sm font-semibold text-gray-700 mb-3 text-start">رابط الفيديو</h2>
               <a
                 href={course.videoUrl}
                 target="_blank"
@@ -148,7 +148,7 @@ export default function CourseViewer({ course, levels, onBack }: Props) {
         {/* Attachments sidebar */}
         <div className="space-y-4">
           <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
-            <h2 className="text-sm font-semibold text-gray-700 mb-4 text-right flex items-center justify-end gap-2">
+            <h2 className="text-sm font-semibold text-gray-700 mb-4 text-start flex items-center justify-end gap-2">
               <span>الملفات المرفقة</span>
               {course.attachments.length > 0 && (
                 <span className="bg-blue-100 text-blue-600 text-xs font-bold px-2 py-0.5 rounded-full">

@@ -2,8 +2,8 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { updateSchedule, createSchedule, createRecurringSchedule, deleteSchedule, deleteRecurringScheduale } from "../services/SchedulesServices";
 import { UpdateSchedulePayload, CreateSchedulePayload, CreateRecurringSchedulePayload } from "../../../types/scheduales";
 import { getAllSchedules, searchSchedules, getSchedulesForTeacher } from "../services/SessionsServices";
-
-
+import ErrorService from "../../../utils/ErrorService";
+import { useTranslation } from "react-i18next";
 
 export const useGetSchedules = () => {
     return useQuery({
@@ -15,7 +15,7 @@ export const useGetSchedules = () => {
 export const useSearchSchedules = (searchTerm: string) => {
     return useQuery({
         queryKey: ["schedules", searchTerm],
-        queryFn: () => searchSchedules(searchTerm),
+        queryFn: () => searchTerm ? searchSchedules(searchTerm) : getAllSchedules(),
     });
 };
 
@@ -29,52 +29,48 @@ export const useGetSchedulesByTeacher = (teacherId: string) => {
 
 export const useCreateSchedule = () => {
     const queryClient = useQueryClient();
+    const { t } = useTranslation();
     return useMutation({
         mutationFn: (data: CreateSchedulePayload) => createSchedule(data),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ["schedules"] });
-        },
-        onError: (error) => {
-            console.error("Create schedule failed:", error);
+            ErrorService.success(t('sessionAddedSuccess'));
         }
     });
 };
 
 export const useCreateRecurringSchedule = () => {
     const queryClient = useQueryClient();
+    const { t } = useTranslation();
     return useMutation({
         mutationFn: (data: CreateRecurringSchedulePayload) => createRecurringSchedule(data),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ["schedules"] });
-        },
-        onError: (error) => {
-            console.error("Create recurring schedule failed:", error);
+            ErrorService.success(t('sessionsAddedSuccess'));
         }
     });
 };
 
 export const useDeleteSchedule = () => {
     const queryClient = useQueryClient();
+    const { t } = useTranslation();
     return useMutation({
         mutationFn: (id: string) => deleteSchedule(id),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ["schedules"] });
-        },
-        onError: (error) => {
-            console.error("Delete schedule failed:", error);
+            ErrorService.success(t('sessionDeletedSuccess'));
         }
     });
 };
 
 export const useDeleteGroupedSchedule = () => {
     const queryClient = useQueryClient();
+    const { t } = useTranslation();
     return useMutation({
         mutationFn: (id: string) => deleteRecurringScheduale(id),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ["schedules"] });
-        },
-        onError: (error) => {
-            console.error("Delete schedule failed:", error);
+            ErrorService.success(t('sessionDeletedSuccess'));
         }
     });
 };
@@ -82,6 +78,7 @@ export const useDeleteGroupedSchedule = () => {
 
 export const useUpdateSchedule = () => {
     const queryClient = useQueryClient();
+    const { t } = useTranslation();
 
     return useMutation({
         mutationFn: ({ id, data }: { id: string; data: UpdateSchedulePayload }) =>
@@ -89,9 +86,7 @@ export const useUpdateSchedule = () => {
 
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ["schedules"] });
-        },
-        onError: (error) => {
-            console.error("Update schedule failed:", error);
+            ErrorService.success(t('sessionUpdatedSuccess'));
         }
     });
 };

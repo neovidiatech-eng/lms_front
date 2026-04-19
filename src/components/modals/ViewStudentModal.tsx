@@ -42,7 +42,7 @@ export default function ViewStudentModal({ isOpen, onClose, studentData }: ViewS
                   {studentData.user.name.charAt(0).toUpperCase()}
                 </span>
               </div>
-              <div className="text-right flex-1">
+              <div className="text-start flex-1">
                 <h3 className="text-2xl font-bold text-gray-900 mb-1">{studentData.user.name}</h3>
                 <p className="text-gray-600">{studentData.user.email}</p>
               </div>
@@ -51,7 +51,7 @@ export default function ViewStudentModal({ isOpen, onClose, studentData }: ViewS
             {/* Student Information Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {/* Email */}
-              <div className="text-right">
+              <div className="text-start">
                 <label className="text-sm font-medium text-gray-500 block mb-1">
                   {language === 'ar' ? 'البريد الإلكتروني' : 'Email'}
                 </label>
@@ -59,7 +59,7 @@ export default function ViewStudentModal({ isOpen, onClose, studentData }: ViewS
               </div>
 
               {/* Phone */}
-              <div className="text-right">
+              <div className="text-start">
                 <label className="text-sm font-medium text-gray-500 block mb-1">
                   {language === 'ar' ? 'رقم الهاتف' : 'Phone Number'}
                 </label>
@@ -70,7 +70,7 @@ export default function ViewStudentModal({ isOpen, onClose, studentData }: ViewS
               </div>
 
               {/* Plan */}
-              <div className="text-right">
+              <div className="text-start">
                 <label className="text-sm font-medium text-gray-500 block mb-1">
                   {language === 'ar' ? 'الخطة' : 'Plan'}
                 </label>
@@ -80,7 +80,7 @@ export default function ViewStudentModal({ isOpen, onClose, studentData }: ViewS
               </div>
 
               {/* Country */}
-              <div className="text-right">
+              <div className="text-start">
                 <label className="text-sm font-medium text-gray-500 block mb-1">
                   {language === 'ar' ? 'الدولة' : 'Country'}
                 </label>
@@ -88,7 +88,7 @@ export default function ViewStudentModal({ isOpen, onClose, studentData }: ViewS
               </div>
 
               {/* Status */}
-              <div className="text-right">
+              <div className="text-start">
                 <label className="text-sm font-medium text-gray-500 block mb-1">
                   {language === 'ar' ? 'الحالة' : 'Status'}
                 </label>
@@ -109,7 +109,7 @@ export default function ViewStudentModal({ isOpen, onClose, studentData }: ViewS
               </div>
 
               {/* Hours Info */}
-              <div className="text-right">
+              <div className="text-start">
                 <label className="text-sm font-medium text-gray-500 block mb-1">
                   {t('hours')}
                 </label>
@@ -124,7 +124,7 @@ export default function ViewStudentModal({ isOpen, onClose, studentData }: ViewS
               </div>
 
               {/* Student ID */}
-              <div className="text-right">
+              <div className="text-start">
                 <label className="text-sm font-medium text-gray-500 block mb-1">
                   {language === 'ar' ? 'رقم الطالب' : 'Student ID'}
                 </label>

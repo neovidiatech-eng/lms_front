@@ -115,15 +115,15 @@ export default function AddExamModal({ isOpen, onClose, onAdd, initialData }: Ad
 
         <form onSubmit={handleSubmit(handleOnSubmit)} className="p-6 space-y-4" dir="rtl">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2 text-right">{text.examTitle[language]}</label>
-            <input type="text" {...register('title')} className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent text-right" dir="rtl" />
-            {errors.title && <p className="text-red-500 text-xs mt-1 text-right">{errors.title.message}</p>}
+            <label className="block text-sm font-medium text-gray-700 mb-2 text-start">{text.examTitle[language]}</label>
+            <input type="text" {...register('title')} className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent text-start" dir="rtl" />
+            {errors.title && <p className="text-red-500 text-xs mt-1 text-start">{errors.title.message}</p>}
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2 text-right">{text.subject[language]}</label>
-            <input type="text" {...register('subject')} className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent text-right" dir="rtl" />
-            {errors.subject && <p className="text-red-500 text-xs mt-1 text-right">{errors.subject.message}</p>}
+            <label className="block text-sm font-medium text-gray-700 mb-2 text-start">{text.subject[language]}</label>
+            <input type="text" {...register('subject')} className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent text-start" dir="rtl" />
+            {errors.subject && <p className="text-red-500 text-xs mt-1 text-start">{errors.subject.message}</p>}
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -134,13 +134,13 @@ export default function AddExamModal({ isOpen, onClose, onAdd, initialData }: Ad
                 onChange={(value) => setValue('studentName', value, { shouldValidate: true })}
                 options={mockStudents}
               />
-              {errors.studentName && <p className="text-red-500 text-xs mt-1 text-right">{errors.studentName.message}</p>}
+              {errors.studentName && <p className="text-red-500 text-xs mt-1 text-start">{errors.studentName.message}</p>}
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2 text-right">{text.dueDate[language]}</label>
-              <input type="date" {...register('dueDate')} className="w-full px-4 py-2 border border-gray-300 rounded-lg text-right" dir="rtl" />
-              {errors.dueDate && <p className="text-red-500 text-xs mt-1 text-right">{errors.dueDate.message}</p>}
+              <label className="block text-sm font-medium text-gray-700 mb-2 text-start">{text.dueDate[language]}</label>
+              <input type="date" {...register('dueDate')} className="w-full px-4 py-2 border border-gray-300 rounded-lg text-start" dir="rtl" />
+              {errors.dueDate && <p className="text-red-500 text-xs mt-1 text-start">{errors.dueDate.message}</p>}
               <DatePickerField
                 label={text.dueDate[language]}
                 value={watch('dueDate')}
@@ -152,15 +152,15 @@ export default function AddExamModal({ isOpen, onClose, onAdd, initialData }: Ad
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2 text-right">{text.duration[language]}</label>
-              <input type="number" min="1" {...register('duration')} className="w-full px-4 py-2 border border-gray-300 rounded-lg text-right" dir="rtl" />
-              {errors.duration && <p className="text-red-500 text-xs mt-1 text-right">{errors.duration.message}</p>}
+              <label className="block text-sm font-medium text-gray-700 mb-2 text-start">{text.duration[language]}</label>
+              <input type="number" min="1" {...register('duration')} className="w-full px-4 py-2 border border-gray-300 rounded-lg text-start" dir="rtl" />
+              {errors.duration && <p className="text-red-500 text-xs mt-1 text-start">{errors.duration.message}</p>}
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2 text-right">{text.grade[language]}</label>
-              <input type="number" min="0" {...register('grade', { valueAsNumber: true })} className="w-full px-4 py-2 border border-gray-300 rounded-lg text-right" dir="rtl" />
-              {errors.grade && <p className="text-red-500 text-xs mt-1 text-right">{errors.grade.message}</p>}
+              <label className="block text-sm font-medium text-gray-700 mb-2 text-start">{text.grade[language]}</label>
+              <input type="number" min="0" {...register('grade', { valueAsNumber: true })} className="w-full px-4 py-2 border border-gray-300 rounded-lg text-start" dir="rtl" />
+              {errors.grade && <p className="text-red-500 text-xs mt-1 text-start">{errors.grade.message}</p>}
             </div>
           </div>
 
@@ -174,7 +174,7 @@ export default function AddExamModal({ isOpen, onClose, onAdd, initialData }: Ad
                 { value: 'completed', label: text.completed[language] }
               ]}
             />
-            {errors.status && <p className="text-red-500 text-xs mt-1 text-right">{errors.status.message}</p>}
+            {errors.status && <p className="text-red-500 text-xs mt-1 text-start">{errors.status.message}</p>}
           </div>
 
           <div className="flex gap-3 pt-4">

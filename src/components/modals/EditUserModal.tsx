@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { X } from 'lucide-react';
+import { X, Eye, EyeOff, Lock } from 'lucide-react';
 import { useLanguage } from '../../contexts/LanguageContext';
 import CustomSelect from '../ui/CustomSelect';
 import { UserFormData, getUserSchema } from '../../lib/schemas/UserSchema';
@@ -40,7 +40,7 @@ const countryCodes = [
 ];
 
 export default function EditUserModal({ isOpen, onClose, onSubmit, userData }: EditUserModalProps) {
-  const { t } = useLanguage();
+  const { language, t } = useLanguage();
 
   // const { data: permsData} = usePermissions();
   // const permissionsList = permsData?.data || [];
@@ -90,7 +90,7 @@ export default function EditUserModal({ isOpen, onClose, onSubmit, userData }: E
     value: c.code,
     searchText: `${c.country} ${c.code}`,
     label: (
-      <div className="flex justify-between items-center flex-row-reverse w-full text-right">
+      <div className={`flex justify-between items-center ${language === 'ar' ? 'flex-row-reverse' : ''} w-full text-start`}>
         <span>{c.flag} {c.country}</span>
         <span className="text-gray-400 font-mono text-xs">{c.code}</span>
       </div>
@@ -101,7 +101,7 @@ export default function EditUserModal({ isOpen, onClose, onSubmit, userData }: E
     value: role.id,
     searchText: role.name,
     label: (
-      <div className="text-right w-full capitalize">
+      <div className="text-start w-full capitalize">
         {role.name}
       </div>
     ),
@@ -129,28 +129,29 @@ export default function EditUserModal({ isOpen, onClose, onSubmit, userData }: E
             {/* Name and Email */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2 text-right">
+                <label className="block text-sm font-medium text-gray-700 mb-2 text-start">
                   {t('name')}
                 </label>
                 <input
                   type="text"
                   {...register('name')}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 text-right"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 text-start"
 
                 />
-                {errors.name && <p className="text-red-500 text-xs mt-1 text-right">{errors.name.message}</p>}
+                {errors.name && <p className="text-red-500 text-xs mt-1 text-start">{errors.name.message}</p>}
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2 text-right">
+                <label className="block text-sm font-medium text-gray-700 mb-2 text-start">
                   {t('email')}
                 </label>
                 <input
                   type="email"
                   {...register('email')}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 text-right"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 text-start"
+                  dir="ltr"
 
                 />
-                {errors.email && <p className="text-red-500 text-xs mt-1 text-right">{errors.email.message}</p>}
+                {errors.email && <p className="text-red-500 text-xs mt-1 text-start">{errors.email.message}</p>}
               </div>
             </div>
 
@@ -170,17 +171,18 @@ export default function EditUserModal({ isOpen, onClose, onSubmit, userData }: E
                 )}
               />
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2 text-right">
+                <label className="block text-sm font-medium text-gray-700 mb-2 text-start">
                   {t('phone')}
                 </label>
                 <input
                   type="tel"
                   {...register('phone')}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 text-right"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 text-start"
+                  dir="ltr"
                   placeholder="1234567890"
 
                 />
-                {errors.phone && <p className="text-red-500 text-xs mt-1 text-right">{errors.phone.message}</p>}
+                {errors.phone && <p className="text-red-500 text-xs mt-1 text-start">{errors.phone.message}</p>}
 
               </div>
             </div>
@@ -201,22 +203,24 @@ export default function EditUserModal({ isOpen, onClose, onSubmit, userData }: E
                 )}
               />
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2 text-right">
+                <label className="block text-sm font-medium text-gray-700 mb-2 text-start">
                   {t('newPasswordOptional')}
                 </label>
                 <div className="relative">
+                  <Lock className="absolute start-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5 pointer-events-none" />
                   <input
                     type={showPassword ? 'text' : 'password'}
                     {...register('password')}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 text-right"
+                    className="w-full px-12 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 text-start transition-all"
+                    dir="ltr"
                     placeholder={t('leaveEmptyPassword')}
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                    className="absolute end-4 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
                   >
-                    {showPassword ? '👁️' : '👁️‍🗨️'}
+                    {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                   </button>
                 </div>
               </div>
@@ -225,7 +229,7 @@ export default function EditUserModal({ isOpen, onClose, onSubmit, userData }: E
             {/* Permissions */}
             {/* <div>
               <div className="flex justify-between items-center mb-4">
-                <label className="block text-sm font-medium text-gray-700 text-right w-full">
+                <label className="block text-sm font-medium text-gray-700 text-start w-full">
                   {t('permissions')}
                 </label>
               </div>
@@ -235,7 +239,7 @@ export default function EditUserModal({ isOpen, onClose, onSubmit, userData }: E
                 ) : (
                   Object.entries(dynamicPermissionGroups).map(([key, group]: [string, any]) => (
                     <div key={key} className="space-y-2">
-                      <h3 className="text-sm font-semibold text-gray-900 text-right">
+                      <h3 className="text-sm font-semibold text-gray-900 text-start">
                         {group.title}
                       </h3>
                       {group.permissions.map((permission: any) => (

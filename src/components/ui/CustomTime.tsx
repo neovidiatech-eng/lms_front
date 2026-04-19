@@ -27,7 +27,7 @@ const CustomTimePicker = ({ label, error, className, value, onChange, ...props }
         >
             <div className="flex flex-col gap-1.5 w-full">
                 {label && (
-                    <label className="text-sm text-gray-700 text-right">
+                    <label className="text-sm text-gray-700 text-start">
                         {label}
                     </label>
                 )}
@@ -46,7 +46,7 @@ const CustomTimePicker = ({ label, error, className, value, onChange, ...props }
                 />
 
                 {error && (
-                    <span className="text-xs text-red-500 mt-1 text-right">{error}</span>
+                    <span className="text-xs text-red-500 mt-1 text-start">{error}</span>
                 )}
             </div>
         </ConfigProvider>

@@ -6,14 +6,14 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { VerifyAccountInput, getVerifyAccountSchema } from "../lib/schemas/AuthSchemas";
 import { verifyAccount, resendCode } from "../services/AuthServices";
 import { useNavigate } from "react-router-dom";
-import { message } from "antd";
 import OtpInput from "../components/ui/OtpInput";
+import ErrorService from "../utils/ErrorService";
 
-interface VerifyAccountProps {
-  onVerifySuccess: () => void;
-}
+// interface VerifyAccountProps {
+//   onVerifySuccess: () => void;
+// }
 
-export default function VerifyAccount({ onVerifySuccess }: VerifyAccountProps) {
+export default function VerifyAccount() {
   const navigate = useNavigate();
   const { t, language } = useLanguage();
   const [isResending, setIsResending] = useState(false);
@@ -37,7 +37,7 @@ export default function VerifyAccount({ onVerifySuccess }: VerifyAccountProps) {
         email,
         otp: data.code
       });
-      message.success(t("verifySuccess") || "Account verified successfully");
+      ErrorService.success(t("verify Success") || "Account verified successfully");
       sessionStorage.removeItem("verify_email");
       navigate("/login");
     } catch (error) {
@@ -50,7 +50,7 @@ export default function VerifyAccount({ onVerifySuccess }: VerifyAccountProps) {
     setIsResending(true);
     try {
       await resendCode({ email });
-      message.success(t("codeResentSuccess") || "New verification code sent");
+      ErrorService.success(t("codeSentSuccess") || "New verification code sent");
     } catch (error) {
       console.error("Resend failed:", error);
     } finally {

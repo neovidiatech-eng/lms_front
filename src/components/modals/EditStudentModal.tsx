@@ -91,41 +91,42 @@ export default function EditStudentModal({
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 backdrop-blur-sm">
       <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh]  overflow-y-auto no-scrollbar">
         <div className="sticky top-0 bg-primary px-6 py-4 flex items-center justify-between rounded-t-2xl z-10">
-          <button onClick={onClose} className="p-2 hover:bg-white/20 rounded-lg transition-colors">
-            <X className="w-5 h-5 text-white/80" />
-          </button>
+
           <h2 className="text-xl font-bold text-white flex items-center gap-2">
             <GraduationCap className="w-6 h-6" />
             <span>{t('editStudent')}</span>
           </h2>
+          <button onClick={onClose} className="p-2 hover:bg-white/20 rounded-lg transition-colors">
+            <X className="w-5 h-5 text-white/80" />
+          </button>
         </div>
 
-        <form onSubmit={handleSubmit(handleEditSubmit)} className="p-6 space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-right">
+        <form onSubmit={handleSubmit(handleEditSubmit)} className="p-6 space-y-6 text-start">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {/* Name */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">{t('name')} *</label>
-              <input {...register('name')} className="w-full px-4 py-3 border border-gray-300 rounded-xl outline-none focus:ring-2 focus:ring-blue-500 text-right" dir="rtl" />
+              <input {...register('name')} className="w-full px-4 py-3 border border-gray-300 rounded-xl outline-none focus:ring-2 focus:ring-blue-500 text-start" />
               {errors.name && <p className="text-red-500 text-xs mt-1">{errors.name.message}</p>}
             </div>
 
             {/* Email */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">{t('email')} *</label>
-              <input {...register('email')} className="w-full px-4 py-3 border border-gray-300 rounded-xl outline-none focus:ring-2 focus:ring-blue-500 text-right" dir="ltr" />
+              <input {...register('email')} className="w-full px-4 py-3 border border-gray-300 rounded-xl outline-none focus:ring-2 focus:ring-blue-500 text-start" dir="ltr" />
               {errors.email && <p className="text-red-500 text-xs mt-1">{errors.email.message}</p>}
             </div>
 
             {/* Phone */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">{t('phone')} *</label>
-              <input {...register('phone')} className="w-full px-4 py-3 border border-gray-300 rounded-xl outline-none focus:ring-2 focus:ring-blue-500 text-right" dir="ltr" />
+              <input {...register('phone')} className="w-full px-4 py-3 border border-gray-300 rounded-xl outline-none focus:ring-2 focus:ring-blue-500 text-start" dir="ltr" />
               {errors.phone && <p className="text-red-500 text-xs mt-1">{errors.phone.message}</p>}
             </div>
 
-            {/* Country Code - لاحظ تمرير القيمة يدوياً */}
+            {/* Country Code */}
             <Controller
-              name="countryCode"
+              name="phone_code"
               control={control}
               render={({ field: { value, onChange } }) => (
                 <CustomSelect

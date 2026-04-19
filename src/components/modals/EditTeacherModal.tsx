@@ -1,5 +1,5 @@
-import { X, Users } from 'lucide-react';
-import { useEffect, useMemo } from 'react';
+import { X, Users, Eye, EyeOff, Lock } from 'lucide-react';
+import { useEffect, useMemo, useState } from 'react';
 import { useLanguage } from '../../contexts/LanguageContext';
 import CustomSelect from '../ui/CustomSelect';
 import { TeacherFormData, getTeacherSchema } from '../../lib/schemas/TeacherSchema';
@@ -19,6 +19,7 @@ interface EditTeacherModalProps {
 
 export default function EditTeacherModal({ isOpen, onClose, onSubmit, teacher }: EditTeacherModalProps) {
   const { language, t } = useLanguage();
+  const [showPassword, setShowPassword] = useState(false);
   const { data: currenciesData } = useCurrency();
   const { data: subjectsData, isLoading: isLoadingSubjects } = useSubjects();
 
@@ -91,13 +92,14 @@ export default function EditTeacherModal({ isOpen, onClose, onSubmit, teacher }:
       <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh]  overflow-y-auto no-scrollbar">
         {/* Header */}
         <div className="sticky top-0 bg-primary px-6 py-4 flex items-center justify-between rounded-t-2xl">
-          <button onClick={onClose} className="p-2 hover:bg-white/20 rounded-lg transition-colors">
-            <X className="w-5 h-5 text-white/80" />
-          </button>
+
           <h2 className="text-xl font-bold text-white flex items-center gap-2">
             <Users className="w-6 h-6" />
             <span>{t('editTeacher')}</span>
           </h2>
+          <button onClick={onClose} className="p-2 hover:bg-white/20 rounded-lg transition-colors">
+            <X className="w-5 h-5 text-white/80" />
+          </button>
         </div>
 
         {/* Form */}
@@ -106,7 +108,7 @@ export default function EditTeacherModal({ isOpen, onClose, onSubmit, teacher }:
             {/* Row 1: Name and Email */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {/* Email */}
-              <div className="text-right">
+              <div className="text-start">
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   {t('email')} *
                 </label>
@@ -114,14 +116,14 @@ export default function EditTeacherModal({ isOpen, onClose, onSubmit, teacher }:
                   type="email"
                   placeholder="example@email.com"
                   {...register('email')}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 text-right"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 text-start"
                   dir="ltr"
                 />
                 {errors.email && <p className="text-red-500 text-xs mt-1">{errors.email.message}</p>}
               </div>
 
               {/* Name */}
-              <div className="text-right">
+              <div className="text-start">
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   {t('fullName')} *
                 </label>
@@ -129,8 +131,7 @@ export default function EditTeacherModal({ isOpen, onClose, onSubmit, teacher }:
                   type="text"
                   placeholder={language === 'ar' ? 'الاسم' : 'Name'}
                   {...register('name')}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 text-right"
-                  dir="rtl"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 text-start"
                 />
                 {errors.name && <p className="text-red-500 text-xs mt-1">{errors.name.message}</p>}
               </div>
@@ -139,25 +140,31 @@ export default function EditTeacherModal({ isOpen, onClose, onSubmit, teacher }:
             {/* Row 2: Password and Phone */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {/* Password */}
-              <div className="text-right">
+              <div className="text-start relative">
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   {t('password')}
                 </label>
-                <input
-                  type="password"
-                  placeholder="••••••••"
-                  {...register('password')}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 text-left bg-gray-50"
-                  dir="ltr"
-                />
+                <div className="relative">
+                  <Lock className="absolute start-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5 pointer-events-none" />
+                  <input
+                    type={showPassword ? 'text' : 'password'}
+                    placeholder="••••••••"
+                    {...register('password')}
+                    className="w-full px-12 py-3 border border-gray-300 rounded-xl outline-none focus:ring-2 focus:ring-blue-500 text-start bg-gray-50 transition-all"
+                    dir="ltr"
+                  />
+                  <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute end-4 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors">
+                    {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                  </button>
+                </div>
                 {errors.password && <p className="text-red-500 text-xs mt-1">{errors.password.message}</p>}
-                <p className="text-xs text-gray-500 mt-1 text-right">
+                <p className="text-xs text-gray-500 mt-1 text-start">
                   {t('leaveBlankPassword')}
                 </p>
               </div>
 
               {/* Phone */}
-              <div className="text-right">
+              <div className="text-start">
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   {t('phoneNumber')} *
                 </label>
@@ -165,7 +172,7 @@ export default function EditTeacherModal({ isOpen, onClose, onSubmit, teacher }:
                   type="tel"
                   placeholder="01012345678"
                   {...register('phone')}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 text-right"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 text-start"
                   dir="ltr"
                 />
                 {errors.phone && <p className="text-red-500 text-xs mt-1">{errors.phone.message}</p>}
@@ -189,7 +196,7 @@ export default function EditTeacherModal({ isOpen, onClose, onSubmit, teacher }:
               />
 
               {/* Hourly Rate */}
-              <div className="text-right">
+              <div className="text-start">
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   {t('hourlyRate')}
                 </label>
@@ -197,7 +204,7 @@ export default function EditTeacherModal({ isOpen, onClose, onSubmit, teacher }:
                   type="number"
                   placeholder="150"
                   {...register('hourlyRate')}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 text-right"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 text-start"
                   dir="ltr"
                 />
                 {errors.hourlyRate && <p className="text-red-500 text-xs mt-1">{errors.hourlyRate.message}</p>}
@@ -235,7 +242,7 @@ export default function EditTeacherModal({ isOpen, onClose, onSubmit, teacher }:
             </div>
 
             {/* Subjects */}
-            <div className="text-right">
+            <div className="text-start">
               <label className="block text-sm font-medium text-gray-700 mb-3">
                 {t('subject')}
               </label>
@@ -255,7 +262,7 @@ export default function EditTeacherModal({ isOpen, onClose, onSubmit, teacher }:
                           checked={subjectsValue.includes(subject.id)}
                           onChange={(checked) => handleSubjectToggle(subject.id, checked)}
                         />
-                        <span className="text-sm text-gray-700 flex-1 text-right">
+                        <span className="text-sm text-gray-700 flex-1 text-start">
                           {language === 'ar' ? subject.name_ar : (subject.name_en || subject.name_ar)}
                         </span>
                       </label>

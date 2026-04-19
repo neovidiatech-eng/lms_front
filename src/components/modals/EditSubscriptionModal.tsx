@@ -125,39 +125,39 @@ export default function EditSubscriptionModal({
 
         <form onSubmit={handleSubmit(onSubmitForm)} className="p-6 space-y-6">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2 text-right">
+            <label className="block text-sm font-medium text-gray-700 mb-2 text-start">
               {text.studentName[language]}
             </label>
             <input
               type="text"
               value={subscription.studentName}
               disabled
-              className="w-full px-4 py-2.5 border border-gray-300 rounded-lg bg-gray-50 text-gray-600 text-right cursor-not-allowed"
+              className="w-full px-4 py-2.5 border border-gray-300 rounded-lg bg-gray-50 text-gray-600 text-start cursor-not-allowed"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2 text-right">
+            <label className="block text-sm font-medium text-gray-700 mb-2 text-start">
               {text.planName[language]}
             </label>
             <input
               type="text"
               {...register('planName')}
-              className={`w-full px-4 py-2.5 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-right ${errors.planName ? 'border-red-500' : 'border-gray-300'}`}
+              className={`w-full px-4 py-2.5 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-start ${errors.planName ? 'border-red-500' : 'border-gray-300'}`}
             />
-            {errors.planName && <p className="mt-1 text-sm text-red-500 text-right">{errors.planName.message}</p>}
+            {errors.planName && <p className="mt-1 text-sm text-red-500 text-start">{errors.planName.message}</p>}
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2 text-right">
+            <label className="block text-sm font-medium text-gray-700 mb-2 text-start">
               {text.price[language]}
             </label>
             <input
               type="text"
               {...register('planPrice')}
-              className={`w-full px-4 py-2.5 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-right ${errors.planPrice ? 'border-red-500' : 'border-gray-300'}`}
+              className={`w-full px-4 py-2.5 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-start ${errors.planPrice ? 'border-red-500' : 'border-gray-300'}`}
             />
-            {errors.planPrice && <p className="mt-1 text-sm text-red-500 text-right">{errors.planPrice.message}</p>}
+            {errors.planPrice && <p className="mt-1 text-sm text-red-500 text-start">{errors.planPrice.message}</p>}
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -214,29 +214,29 @@ export default function EditSubscriptionModal({
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2 text-right">
+              <label className="block text-sm font-medium text-gray-700 mb-2 text-start">
                 {text.totalSessions[language]}
               </label>
               <input
                 type="number"
                 {...register('totalSessions', { valueAsNumber: true })}
-                className={`w-full px-4 py-2.5 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-right ${errors.totalSessions ? 'border-red-500' : 'border-gray-300'}`}
+                className={`w-full px-4 py-2.5 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-start ${errors.totalSessions ? 'border-red-500' : 'border-gray-300'}`}
                 min="0"
               />
-              {errors.totalSessions && <p className="mt-1 text-sm text-red-500 text-right">{errors.totalSessions.message}</p>}
+              {errors.totalSessions && <p className="mt-1 text-sm text-red-500 text-start">{errors.totalSessions.message}</p>}
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2 text-right">
+              <label className="block text-sm font-medium text-gray-700 mb-2 text-start">
                 {text.remainingSessions[language]}
               </label>
               <input
                 type="number"
                 {...register('sessionsRemaining', { valueAsNumber: true })}
-                className={`w-full px-4 py-2.5 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-right ${errors.sessionsRemaining ? 'border-red-500' : 'border-gray-300'}`}
+                className={`w-full px-4 py-2.5 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-start ${errors.sessionsRemaining ? 'border-red-500' : 'border-gray-300'}`}
                 min="0"
               />
-              {errors.sessionsRemaining && <p className="mt-1 text-sm text-red-500 text-right">{errors.sessionsRemaining.message}</p>}
+              {errors.sessionsRemaining && <p className="mt-1 text-sm text-red-500 text-start">{errors.sessionsRemaining.message}</p>}
             </div>
           </div>
 
@@ -252,14 +252,14 @@ export default function EditSubscriptionModal({
 
             {showNotificationBox && (
               <div className="mt-4 bg-gradient-to-br from-orange-50 to-amber-50 border border-orange-200 rounded-xl p-4 space-y-3 animate-fadeIn">
-                <h3 className="text-base font-semibold text-gray-900 text-right">
+                <h3 className="text-base font-semibold text-gray-900 text-start">
                   {text.notificationTitle[language]}
                 </h3>
                 <textarea
                   value={notificationMessage}
                   onChange={(e) => setNotificationMessage(e.target.value)}
                   placeholder={text.notificationPlaceholder[language]}
-                  className="w-full px-4 py-3 border border-orange-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent text-right resize-none"
+                  className="w-full px-4 py-3 border border-orange-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent text-start resize-none"
                   rows={4}
                 />
                 <button

@@ -99,13 +99,6 @@ export default function Agenda() {
   const todayKey = formatDateLocal(new Date());
   const todaySessions = sessionsByDate[todayKey] || [];
 
-  // 📌 Loading
-  if (isLoading) {
-    return (
-      <div className="p-10 text-center text-gray-600">Loading agenda...</div>
-    );
-  }
-
   // 📌 Error
   if (isError) {
     return <div className="p-10 text-center text-red-500">{error.message}</div>;
@@ -135,12 +128,21 @@ export default function Agenda() {
         ].map((s, i) => (
           <div
             key={i}
-            className="bg-white rounded-xl p-6 shadow-sm border-r-4 border-gray-200"
+            className="bg-white rounded-xl p-6 shadow-sm border-r-4 border-gray-200 relative overflow-hidden"
           >
-            <p className="text-sm text-gray-600 text-right mb-1">{s.label}</p>
-            <p className="text-3xl font-bold text-gray-900 text-right">
-              {s.val}
-            </p>
+            {isLoading ? (
+              <div className="animate-pulse">
+                <div className="h-4 bg-gray-200 rounded w-1/2 ml-auto mb-2"></div>
+                <div className="h-8 bg-gray-200 rounded w-1/4 ml-auto"></div>
+              </div>
+            ) : (
+              <>
+                <p className="text-sm text-gray-600 text-right mb-1">{s.label}</p>
+                <p className="text-3xl font-bold text-gray-900 text-right">
+                  {s.val}
+                </p>
+              </>
+            )}
           </div>
         ))}
       </div>
@@ -212,7 +214,11 @@ export default function Agenda() {
                   <div className="text-sm font-medium">{d.getDate()}</div>
 
                   {/* CLICKABLE BADGE */}
-                  {sessionsByDate[formatKey(d)]?.length > 0 && (
+                  {isLoading ? (
+                    <div className="mt-2 flex justify-center w-full animate-pulse">
+                      <div className="bg-gray-200 rounded-full w-6 h-6"></div>
+                    </div>
+                  ) : sessionsByDate[formatKey(d)]?.length > 0 && (
                     <button
                       onClick={() => {
                         const key = formatKey(d);
@@ -239,7 +245,13 @@ export default function Agenda() {
             <Clock className="w-5 h-5 text-primary" />
           </h3>
 
-          {todaySessions.length === 0 ? (
+          {isLoading ? (
+            <div className="space-y-4 animate-pulse">
+              {[1, 2, 3].map((i) => (
+                <div key={i} className="bg-gray-100 border rounded-xl p-4 h-28"></div>
+              ))}
+            </div>
+          ) : todaySessions.length === 0 ? (
             <p className="text-center text-gray-500 py-10">
               {t("noSessionsToday")}
             </p>

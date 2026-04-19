@@ -93,7 +93,7 @@ export default function EditTransactionModal({ isOpen, onClose, transaction, onS
 
         <form onSubmit={handleSubmit} className="p-6 space-y-5">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2 text-right">{text.type[language]}</label>
+            <label className="block text-sm font-medium text-gray-700 mb-2 text-start">{text.type[language]}</label>
             <CustomSelect
               value={formData.type}
               onChange={(value) => setFormData({ ...formData, type: value as 'income' | 'teacher_expense' })}
@@ -106,23 +106,23 @@ export default function EditTransactionModal({ isOpen, onClose, transaction, onS
 
           {formData.type === 'income' && (
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2 text-right">{text.student[language]}</label>
+              <label className="block text-sm font-medium text-gray-700 mb-2 text-start">{text.student[language]}</label>
               <input
                 type="text"
                 value={formData.studentName}
                 onChange={(e) => setFormData({ ...formData, studentName: e.target.value })}
-                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 text-right"
+                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 text-start"
               />
             </div>
           )}
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2 text-right">{text.teacher[language]} *</label>
+            <label className="block text-sm font-medium text-gray-700 mb-2 text-start">{text.teacher[language]} *</label>
             <input
               type="text"
               value={formData.teacherName}
               onChange={(e) => setFormData({ ...formData, teacherName: e.target.value })}
-              className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 text-right"
+              className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 text-start"
               required
             />
           </div>
@@ -131,17 +131,17 @@ export default function EditTransactionModal({ isOpen, onClose, transaction, onS
             <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 space-y-3">
               <div className="grid grid-cols-3 gap-3">
                 <div>
-                  <label className="block text-xs font-medium text-gray-700 mb-1 text-right">{text.sessionCount[language]}</label>
+                  <label className="block text-xs font-medium text-gray-700 mb-1 text-start">{text.sessionCount[language]}</label>
                   <input
                     type="number"
                     value={formData.sessionCount}
                     onChange={(e) => setFormData({ ...formData, sessionCount: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg text-right text-sm"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg text-start text-sm"
                     min="1"
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-medium text-gray-700 mb-1 text-right">{text.sessionDuration[language]}</label>
+                  <label className="block text-xs font-medium text-gray-700 mb-1 text-start">{text.sessionDuration[language]}</label>
                   <CustomSelect
                     value={formData.sessionDuration}
                     onChange={(value) => setFormData({ ...formData, sessionDuration: parseInt(value as string) })}
@@ -155,12 +155,12 @@ export default function EditTransactionModal({ isOpen, onClose, transaction, onS
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-medium text-gray-700 mb-1 text-right">{text.ratePerHour[language]}</label>
+                  <label className="block text-xs font-medium text-gray-700 mb-1 text-start">{text.ratePerHour[language]}</label>
                   <input
                     type="number"
                     value={formData.ratePerHour}
                     onChange={(e) => setFormData({ ...formData, ratePerHour: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg text-right text-sm"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg text-start text-sm"
                     min="0"
                     step="0.01"
                   />
@@ -178,18 +178,18 @@ export default function EditTransactionModal({ isOpen, onClose, transaction, onS
 
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2 text-right">{text.amount[language]} *</label>
+              <label className="block text-sm font-medium text-gray-700 mb-2 text-start">{text.amount[language]} *</label>
               <input
                 type="number"
                 step="0.01"
                 value={formData.amount}
                 onChange={(e) => setFormData({ ...formData, amount: e.target.value })}
-                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 text-right"
+                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 text-start"
                 required
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2 text-right">{text.currency[language]}</label>
+              <label className="block text-sm font-medium text-gray-700 mb-2 text-start">{text.currency[language]}</label>
               <CustomSelect
                 value={formData.currency}
                 onChange={(value) => setFormData({ ...formData, currency: value as string })}
@@ -210,18 +210,18 @@ export default function EditTransactionModal({ isOpen, onClose, transaction, onS
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2 text-right">{text.paymentMethod[language]}</label>
+              <label className="block text-sm font-medium text-gray-700 mb-2 text-start">{text.paymentMethod[language]}</label>
               <input
                 type="text"
                 value={formData.paymentMethod}
                 onChange={(e) => setFormData({ ...formData, paymentMethod: e.target.value })}
-                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 text-right"
+                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 text-start"
               />
             </div>
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2 text-right">{text.status[language]}</label>
+            <label className="block text-sm font-medium text-gray-700 mb-2 text-start">{text.status[language]}</label>
             <CustomSelect
               value={formData.status}
               onChange={(value) => setFormData({ ...formData, status: value as 'completed' | 'pending' })}
@@ -233,11 +233,11 @@ export default function EditTransactionModal({ isOpen, onClose, transaction, onS
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2 text-right">{text.notes[language]}</label>
+            <label className="block text-sm font-medium text-gray-700 mb-2 text-start">{text.notes[language]}</label>
             <textarea
               value={formData.notes}
               onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
-              className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 text-right resize-none"
+              className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 text-start resize-none"
               rows={3}
             />
           </div>

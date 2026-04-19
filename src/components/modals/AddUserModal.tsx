@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { X } from 'lucide-react';
+import { X, Eye, EyeOff, Lock } from 'lucide-react';
 import { useLanguage } from '../../contexts/LanguageContext';
 import CustomSelect from '../ui/CustomSelect';
 import { Controller, useForm } from 'react-hook-form';
@@ -48,7 +48,7 @@ const countryCodes = [
 
 
 export default function AddUserModal({ isOpen, onClose, onSubmit }: AddUserModalProps) {
-  const { t } = useLanguage();
+  const { language, t } = useLanguage();
   const [showPassword, setShowPassword] = useState(false);
   const { data: rolesData } = useRoles();
   const dynamicRoles = rolesData?.data || [];
@@ -100,7 +100,7 @@ export default function AddUserModal({ isOpen, onClose, onSubmit }: AddUserModal
     value: c.code,
     searchText: `${c.country} ${c.code}`,
     label: (
-      <div className="flex justify-between items-center flex-row-reverse w-full text-right">
+      <div className={`flex justify-between items-center ${language === 'ar' ? 'flex-row-reverse' : ''} w-full text-start`}>
         <span>{c.flag} {c.country}</span>
         <span className="text-gray-400 font-mono text-xs">{c.code}</span>
       </div>
@@ -111,7 +111,7 @@ export default function AddUserModal({ isOpen, onClose, onSubmit }: AddUserModal
     value: role.id,
     searchText: role.name,
     label: (
-      <div className="text-right w-full capitalize">
+      <div className="text-start w-full capitalize">
         {role.name}
       </div>
     ),
@@ -124,6 +124,7 @@ export default function AddUserModal({ isOpen, onClose, onSubmit }: AddUserModal
         <div className="flex items-center justify-between px-6 py-4 bg-primary rounded-t-2xl">
           <h2 className="text-2xl font-bold text-white">
             {t('addNewUser')}
+            
           </h2>
           <button
             onClick={onClose}
@@ -139,27 +140,28 @@ export default function AddUserModal({ isOpen, onClose, onSubmit }: AddUserModal
             {/* Name and Email */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2 text-right">
+                <label className="block text-sm font-medium text-gray-700 mb-2 text-start">
                   {t('name')}
                 </label>
                 <input
                   type="text"
                   {...register('name')}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 text-right"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 text-start"
 
                 />
-                {errors.name && <p className="text-red-500 text-xs mt-1 text-right">{errors.name.message}</p>}
+                {errors.name && <p className="text-red-500 text-xs mt-1 text-start">{errors.name.message}</p>}
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2 text-right">
+                <label className="block text-sm font-medium text-gray-700 mb-2 text-start">
                   {t('email')}
                 </label>
                 <input
                   type="email"
                   {...register('email')}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 text-right"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 text-start"
+                  dir="ltr"
                 />
-                {errors.email && <p className="text-red-500 text-xs mt-1 text-right">{errors.email.message}</p>}
+                {errors.email && <p className="text-red-500 text-xs mt-1 text-start">{errors.email.message}</p>}
               </div>
             </div>
 
@@ -181,17 +183,18 @@ export default function AddUserModal({ isOpen, onClose, onSubmit }: AddUserModal
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2 text-right">
+                <label className="block text-sm font-medium text-gray-700 mb-2 text-start">
                   {t('phone')}
                 </label>
                 <input
                   type="tel"
                   {...register('phone')}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 text-right"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 text-start"
+                  dir="ltr"
                   placeholder="1234567890"
 
                 />
-                {errors.phone && <p className="text-red-500 text-xs mt-1 text-right">{errors.phone.message}</p>}
+                {errors.phone && <p className="text-red-500 text-xs mt-1 text-start">{errors.phone.message}</p>}
 
               </div>
             </div>
@@ -216,31 +219,32 @@ export default function AddUserModal({ isOpen, onClose, onSubmit }: AddUserModal
 
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2 text-right">
+                <label className="block text-sm font-medium text-gray-700 mb-2 text-start">
                   {t('password')}
                 </label>
                 <div className="relative">
+                  <Lock className="absolute start-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5 pointer-events-none" />
                   <input
                     type={showPassword ? 'text' : 'password'}
                     {...register('password')}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 text-right"
-
+                    className="w-full px-12 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 text-start transition-all"
+                    dir="ltr"
                   />
-                  {errors.password && <p className="text-red-500 text-xs mt-1 text-right">{errors.password.message}</p>}
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                    className="absolute end-4 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
                   >
-                    {showPassword ? '👁️' : '👁️‍🗨️'}
+                    {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                   </button>
                 </div>
+                {errors.password && <p className="text-red-500 text-xs mt-1 text-start">{errors.password.message}</p>}
               </div>
             </div>
 
             {/* <div>
               <div className="flex justify-between items-center mb-4">
-                <label className="block text-sm font-medium text-gray-700 text-right w-full">
+                <label className="block text-sm font-medium text-gray-700 text-start w-full">
                   {t('userManagement')}
                 </label>
               </div>
@@ -250,7 +254,7 @@ export default function AddUserModal({ isOpen, onClose, onSubmit }: AddUserModal
                 ) : (
                   Object.entries(dynamicPermissionGroups).map(([key, group]: [string, any]) => (
                     <div key={key} className="space-y-2">
-                      <h3 className="text-sm font-semibold text-gray-900 text-left">
+                      <h3 className="text-sm font-semibold text-gray-900 text-end">
                         {group.title}
                       </h3>
                       {group.permissions.map((permission: any) => (

@@ -99,7 +99,7 @@ export default function Currencies() {
   }
 
   return (
-    <div className="p-6" dir="rtl">
+    <div className="p-6" dir={language === 'ar' ? 'rtl' : 'ltr'}>
       <div className="mb-8 flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">{text.title[language]}</h1>
@@ -148,7 +148,7 @@ export default function Currencies() {
               placeholder={text.search[language]}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full max-w-xs pr-9 pl-4 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent text-right"
+              className={`w-full max-w-xs ${language === 'ar' ? 'pr-9 pl-4' : 'pl-9 pr-4'} py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent text-start`}
             />
           </div>
         </div>
@@ -173,12 +173,12 @@ export default function Currencies() {
             <table className="w-full">
               <thead>
                 <tr className="bg-gray-50 border-b border-gray-100">
-                  <th className="px-6 py-3.5 text-right text-xs font-semibold text-gray-500 uppercase tracking-wider">{text.code[language]}</th>
-                  <th className="px-6 py-3.5 text-right text-xs font-semibold text-gray-500 uppercase tracking-wider">{text.name[language]}</th>
-                  <th className="px-6 py-3.5 text-right text-xs font-semibold text-gray-500 uppercase tracking-wider">{text.symbol[language]}</th>
-                  <th className="px-6 py-3.5 text-right text-xs font-semibold text-gray-500 uppercase tracking-wider">{text.exchangeRate[language]}</th>
-                  <th className="px-6 py-3.5 text-right text-xs font-semibold text-gray-500 uppercase tracking-wider">{text.isDefault[language]}</th>
-                  <th className="px-6 py-3.5 text-right text-xs font-semibold text-gray-500 uppercase tracking-wider">{text.actions[language]}</th>
+                  <th className="px-6 py-3.5 text-start text-xs font-semibold text-gray-500 uppercase tracking-wider">{text.code[language]}</th>
+                  <th className="px-6 py-3.5 text-start text-xs font-semibold text-gray-500 uppercase tracking-wider">{text.name[language]}</th>
+                  <th className="px-6 py-3.5 text-start text-xs font-semibold text-gray-500 uppercase tracking-wider">{text.symbol[language]}</th>
+                  <th className="px-6 py-3.5 text-start text-xs font-semibold text-gray-500 uppercase tracking-wider">{text.exchangeRate[language]}</th>
+                  <th className="px-6 py-3.5 text-start text-xs font-semibold text-gray-500 uppercase tracking-wider">{text.isDefault[language]}</th>
+                  <th className="px-6 py-3.5 text-start text-xs font-semibold text-gray-500 uppercase tracking-wider">{text.actions[language]}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-50">
@@ -187,26 +187,26 @@ export default function Currencies() {
                     key={currency.id}
                     className={`hover:bg-gray-50 transition-colors ${currency.default ? 'bg-green-50/40' : ''}`}
                   >
-                    <td className="px-6 py-4 text-right">
+                    <td className="px-6 py-4 text-start">
                       <span className="inline-flex items-center px-2.5 py-1 rounded-lg bg-gray-100 text-gray-800 text-sm font-bold font-mono">
                         {currency.code}
                       </span>
                     </td>
-                    <td className="px-6 py-4 text-right">
+                    <td className="px-6 py-4 text-start">
                       <span className="text-sm font-medium text-gray-900">
                         {language === 'ar' ? currency.name_ar : currency.name_en}
                       </span>
                     </td>
-                    <td className="px-6 py-4 text-right">
+                    <td className="px-6 py-4 text-start">
                       <span className="text-base font-bold text-gray-700">{currency.symbol}</span>
                     </td>
-                    <td className="px-6 py-4 text-right">
+                    <td className="px-6 py-4 text-start">
                       <div className="flex items-center justify-start gap-1.5">
                         <TrendingUp className="w-3.5 h-3.5 text-gray-400" />
                         <span className="text-sm font-semibold text-gray-900">{currency.exchangeRate}</span>
                       </div>
                     </td>
-                    <td className="px-6 py-4 text-right">
+                    <td className="px-6 py-4 text-start">
                       {currency.default ? (
                         <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-green-100 text-green-700 text-xs font-semibold">
                           <Star className="w-3 h-3" />

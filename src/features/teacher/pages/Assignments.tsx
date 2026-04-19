@@ -6,6 +6,7 @@ import AddAssignmentModal from '../../../components/modals/AddAssignmentModal';
 import { useConfirm } from '../../../hooks/useConfirm';
 import { useGetAssignments, useDeleteAssignment } from '../../../hooks/useAssignment';
 import { Assignment } from '../../../types/assignment';
+import { TableSkeleton } from '../../../components/ui/CustomSkeleton';
 
 export default function Assignments() {
   const { language } = useLanguage();
@@ -146,7 +147,7 @@ export default function Assignments() {
               <select
                 value={filters.status}
                 onChange={(e) => setFilters({ ...filters, status: e.target.value })}
-                className="px-4 py-2 border border-gray-300 rounded-lg text-right"
+                className="px-4 py-2 border border-gray-300 rounded-lg text-start"
                 dir="rtl"
               >
                 <option value="">{text.columnStatus[language]}</option>
@@ -159,7 +160,7 @@ export default function Assignments() {
                 placeholder={text.columnSubject[language]}
                 value={filters.subject}
                 onChange={(e) => setFilters({ ...filters, subject: e.target.value })}
-                className="px-4 py-2 border border-gray-300 rounded-lg text-right"
+                className="px-4 py-2 border border-gray-300 rounded-lg text-start"
                 dir="rtl"
               />
               <input
@@ -167,7 +168,7 @@ export default function Assignments() {
                 placeholder={text.columnStudent[language]}
                 value={filters.student}
                 onChange={(e) => setFilters({ ...filters, student: e.target.value })}
-                className="px-4 py-2 border border-gray-300 rounded-lg text-right"
+                className="px-4 py-2 border border-gray-300 rounded-lg text-start"
                 dir="rtl"
               />
             </div>
@@ -176,9 +177,7 @@ export default function Assignments() {
 
         <div className="overflow-x-auto min-h-[400px]">
           {isLoading ? (
-            <div className="flex items-center justify-center h-64 text-gray-500 font-medium">
-              {text.loading[language]}
-            </div>
+            <TableSkeleton rows={itemsPerPage} columns={8} />
           ) : currentAssignments.length === 0 ? (
             <div className="flex items-center justify-center h-64 text-gray-500 font-medium flex-col gap-2">
               <Search className="w-12 h-12 text-gray-300" />
@@ -188,32 +187,32 @@ export default function Assignments() {
             <table className="w-full" dir="rtl">
               <thead className="bg-gray-50 border-b border-gray-200">
                 <tr>
-                  <th className="px-6 py-4 text-right text-sm font-semibold text-gray-900">{text.columnStudent[language]}</th>
-                  <th className="px-6 py-4 text-right text-sm font-semibold text-gray-900">{text.columnSubject[language]}</th>
-                  <th className="px-6 py-4 text-right text-sm font-semibold text-gray-900">{text.columnTeacher[language]}</th>
-                  <th className="px-6 py-4 text-right text-sm font-semibold text-gray-900">{text.columnTitle[language]}</th>
-                  <th className="px-6 py-4 text-right text-sm font-semibold text-gray-900">{text.columnDescription[language]}</th>
-                  <th className="px-6 py-4 text-right text-sm font-semibold text-gray-900">{text.columnDueDate[language]}</th>
-                  <th className="px-6 py-4 text-right text-sm font-semibold text-gray-900">{text.columnStatus[language]}</th>
-                  <th className="px-6 py-4 text-right text-sm font-semibold text-gray-900">{text.columnActions[language]}</th>
+                  <th className="px-6 py-4 text-start text-sm font-semibold text-gray-900">{text.columnStudent[language]}</th>
+                  <th className="px-6 py-4 text-start text-sm font-semibold text-gray-900">{text.columnSubject[language]}</th>
+                  <th className="px-6 py-4 text-start text-sm font-semibold text-gray-900">{text.columnTeacher[language]}</th>
+                  <th className="px-6 py-4 text-start text-sm font-semibold text-gray-900">{text.columnTitle[language]}</th>
+                  <th className="px-6 py-4 text-start text-sm font-semibold text-gray-900">{text.columnDescription[language]}</th>
+                  <th className="px-6 py-4 text-start text-sm font-semibold text-gray-900">{text.columnDueDate[language]}</th>
+                  <th className="px-6 py-4 text-start text-sm font-semibold text-gray-900">{text.columnStatus[language]}</th>
+                  <th className="px-6 py-4 text-start text-sm font-semibold text-gray-900">{text.columnActions[language]}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-200">
                 {currentAssignments.map((assignment) => (
                   <tr key={assignment.id} className="hover:bg-gray-50 transition-colors">
-                    <td className="px-6 py-4 text-gray-900 font-medium">{assignment.student?.user?.name}</td>
-                    <td className="px-6 py-4">
+                    <td className="px-6 py-4 text-start text-gray-900 font-medium">{assignment.student?.user?.name}</td>
+                    <td className="px-6 py-4 text-start">
                       <span className="text-primary font-medium hover:underline cursor-pointer">
                         {language === 'ar' ? assignment.subject?.name_ar : assignment.subject?.name_en || assignment.subject?.name_ar}
                       </span>
                     </td>
-                    <td className="px-6 py-4 text-gray-900 font-medium">{assignment.teacher?.user?.name}</td>
-                    <td className="px-6 py-4 text-gray-900 font-medium">{assignment.title}</td>
-                    <td className="px-6 py-4 text-gray-600">{assignment.description}</td>
-                    <td className="px-6 py-4 text-gray-600">
+                    <td className="px-6 py-4 text-start text-gray-900 font-medium">{assignment.teacher?.user?.name}</td>
+                    <td className="px-6 py-4 text-start text-gray-900 font-medium">{assignment.title}</td>
+                    <td className="px-6 py-4 text-start text-gray-600">{assignment.description}</td>
+                    <td className="px-6 py-4 text-start text-gray-600">
                       {new Date(assignment.dueDate).toLocaleDateString(language === 'ar' ? 'ar-EG' : 'en-US')}
                     </td>
-                    <td className="px-6 py-4">
+                    <td className="px-6 py-4 text-start">
                       <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${assignment.status === 'pending'
                         ? 'bg-yellow-100 text-yellow-800'
                         : assignment.status === 'submitted'
@@ -223,7 +222,7 @@ export default function Assignments() {
                         {text[assignment.status as keyof typeof text] ? (text[assignment.status as keyof typeof text] as any)[language] : assignment.status}
                       </span>
                     </td>
-                    <td className="px-6 py-4">
+                    <td className="px-6 py-4 text-start">
                       <div className="flex items-center gap-2 justify-start">
                         <button
                           onClick={() => handleEditAssignment(assignment)}

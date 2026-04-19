@@ -95,7 +95,7 @@ export default function AddCurrencyModal({ isOpen, onClose, onSave, initialData 
 
         <form onSubmit={handleSubmit(onSubmit)} className="p-6 space-y-6">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2 text-right">
+            <label className="block text-sm font-medium text-gray-700 mb-2 text-start">
               {text.code[language]} *
             </label>
             <input
@@ -135,7 +135,7 @@ export default function AddCurrencyModal({ isOpen, onClose, onSave, initialData 
             <div className="p-4">
               {activeTab === 'ar' ? (
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2 text-right">
+                  <label className="block text-sm font-medium text-gray-700 mb-2 text-start">
                     {text.nameAr[language]} *
                   </label>
                   <input
@@ -164,7 +164,7 @@ export default function AddCurrencyModal({ isOpen, onClose, onSave, initialData 
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2 text-right">
+            <label className="block text-sm font-medium text-gray-700 mb-2 text-start">
               {text.symbol[language]} *
             </label>
             <input
@@ -177,7 +177,7 @@ export default function AddCurrencyModal({ isOpen, onClose, onSave, initialData 
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2 text-right">
+            <label className="block text-sm font-medium text-gray-700 mb-2 text-start">
               {text.exchangeRate[language]} *
             </label>
             <input

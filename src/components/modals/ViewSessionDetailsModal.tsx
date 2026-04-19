@@ -97,14 +97,14 @@ export default function ViewSessionDetailsModal({ isOpen, onClose, sessionGroup,
         <div className="flex-1  overflow-y-auto no-scrollbar p-6">
           <div className="space-y-6">
             <div className="bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-200 rounded-2xl p-6">
-              <h3 className="text-2xl font-bold text-gray-900 text-right mb-6">{sessionGroup.sessionName}</h3>
+              <h3 className="text-2xl font-bold text-gray-900 text-start mb-6">{sessionGroup.sessionName}</h3>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="flex items-center gap-3 bg-white rounded-xl p-4 shadow-sm">
                   <div className="flex-shrink-0 w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
                     <User className="w-5 h-5 text-blue-600" />
                   </div>
-                  <div className="flex-1 text-right">
+                  <div className="flex-1 text-start">
                     <p className="text-xs text-gray-500">{text.student[language]}</p>
                     <p className="font-semibold text-gray-900">{sessionGroup.student}</p>
                   </div>
@@ -114,7 +114,7 @@ export default function ViewSessionDetailsModal({ isOpen, onClose, sessionGroup,
                   <div className="flex-shrink-0 w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
                     <GraduationCap className="w-5 h-5 text-green-600" />
                   </div>
-                  <div className="flex-1 text-right">
+                  <div className="flex-1 text-start">
                     <p className="text-xs text-gray-500">{text.teacher[language]}</p>
                     <p className="font-semibold text-gray-900">{sessionGroup.teacher}</p>
                   </div>
@@ -124,7 +124,7 @@ export default function ViewSessionDetailsModal({ isOpen, onClose, sessionGroup,
                   <div className="flex-shrink-0 w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
                     <BookOpen className="w-5 h-5 text-purple-600" />
                   </div>
-                  <div className="flex-1 text-right">
+                  <div className="flex-1 text-start">
                     <p className="text-xs text-gray-500">{text.subject[language]}</p>
                     <p className="font-semibold text-gray-900">{sessionGroup.subject}</p>
                   </div>
@@ -134,7 +134,7 @@ export default function ViewSessionDetailsModal({ isOpen, onClose, sessionGroup,
                   <div className="flex-shrink-0 w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center">
                     <Clock className="w-5 h-5 text-orange-600" />
                   </div>
-                  <div className="flex-1 text-right">
+                  <div className="flex-1 text-start">
                     <p className="text-xs text-gray-500">{text.duration[language]}</p>
                     <p className="font-semibold text-gray-900">{sessionGroup.duration} {text.minutes[language]}</p>
                   </div>
@@ -143,7 +143,7 @@ export default function ViewSessionDetailsModal({ isOpen, onClose, sessionGroup,
 
               {sessionGroup.meetingLink && (
                 <div className="mt-4 bg-white rounded-xl p-4 shadow-sm">
-                  <p className="text-xs text-gray-500 text-right mb-2">{text.meetingLink[language]}</p>
+                  <p className="text-xs text-gray-500 text-start mb-2">{text.meetingLink[language]}</p>
                   <div className="flex items-center gap-3">
                     <a
                       href={sessionGroup.meetingLink}
@@ -153,7 +153,7 @@ export default function ViewSessionDetailsModal({ isOpen, onClose, sessionGroup,
                     >
                       {text.openLink[language]}
                     </a>
-                    <div className="flex-1 text-sm text-gray-600 break-all text-right" dir="ltr">
+                    <div className="flex-1 text-sm text-gray-600 break-all text-start" dir="ltr">
                       {sessionGroup.meetingLink}
                     </div>
                   </div>
@@ -162,28 +162,28 @@ export default function ViewSessionDetailsModal({ isOpen, onClose, sessionGroup,
             </div>
 
             <div className="bg-gradient-to-br from-green-50 to-emerald-50 border border-green-200 rounded-2xl p-6">
-              <h3 className="text-lg font-bold text-gray-900 text-right mb-4 flex items-center justify-end gap-2">
+              <h3 className="text-lg font-bold text-gray-900 text-start mb-4 flex items-center justify-end gap-2">
                 <span>{text.packageInfo[language]}</span>
                 <Calendar className="w-5 h-5 text-green-600" />
               </h3>
 
               <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                <div className="bg-white rounded-xl p-4 shadow-sm text-right">
+                <div className="bg-white rounded-xl p-4 shadow-sm text-start">
                   <p className="text-xs text-gray-500 mb-1">{text.packageName[language]}</p>
                   <p className="text-lg font-bold text-gray-900">{sessionGroup.packageInfo.packageName}</p>
                 </div>
 
-                <div className="bg-white rounded-xl p-4 shadow-sm text-right">
+                <div className="bg-white rounded-xl p-4 shadow-sm text-start">
                   <p className="text-xs text-gray-500 mb-1">{text.totalSessions[language]}</p>
                   <p className="text-lg font-bold text-blue-600">{sessionGroup.packageInfo.totalSessions}</p>
                 </div>
 
-                <div className="bg-white rounded-xl p-4 shadow-sm text-right">
+                <div className="bg-white rounded-xl p-4 shadow-sm text-start">
                   <p className="text-xs text-gray-500 mb-1">{text.sessionsUsed[language]}</p>
                   <p className="text-lg font-bold text-orange-600">{sessionGroup.packageInfo.sessionsUsed}</p>
                 </div>
 
-                <div className="bg-white rounded-xl p-4 shadow-sm text-right">
+                <div className="bg-white rounded-xl p-4 shadow-sm text-start">
                   <p className="text-xs text-gray-500 mb-1">{text.sessionsRemaining[language]}</p>
                   <p className="text-lg font-bold text-green-600">{sessionGroup.packageInfo.sessionsRemaining}</p>
                 </div>
@@ -192,7 +192,7 @@ export default function ViewSessionDetailsModal({ isOpen, onClose, sessionGroup,
 
             <div className="bg-white border border-gray-200 rounded-2xl overflow-hidden">
               <div className="bg-gray-50 px-6 py-4 border-b border-gray-200">
-                <h3 className="text-lg font-bold text-gray-900 text-right">{text.schedule[language]}</h3>
+                <h3 className="text-lg font-bold text-gray-900 text-start">{text.schedule[language]}</h3>
               </div>
 
               <div className="p-4 max-h-96  overflow-y-auto no-scrollbar">
@@ -205,18 +205,18 @@ export default function ViewSessionDetailsModal({ isOpen, onClose, sessionGroup,
                       <div className="flex items-center justify-between gap-4" dir="rtl">
                         <div className="flex items-center gap-3">
                           <div>
-                            <p className="text-xs text-gray-500 text-right">{text.day[language]}</p>
-                            <p className="font-bold text-gray-900 text-right">{session.day}</p>
+                            <p className="text-xs text-gray-500 text-start">{text.day[language]}</p>
+                            <p className="font-bold text-gray-900 text-start">{session.day}</p>
                           </div>
 
                           <div className="border-r border-gray-300 pr-4">
-                            <p className="text-xs text-gray-500 text-right">{text.date[language]}</p>
-                            <p className="font-medium text-gray-900 text-right">{session.date}</p>
+                            <p className="text-xs text-gray-500 text-start">{text.date[language]}</p>
+                            <p className="font-medium text-gray-900 text-start">{session.date}</p>
                           </div>
 
                           <div className="border-r border-gray-300 pr-4">
-                            <p className="text-xs text-gray-500 text-right">{text.time[language]}</p>
-                            <p className="font-medium text-gray-900 text-right" dir="ltr">
+                            <p className="text-xs text-gray-500 text-start">{text.time[language]}</p>
+                            <p className="font-medium text-gray-900 text-start" dir="ltr">
                               {session.time} - {session.endTime}
                             </p>
                           </div>

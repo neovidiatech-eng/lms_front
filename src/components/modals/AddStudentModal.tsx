@@ -1,4 +1,5 @@
-import { X, GraduationCap } from 'lucide-react';
+import { useState } from 'react';
+import { X, GraduationCap, Eye, EyeOff, Lock } from 'lucide-react';
 import { useLanguage } from '../../contexts/LanguageContext';
 import CustomSelect from '../ui/CustomSelect';
 import DatePickerField from '../ui/DatePickerField';
@@ -15,11 +16,12 @@ interface AddStudentModalProps {
 
 export default function AddStudentModal({ isOpen, onClose, onSubmit }: AddStudentModalProps) {
   const { language, t } = useLanguage();
+  const [showPassword, setShowPassword] = useState(false);
   const { data: plansData } = usePlans();
   const { register, handleSubmit, control, reset, formState: { errors } } = useForm<StudentFormData>({
     resolver: zodResolver(getStudentSchema(t)),
     defaultValues: {
-      countryCode: '+20',
+      phone_code: '+20',
       status: 'approved',
       gender: '',
       plan: '',
@@ -85,13 +87,14 @@ export default function AddStudentModal({ isOpen, onClose, onSubmit }: AddStuden
       <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh]  overflow-y-auto no-scrollbar">
         {/* Header */}
         <div className="sticky top-0 bg-primary px-6 py-4 flex items-center justify-between rounded-t-2xl">
-          <button onClick={onClose} className="p-2 hover:bg-white/20 rounded-lg transition-colors">
-            <X className="w-5 h-5 text-white/80" />
-          </button>
+
           <h2 className="text-xl font-bold text-white flex items-center gap-2">
             <GraduationCap className="w-6 h-6" />
             <span>{t('addNewStudent')}</span>
           </h2>
+          <button onClick={onClose} className="p-2 hover:bg-white/20 rounded-lg transition-colors">
+            <X className="w-5 h-5 text-white/80" />
+          </button>
         </div>
 
         {/* Form */}
@@ -99,7 +102,7 @@ export default function AddStudentModal({ isOpen, onClose, onSubmit }: AddStuden
           <div className="space-y-6">
             {/* Row 1: Name and Email */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="text-right">
+              <div className="text-start">
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   {t('name')} *
                 </label>
@@ -107,13 +110,12 @@ export default function AddStudentModal({ isOpen, onClose, onSubmit }: AddStuden
                   type="text"
                   {...register('name')}
                   placeholder="ex :- Mohamed"
-                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary text-right"
-                  dir="rtl"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary text-start"
                 />
                 {errors.name && <p className="text-red-500 text-xs mt-1">{errors.name.message}</p>}
               </div>
 
-              <div className="text-right">
+              <div className="text-start">
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   {t('email')} *
                 </label>
@@ -122,7 +124,7 @@ export default function AddStudentModal({ isOpen, onClose, onSubmit }: AddStuden
                   required
                   {...register('email')}
                   placeholder="ex :- student@example.com"
-                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary text-right"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary text-start"
                   dir="ltr"
                 />
                 {errors.email && <p className="text-red-500 text-xs mt-1">{errors.email.message}</p>}
@@ -131,7 +133,7 @@ export default function AddStudentModal({ isOpen, onClose, onSubmit }: AddStuden
 
             {/* Row 2: Phone and Country Code */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="text-right">
+              <div className="text-start">
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   {t('phone')} *
                 </label>
@@ -139,14 +141,14 @@ export default function AddStudentModal({ isOpen, onClose, onSubmit }: AddStuden
                   type="tel"
                   {...register('phone')}
                   placeholder="ex :- 01091536978"
-                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary text-right"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary text-start"
                   dir="ltr"
                 />
                 {errors.phone && <p className="text-red-500 text-xs mt-1">{errors.phone.message}</p>}
               </div>
 
               <Controller
-                name="countryCode"
+                name="phone_code"
                 control={control}
                 render={({ field }) => (
                   <CustomSelect
@@ -161,7 +163,7 @@ export default function AddStudentModal({ isOpen, onClose, onSubmit }: AddStuden
 
             {/* Row 3: Gender and Birth Date */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="text-right">
+              <div className="text-start">
                 <Controller
                   name="birthDate"
                   control={control}
@@ -220,17 +222,23 @@ export default function AddStudentModal({ isOpen, onClose, onSubmit }: AddStuden
 
             {/* Row 5: Password and Status */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="text-right">
+              <div className="text-start relative">
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   {t('password')} *
                 </label>
-                <input
-                  type="password"
-                  {...register('password')}
-                  placeholder="••••••••"
-                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary text-right bg-gray-50"
-                  dir="ltr"
-                />
+                <div className="relative">
+                  <Lock className="absolute start-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5 pointer-events-none" />
+                  <input
+                    type={showPassword ? 'text' : 'password'}
+                    {...register('password')}
+                    placeholder="••••••••"
+                    className="w-full px-12 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary text-start bg-gray-50 transition-all"
+                    dir="ltr"
+                  />
+                  <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute end-4 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors">
+                    {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                  </button>
+                </div>
                 {errors.password && <p className="text-red-500 text-xs mt-1">{errors.password.message}</p>}
               </div>
 

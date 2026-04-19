@@ -126,22 +126,22 @@ export default function AddPlanModal({ isOpen, onClose, onSave, initialData }: A
           {/* Names */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2 text-right">
+              <label className="block text-sm font-medium text-gray-700 mb-2 text-start">
                 {text.nameAr[language]}
               </label>
-              <input {...register('name')} className="w-full px-4 py-2.5 border rounded-lg text-right" />
-              {errors.name && (<p className="text-red-500 text-sm mt-1 text-right"> {errors.name.message}</p>
+              <input {...register('name')} className="w-full px-4 py-2.5 border rounded-lg text-start" />
+              {errors.name && (<p className="text-red-500 text-sm mt-1 text-start"> {errors.name.message}</p>
               )}
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2 text-right">
+              <label className="block text-sm font-medium text-gray-700 mb-2 text-start">
                 {text.nameEn[language]}
               </label>
               <input {...register('nameEn')} className="w-full px-4 py-2.5 border rounded-lg" />
 
               {errors.nameEn && (
-                <p className="text-red-500 text-sm mt-1 text-right">
+                <p className="text-red-500 text-sm mt-1 text-start">
                   {errors.nameEn.message}
                 </p>
               )}
@@ -149,11 +149,11 @@ export default function AddPlanModal({ isOpen, onClose, onSave, initialData }: A
           </div>
           {/* Description */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2 text-right">
+            <label className="block text-sm font-medium text-gray-700 mb-2 text-start">
               {text.description[language]}
             </label>
-            <textarea {...register('description')} rows={3} className="w-full px-4 py-2.5 border rounded-lg text-right resize-none" />
-            {errors.description && (<p className="text-red-500 text-sm mt-1 text-right"> {errors.description.message}</p>
+            <textarea {...register('description')} rows={3} className="w-full px-4 py-2.5 border rounded-lg text-start resize-none" />
+            {errors.description && (<p className="text-red-500 text-sm mt-1 text-start"> {errors.description.message}</p>
             )}
           </div>
 
@@ -161,23 +161,23 @@ export default function AddPlanModal({ isOpen, onClose, onSave, initialData }: A
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2 text-right">
+              <label className="block text-sm font-medium text-gray-700 mb-2 text-start">
                 {text.price[language]}
               </label>
               <input
                 type="number"
                 {...register('price', { valueAsNumber: true })}
-                className="w-full px-4 py-2.5 border rounded-lg text-right"
+                className="w-full px-4 py-2.5 border rounded-lg text-start"
               />
               {errors.price && (
-                <p className="text-red-500 text-sm mt-1 text-right">
+                <p className="text-red-500 text-sm mt-1 text-start">
                   {errors.price.message}
                 </p>
               )}
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2 text-right">
+              <label className="block text-sm font-medium text-gray-700 mb-2 text-start">
                 {text.currency[language]}
               </label>
               <Controller
@@ -194,7 +194,7 @@ export default function AddPlanModal({ isOpen, onClose, onSave, initialData }: A
                 )}
               />
               {errors.currency && (
-                <p className="text-red-500 text-sm mt-1 text-right">
+                <p className="text-red-500 text-sm mt-1 text-start">
                   {errors.currency.message}
                 </p>
               )}
@@ -205,32 +205,32 @@ export default function AddPlanModal({ isOpen, onClose, onSave, initialData }: A
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2 text-right">
+              <label className="block text-sm font-medium text-gray-700 mb-2 text-start">
                 {text.duration[language]}
               </label>
               <input
                 type="number"
                 {...register('duration', { valueAsNumber: true })}
-                className="w-full px-4 py-2.5 border rounded-lg text-right"
+                className="w-full px-4 py-2.5 border rounded-lg text-start"
               />
               {errors.duration && (
-                <p className="text-red-500 text-sm mt-1 text-right">
+                <p className="text-red-500 text-sm mt-1 text-start">
                   {errors.duration.message}
                 </p>
               )}
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2 text-right">
+              <label className="block text-sm font-medium text-gray-700 mb-2 text-start">
                 {text.sessionsCount[language]}
               </label>
               <input
                 type="number"
                 {...register('sessionsCount', { valueAsNumber: true })}
-                className="w-full px-4 py-2.5 border rounded-lg text-right"
+                className="w-full px-4 py-2.5 border rounded-lg text-start"
               />
               {errors.sessionsCount && (
-                <p className="text-red-500 text-sm mt-1 text-right">
+                <p className="text-red-500 text-sm mt-1 text-start">
                   {errors.sessionsCount.message}
                 </p>
               )}
@@ -270,7 +270,7 @@ export default function AddPlanModal({ isOpen, onClose, onSave, initialData }: A
                       placeholder={text.featurePlaceholder[language]}
                       className={`px-4 py-2.5 border rounded-lg ${errors.features?.[index] ? 'border-red-500' : 'border-gray-300'}`}
                     />
-                    {errors.features?.[index] && <span className="text-red-500 text-xs text-right">هذا الحقل مطلوب</span>}
+                    {errors.features?.[index] && <span className="text-red-500 text-xs text-start">هذا الحقل مطلوب</span>}
                   </div>
 
                 </div>
@@ -291,7 +291,7 @@ export default function AddPlanModal({ isOpen, onClose, onSave, initialData }: A
             </div>
 
             <div className="flex flex-col gap-1">
-              <label className="block text-sm font-medium text-gray-700 text-right mb-1">
+              <label className="block text-sm font-medium text-gray-700 text-start mb-1">
                 {text.status[language]}
               </label>
               <Controller

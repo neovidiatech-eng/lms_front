@@ -75,7 +75,7 @@ export default function AddRoleModal({
                 {/* Form */}
                 <form
                     onSubmit={handleSubmit(onFormSubmit)}
-                    className="p-6 space-y-6"
+                    className="p-6 space-y-6 text-start"
                 >
                     {/* Role Name */}
                     <div>

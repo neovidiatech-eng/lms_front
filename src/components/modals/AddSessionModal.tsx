@@ -122,7 +122,7 @@ export default function AddSessionModal({ isOpen, onClose, onAdd }: AddSessionMo
                     />
                   )}
                 />
-                {errors.student && <span className="text-red-500 text-xs mt-1 block text-right">{errors.student.message}</span>}
+                {errors.student && <span className="text-red-500 text-xs mt-1 block text-start">{errors.student.message}</span>}
               </div>
 
               <div>
@@ -143,15 +143,15 @@ export default function AddSessionModal({ isOpen, onClose, onAdd }: AddSessionMo
                     />
                   )}
                 />
-                {errors.teacher && <span className="text-red-500 text-xs mt-1 block text-right">{errors.teacher.message}</span>}
+                {errors.teacher && <span className="text-red-500 text-xs mt-1 block text-start">{errors.teacher.message}</span>}
               </div>
             </div>
 
             {/* Package Details */}
             {selectedStudentPackage && (
               <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
-                <h3 className="text-sm font-semibold text-blue-900 mb-3 text-right">{t('packageInfo')}</h3>
-                <div className="grid grid-cols-3 gap-4 text-right">
+                <h3 className="text-sm font-semibold text-blue-900 mb-3 text-start">{t('packageInfo')}</h3>
+                <div className="grid grid-cols-3 gap-4 text-start">
                   <div>
                     <p className="text-xs text-blue-600 mb-1">{t('packageName')}</p>
                     <p className="text-sm font-medium text-blue-900">{language === 'ar' ? selectedStudentData?.plan?.name_ar : selectedStudentData?.plan?.name_en}</p>
@@ -185,12 +185,12 @@ export default function AddSessionModal({ isOpen, onClose, onAdd }: AddSessionMo
                   />
                 )}
               />
-              {errors.subject && <span className="text-red-500 text-xs block text-right">{errors.subject.message}</span>}
+              {errors.subject && <span className="text-red-500 text-xs block text-start">{errors.subject.message}</span>}
             </div>
 
             {/* Date and Title */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="space-y-2 text-right">
+              <div className="space-y-2 text-start">
                 <DatePickerField
                   label={`${t('sessionDate')} `}
                   value={watch('sessionDate')}
@@ -199,7 +199,7 @@ export default function AddSessionModal({ isOpen, onClose, onAdd }: AddSessionMo
                 />
               </div>
 
-              <div className="space-y-2 text-right">
+              <div className="space-y-2 text-start">
                 <label className="block text-sm font-medium text-gray-700">
                   {t('sessionTitleLabel')} <span className="text-red-500">*</span>
                 </label>
@@ -207,7 +207,7 @@ export default function AddSessionModal({ isOpen, onClose, onAdd }: AddSessionMo
                   type="text"
                   {...register('title')}
                   placeholder={t('sessionTitlePlaceholder')}
-                  className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent text-right"
+                  className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent text-start"
                 />
                 {errors.title && <span className="text-red-500 text-xs">{errors.title.message}</span>}
               </div>
@@ -215,7 +215,7 @@ export default function AddSessionModal({ isOpen, onClose, onAdd }: AddSessionMo
 
             {/* Description and Type */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="space-y-2 text-right">
+              <div className="space-y-2 text-start">
                 <label className="block text-sm font-medium text-gray-700">
                   {t('description')}
                 </label>
@@ -223,9 +223,9 @@ export default function AddSessionModal({ isOpen, onClose, onAdd }: AddSessionMo
                   {...register('description')}
                   placeholder={t('descriptionPlaceholder')}
                   rows={2}
-                  className={`w-full px-4 py-3 border rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent text-right resize-none ${errors.description ? 'border-red-500' : 'border-gray-200'}`}
+                  className={`w-full px-4 py-3 border rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent text-start resize-none ${errors.description ? 'border-red-500' : 'border-gray-200'}`}
                 />
-                {errors.description && <span className="text-red-500 text-xs mt-1 block text-right">{errors.description.message}</span>}
+                {errors.description && <span className="text-red-500 text-xs mt-1 block text-start">{errors.description.message}</span>}
               </div>
 
               <div className="space-y-2">
@@ -245,7 +245,7 @@ export default function AddSessionModal({ isOpen, onClose, onAdd }: AddSessionMo
                     />
                   )}
                 />
-                {errors.type && <span className="text-red-500 text-xs mt-1 block text-right">{errors.type.message}</span>}
+                {errors.type && <span className="text-red-500 text-xs mt-1 block text-start">{errors.type.message}</span>}
               </div>
             </div>
 
@@ -290,15 +290,15 @@ export default function AddSessionModal({ isOpen, onClose, onAdd }: AddSessionMo
                     />
                   )}
                 />
-                {errors.duration && <span className="text-red-500 text-xs block text-right">{errors.duration.message}</span>}
+                {errors.duration && <span className="text-red-500 text-xs block text-start">{errors.duration.message}</span>}
               </div>
 
-              <div className="space-y-2 text-right">
+              <div className="space-y-2 text-start">
 
                 {/* <input
                   type="time"
                   {...register('startTime')}
-                  className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent text-right"
+                  className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent text-start"
                 />
                 {errors.startTime && <span className="text-red-500 text-xs">{errors.startTime.message}</span>} */}
                 <Controller
@@ -315,7 +315,7 @@ export default function AddSessionModal({ isOpen, onClose, onAdd }: AddSessionMo
                 />
               </div>
 
-              <div className="space-y-2 text-right">
+              <div className="space-y-2 text-start">
                 <label className="block text-sm font-medium text-gray-700">
                   {t('endTime')} <span className="text-red-500">*</span>
                 </label>
@@ -323,7 +323,7 @@ export default function AddSessionModal({ isOpen, onClose, onAdd }: AddSessionMo
                   type="time"
                   disabled
                   {...register('endTime')}
-                  className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent text-right"
+                  className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent text-start"
                 />
                 {errors.endTime && <span className="text-red-500 text-xs">{errors.endTime.message}</span>}
               </div>
@@ -331,25 +331,25 @@ export default function AddSessionModal({ isOpen, onClose, onAdd }: AddSessionMo
 
             {/* Meeting Link and Notes */}
             <div className="space-y-4">
-              <div className="space-y-2 text-right">
+              <div className="space-y-2 text-start">
                 <label className="block text-sm font-medium text-gray-700">{t('meetingLink')}</label>
                 <input
                   type="url"
                   {...register('meetingLink')}
                   placeholder="https://zoom.us/..."
-                  className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent text-right"
+                  className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent text-start"
                   dir="ltr"
                 />
               </div>
-              <div className="space-y-2 text-right">
+              <div className="space-y-2 text-start">
                 <label className="block text-sm font-medium text-gray-700">{t('notes')}</label>
                 <textarea
                   {...register('notes')}
                   placeholder={t('notesPlaceholder')}
                   rows={3}
-                  className={`w-full px-4 py-3 border rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent text-right resize-none ${errors.notes ? 'border-red-500' : 'border-gray-200'}`}
+                  className={`w-full px-4 py-3 border rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent text-start resize-none ${errors.notes ? 'border-red-500' : 'border-gray-200'}`}
                 />
-                {errors.notes && <span className="text-red-500 text-xs mt-1 block text-right">{errors.notes.message}</span>}
+                {errors.notes && <span className="text-red-500 text-xs mt-1 block text-start">{errors.notes.message}</span>}
               </div>
             </div>
           </div>

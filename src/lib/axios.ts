@@ -31,7 +31,6 @@ api.interceptors.response.use(
   },
   (error) => {
     const status = error.response?.status;
-    const message = ErrorService.parseErrorMessage(error);
 
     if (status === 401) {
       const token =
@@ -60,7 +59,6 @@ api.interceptors.response.use(
     } else {
       // Log the error
       console.error("API Error:", error);
-      ErrorService.error(message);
     }
 
 

@@ -70,7 +70,7 @@ export default function Header({ onMenuClick, userRole, isCollapsed }: HeaderPro
                 {settings.name.charAt(0)}
               </div>
             )}
-            <div className="hidden sm:block text-right">
+            <div className="hidden sm:block text-start">
               <h1 className="text-lg font-bold text-gray-900">{settings.name}</h1>
               <p className="text-xs text-gray-500">{roleSubtitle[userRole][language]}</p>
             </div>
@@ -92,12 +92,12 @@ export default function Header({ onMenuClick, userRole, isCollapsed }: HeaderPro
               <>
                 <div className="fixed inset-0 z-40" onClick={() => setShowNotifications(false)}></div>
                 <div className="absolute left-0 mt-2 w-80 bg-white rounded-xl shadow-lg border border-gray-200 py-2 z-50">
-                  <div className="px-4 py-2 border-b border-gray-100"><h3 className="font-semibold text-gray-900 text-right">الإشعارات</h3></div>
+                  <div className="px-4 py-2 border-b border-gray-100"><h3 className="font-semibold text-gray-900 text-start">الإشعارات</h3></div>
                   <div className="max-h-96 overflow-y-auto">
                     {notifications.map((notif) => (
                       <div key={notif.id} className="px-4 py-3 hover:bg-gray-50 cursor-pointer transition-colors">
-                        <p className="text-sm text-gray-900 text-right">{notif.text}</p>
-                        <p className="text-xs text-gray-500 text-right mt-1">منذ {notif.time}</p>
+                        <p className="text-sm text-gray-900 text-start">{notif.text}</p>
+                        <p className="text-xs text-gray-500 text-start mt-1">منذ {notif.time}</p>
                       </div>
                     ))}
                   </div>
@@ -108,7 +108,7 @@ export default function Header({ onMenuClick, userRole, isCollapsed }: HeaderPro
           <div className="relative">
             <button onClick={() => setShowProfileMenu(!showProfileMenu)} className="flex items-center gap-2 p-2 hover:bg-gray-100 rounded-lg transition-colors">
               <ChevronDown className="w-4 h-4 text-gray-600" />
-              <div className="hidden sm:block text-right">
+              <div className="hidden sm:block text-start">
                 <p className="text-sm font-semibold text-gray-900">{role}</p>
                 <p className="text-xs text-gray-500">{email}</p>
               </div>
@@ -121,11 +121,11 @@ export default function Header({ onMenuClick, userRole, isCollapsed }: HeaderPro
                 <div className="fixed inset-0 z-40" onClick={() => setShowProfileMenu(false)}></div>
                 <div className={`absolute ${isRtl ? 'left-0' : 'right-0'} mt-2 w-56 bg-white rounded-xl shadow-lg border border-gray-200 py-2 z-50`}>
                   <div className="px-4 py-3 border-b border-gray-100">
-                    <p className="text-sm font-semibold text-gray-900 text-right">{role}</p>
-                    <p className="text-xs text-gray-500 text-right">{email}</p>
+                    <p className="text-sm font-semibold text-gray-900 text-start">{role}</p>
+                    <p className="text-xs text-gray-500 text-start">{email}</p>
                   </div>
                   <div className="py-2">
-                    <button onClick={handleLogout} className="w-full px-4 py-2 text-right hover:bg-red-50 transition-colors flex items-center justify-end gap-2 text-red-600">
+                    <button onClick={handleLogout} className="w-full px-4 py-2 text-start hover:bg-red-50 transition-colors flex items-center justify-end gap-2 text-red-600">
                       <span className="text-sm font-medium"> {t('logout')}</span>
                       <LogOut className="w-4 h-4" />
                     </button>

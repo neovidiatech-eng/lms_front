@@ -107,7 +107,7 @@ export default function AddExpenseModal({ isOpen, onClose, onSave, initialData }
 
         <form onSubmit={handleSubmit(onSubmit)} className="p-6 space-y-6">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2 text-right">
+            <label className="block text-sm font-medium text-gray-700 mb-2 text-start">
               {text.description[language]} *
             </label>
             <input
@@ -119,7 +119,7 @@ export default function AddExpenseModal({ isOpen, onClose, onSave, initialData }
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2 text-right">
+              <label className="block text-sm font-medium text-gray-700 mb-2 text-start">
                 {text.category[language]} *
               </label>
               <Controller
@@ -138,7 +138,7 @@ export default function AddExpenseModal({ isOpen, onClose, onSave, initialData }
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2 text-right">
+              <label className="block text-sm font-medium text-gray-700 mb-2 text-start">
                 {text.currency[language]} *
               </label>
               <Controller
@@ -158,7 +158,7 @@ export default function AddExpenseModal({ isOpen, onClose, onSave, initialData }
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2 text-right">
+            <label className="block text-sm font-medium text-gray-700 mb-2 text-start">
               {text.amount[language]} *
             </label>
             <input

@@ -78,7 +78,7 @@ export default function EditCurrencyModal({ isOpen, onClose, currency, onSave }:
 
         <form onSubmit={handleSubmit} className="p-6 space-y-6">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2 text-right">
+            <label className="block text-sm font-medium text-gray-700 mb-2 text-start">
               {text.code[language]} *
             </label>
             <input
@@ -86,7 +86,7 @@ export default function EditCurrencyModal({ isOpen, onClose, currency, onSave }:
               value={formData.code}
               onChange={(e) => setFormData({ ...formData, code: e.target.value.toUpperCase() })}
               placeholder={text.codePlaceholder[language]}
-              className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-right uppercase"
+              className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-start uppercase"
               maxLength={3}
               required
             />
@@ -119,7 +119,7 @@ export default function EditCurrencyModal({ isOpen, onClose, currency, onSave }:
             <div className="p-4">
               {activeTab === 'ar' ? (
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2 text-right">
+                  <label className="block text-sm font-medium text-gray-700 mb-2 text-start">
                     {text.nameAr[language]} *
                   </label>
                   <input
@@ -127,13 +127,13 @@ export default function EditCurrencyModal({ isOpen, onClose, currency, onSave }:
                     value={formData.nameAr}
                     onChange={(e) => setFormData({ ...formData, nameAr: e.target.value })}
                     placeholder={text.nameArPlaceholder[language]}
-                    className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-right"
+                    className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-start"
                     required
                   />
                 </div>
               ) : (
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2 text-left">
+                  <label className="block text-sm font-medium text-gray-700 mb-2 text-end">
                     {text.nameAr[language]} *
                   </label>
                   <input
@@ -141,7 +141,7 @@ export default function EditCurrencyModal({ isOpen, onClose, currency, onSave }:
                     value={formData.nameEn}
                     onChange={(e) => setFormData({ ...formData, nameEn: e.target.value })}
                     placeholder={text.nameArPlaceholder[language]}
-                    className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-left"
+                    className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-end"
                     required
                   />
                 </div>
@@ -150,7 +150,7 @@ export default function EditCurrencyModal({ isOpen, onClose, currency, onSave }:
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2 text-right">
+            <label className="block text-sm font-medium text-gray-700 mb-2 text-start">
               {text.symbol[language]} *
             </label>
             <input
@@ -158,14 +158,14 @@ export default function EditCurrencyModal({ isOpen, onClose, currency, onSave }:
               value={formData.symbol}
               onChange={(e) => setFormData({ ...formData, symbol: e.target.value })}
               placeholder={text.symbolPlaceholder[language]}
-              className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-right"
+              className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-start"
               maxLength={5}
               required
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2 text-right">
+            <label className="block text-sm font-medium text-gray-700 mb-2 text-start">
               {text.exchangeRate[language]} *
             </label>
             <input
@@ -173,12 +173,12 @@ export default function EditCurrencyModal({ isOpen, onClose, currency, onSave }:
               step="0.0001"
               value={formData.exchangeRate}
               onChange={(e) => setFormData({ ...formData, exchangeRate: e.target.value })}
-              className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-right"
+              className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-start"
               min="0.0001"
               required
               disabled={formData.isDefault}
             />
-            <p className="text-xs text-gray-500 mt-1 text-right">{text.exchangeRateHint[language]}</p>
+            <p className="text-xs text-gray-500 mt-1 text-start">{text.exchangeRateHint[language]}</p>
           </div>
 
           <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
@@ -197,7 +197,7 @@ export default function EditCurrencyModal({ isOpen, onClose, currency, onSave }:
             </label>
             {!currency.isDefault && formData.isDefault && (
               <div className="mt-3 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
-                <p className="text-xs text-yellow-800 text-right">{text.defaultWarning[language]}</p>
+                <p className="text-xs text-yellow-800 text-start">{text.defaultWarning[language]}</p>
               </div>
             )}
           </div>

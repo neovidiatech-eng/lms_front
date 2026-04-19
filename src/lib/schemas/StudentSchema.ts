@@ -5,7 +5,7 @@ type TFunc = (key: string, options?: any) => string;
 export const getStudentSchema = (t: TFunc) => z.object({
   name: z.string().min(3, t("validation.min", { count: 3 })),
   email: z.string().email(t("validation.email")),
-  countryCode: z.string().min(1, t("validation.required")),
+  phone_code: z.string().min(1, t("validation.required")),
   phone: z.string().min(1, t("validation.required")),
   gender: z.string().min(1, t("validation.required")),
   birthDate: z.string().optional().or(z.literal('')),
@@ -14,12 +14,12 @@ export const getStudentSchema = (t: TFunc) => z.object({
   status: z.enum(['approved', 'pending', 'rejected']),
   password: z.string().min(6, t("validation.min", { count: 6 })).optional().or(z.literal('')),
 }).superRefine((data, ctx) => {
-  const { countryCode, phone } = data;
+  const { phone_code, phone } = data;
 
   if (!phone) return;
 
   // Egypt
-  if (countryCode === "+20") {
+  if (phone_code === "+20") {
     if (!/^01[0125][0-9]{8}$/.test(phone)) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
@@ -29,7 +29,7 @@ export const getStudentSchema = (t: TFunc) => z.object({
     }
   }
   // Saudi Arabia
-  else if (countryCode === "+966") {
+  else if (phone_code === "+966") {
     if (!/^5[0-9]{8}$/.test(phone)) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
@@ -39,7 +39,7 @@ export const getStudentSchema = (t: TFunc) => z.object({
     }
   }
   // UAE
-  else if (countryCode === "+971") {
+  else if (phone_code === "+971") {
     if (!/^5[0124568][0-9]{7}$/.test(phone)) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
@@ -49,7 +49,7 @@ export const getStudentSchema = (t: TFunc) => z.object({
     }
   }
   // Kuwait
-  else if (countryCode === "+965") {
+  else if (phone_code === "+965") {
     if (!/^[569][0-9]{7}$/.test(phone)) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,

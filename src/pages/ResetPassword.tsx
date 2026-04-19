@@ -1,4 +1,4 @@
-import { useState } from "react";
+ import { useState } from "react";
 import { Eye, EyeOff, ArrowLeft, ArrowRight } from "lucide-react";
 import { useLanguage } from "../contexts/LanguageContext";
 import { useForm, Controller } from "react-hook-form";
@@ -6,8 +6,8 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { ResetPasswordInput, getResetPasswordSchema } from "../lib/schemas/AuthSchemas";
 import { resetPassword, resendCode } from "../services/AuthServices";
 import { useNavigate } from "react-router-dom";
-import { message } from "antd";
 import OtpInput from "../components/ui/OtpInput";
+import ErrorService from "../utils/ErrorService";
 
 export default function ResetPassword() {
   const navigate = useNavigate();
@@ -39,7 +39,7 @@ export default function ResetPassword() {
         password: data.password,
         confirm: data.confirmPassword,
       });
-      message.success(t("changesSavedSuccess"));
+      ErrorService.success(t("changes Saved Success"));
       sessionStorage.removeItem("reset_email");
       navigate("/login");
     } catch (error) {
@@ -52,7 +52,7 @@ export default function ResetPassword() {
     setIsResending(true);
     try {
       await resendCode({ email });
-      message.success(t("codeResentSuccess") || "Code resent successfully");
+      ErrorService.success(t("codeSentSuccess") || "Code resent successfully");
     } catch (error) {
       console.error("Resend failed:", error);
     } finally {

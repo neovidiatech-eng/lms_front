@@ -55,7 +55,7 @@ export default function ViewParentModal({ parent, onClose }: ViewParentModalProp
             <div className="w-20 h-20 bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl flex items-center justify-center shadow-lg">
               <span className="text-white font-bold text-3xl">{parent.name[0]}</span>
             </div>
-            <div className="text-right flex-1">
+            <div className="text-start flex-1">
               <h3 className="text-2xl font-bold text-gray-900">{parent.name}</h3>
               <p className="text-gray-600 mt-1">{parent.email}</p>
             </div>
@@ -98,7 +98,7 @@ export default function ViewParentModal({ parent, onClose }: ViewParentModalProp
               </div>
               {parent.studentNames.length > 0 ? (
                 <div>
-                  <span className="text-gray-600 text-sm block mb-2 text-right">{text.studentNames[language]}</span>
+                  <span className="text-gray-600 text-sm block mb-2 text-start">{text.studentNames[language]}</span>
                   <div className="space-y-2">
                     {parent.studentNames.map((studentName, index) => (
                       <div key={index} className="bg-white p-3 rounded-lg border border-gray-200">

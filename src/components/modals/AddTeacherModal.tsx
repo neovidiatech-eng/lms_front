@@ -1,4 +1,5 @@
-import { X, Users } from 'lucide-react';
+import { useState } from 'react';
+import { X, Users, Eye, EyeOff, Lock } from 'lucide-react';
 import { useLanguage } from '../../contexts/LanguageContext';
 import CustomSelect from '../ui/CustomSelect';
 import { TeacherFormData, getTeacherSchema } from '../../lib/schemas/TeacherSchema';
@@ -17,6 +18,7 @@ interface AddTeacherModalProps {
 
 export default function AddTeacherModal({ isOpen, onClose, onSubmit }: AddTeacherModalProps) {
   const { language, t } = useLanguage();
+  const [showPassword, setShowPassword] = useState(false);
   const { data: currenciesData } = useCurrency();
   const { data: subjectsData, isLoading: isLoadingSubjects, error, isError } = useSubjects();
 
@@ -79,13 +81,14 @@ export default function AddTeacherModal({ isOpen, onClose, onSubmit }: AddTeache
       <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh]  overflow-y-auto no-scrollbar">
         {/* Header */}
         <div className="sticky top-0 bg-primary px-6 py-4 flex items-center justify-between rounded-t-2xl">
-          <button onClick={onClose} className="p-2 hover:bg-white/20 rounded-lg transition-colors">
-            <X className="w-5 h-5 text-white/80" />
-          </button>
+
           <h2 className="text-xl font-bold text-white flex items-center gap-2">
             <Users className="w-6 h-6" />
             <span>{t('addTeacher')}</span>
           </h2>
+          <button onClick={onClose} className="p-2 hover:bg-white/20 rounded-lg transition-colors">
+            <X className="w-5 h-5 text-white/80" />
+          </button>
         </div>
 
         {/* Form */}
@@ -94,7 +97,7 @@ export default function AddTeacherModal({ isOpen, onClose, onSubmit }: AddTeache
             {/* Row 1: Name and Email */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {/* Email */}
-              <div className="text-right">
+              <div className="text-start">
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   {t('email')} *
                 </label>
@@ -102,14 +105,14 @@ export default function AddTeacherModal({ isOpen, onClose, onSubmit }: AddTeache
                   type="email"
                   placeholder="example@email.com"
                   {...register('email')}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary text-right"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary text-start"
                   dir="ltr"
                 />
                 {errors.email && <p className="text-red-500 text-xs mt-1">{errors.email.message}</p>}
               </div>
 
               {/* Name */}
-              <div className="text-right">
+              <div className="text-start">
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   {t('name')} *
                 </label>
@@ -117,8 +120,7 @@ export default function AddTeacherModal({ isOpen, onClose, onSubmit }: AddTeache
                   type="text"
                   placeholder={t('name')}
                   {...register('name')}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary text-right"
-                  dir="rtl"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary text-start"
                 />
                 {errors.name && <p className="text-red-500 text-xs mt-1">{errors.name.message}</p>}
               </div>
@@ -127,22 +129,28 @@ export default function AddTeacherModal({ isOpen, onClose, onSubmit }: AddTeache
             {/* Row 2: Password and Phone */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {/* Password */}
-              <div className="text-right">
+              <div className="text-start relative">
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   {t('password')} *
                 </label>
-                <input
-                  type="password"
-                  placeholder="••••••••"
-                  {...register('password')}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary text-left bg-gray-50"
-                  dir="ltr"
-                />
+                <div className="relative">
+                  <Lock className="absolute start-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5 pointer-events-none" />
+                  <input
+                    type={showPassword ? 'text' : 'password'}
+                    placeholder="••••••••"
+                    {...register('password')}
+                    className="w-full px-12 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary text-start bg-gray-50 transition-all"
+                    dir="ltr"
+                  />
+                  <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute end-4 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors">
+                    {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                  </button>
+                </div>
                 {errors.password && <p className="text-red-500 text-xs mt-1">{errors.password.message}</p>}
               </div>
 
               {/* Phone */}
-              <div className="text-right">
+              <div className="text-start">
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   {t('phone')} *
                 </label>
@@ -150,7 +158,7 @@ export default function AddTeacherModal({ isOpen, onClose, onSubmit }: AddTeache
                   type="tel"
                   placeholder="+2012345678"
                   {...register('phone')}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary text-right"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary text-start"
                   dir="ltr"
                 />
                 {errors.phone && <p className="text-red-500 text-xs mt-1">{errors.phone.message}</p>}
@@ -174,7 +182,7 @@ export default function AddTeacherModal({ isOpen, onClose, onSubmit }: AddTeache
               />
 
               {/* Hourly Rate */}
-              <div className="text-right">
+              <div className="text-start">
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   {t('hourlyRate')}
                 </label>
@@ -182,7 +190,7 @@ export default function AddTeacherModal({ isOpen, onClose, onSubmit }: AddTeache
                   type="number"
                   placeholder="150"
                   {...register('hourlyRate', { valueAsNumber: true })}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary text-right"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary text-start"
                   dir="ltr"
                 />
               </div>
@@ -220,7 +228,7 @@ export default function AddTeacherModal({ isOpen, onClose, onSubmit }: AddTeache
             </div>
 
             {/* Subjects */}
-            <div className="text-right">
+            <div className="text-start">
               <label className="block text-sm font-medium text-gray-700 mb-3">
                 {t('subject')}
               </label>
@@ -240,7 +248,7 @@ export default function AddTeacherModal({ isOpen, onClose, onSubmit }: AddTeache
                           checked={subjectsValue.includes(subject.id)}
                           onChange={(checked) => handleSubjectToggle(subject.id, checked)}
                         />
-                        <span className="text-sm text-gray-700 flex-1 text-right">
+                        <span className="text-sm text-gray-700 flex-1 text-start">
                           {language === 'ar' ? subject.name_ar : (subject.name_en || subject.name_ar)}
                         </span>
                       </label>

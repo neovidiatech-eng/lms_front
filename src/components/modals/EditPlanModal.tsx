@@ -128,7 +128,7 @@ export default function EditPlanModal({
         <form onSubmit={handleSubmit} className="p-6 space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2 text-right">
+              <label className="block text-sm font-medium text-gray-700 mb-2 text-start">
                 {text.nameAr[language]}
               </label>
               <input
@@ -137,13 +137,13 @@ export default function EditPlanModal({
                 onChange={(e) =>
                   setFormData({ ...formData, name: e.target.value })
                 }
-                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-right"
+                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-start"
                 required
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2 text-right">
+              <label className="block text-sm font-medium text-gray-700 mb-2 text-start">
                 {text.nameEn[language]}
               </label>
               <input
@@ -152,14 +152,14 @@ export default function EditPlanModal({
                 onChange={(e) =>
                   setFormData({ ...formData, nameEn: e.target.value })
                 }
-                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-left"
+                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-end"
                 required
               />
             </div>
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2 text-right">
+            <label className="block text-sm font-medium text-gray-700 mb-2 text-start">
               {text.description[language]}
             </label>
             <textarea
@@ -167,7 +167,7 @@ export default function EditPlanModal({
               onChange={(e) =>
                 setFormData({ ...formData, description: e.target.value })
               }
-              className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-right resize-none"
+              className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-start resize-none"
               rows={3}
               required
             />
@@ -175,7 +175,7 @@ export default function EditPlanModal({
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2 text-right">
+              <label className="block text-sm font-medium text-gray-700 mb-2 text-start">
                 {text.price[language]}
               </label>
               <input
@@ -184,14 +184,14 @@ export default function EditPlanModal({
                 onChange={(e) =>
                   setFormData({ ...formData, price: e.target.value })
                 }
-                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-right"
+                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-start"
                 min="0"
                 required
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2 text-right">
+              <label className="block text-sm font-medium text-gray-700 mb-2 text-start">
                 {text.currency[language]}
               </label>
               <CustomSelect
@@ -209,7 +209,7 @@ export default function EditPlanModal({
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2 text-right">
+              <label className="block text-sm font-medium text-gray-700 mb-2 text-start">
                 {text.duration[language]}
               </label>
               <input
@@ -218,14 +218,14 @@ export default function EditPlanModal({
                 onChange={(e) =>
                   setFormData({ ...formData, duration: e.target.value })
                 }
-                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-right"
+                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-start"
                 min="1"
                 required
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2 text-right">
+              <label className="block text-sm font-medium text-gray-700 mb-2 text-start">
                 {text.sessionsCount[language]}
               </label>
               <input
@@ -237,7 +237,7 @@ export default function EditPlanModal({
                     sessionsCount: parseInt(e.target.value) || 0,
                   })
                 }
-                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-right"
+                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-start"
                 min="0"
                 required
               />
@@ -274,7 +274,7 @@ export default function EditPlanModal({
                     value={feature}
                     onChange={(e) => updateFeature(index, e.target.value)}
                     placeholder={text.featurePlaceholder[language]}
-                    className="flex-1 px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-right"
+                    className="flex-1 px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-start"
                   />
                 </div>
               ))}
@@ -297,7 +297,7 @@ export default function EditPlanModal({
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2 text-right">
+              <label className="block text-sm font-medium text-gray-700 mb-2 text-start">
                 {text.status[language]}
               </label>
               <CustomSelect

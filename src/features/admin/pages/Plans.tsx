@@ -158,7 +158,7 @@ export default function Plans() {
           features: item.features || [],
 
           isPopular: item.bestSeller,
-          status: item.active ? "active" : "inactive",
+          status: (item.active ? "active" : "inactive") as "active" | "inactive",
         }));
         setPlans(formatted);
       } catch (error) {
@@ -247,7 +247,7 @@ export default function Plans() {
     }
   };
   return (
-    <div className="p-6 space-y-6">
+    <div className="p-6 space-y-6" dir={language === 'ar' ? 'rtl' : 'ltr'}>
       <div className="flex items-center justify-between">
         <h1 className="text-3xl font-bold text-gray-900">
           {text.title[language]}
@@ -287,7 +287,7 @@ export default function Plans() {
 
               <div className="p-6">
                 <div className="flex items-start justify-between mb-4">
-                  <div className="flex-1 text-right">
+                  <div className="flex-1 text-start">
                     <h3 className="text-2xl font-bold text-gray-900 mb-2">
                       {language === "ar" ? plan.name : plan.nameEn}
                     </h3>
@@ -309,7 +309,7 @@ export default function Plans() {
                     <span className="text-5xl font-bold text-gray-900">
                       {plan.price}
                     </span>
-                    <div className="text-right">
+                    <div className="text-start">
                       <div className="text-gray-600">{plan.currency}</div>
                       <div className="text-sm text-gray-500">
                         /{text.month[language]}
@@ -322,13 +322,13 @@ export default function Plans() {
                 </div>
 
                 <div className="space-y-3 mb-6">
-                  <h4 className="text-sm font-semibold text-gray-900 text-right">
+                  <h4 className="text-sm font-semibold text-gray-900 text-start">
                     {text.features[language]}
                   </h4>
                   {plan.features.map((feature, index) => (
                     <div
                       key={index}
-                      className="flex items-start gap-3 text-right"
+                      className="flex items-start gap-3 text-start"
                     >
                       <CheckCircle className="w-5 h-5 text-green-500 flex-shrink-0 mt-0.5" />
                       <span className="text-sm text-gray-700 flex-1">

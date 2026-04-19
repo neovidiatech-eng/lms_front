@@ -390,14 +390,14 @@ const handleSaveTransaction = (data: TransactionFormData) => {
             placeholder={text.search[language]}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full px-4 py-3 pr-12 border border-gray-300 rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent text-right"
+            className="w-full px-4 py-3 pr-12 border border-gray-300 rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent text-start"
           />
         </div>
         <div className="grid grid-cols-2 gap-3">
           <select
             value={filterType}
             onChange={(e) => setFilterType(e.target.value)}
-            className="px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-primary text-right bg-white appearance-none"
+            className="px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-primary text-start bg-white appearance-none"
           >
             <option value="all">{text.allTypes[language]}</option>
             <option value="income">{text.income[language]}</option>
@@ -406,7 +406,7 @@ const handleSaveTransaction = (data: TransactionFormData) => {
           <select
             value={filterStatus}
             onChange={(e) => setFilterStatus(e.target.value)}
-            className="px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-primary text-right bg-white appearance-none"
+            className="px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-primary text-start bg-white appearance-none"
           >
             <option value="all">{text.allStatuses[language]}</option>
             <option value="completed">{text.completed[language]}</option>
@@ -426,27 +426,27 @@ const handleSaveTransaction = (data: TransactionFormData) => {
             <table className="w-full" dir="rtl">
               <thead className="bg-gray-50 border-b border-gray-200">
                 <tr>
-                  <th className="px-5 py-4 text-right text-sm font-semibold text-gray-800">{text.type[language]}</th>
-                  <th className="px-5 py-4 text-right text-sm font-semibold text-gray-800">{text.student[language]}</th>
-                  <th className="px-5 py-4 text-right text-sm font-semibold text-gray-800">{text.amount[language]}</th>
-                  <th className="px-5 py-4 text-right text-sm font-semibold text-gray-800">{text.paymentMethod[language]}</th>
-                  <th className="px-5 py-4 text-right text-sm font-semibold text-gray-800">{text.date[language]}</th>
-                  <th className="px-5 py-4 text-right text-sm font-semibold text-gray-800">{text.status[language]}</th>
-                  <th className="px-5 py-4 text-right text-sm font-semibold text-gray-800">{text.actions[language]}</th>
+                  <th className="px-5 py-4 text-start text-sm font-semibold text-gray-800">{text.type[language]}</th>
+                  <th className="px-5 py-4 text-start text-sm font-semibold text-gray-800">{text.student[language]}</th>
+                  <th className="px-5 py-4 text-start text-sm font-semibold text-gray-800">{text.amount[language]}</th>
+                  <th className="px-5 py-4 text-start text-sm font-semibold text-gray-800">{text.paymentMethod[language]}</th>
+                  <th className="px-5 py-4 text-start text-sm font-semibold text-gray-800">{text.date[language]}</th>
+                  <th className="px-5 py-4 text-start text-sm font-semibold text-gray-800">{text.status[language]}</th>
+                  <th className="px-5 py-4 text-start text-sm font-semibold text-gray-800">{text.actions[language]}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100">
                 {filteredTransactions.map((transaction) => (
                   <tr key={transaction.id} className="hover:bg-gray-50 transition-colors">
                     <td className="px-5 py-4">
-                      <div className="flex items-center gap-2 justify-end">
+                      <div className="flex items-center gap-2 justify-start">
                         <span className={`text-sm font-medium ${transaction.type === 'income' ? 'text-green-700' : 'text-orange-700'}`}>
                           {transaction.type === 'income' ? text.income[language] : text.teacher_expense[language]}
                         </span>
                         <span className="text-lg">{transaction.type === 'income' ? '💰' : '👨‍🏫'}</span>
                       </div>
                     </td>
-                    <td className="px-5 py-4 text-right">
+                    <td className="px-5 py-4 text-start">
                       <span className="text-sm font-medium text-gray-900">
                         {transaction.type === 'income' ? transaction.studentName : transaction.teacherName}
                       </span>
@@ -454,21 +454,21 @@ const handleSaveTransaction = (data: TransactionFormData) => {
                         <p className="text-xs text-gray-400">{transaction.sessionCount} حصة × {transaction.sessionDuration === 60 ? '60' : '30'} دقيقة</p>
                       )}
                     </td>
-                    <td className="px-5 py-4 text-right">
-                      <div className="flex items-center gap-1 justify-end">
+                    <td className="px-5 py-4 text-start">
+                      <div className="flex items-center gap-1 justify-start">
                         <span className={`text-sm font-bold ${transaction.type === 'income' ? 'text-green-600' : 'text-orange-600'}`}>
                           {convertAmount(transaction.amount, transaction.currency).toFixed(2)}
                         </span>
                         <span className="text-xs text-gray-500">{currentSymbol}</span>
                       </div>
                       {transaction.currency !== selectedCurrency && (
-                        <p className="text-xs text-gray-400 text-right">{transaction.amount} {transaction.currency}</p>
+                        <p className="text-xs text-gray-400 text-start">{transaction.amount} {transaction.currency}</p>
                       )}
                     </td>
-                    <td className="px-5 py-4 text-right">
+                    <td className="px-5 py-4 text-start">
                       <span className="text-sm text-gray-700">{transaction.paymentMethod || '-'}</span>
                     </td>
-                    <td className="px-5 py-4 text-right">
+                    <td className="px-5 py-4 text-start">
                       <span className="text-sm text-gray-900">{transaction.date}</span>
                     </td>
                     <td className="px-5 py-4">

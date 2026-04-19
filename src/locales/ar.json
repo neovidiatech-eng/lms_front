@@ -1,4 +1,7 @@
 {
+  "loginSuccess": "تم تسجيل الدخول بنجاح",
+  "verifySuccess": "تم التحقق من الحساب بنجاح",
+  "codeSentSuccess": "تم إرسال رمز التحقق بنجاح",
   "createNewStudentAccount": "إنشاء حساب طالب جديد",
   "orLogin": "أو سجل الدخول",
   "email": "البريد الإلكتروني",
@@ -62,6 +65,7 @@
   "roleManagement": "إدارة الصلاحيات",
   "addNewRole": "إضافة دور جديد",
   "editRole": "تعديل الدور",
+  "totalRoles": "إجمالي الأدوار",
   "roleName": "اسم الدور",
   "description": "الوصف",
   "permissionsCount": "عدد الصلاحيات",

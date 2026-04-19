@@ -157,7 +157,7 @@ export default function Parents() {
               placeholder={text.search[language]}
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className={`w-full ${language === 'ar' ? 'pr-12 text-right' : 'pl-12'} py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent`}
+              className={`w-full ${language === 'ar' ? 'pr-12' : 'pl-12'} py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent text-start`}
             />
           </div>
         </div>
@@ -166,11 +166,11 @@ export default function Parents() {
           <table className="w-full">
             <thead className="bg-gray-50 border-b border-gray-100">
               <tr>
-                <th className="px-6 py-4 text-right text-sm font-semibold text-gray-700">{text.parentName[language]}</th>
-                <th className="px-6 py-4 text-right text-sm font-semibold text-gray-700">{text.email[language]}</th>
-                <th className="px-6 py-4 text-right text-sm font-semibold text-gray-700">{text.phone[language]}</th>
-                <th className="px-6 py-4 text-right text-sm font-semibold text-gray-700">{text.children[language]}</th>
-                <th className="px-6 py-4 text-right text-sm font-semibold text-gray-700">{text.actions[language]}</th>
+                <th className="px-6 py-4 text-start text-sm font-semibold text-gray-700">{text.parentName[language]}</th>
+                <th className="px-6 py-4 text-start text-sm font-semibold text-gray-700">{text.email[language]}</th>
+                <th className="px-6 py-4 text-start text-sm font-semibold text-gray-700">{text.phone[language]}</th>
+                <th className="px-6 py-4 text-start text-sm font-semibold text-gray-700">{text.children[language]}</th>
+                <th className="px-6 py-4 text-start text-sm font-semibold text-gray-700">{text.actions[language]}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">
@@ -184,15 +184,15 @@ export default function Parents() {
                       <span className="font-medium text-gray-900">{parent.name}</span>
                     </div>
                   </td>
-                  <td className="px-6 py-4 text-gray-700 text-right">{parent.email}</td>
-                  <td className="px-6 py-4 text-gray-700 text-right">{parent.phone}</td>
-                  <td className="px-6 py-4 text-right">
+                  <td className="px-6 py-4 text-gray-700 text-start">{parent.email}</td>
+                  <td className="px-6 py-4 text-gray-700 text-start">{parent.phone}</td>
+                  <td className="px-6 py-4 text-start">
                     <span className="inline-flex items-center gap-2 px-3 py-1 bg-primary-light text-white rounded-full text-sm font-medium">
                       {parent.numberOfChildren} {text.students[language]}
                     </span>
                   </td>
-                  <td className="px-6 py-4">
-                    <div className="flex items-center gap-2 justify-end">
+                  <td className="px-6 py-4 text-start">
+                    <div className="flex items-center gap-2 justify-start">
                       <button
                         onClick={() => handleDeleteParent(parent.id)}
                         className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"

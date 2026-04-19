@@ -1,7 +1,9 @@
 import { DatePicker, ConfigProvider } from 'antd';
 import ar_EG from 'antd/locale/ar_EG';
+import en_US from 'antd/locale/en_US';
 import dayjs from 'dayjs';
 import 'dayjs/locale/ar';
+import { useTranslation } from 'react-i18next';
 
 interface DatePickerFieldProps {
   value?: string;        // YYYY-MM-DD or YYYY-MM string
@@ -24,6 +26,8 @@ export default function DatePickerField({
   disabled = false,
   picker = 'date',
 }: DatePickerFieldProps) {
+  const { i18n } = useTranslation();
+  const language = i18n.language.split('-')[0];
   const dayjsValue = value ? dayjs(value) : null;
 
   const formatMap: Record<string, string> = {
@@ -45,11 +49,11 @@ export default function DatePickerField({
   return (
     <div className={className}>
       {label && (
-        <label className="block text-sm font-medium text-gray-700 mb-2 text-right">
+        <label className="block text-sm font-medium text-gray-700 mb-2 text-start">
           {label}
         </label>
       )}
-      <ConfigProvider locale={ar_EG} direction="rtl"
+      <ConfigProvider locale={language === 'ar' ? ar_EG : en_US} direction={language === 'ar' ? 'rtl' : 'ltr'}
         theme={{
           components: {
             DatePicker: {
@@ -71,7 +75,7 @@ export default function DatePickerField({
           status={error ? 'error' : undefined}
         />
       </ConfigProvider>
-      {error && <p className="text-red-500 text-xs mt-1 text-right">{error}</p>}
+      {error && <p className="text-red-500 text-xs mt-1 text-start">{error}</p>}
     </div>
   );
 }

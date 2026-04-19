@@ -149,7 +149,7 @@ export default function ViewPlanModal({ isOpen, onClose, plan }: ViewPlanModalPr
               {plan.features.map((feature, index) => (
                 <div key={index} className="flex items-start gap-3 bg-white rounded-lg p-3 border border-purple-200">
                   <CheckCircle className="w-5 h-5 text-green-500 flex-shrink-0 mt-0.5" />
-                  <span className="text-sm text-gray-700 flex-1 text-right">{feature}</span>
+                  <span className="text-sm text-gray-700 flex-1 text-start">{feature}</span>
                 </div>
               ))}
             </div>
