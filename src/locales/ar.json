@@ -403,5 +403,7 @@
   "packageInfo": "تفاصيل الباقة",
   "packageName": "الباقة",
   "sessionsRemaining": "الحصص المتبقية",
-  "scheduledDays": "أيام الحصة"
+  "scheduledDays": "أيام الحصة",
+  "grid": "شبكة",
+  "list": "قائمة"
 }

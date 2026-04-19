@@ -423,7 +423,7 @@ const handleSaveTransaction = (data: TransactionFormData) => {
       ) : (
         <div className="bg-white rounded-2xl border border-gray-200 overflow-hidden shadow-sm">
           <div className="overflow-x-auto">
-            <table className="w-full" dir="rtl">
+            <table className="w-full" dir={language === "ar" ? "rtl" : "ltr"}>
               <thead className="bg-gray-50 border-b border-gray-200">
                 <tr>
                   <th className="px-5 py-4 text-start text-sm font-semibold text-gray-800">{text.type[language]}</th>

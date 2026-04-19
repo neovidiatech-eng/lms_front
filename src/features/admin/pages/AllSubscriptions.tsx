@@ -240,7 +240,7 @@ export default function AllSubscriptions() {
           </div>
         ) : (
           <div className="overflow-x-auto">
-            <table className="w-full" dir="rtl">
+            <table className="w-full" dir={language === "ar" ? "rtl" : "ltr"}>
               <thead>
                 <tr className="border-b border-gray-200 bg-gray-50">
                   <th className="px-4 py-4 text-start text-sm font-semibold text-gray-700">

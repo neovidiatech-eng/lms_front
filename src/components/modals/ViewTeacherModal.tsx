@@ -63,14 +63,13 @@ export default function ViewTeacherModal({ isOpen, onClose, teacher }: ViewTeach
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-5xl max-h-[90vh]  overflow-y-auto no-scrollbar">
-        <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between rounded-t-2xl z-10">
+      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-5xl max-h-[90vh]  overflow-y-auto no-scrollbar" dir={language === "ar" ? "rtl" : "ltr"}>
+        <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between rounded-t-2xl z-10" >
+          <h2 className="text-xl font-bold text-gray-900">{teacher.user?.name}</h2>
           <button onClick={onClose} className="p-2 hover:bg-gray-100 rounded-lg transition-colors">
             <X className="w-5 h-5 text-gray-500" />
           </button>
-          <h2 className="text-xl font-bold text-gray-900">{teacher.user?.name}</h2>
         </div>
-
         <div className="p-6">
           <div className="flex flex-col items-center mb-8">
             <div className="w-24 h-24 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center mb-4 shadow-lg">
@@ -112,7 +111,7 @@ export default function ViewTeacherModal({ isOpen, onClose, teacher }: ViewTeach
           </div>
 
           <div className="mb-8">
-            <div className="flex items-center gap-2 mb-4 justify-end">
+            <div className="flex items-center gap-2 mb-4 justify-start">
               <h4 className="text-lg font-bold text-gray-900">{t('statistics') || (language === 'ar' ? 'الإحصائيات' : 'Statistics')}</h4>
             </div>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -148,7 +147,7 @@ export default function ViewTeacherModal({ isOpen, onClose, teacher }: ViewTeach
           </div>
 
           <div>
-            <div className="flex items-center gap-2 mb-4 justify-end">
+            <div className="flex items-center gap-2 mb-4 justify-start">
               <DollarSign className="w-5 h-5 text-green-600" />
               <h4 className="text-lg font-bold text-gray-900">{t('earningsDetails') || (language === 'ar' ? 'تفاصيل الأرباح' : 'Earnings Details')}</h4>
             </div>
@@ -202,7 +201,7 @@ export default function ViewTeacherModal({ isOpen, onClose, teacher }: ViewTeach
 
           {teacherSessions.length > 0 && (
             <div className="mt-8">
-              <div className="flex items-center gap-2 mb-4 justify-end">
+              <div className="flex items-center gap-2 mb-4 justify-start">
                 <h4 className="text-lg font-bold text-gray-900">{t('recentSessions') || (language === 'ar' ? 'آخر الحصص' : 'Recent Sessions')}</h4>
               </div>
               <div className="space-y-2">
