@@ -6,6 +6,7 @@ import {
 } from "../services/ExamServices";
 import { useQuery } from "@tanstack/react-query";
 import { getStudents } from "../../admin/services/StudentServices";
+import { deleteExam } from "../services/ExamServices";
 
 export const useStudents = () => {
   return useQuery({
@@ -29,8 +30,6 @@ export const useExamDetails = (id: string, enabled: boolean) => {
   });
 };
 
-import { deleteExam } from "../services/ExamServices";
-
 export const useDeleteExam = () => {
   const queryClient = useQueryClient();
 
@@ -44,10 +43,8 @@ export const useDeleteExam = () => {
 };
 
 //create exam
-
 export const useCreateExam = () => {
   const queryClient = useQueryClient();
-
   return useMutation({
     mutationFn: createExam,
     onSuccess: () => {

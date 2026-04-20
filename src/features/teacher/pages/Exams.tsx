@@ -11,6 +11,7 @@ import {
   useExams,
 } from "../hooks/useExams";
 import ViewExamModal from "../../../components/modals/ViewExamModal";
+import { ExamFormData } from "../../../lib/schemas/ExamSchema";
 
 interface Exam {
   id: string;
@@ -21,7 +22,7 @@ interface Exam {
   studentId?: string;
   subjectId?: string;
   dueDate: string;
-  duration: string;
+  duration: number;
   grade: number;
   status: "upcoming" | "completed";
 }
@@ -34,23 +35,17 @@ export default function Exams() {
   const [currentPage, setCurrentPage] = useState(1);
   const [showFilters, setShowFilters] = useState(false);
   const [showAddModal, setShowAddModal] = useState(false);
-  const [editingExam, setEditingExam] = useState<Exam | null>(null);
+  const [editingExam, setEditingExam] = useState<ExamFormData | null>(null);
   const [selectedExamId, setSelectedExamId] = useState<string | null>(null);
   const [showModal, setShowModal] = useState(false);
+
   const deleteExamMutation = useDeleteExam();
-  const { data: examDetails, isLoading: examLoading } = useExamDetails(
-    selectedExamId!,
+
+  const { data: examDetails } = useExamDetails(
+    selectedExamId || "",
     !!selectedExamId && showModal,
   );
-  const handleEditExam = (exam: Exam) => {
-    setEditingExam(exam);
-    setShowAddModal(true);
-  };
 
-  const handleCloseModal = () => {
-    setShowAddModal(false);
-    setEditingExam(null);
-  };
   const { confirm, ConfirmDialog } = useConfirm();
 
   const [filters, setFilters] = useState({
@@ -77,11 +72,10 @@ export default function Exams() {
       dueDate: exam.dueDate
         ? new Date(exam.dueDate).toISOString().split("T")[0]
         : "",
-      duration: `${exam.duration} min`,
+      duration: exam.duration,
       grade: exam.grade,
       status: exam.status === "pending" ? "upcoming" : "completed",
     })) || [];
-
   const text = {
     title: { ar: "الامتحانات", en: "Exams" },
     search: { ar: "بحث...", en: "Search..." },
@@ -98,8 +92,26 @@ export default function Exams() {
     columnStatus: { ar: "الحالة", en: "Status" },
     columnActions: { ar: "الإجراءات", en: "Actions" },
   };
+  const handleEditExam = (exam: Exam) => {
+    setEditingExam({
+      title: exam.title,
+      subjectId: exam.subjectId || "",
+      studentId: exam.studentId || "",
+      teacher: exam.teacher,
+      dueDate: exam.dueDate,
+      duration: exam.duration,
+      grade: exam.grade,
+      status: exam.status,
+    });
 
-  // FILTERS
+    setShowAddModal(true);
+  };
+
+  const handleCloseModal = () => {
+    setShowAddModal(false);
+    setEditingExam(null);
+  };
+
   const filteredExams = exams.filter((exam) => {
     const matchesSearch =
       exam.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -122,7 +134,7 @@ export default function Exams() {
   );
 
   // CREATE
-  const handleSaveExam = async (examData: any) => {
+  const handleSaveExam = async (examData: ExamFormData) => {
     try {
       await createExam.mutateAsync({
         title: examData.title,
@@ -130,8 +142,8 @@ export default function Exams() {
         studentId: examData.studentId,
         subjectId: examData.subjectId,
         status: examData.status === "upcoming" ? "pending" : "completed",
-        dueDate: examData.dueDate,
-        duration: Number(examData.duration),
+        dueDate: new Date(examData.dueDate).toISOString(), // ✅ هنا الحل
+        duration: examData.duration,
       });
 
       setShowAddModal(false);
@@ -162,10 +174,9 @@ export default function Exams() {
 
   return (
     <div className="space-y-6">
-      {/* HEADER */}
       <div className="flex items-center justify-between">
         <h1 className="text-3xl font-bold text-gray-900">
-          {text.title[language]}
+          {language === "ar" ? "الامتحانات" : "Exams"}
         </h1>
 
         <button
@@ -173,11 +184,9 @@ export default function Exams() {
           className="flex items-center gap-2 px-6 py-3 btn-primary text-white rounded-xl"
         >
           <Plus className="w-5 h-5" />
-          {text.addExam[language]}
+          {language === "ar" ? "إضافة امتحان" : "Add Exam"}
         </button>
       </div>
-
-      {/* MODAL */}
 
       <AddExamModal
         isOpen={showAddModal}
@@ -349,6 +358,7 @@ export default function Exams() {
         }}
         exam={examDetails?.data}
       />
+
       {ConfirmDialog}
     </div>
   );

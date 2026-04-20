@@ -6,16 +6,14 @@ import { Resolver, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ExamFormData, getExamSchema } from "../../lib/schemas/ExamSchema";
 import { useEffect } from "react";
-
-interface Exam extends ExamFormData {
-  id: string;
-}
+import { useStudents } from "../../features/admin/hooks/useStudents";
+import { useSubjects } from "../../features/admin/hooks/useSubjects";
 
 interface AddExamModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onAdd: (exam: Exam) => void;
-  initialData?: Exam | null;
+  onAdd: (exam: ExamFormData) => void;
+  initialData?: ExamFormData | null;
 }
 
 export default function AddExamModal({
@@ -25,68 +23,18 @@ export default function AddExamModal({
   initialData,
 }: AddExamModalProps) {
   const { language, t } = useLanguage();
+  const { data } = useStudents();
+  const { data: subjData } = useSubjects();
 
-  const mockStudents = [
-    {
-      value: "أحمد محمد",
-      label: language === "ar" ? "أحمد محمد" : "Ahmed Mohamed",
-    },
-    {
-      value: "سارة محمود",
-      label: language === "ar" ? "سارة محمود" : "Sarah Mahmoud",
-    },
-    { value: "زياد علي", label: language === "ar" ? "زياد علي" : "Zeyad Ali" },
-    {
-      value: "مريم إبراهيم",
-      label: language === "ar" ? "مريم إبراهيم" : "Maryam Ibrahim",
-    },
-    {
-      value: "ياسين حسن",
-      label: language === "ar" ? "ياسين حسن" : "Yassin Hassan",
-    },
-  ];
+  const subjects = subjData?.subjects.map((s) => ({
+    value: s?.id,
+    label: s?.name_ar,
+  }));
 
-  const {
-    register,
-    handleSubmit,
-    reset,
-    setValue,
-    watch,
-    formState: { errors },
-  } = useForm<ExamFormData>({
-    resolver: zodResolver(getExamSchema(t)) as Resolver<ExamFormData>,
-    defaultValues: {
-      grade: 100,
-      status: "upcoming",
-      teacher: "أ. محمد الأحمدي", // Default teacher name
-    },
-  });
-
-  useEffect(() => {
-    if (isOpen) {
-      if (initialData) {
-        const sanitizedData = {
-          ...initialData,
-          duration:
-            typeof initialData.duration === "string"
-              ? initialData.duration.replace(/[^0-9]/g, "")
-              : initialData.duration,
-        };
-        reset(sanitizedData);
-      } else {
-        reset({
-          title: "",
-          subject: "",
-          teacher: "أ. محمد الأحمدي",
-          studentName: "",
-          dueDate: "",
-          duration: "",
-          grade: 100,
-          status: "upcoming",
-        });
-      }
-    }
-  }, [initialData, reset, isOpen]);
+  const students = data?.data.studentsData?.map((s) => ({
+    value: s?.id,
+    label: s?.user?.name,
+  }));
 
   const text = {
     title: {
@@ -110,12 +58,43 @@ export default function AddExamModal({
     },
   };
 
+  const {
+    register,
+    handleSubmit,
+    reset,
+    setValue,
+    watch,
+    formState: { errors },
+  } = useForm<ExamFormData>({
+    resolver: zodResolver(getExamSchema(t)) as Resolver<ExamFormData>,
+    defaultValues: {
+      grade: 100,
+      status: "upcoming",
+      teacher: "أ. محمد الأحمدي",
+    },
+  });
+
+  useEffect(() => {
+    if (isOpen) {
+      if (initialData) {
+        reset(initialData);
+      } else {
+        reset({
+          title: "",
+          subjectId: "",
+          studentId: "",
+          teacher: "أ. محمد الأحمدي",
+          dueDate: "",
+          duration: 0,
+          grade: 100,
+          status: "upcoming",
+        });
+      }
+    }
+  }, [initialData, reset, isOpen]);
+
   const handleOnSubmit = (data: ExamFormData) => {
-    onAdd({
-      id: initialData?.id || Date.now().toString(),
-      ...data,
-      duration: `${data.duration} دقيقة`,
-    });
+    onAdd(data);
     onClose();
   };
 
@@ -123,11 +102,18 @@ export default function AddExamModal({
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-2xl shadow-xl max-w-2xl w-full max-h-[90vh]  overflow-y-auto no-scrollbar">
+      <div className="bg-white rounded-2xl shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto no-scrollbar">
         <div className="sticky top-0 bg-primary border-b border-gray-200 px-6 py-4 flex items-center justify-between rounded-t-2xl z-10">
           <h2 className="text-2xl font-bold text-white">
-            {text.title[language]}
+            {initialData
+              ? language === "ar"
+                ? "تعديل امتحان"
+                : "Edit Exam"
+              : language === "ar"
+                ? "إضافة امتحان جديد"
+                : "Add New Exam"}
           </h2>
+
           <button
             onClick={onClose}
             className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
@@ -159,54 +145,56 @@ export default function AddExamModal({
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2 text-start">
+            {/* <label className="block bg-black text-sm font-medium text-gray-700 mb-2 text-start">
               {text.subject[language]}
-            </label>
-            <input
-              type="text"
-              {...register("subject")}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent text-start"
-              dir="rtl"
+            </label> */}
+
+            <CustomSelect
+              label={text.subject[language]}
+              value={watch("subjectId")}
+              onChange={(value) =>
+                setValue("subjectId", value, { shouldValidate: true })
+              }
+              options={subjects || []}
             />
-            {errors.subject && (
+            {errors.subjectId && (
               <p className="text-red-500 text-xs mt-1 text-start">
-                {errors.subject.message}
+                {errors.subjectId.message}
               </p>
             )}
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <CustomSelect
-                label={text.student[language]}
-                value={watch("studentName")}
-                onChange={(value) =>
-                  setValue("studentName", value, { shouldValidate: true })
-                }
-                options={mockStudents}
-              />
-              {errors.studentName && (
-                <p className="text-red-500 text-xs mt-1 text-start">
-                  {errors.studentName.message}
-                </p>
-              )}
-            </div>
+          <div>
+            {/* student////////////////// */}
+            <CustomSelect
+              label={text.student[language]}
+              value={watch("studentId")}
+              onChange={(value) =>
+                setValue("studentId", value, { shouldValidate: true })
+              }
+              options={students || []}
+            />
+            {errors.studentId && (
+              <p className="text-red-500 text-xs mt-1 text-start">
+                {errors.studentId.message}
+              </p>
+            )}
+          </div>
 
-            <div>
-              {errors.dueDate && (
-                <p className="text-red-500 text-xs mt-1 text-start">
-                  {errors.dueDate.message}
-                </p>
-              )}
-              <DatePickerField
-                label={text.dueDate[language]}
-                value={watch("dueDate")}
-                onChange={(val) =>
-                  setValue("dueDate", val, { shouldValidate: true })
-                }
-                error={errors.dueDate?.message}
-              />
-            </div>
+          <div>
+            {errors.dueDate && (
+              <p className="text-red-500 text-xs mt-1 text-start">
+                {errors.dueDate.message}
+              </p>
+            )}
+            <DatePickerField
+              label={text.dueDate[language]}
+              value={watch("dueDate")}
+              onChange={(val) =>
+                setValue("dueDate", val, { shouldValidate: true })
+              }
+              error={errors.dueDate?.message}
+            />
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -267,7 +255,6 @@ export default function AddExamModal({
               </p>
             )}
           </div>
-
           <div className="flex gap-3 pt-4">
             <button
               type="button"
