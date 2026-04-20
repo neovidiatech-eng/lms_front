@@ -395,5 +395,8 @@
   "packageName": "Package",
   "sessionsRemaining": "Sessions Remaining",
   "scheduledDays": "Recurring Day",
-  "pendingStudents": "Pending Students"
+  "pendingStudents": "Pending Students",
+  "grid": "Grid",
+  "list": "List",
+  "studentInfo": "Student Info"
 }

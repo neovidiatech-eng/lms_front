@@ -1,9 +1,9 @@
 import { useState } from 'react';
-import { Search, Plus, Trash2, Filter, Edit2 } from 'lucide-react';
+import { Search,  Filter } from 'lucide-react';
 import { useLanguage } from '../../../contexts/LanguageContext';
 import Pagination from '../../../components/ui/Pagination';
-import AddExamModal from '../../../components/modals/ExamModal';
-import { useConfirm } from '../../../hooks/useConfirm';
+// import AddExamModal from '../../../components/modals/ExamModal';
+// import { useConfirm } from '../../../hooks/useConfirm';
 
 interface Exam {
   id: string;
@@ -22,9 +22,9 @@ export default function Exams() {
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const [showFilters, setShowFilters] = useState(false);
-  const [showAddModal, setShowAddModal] = useState(false);
-  const [editingExam, setEditingExam] = useState<Exam | null>(null);
-  const { confirm, ConfirmDialog } = useConfirm();
+  // const [showAddModal, setShowAddModal] = useState(false);
+  // const [editingExam, setEditingExam] = useState<Exam | null>(null);
+  // const { confirm, ConfirmDialog } = useConfirm();
   const [filters, setFilters] = useState({
     status: '',
     subject: '',
@@ -139,54 +139,54 @@ export default function Exams() {
     setCurrentPage(page);
   };
 
-const handleSaveExam = (examData: Exam) => {
-  if (editingExam) {
-    setExams(exams.map(e => e.id === editingExam.id ? examData : e));
-  } else {
-    setExams([...exams, examData]);
-  }
-  handleCloseModal();
-};
+// const handleSaveExam = (examData: Exam) => {
+//   if (editingExam) {
+//     setExams(exams.map(e => e.id === editingExam.id ? examData : e));
+//   } else {
+//     setExams([...exams, examData]);
+//   }
+//   handleCloseModal();
+// };
 
-  const handleEditExam = (exam: Exam) => {
-  setEditingExam(exam);
-  setShowAddModal(true);
-};
+//   const handleEditExam = (exam: Exam) => {
+//   setEditingExam(exam);
+//   setShowAddModal(true);
+// };
 
-const handleCloseModal = () => {
-  setShowAddModal(false);
-  setEditingExam(null);
-};
+// const handleCloseModal = () => {
+//   setShowAddModal(false);
+//   setEditingExam(null);
+// };
 
-  const handleDeleteExam = async (examId: string) => {
-    const confirmed = await confirm({
-      title: language === 'ar' ? 'حذف امتحان' : 'Delete Exam',
-      message: language === 'ar' ? 'هل أنت متأكد من حذف هذا الامتحان؟' : 'Are you sure you want to delete this exam?',
-    });
-    if (confirmed) {
-      setExams(exams.filter(exam => exam.id !== examId));
-    }
-  };
+  // const handleDeleteExam = async (examId: string) => {
+  //   const confirmed = await confirm({
+  //     title: language === 'ar' ? 'حذف امتحان' : 'Delete Exam',
+  //     message: language === 'ar' ? 'هل أنت متأكد من حذف هذا الامتحان؟' : 'Are you sure you want to delete this exam?',
+  //   });
+  //   if (confirmed) {
+  //     setExams(exams.filter(exam => exam.id !== examId));
+  //   }
+  // };
 
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h1 className="text-3xl font-bold text-gray-900">{text.title[language]}</h1>
-        <button
+        {/* <button
           onClick={() => setShowAddModal(true)}
           className="flex items-center gap-2 px-6 py-3 btn-primary text-white rounded-xl transition-colors font-medium"
         >
           <Plus className="w-5 h-5" />
           {text.addExam[language]}
-        </button>
+        </button> */}
       </div>
 
-      <AddExamModal
+      {/* <AddExamModal
         isOpen={showAddModal}
         onClose={() => setShowAddModal(false)}
         onAdd={handleSaveExam}
         initialData={editingExam}
-      />
+      /> */}
 
       <div className="bg-white rounded-2xl shadow-sm border border-gray-200">
         <div className="p-6 border-b border-gray-200">
@@ -252,7 +252,7 @@ const handleCloseModal = () => {
         </div>
 
         <div className="overflow-x-auto">
-          <table className="w-full" dir="rtl">
+          <table className="w-full" dir={language === "ar" ? "rtl" : "ltr"}>
             <thead className="bg-gray-50 border-b border-gray-200">
               <tr>
                 <th className="px-6 py-4 text-start text-sm font-semibold text-gray-900">{text.columnTitle[language]}</th>
@@ -262,7 +262,7 @@ const handleCloseModal = () => {
                 <th className="px-6 py-4 text-start text-sm font-semibold text-gray-900">{text.columnDuration[language]}</th>
                 <th className="px-6 py-4 text-start text-sm font-semibold text-gray-900">{text.columnGrade[language]}</th>
                 <th className="px-6 py-4 text-start text-sm font-semibold text-gray-900">{text.columnStatus[language]}</th>
-                <th className="px-6 py-4 text-start text-sm font-semibold text-gray-900">{text.columnActions[language]}</th>
+                {/* <th className="px-6 py-4 text-start text-sm font-semibold text-gray-900">{text.columnActions[language]}</th> */}
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200">
@@ -287,7 +287,7 @@ const handleCloseModal = () => {
                       {text[exam.status][language]}
                     </span>
                   </td>
-                  <td className="px-6 py-4 text-start">
+                  {/* <td className="px-6 py-4 text-start">
                     <div className="flex items-center gap-2 justify-start">
                       <button
                         onClick={() => handleEditExam(exam)}
@@ -304,7 +304,7 @@ const handleCloseModal = () => {
                         <Trash2 className="w-5 h-5" />
                       </button>
                     </div>
-                  </td>
+                  </td> */}
                 </tr>
               ))}
             </tbody>
@@ -321,7 +321,7 @@ const handleCloseModal = () => {
           />
         </div>
       </div>
-      {ConfirmDialog}
+      {/* {ConfirmDialog} */}
     </div>
   );
 }
