@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react';
 import { X, Calendar, Clock, User, GraduationCap, BookOpen, Video, MapPin, FileText } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { Schedule } from '../../types/scheduales';
@@ -13,6 +14,22 @@ interface ViewSessionModalProps {
 export default function ViewSessionModal({ isOpen, onClose, session, groupedSessions, allSessions = [] }: ViewSessionModalProps) {
   const { t, i18n } = useTranslation();
   const language = i18n.language.split('-')[0];
+  const [now, setNow] = useState(new Date());
+
+  useEffect(() => {
+    if (!isOpen) return;
+    const timer = setInterval(() => setNow(new Date()), 30000);
+    return () => clearInterval(timer);
+  }, [isOpen]);
+
+
+  const isJoinable = (startTime: string, endTime: string, link: string) => {
+    if (!link) return false;
+    const start = new Date(startTime);
+    const end = new Date(endTime);
+    const oneMinuteBefore = new Date(start.getTime() - 60000);
+    return now >= oneMinuteBefore && now <= end;
+  };
 
 
 
@@ -210,15 +227,18 @@ export default function ViewSessionModal({ isOpen, onClose, session, groupedSess
 
                               <div className="flex items-center gap-2">
                                 {s.link ? (
-                                  <a
-                                    href={s.link}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-sm font-medium"
+                                  <button
+                                    onClick={() => window.open(s.link, '_blank')}
+                                    disabled={!isJoinable(s.start_time, s.end_time, s.link)}
+                                    className={`flex items-center gap-2 px-4 py-2 rounded-xl transition-all font-medium ${
+                                      isJoinable(s.start_time, s.end_time, s.link)
+                                        ? 'bg-green-600 text-white hover:bg-green-700 shadow-sm hover:shadow-md'
+                                        : 'bg-gray-100 text-gray-400 cursor-not-allowed opacity-60'
+                                    }`}
                                   >
                                     <Video className="w-4 h-4" />
-                                    {t('joinSession') || (language === 'ar' ? 'دخول الحصة' : 'Join Session')}
-                                  </a>
+                                    <span className="text-sm">{t('joinSession')}</span>
+                                  </button>
                                 ) : (
                                   <span className="text-sm text-gray-400">{t('noLink') || (language === 'ar' ? 'لا يوجد رابط' : 'No link')}</span>
                                 )}
@@ -235,16 +255,19 @@ export default function ViewSessionModal({ isOpen, onClose, session, groupedSess
                   <div className="mt-4 bg-white rounded-xl p-4 shadow-sm border border-gray-100">
                     <p className="text-xs text-gray-500 text-start mb-2">{t('meetingLink')}</p>
                     <div className="flex items-center gap-3">
-                      <a
-                        href={session.link}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg hover:opacity-90 transition-colors text-sm font-medium"
+                      <button
+                        onClick={() => window.open(session.link, '_blank')}
+                        disabled={!isJoinable(session.start_time, session.end_time, session.link)}
+                        className={`flex items-center gap-2 px-4 py-2 rounded-xl transition-all font-medium ${
+                          isJoinable(session.start_time, session.end_time, session.link)
+                            ? 'bg-green-600 text-white hover:bg-green-700 shadow-sm hover:shadow-md'
+                            : 'bg-gray-100 text-gray-400 cursor-not-allowed opacity-60'
+                        }`}
                       >
                         <Video className="w-4 h-4" />
-                        {t('openLink')}
-                      </a>
-                      <div className="flex-1 text-sm text-gray-600 break-all text-start" dir="ltr">
+                        <span className="text-sm">{t('joinSession')}</span>
+                      </button>
+                      <div className="flex-1 text-sm text-gray-600 break-all text-start font-medium" dir="ltr">
                         {session.link}
                       </div>
                     </div>

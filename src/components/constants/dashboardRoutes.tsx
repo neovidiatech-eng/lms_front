@@ -125,10 +125,10 @@ export const dashboardRoutes: RouteConfig[] = [
         element: <TeachersPage />,
       },
       {
-        id: "teacher-requests",
+        id: "requests",
         label: "sidebar_requests",
         icon: FileQuestion,
-        path: "teacher-requests",
+        path: " requests",
         element: <TeacherRequestsPage />,
       },
       {

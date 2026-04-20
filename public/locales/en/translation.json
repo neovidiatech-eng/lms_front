@@ -398,5 +398,6 @@
   "pendingStudents": "Pending Students",
   "grid": "Grid",
   "list": "List",
-  "studentInfo": "Student Info"
+  "studentInfo": "Student Info",
+  "AddRequest": "Add Request"
 }

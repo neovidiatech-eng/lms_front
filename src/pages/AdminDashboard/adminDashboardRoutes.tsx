@@ -125,13 +125,6 @@ export const adminDashboardRoutes: RouteConfig[] = [
         element: <TeachersPage />,
       },
       {
-        id: "teacher-requests",
-        label: "sidebar_requests",
-        icon: FileQuestion,
-        path: "teacher-requests",
-        element: <TeacherRequestsPage />,
-      },
-      {
         id: "teacher-availability",
         label: "sidebar_available",
         icon: Clock,
@@ -248,6 +241,13 @@ export const adminDashboardRoutes: RouteConfig[] = [
       },
     ],
   },
+   {
+        id: "requests",
+        label: "sidebar_requests",
+        icon: FileQuestion,
+        path: "requests",
+        element: <TeacherRequestsPage />,
+      },
   {
     id: "settings",
     label: "sidebar_settings",

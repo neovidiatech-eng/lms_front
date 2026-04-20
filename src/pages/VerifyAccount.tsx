@@ -9,11 +9,11 @@ import { useNavigate } from "react-router-dom";
 import OtpInput from "../components/ui/OtpInput";
 import ErrorService from "../utils/ErrorService";
 
-// interface VerifyAccountProps {
-//   onVerifySuccess: () => void;
-// }
+interface VerifyAccountProps {
+  onVerifySuccess?: () => void;
+}
 
-export default function VerifyAccount() {
+export default function VerifyAccount({ onVerifySuccess }: VerifyAccountProps) {
   const navigate = useNavigate();
   const { t, language } = useLanguage();
   const [isResending, setIsResending] = useState(false);
@@ -33,13 +33,22 @@ export default function VerifyAccount() {
 
   const onSubmit = async (data: VerifyAccountInput) => {
     try {
-      await verifyAccount({
+      const result = await verifyAccount({
         email,
         otp: data.code
       });
       ErrorService.success(t("verify Success") || "Account verified successfully");
       sessionStorage.removeItem("verify_email");
-      navigate("/login");
+      
+      const token = result.data?.accessToken || result.accessToken;
+      if (token) {
+        sessionStorage.setItem("token", token);
+        const role = result.data?.role || result.role;
+        if (role) localStorage.setItem("role", role);
+        onVerifySuccess?.();
+      } else {
+        navigate("/login");
+      }
     } catch (error) {
       console.error("Account verification failed:", error);
     }
