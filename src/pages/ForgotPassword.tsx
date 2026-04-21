@@ -5,7 +5,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { ForgotPasswordInput, getForgotPasswordSchema } from "../lib/schemas/AuthSchemas";
 import { forgetPassword } from "../services/AuthServices";
 import { useNavigate } from "react-router-dom";
-import ErrorService from "../utils/ErrorService";
+import { message } from "antd";
 
 export default function ForgotPassword() {
   const navigate = useNavigate();
@@ -24,10 +24,10 @@ export default function ForgotPassword() {
 
   const onSubmit = async (data: ForgotPasswordInput) => {
     try {
-      await forgetPassword(data);
+      const result = await forgetPassword(data);
       // Store email in session for the reset password step
       sessionStorage.setItem("reset_email", data.email);
-      ErrorService.success(t('codeSentSuccess'));
+      message.success(result.message || t('codeSentSuccess'));
       navigate("/reset-password");
     } catch (error) {
       console.error("Forget password request failed:", error);
@@ -88,3 +88,4 @@ export default function ForgotPassword() {
     </div>
   );
 }
+

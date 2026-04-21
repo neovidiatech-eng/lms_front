@@ -9,7 +9,7 @@ import { login, googleLogin } from "../services/AuthServices";
 import { Link, useNavigate } from "react-router-dom";
 import { CustomCheckbox } from "../components/ui/CustomCheckbox";
 import { GoogleLogin } from "@react-oauth/google";
-import ErrorService from "../utils/ErrorService";
+import { message } from "antd";
 
 interface LoginProps {
   onLoginSuccess: () => void;
@@ -58,7 +58,7 @@ export default function Login({ onLoginSuccess }: LoginProps) {
         const role = result.data?.role || result.role;
         localStorage.setItem("role", role);
         onLoginSuccess();
-        ErrorService.success(t('loginSuccess'));
+        message.success(result.message || t('loginSuccess'));
 
         const email = data.email;
         localStorage.setItem("email", email);
@@ -192,7 +192,7 @@ export default function Login({ onLoginSuccess }: LoginProps) {
                     if (token) {
                       localStorage.setItem("token", token);
                       onLoginSuccess();
-                      ErrorService.success(t('login Success'));
+                      message.success(result.message || t('loginSuccess'));
                       navigate("/dashboard");
                     }
                   } catch (error) {
@@ -215,3 +215,4 @@ export default function Login({ onLoginSuccess }: LoginProps) {
     </div>
   );
 }
+

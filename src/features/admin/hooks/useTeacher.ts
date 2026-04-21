@@ -1,8 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { createTeacher, deleteTeacher, getTeacher, getTeacherById, searchTeacher, updateTeacher } from "../services/TeacherServices"
 import { CreateTeacherInput, Teacher, TeachersData } from "../../../types/teachers"
-import ErrorService from "../../../utils/ErrorService"
-import { useTranslation } from "react-i18next"
+import { message } from "antd"
 
 export const useTeacher = (search?: string) => {
     return useQuery<TeachersData>({
@@ -19,38 +18,36 @@ export const useTeacherById = (id: string) => {
 }
 export const useUpdateTeacher = () => {
     const queryClient = useQueryClient();
-    const { t } = useTranslation();
     return useMutation({
         mutationFn: ({ id, data }: { id: string; data: CreateTeacherInput | Partial<Teacher> }) => updateTeacher(id, data),
-        onSuccess: (_, variables) => {
+        onSuccess: (data: any, variables) => {
             queryClient.invalidateQueries({ queryKey: ["teachers"] });
             queryClient.invalidateQueries({ queryKey: ["teachers", variables.id] });
-            ErrorService.success(t('teacher Updated Success'));
+            message.success(data.message || 'Teacher Updated Successfully');
         }
     });
 }
 
 export const useDeleteTeacher = () => {
     const queryClient = useQueryClient();
-    const { t } = useTranslation();
     return useMutation({
         mutationFn: (id: string) => deleteTeacher(id),
-        onSuccess: (_, id) => {
+        onSuccess: (data: any, id) => {
             queryClient.invalidateQueries({ queryKey: ["teachers"] });
             queryClient.invalidateQueries({ queryKey: ["teachers", id] });
-            ErrorService.success(t('teacher Deleted Success'));
+            message.success(data.message || 'Teacher Deleted Successfully');
         }
     });
 }
 
 export const useCreateTeacher = () => {
     const queryClient = useQueryClient();
-    const { t } = useTranslation();
     return useMutation({
         mutationFn: (data: CreateTeacherInput) => createTeacher(data),
-        onSuccess: () => {
+        onSuccess: (data: any) => {
             queryClient.invalidateQueries({ queryKey: ["teachers"] });
-            ErrorService.success(t('teacher Added Success'));
+            message.success(data.message || 'Teacher Added Successfully');
         }
     });
 }
+

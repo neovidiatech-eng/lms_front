@@ -6,7 +6,7 @@ import {
   Clock, Wallet, ArrowUpRight, X,
   BookOpen, Users, Star, ShieldCheck, FileText, Send
 } from 'lucide-react';
-import ErrorService from '../../../utils/ErrorService';
+import { message } from 'antd';
 
 // Internal Withdrawal Modal Component
 function WithdrawalModal({ isOpen, onClose, balance, onWithdraw, isRtl, settings }: any) {
@@ -18,16 +18,17 @@ function WithdrawalModal({ isOpen, onClose, balance, onWithdraw, isRtl, settings
     e.preventDefault();
     const numAmount = parseFloat(amount);
     if (!numAmount || numAmount <= 0) {
-      ErrorService.error(isRtl ? 'يرجى إدخال مبلغ صالح' : 'Please enter a valid amount');
+      message.error(isRtl ? 'يرجى إدخال مبلغ صالح' : 'Please enter a valid amount');
       return;
     }
     if (numAmount > balance) {
-      ErrorService.error(isRtl ? 'المبلغ يتجاوز الرصيد الحالي' : 'Amount exceeds current balance');
+      message.error(isRtl ? 'المبلغ يتجاوز الرصيد الحالي' : 'Amount exceeds current balance');
       return;
     }
     onWithdraw(numAmount);
     setAmount('');
   };
+
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[100] p-4 animate-fade-in">
@@ -111,9 +112,10 @@ export default function TeacherProfile() {
   ];
 
   const handleWithdraw = (amount: number) => {
-    ErrorService.success(isRtl ? `تم إرسال طلب سحب مبلغ $${amount} بنجاح` : `Withdrawal request for $${amount} submitted successfully`);
+    message.success(isRtl ? `تم إرسال طلب سحب مبلغ $${amount} بنجاح` : `Withdrawal request for $${amount} submitted successfully`);
     setIsWithdrawModalOpen(false);
   };
+
 
   return (
     <div className="space-y-6 animate-fade-in pb-10" dir={isRtl ? 'rtl' : 'ltr'}>

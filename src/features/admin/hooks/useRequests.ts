@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import ErrorService from "../../../utils/ErrorService";
 import { getRequests, changeRequestStatus } from "../services/RequestsServices";
+import { message } from "antd";
 
 export const useRequests = () => {
     return useQuery({
@@ -16,12 +16,10 @@ export const useChangeRequestStatus = () => {
         mutationFn: ({ id, status, adminNotes }: { id: string; status: "approve" | "reject", adminNotes: string }) =>
             changeRequestStatus(id, status, adminNotes),
 
-        onSuccess: (data) => {
+        onSuccess: (data: any) => {
             queryClient.invalidateQueries({ queryKey: ["requests"] });
-            ErrorService.success(data.message || "Request status updated successfully");
-        },
-        onError: (error: any) => {
-            ErrorService.error(error.response?.data?.message || "Failed to update request status");
+            message.success(data.message || "Request status updated successfully");
         }
     });
 };
+

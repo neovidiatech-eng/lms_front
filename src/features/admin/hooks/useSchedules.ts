@@ -16,8 +16,7 @@ import {
   searchSchedules,
   getSchedulesForTeacher,
 } from "../services/SessionsServices";
-import ErrorService from "../../../utils/ErrorService";
-import { useTranslation } from "react-i18next";
+import { message } from "antd";
 
 export const useGetSchedules = () => {
   return useQuery({
@@ -44,64 +43,60 @@ export const useGetSchedulesByTeacher = (teacherId: string) => {
 
 export const useCreateSchedule = () => {
   const queryClient = useQueryClient();
-  const { t } = useTranslation();
   return useMutation({
     mutationFn: (data: CreateSchedulePayload) => createSchedule(data),
-    onSuccess: () => {
+    onSuccess: (data: any) => {
       queryClient.invalidateQueries({ queryKey: ["schedules"] });
-      ErrorService.success(t("sessionAddedSuccess"));
+      message.success(data.message || 'Schedule Created Successfully');
     },
   });
 };
 
 export const useCreateRecurringSchedule = () => {
   const queryClient = useQueryClient();
-  const { t } = useTranslation();
   return useMutation({
     mutationFn: (data: CreateRecurringSchedulePayload) =>
       createRecurringSchedule(data),
-    onSuccess: () => {
+    onSuccess: (data: any) => {
       queryClient.invalidateQueries({ queryKey: ["schedules"] });
-      ErrorService.success(t("sessionsAddedSuccess"));
+      message.success(data.message || 'Recurring Schedules Created Successfully');
     },
   });
 };
 
 export const useDeleteSchedule = () => {
   const queryClient = useQueryClient();
-  const { t } = useTranslation();
   return useMutation({
     mutationFn: (id: string) => deleteSchedule(id),
-    onSuccess: () => {
+    onSuccess: (data: any) => {
       queryClient.invalidateQueries({ queryKey: ["schedules"] });
-      ErrorService.success(t("sessionDeletedSuccess"));
+      message.success(data.message || 'Schedule Deleted Successfully');
     },
   });
 };
 
 export const useDeleteGroupedSchedule = () => {
   const queryClient = useQueryClient();
-  const { t } = useTranslation();
   return useMutation({
     mutationFn: (id: string) => deleteRecurringScheduale(id),
-    onSuccess: () => {
+    onSuccess: (data: any) => {
       queryClient.invalidateQueries({ queryKey: ["schedules"] });
-      ErrorService.success(t("sessionDeletedSuccess"));
+      message.success(data.message || 'Grouped Schedule Deleted Successfully');
     },
   });
 };
 
 export const useUpdateSchedule = () => {
   const queryClient = useQueryClient();
-  const { t } = useTranslation();
 
   return useMutation({
     mutationFn: ({ id, data }: { id: string; data: UpdateSchedulePayload }) =>
       updateSchedule(id, data),
 
-    onSuccess: () => {
+    onSuccess: (data: any) => {
       queryClient.invalidateQueries({ queryKey: ["schedules"] });
-      ErrorService.success(t("sessionUpdatedSuccess"));
+      message.success(data.message || 'Schedule Updated Successfully');
     },
   });
 };
+
