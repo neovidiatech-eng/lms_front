@@ -106,7 +106,7 @@ export const studentDashboardRoutes: StudentRouteConfig[] = [
   },
   {
     id: 'student-requests',
-    label: 'sidebar_student_requests',
+    label: 'sidebar_requests',
     icon: Send,
     path: 'requests',
     element: <RequestsPage />,

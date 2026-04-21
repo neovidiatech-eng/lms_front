@@ -400,5 +400,6 @@
   "sessionsRemaining": "Sessions Remaining",
   "scheduledDays": "Recurring Day",
   "grid": "Grid",
-  "list": "List"
+  "list": "List",
+  "AddRequest": "Add Request"
 }

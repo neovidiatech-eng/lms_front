@@ -97,11 +97,12 @@ export const teacherDashboardRoutes: RouteConfig[] = [
   },
   {
     id: 'teacher-requests',
-    label: 'sidebar_teacher_requests',
+    label: 'sidebar_requests',
     icon: Send,
     path: 'requests',
     element: <RequestsPage />,
   },
+
   {
     id: 'teacher-profile',
     label: 'sidebar_profile',

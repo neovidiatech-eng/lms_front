@@ -405,5 +405,6 @@
   "sessionsRemaining": "الحصص المتبقية",
   "scheduledDays": "أيام الحصة",
   "grid": "شبكة",
-  "list": "قائمة"
+  "list": "قائمة",
+  "AddRequest": "طلب جديد"
 }

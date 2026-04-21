@@ -6,6 +6,10 @@ import i18n from "../../i18n";
 const api = axios.create({
   baseURL: baseURL,
   timeout: 300000,
+  headers: {
+    "Accept-Language": i18n.language
+
+  }
 });
 
 api.interceptors.request.use(

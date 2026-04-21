@@ -203,7 +203,7 @@
   "sidebar_students": "الطلاب",
   "sidebar_parents": "أولياء الأمور",
   "sidebar_teachers": "المعلمين",
-  "sidebar_requests": "طلبات المعلمين",
+  "sidebar_requests": "الطلبات",
   "sidebar_available": "المتاحين",
   "sidebar_subjects": "المواد",
   "sidebar_academic_content": "المحتوى الأكاديمي",
@@ -403,5 +403,6 @@
   "pendingStudents": "الطلاب المعلقين",
   "grid": "شبكة",
   "list": "قائمة",
-  "studentInfo": "معلومات الطالب"
+  "studentInfo": "معلومات الطالب",
+  "AddRequest": "طلب جديد"
 }

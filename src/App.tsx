@@ -27,6 +27,8 @@ const StudentDashboard = lazy(() => import('./pages/StudentDashboard/StudentDash
 const TeacherDashboard = lazy(() => import('./pages/TeacherDashboard/TeacherDashboard'));
 import AuthGuard from './components/guards/AuthGuard';
 import GuestGuard from './components/guards/GuestGuard';
+import { Provider } from "react-redux";
+import { store } from './store/store';
 
 // Centralized Loading Fallback UI
 const LoadingFallback = () => (
@@ -70,7 +72,8 @@ function App() {
 
 
   return (
-    <ErrorBoundary>
+ <Provider store={store}>
+     <ErrorBoundary>
       <GoogleOAuthProvider clientId={googleClientId}>
         <QueryClientProvider client={queryClient}>
           <SettingsProvider>
@@ -116,6 +119,7 @@ function App() {
         </QueryClientProvider>
       </GoogleOAuthProvider>
     </ErrorBoundary>
+ </Provider>
   );
 }
 

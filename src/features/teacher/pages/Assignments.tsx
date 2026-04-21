@@ -27,7 +27,8 @@ export default function Assignments() {
   const itemsPerPage = 10;
 
   const { data: assignmentsData, isLoading } = useGetAssignments();
-  const assignments = assignmentsData?.data || [];
+  const assignments = assignmentsData?.data?.items || [];
+
 
 
   const text = {

@@ -1,16 +1,12 @@
-import { useEffect, useState } from "react";
-import { Search, Edit, Trash2, Eye, CreditCard } from "lucide-react";
+import { useMemo, useState } from "react";
+import { Search , Eye, CreditCard } from "lucide-react";
 import { useLanguage } from "../../../contexts/LanguageContext";
 import Pagination from "../../../components/ui/Pagination";
 import ViewSubscriptionDetailsModal from "../../../components/modals/ViewSubscriptionDetailsModal";
-import EditSubscriptionModal from "../../../components/modals/EditSubscriptionModal";
 import CustomSelect from "../../../components/ui/CustomSelect";
 import { TableSkeleton } from "../../../components/ui/CustomSkeleton";
-import {
-  deleteSubscriptionRequest,
-  getSubscriptionRequests,
-} from "../services/subscriptionRequestServices";
-import { useConfirm } from "../../../hooks/useConfirm";
+import { useSubscription } from "../hooks/useSubscription";
+import { SubscriptionData } from "../../../types/subscription";
 
 interface Subscription {
   id: string;
@@ -32,13 +28,12 @@ export default function AllSubscriptions() {
     "all" | "active" | "expired" | "cancelled"
   >("all");
   const [showViewModal, setShowViewModal] = useState(false);
-  const [showEditModal, setShowEditModal] = useState(false);
   const [selectedSubscription, setSelectedSubscription] =
     useState<Subscription | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [deletingId, setDeletingId] = useState<string | null>(null);
-  const { confirm, ConfirmDialog } = useConfirm();
+
   const itemsPerPage = 10;
+
+  const { data, isLoading } = useSubscription();
 
   const text = {
     title: { ar: "كل الاشتراكات", en: "All Subscriptions" },
@@ -75,56 +70,32 @@ export default function AllSubscriptions() {
     },
   };
 
-  const [subscriptions, setSubscriptions] = useState<Subscription[]>([]);
-  const mapSubscriptionToUI = (item: any): Subscription => {
+  const mapApiToSubscription = (apiData: SubscriptionData): Subscription => {
+    const startDate = new Date(apiData.startDate);
+    const endDate = new Date(startDate);
+    endDate.setDate(startDate.getDate() + (apiData.plan?.duration || 30));
+
     return {
-      id: item.id,
-      studentName: item.user?.name || "—",
-      planName: item.plan?.name_ar || item.plan?.name_en || "—",
-      planPrice: `${item.plan?.price || 0} $`,
-      startDate: item.createdAt?.split("T")[0] || "",
-      endDate: "",
-      status: mapStatus(item.status),
-      sessionsRemaining: item.plan?.hours || 0,
-      totalSessions: item.plan?.hours || 0,
+      id: apiData.id,
+      studentName: apiData.user?.name || "—",
+      planName: language === "ar" ? apiData.plan?.name_ar : apiData.plan?.name_en || "—",
+      planPrice: `${apiData.amount} ${apiData.currency?.symbol || ""}`,
+      startDate: startDate.toLocaleDateString(language === "ar" ? "ar-EG" : "en-US"),
+      endDate: endDate.toLocaleDateString(language === "ar" ? "ar-EG" : "en-US"),
+      status: (apiData.status as any) || "active",
+      sessionsRemaining: apiData.plan?.sessionsCount || 0, // Should ideally be from API
+      totalSessions: apiData.plan?.sessionsCount || 0,
     };
   };
 
-  const mapStatus = (status: string): "active" | "expired" | "cancelled" => {
-    switch (status) {
-      case "approved":
-        return "active";
-      case "pending":
-        return "active";
-      case "rejected":
-        return "cancelled";
-      default:
-        return "expired";
-    }
-  };
+  const formattedSubscriptions = useMemo(() => {
+    if (!data || !Array.isArray(data)) return [];
+    return data.map(mapApiToSubscription);
+  }, [data, language]);
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        setIsLoading(true);
-        const data = await getSubscriptionRequests();
-        const formatted = data.map((item: any) => mapSubscriptionToUI(item));
-        setSubscriptions(formatted);
-      } catch (err) {
-        console.error(err);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchData();
-  }, []);
-
-  const filteredSubscriptions = subscriptions.filter((subscription) => {
+  const filteredSubscriptions = formattedSubscriptions.filter((subscription) => {
     const matchesSearch =
-      subscription.studentName
-        .toLowerCase()
-        .includes(searchTerm.toLowerCase()) ||
+      subscription.studentName.toLowerCase().includes(searchTerm.toLowerCase()) ||
       subscription.planName.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesStatus =
       statusFilter === "all" || subscription.status === statusFilter;
@@ -152,6 +123,7 @@ export default function AllSubscriptions() {
   };
 
   const calculateProgress = (remaining: number, total: number) => {
+    if (total === 0) return 100;
     const used = total - remaining;
     return (used / total) * 100;
   };
@@ -161,34 +133,6 @@ export default function AllSubscriptions() {
     setShowViewModal(true);
   };
 
-  const handleEdit = (subscription: Subscription) => {
-    setSelectedSubscription(subscription);
-    setShowEditModal(true);
-  };
-
-  const handleSave = (updatedSubscription: Subscription) => {
-    setSubscriptions((prev) =>
-      prev.map((sub) =>
-        sub.id === updatedSubscription.id ? updatedSubscription : sub,
-      ),
-    );
-  };
-
-  const handleDelete = async (id: string) => {
-    const confirmed = await confirm({
-      title: language === "ar" ? "حذف اشتراك" : "Delete Subscription",
-      message: text.confirmDelete[language],
-    });
-    if (!confirmed) return;
-
-    try {
-      setDeletingId(id);
-      await deleteSubscriptionRequest(id);
-      setSubscriptions((prev) => prev.filter((sub) => sub.id !== id));
-    } finally {
-      setDeletingId(null);
-    }
-  };
 
   return (
     <div className="p-6 space-y-6">
@@ -201,13 +145,13 @@ export default function AllSubscriptions() {
       <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
         <div className="flex flex-col md:flex-row gap-4 mb-6">
           <div className="flex-1 relative">
-            <Search className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+            <Search className={`absolute ${language === 'ar' ? 'right-3' : 'left-3'} top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5`} />
             <input
               type="text"
               placeholder={text.search[language]}
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pr-10 pl-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent text-right transition-all"
+              className={`w-full ${language === 'ar' ? 'pr-10 pl-4 text-right' : 'pl-10 pr-4 text-left'} py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent transition-all`}
             />
           </div>
           <div className="w-full md:w-[220px]">
@@ -318,7 +262,7 @@ export default function AllSubscriptions() {
                         </div>
                         <div className="w-full bg-gray-200 rounded-full h-2">
                           <div
-                            className="progress-primary h-2 rounded-full transition-all"
+                            className="bg-primary h-2 rounded-full transition-all"
                             style={{
                               width: `${calculateProgress(
                                 subscription.sessionsRemaining,
@@ -330,7 +274,7 @@ export default function AllSubscriptions() {
                       </div>
                     </td>
                     <td className="px-4 py-4">
-                      <div className="flex items-center gap-2 justify-end">
+                      <div className={`flex items-center gap-2 ${language === 'ar' ? 'justify-start' : 'justify-end'}`}>
                         <button
                           onClick={() => handleView(subscription)}
                           className="p-2 icon-btn-primary rounded-lg transition-colors group"
@@ -338,20 +282,7 @@ export default function AllSubscriptions() {
                         >
                           <Eye className="w-5 h-5" />
                         </button>
-                        <button
-                          onClick={() => handleEdit(subscription)}
-                          className="p-2 text-green-600 hover:bg-green-50 rounded-lg transition-colors group"
-                          title={text.edit[language]}
-                        >
-                          <Edit className="w-5 h-5" />
-                        </button>
-                        <button
-                          disabled={deletingId === subscription.id}
-                          onClick={() => handleDelete(subscription.id)}
-                          className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors disabled:opacity-50 group"
-                        >
-                          <Trash2 className="w-5 h-5" />
-                        </button>
+                      
                       </div>
                     </td>
                   </tr>
@@ -384,18 +315,8 @@ export default function AllSubscriptions() {
             }}
             subscription={selectedSubscription}
           />
-          <EditSubscriptionModal
-            isOpen={showEditModal}
-            onClose={() => {
-              setShowEditModal(false);
-              setSelectedSubscription(null);
-            }}
-            subscription={selectedSubscription}
-            onSave={handleSave}
-          />
         </>
       )}
-      {ConfirmDialog}
     </div>
   );
 }

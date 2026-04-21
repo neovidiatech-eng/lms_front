@@ -62,5 +62,14 @@ export interface Assignment {
 export interface AssignmentsResponse {
     message: string;
     status: number;
-    data: Assignment[];
+    data: {
+        items: Assignment[];
+        pagination: {
+            page: number;
+            limit: number;
+            totalItems: number;
+            totalPages: number;
+            hasNextPage: boolean;
+        };
+    };
 }
