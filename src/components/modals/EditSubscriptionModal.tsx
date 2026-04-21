@@ -21,8 +21,9 @@ interface EditSubscriptionModalProps {
     sessionsRemaining: number;
     totalSessions: number;
   };
-  onSave: (updatedSubscription: any) => void;
+  onSave: (updatedSubscription: any) => Promise<void> | void;
 }
+
 
 export default function EditSubscriptionModal({
   isOpen,
@@ -33,6 +34,7 @@ export default function EditSubscriptionModal({
   const { language, t } = useLanguage();
   const [showNotificationBox, setShowNotificationBox] = useState(false);
   const [notificationMessage, setNotificationMessage] = useState('');
+  const [isSaving, setIsSaving] = useState(false);
 
   const {
     register,
@@ -93,9 +95,16 @@ export default function EditSubscriptionModal({
 
   if (!isOpen) return null;
 
-  const onSubmitForm = (data: EditSubscriptionFormData) => {
-    onSave({ ...subscription, ...data });
-    onClose();
+  const onSubmitForm = async (data: EditSubscriptionFormData) => {
+    try {
+      setIsSaving(true);
+      await onSave({ ...subscription, ...data });
+      onClose();
+    } catch (error) {
+      console.error("Save failed:", error);
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   const handleSendNotification = () => {
@@ -285,9 +294,14 @@ export default function EditSubscriptionModal({
             </button>
             <button
               type="submit"
-              className="flex items-center gap-2 px-6 py-2.5 bg-gradient-to-r from-blue-600 to-cyan-600 text-white rounded-lg hover:from-blue-700 hover:to-cyan-700 transition-all font-medium shadow-lg"
+              disabled={isSaving}
+              className="flex items-center gap-2 px-6 py-2.5 bg-gradient-to-r from-blue-600 to-cyan-600 text-white rounded-lg hover:from-blue-700 hover:to-cyan-700 transition-all font-medium shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              <Save className="w-5 h-5" />
+              {isSaving ? (
+                <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+              ) : (
+                <Save className="w-5 h-5" />
+              )}
               {text.save[language]}
             </button>
           </div>

@@ -24,7 +24,7 @@ export default function Sessions() {
   const [groupedSessions, setGroupedSessions] = useState<Schedule[]>([]);
   const [now, setNow] = useState(new Date());
 
-const { settings } = useSettings();
+  const { settings } = useSettings();
   const [isRequestModalOpen, setIsRequestModalOpen] = useState(false);
   const [sessionForRequest, setSessionForRequest] = useState<Schedule | null>(null);
   const isRtl = language === 'ar';
@@ -201,6 +201,8 @@ const { settings } = useSettings();
                   <th className="px-6 py-4 text-start text-sm font-semibold text-gray-700">{t('dateTime')}</th>
                   <th className="px-6 py-4 text-start text-sm font-semibold text-gray-700">{t('duration')}</th>
                   <th className="px-6 py-4 text-start text-sm font-semibold text-gray-700">{t('status')}</th>
+                  <th className="px-6 py-4 text-start text-sm font-semibold text-gray-700">{t('joinSession')}</th>
+                  <th className="px-6 py-4 text-start text-sm font-semibold text-gray-700">{t('AddRequest')}</th>
                   <th className="px-6 py-4 text-start text-sm font-semibold text-gray-700">{t('actions')}</th>
                 </tr>
               </thead>
@@ -266,11 +268,10 @@ const { settings } = useSettings();
                         <button
                           onClick={() => window.open(session.link, '_blank')}
                           disabled={!isJoinable(session.start_time, session.end_time, session.link)}
-                          className={`flex items-center gap-2 px-4 py-2 rounded-xl transition-all font-medium ${
-                            isJoinable(session.start_time, session.end_time, session.link)
+                          className={`flex items-center gap-2 px-4 py-2 rounded-xl transition-all font-medium ${isJoinable(session.start_time, session.end_time, session.link)
                               ? 'bg-green-600 text-white hover:bg-green-700 shadow-sm hover:shadow-md'
                               : 'bg-gray-100 text-gray-400 cursor-not-allowed opacity-60'
-                          }`}
+                            }`}
                         >
                           <Video className="w-4 h-4" />
                           <span className="text-sm">{t('joinSession')}</span>
@@ -291,21 +292,21 @@ const { settings } = useSettings();
                         </button>
                       </td>
                       <td className="px-6 py-4 text-start">
-                    <div className="flex items-center gap-2 justify-start">
-                      <button
-                        onClick={() => {
-                          const grouped = session.parent_recurring_id
-                            ? scheduleData.filter((s: Schedule) => s.parent_recurring_id === session.parent_recurring_id)
-                            : [session];
-                          setGroupedSessions(grouped);
-                          setSelectedSession(session);
-                          setShowViewModal(true);
-                        }}
-                        className="p-2 icon-btn-primary rounded-lg transition-colors"
-                        title={t('view')}
-                      >
-                        <Eye className="w-4 h-4" />
-                      </button>
+                        <div className="flex items-center gap-2 justify-start">
+                          <button
+                            onClick={() => {
+                              const grouped = session.parent_recurring_id
+                                ? scheduleData.filter((s: Schedule) => s.parent_recurring_id === session.parent_recurring_id)
+                                : [session];
+                              setGroupedSessions(grouped);
+                              setSelectedSession(session);
+                              setShowViewModal(true);
+                            }}
+                            className="p-2 icon-btn-primary rounded-lg transition-colors"
+                            title={t('view')}
+                          >
+                            <Eye className="w-4 h-4" />
+                          </button>
 
 
                         </div>
@@ -344,12 +345,12 @@ const { settings } = useSettings();
         groupedSessions={groupedSessions}
         allSessions={scheduleData}
       />
-       <CreateRequestModal
-              isOpen={isRequestModalOpen}
-              onClose={() => { setIsRequestModalOpen(false); setSessionForRequest(null); }}
-              sessionId={sessionForRequest?.id}
-              sessionTitle={sessionForRequest?.title}
-            />
+      <CreateRequestModal
+        isOpen={isRequestModalOpen}
+        onClose={() => { setIsRequestModalOpen(false); setSessionForRequest(null); }}
+        sessionId={sessionForRequest?.id}
+        sessionTitle={sessionForRequest?.title}
+      />
     </div>
   );
 }
