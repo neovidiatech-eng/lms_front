@@ -1,9 +1,10 @@
 // import AddExamModal from '../../../components/modals/ExamModal';
 // import { useConfirm } from '../../../hooks/useConfirm';
-import { useState } from "react";
+import { useState, useMemo } from "react";
+
 import { Search, Filter } from "lucide-react";
 import { useLanguage } from "../../../contexts/LanguageContext";
-import Pagination from "../../../components/ui/Pagination";
+
 import { useExams } from "../hooks/useExams";
 
 interface Exam {
@@ -22,8 +23,8 @@ export default function Exams() {
   const { language } = useLanguage();
 
   const [searchTerm, setSearchTerm] = useState("");
-  const [currentPage, setCurrentPage] = useState(1);
   const [showFilters, setShowFilters] = useState(false);
+
 
   const [filters, setFilters] = useState({
     status: "",
@@ -32,22 +33,25 @@ export default function Exams() {
     student: "",
   });
 
-  const itemsPerPage = 10;
+  const { data: apiResponse, isLoading, isError } = useExams();
 
-  const { data, isLoading, isError } = useExams();
-
-  const exams =
-    data?.data?.map((exam: any) => ({
+  const exams = useMemo(() => {
+    const rawItems = apiResponse?.data?.items ?? [];
+    return rawItems.map((exam: any) => ({
       id: exam.id,
       title: exam.title,
-      subject: exam.subject?.name_en || exam.subject?.name_ar,
-      teacher: exam.teacher?.user?.name,
-      studentName: exam.student?.user?.name,
+      subject: exam.subject?.name_en || exam.subject?.name_ar || "",
+      teacher: exam.teacher?.user?.name || "",
+      studentName: exam.student?.user?.name || "",
       dueDate: exam.dueDate,
       duration: `${exam.duration} min`,
-      grade: exam.grade,
-      status: exam.status === "pending" ? "upcoming" : "completed",
-    })) || [];
+      grade: exam.grade ?? 0,
+      status: (exam.status === "pending" ? "upcoming" : "completed") as "upcoming" | "completed",
+    })) as Exam[];
+  }, [apiResponse]);
+
+
+
   const text = {
     title: { ar: "الامتحانات", en: "Exams" },
     search: {
@@ -67,39 +71,23 @@ export default function Exams() {
     completed: { ar: "مكتمل", en: "Completed" },
   };
 
-  const filteredExams = exams.filter((exam: Exam) => {
-    const matchesSearch =
-      exam.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      exam.subject.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      exam.teacher.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      exam.studentName.toLowerCase().includes(searchTerm.toLowerCase());
+  const currentExams = useMemo(() => {
+    return exams.filter((exam: Exam) => {
+      const matchesSearch =
+        exam.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        exam.subject.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        exam.teacher.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        exam.studentName.toLowerCase().includes(searchTerm.toLowerCase());
 
-    const matchesStatus = !filters.status || exam.status === filters.status;
-    const matchesSubject = !filters.subject || exam.subject === filters.subject;
-    const matchesTeacher = !filters.teacher || exam.teacher === filters.teacher;
-    const matchesStudent =
-      !filters.student || exam.studentName === filters.student;
+      const matchesStatus = !filters.status || exam.status === filters.status;
+      const matchesSubject = !filters.subject || exam.subject === filters.subject;
+      const matchesTeacher = !filters.teacher || exam.teacher === filters.teacher;
+      const matchesStudent = !filters.student || exam.studentName === filters.student;
 
-    return (
-      matchesSearch &&
-      matchesStatus &&
-      matchesSubject &&
-      matchesTeacher &&
-      matchesStudent
-    );
-  });
+      return matchesSearch && matchesStatus && matchesSubject && matchesTeacher && matchesStudent;
+    });
+  }, [exams, searchTerm, filters]);
 
-  // ✅ Pagination
-  const totalPages = Math.ceil(filteredExams.length / itemsPerPage);
-  const startIndex = (currentPage - 1) * itemsPerPage;
-  const currentExams = filteredExams.slice(
-    startIndex,
-    startIndex + itemsPerPage,
-  );
-
-  const handlePageChange = (page: number) => {
-    setCurrentPage(page);
-  };
 
   // ✅ Loading / Error states
   if (isLoading) {
@@ -260,11 +248,10 @@ export default function Exams() {
                   </td>
                   <td className="px-6 py-4 text-start">
                     <span
-                      className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${
-                        exam.status === "upcoming"
-                          ? "bg-yellow-100 text-yellow-800"
-                          : "bg-green-100 text-green-800"
-                      }`}
+                      className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${exam.status === "upcoming"
+                        ? "bg-yellow-100 text-yellow-800"
+                        : "bg-green-100 text-green-800"
+                        }`}
                     >
                       {text[exam.status][language]}
                     </span>
@@ -293,17 +280,8 @@ export default function Exams() {
           </table>
         </div>
 
-        <div className="p-6 border-t border-gray-200">
-          <Pagination
-            currentPage={currentPage}
-            totalPages={totalPages}
-            totalItems={filteredExams.length}
-            itemsPerPage={itemsPerPage}
-            onPageChange={handlePageChange}
-          />
         </div>
       </div>
-      {/* {ConfirmDialog} */}
-    </div>
+
   );
 }
