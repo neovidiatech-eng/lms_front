@@ -34,7 +34,6 @@ export default function Exams() {
 
   const itemsPerPage = 10;
 
-  // ✅ API DATA
   const { data, isLoading, isError } = useExams();
 
   const exams =

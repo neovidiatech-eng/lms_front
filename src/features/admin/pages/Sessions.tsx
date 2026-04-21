@@ -1,26 +1,34 @@
-import { useState, useEffect } from 'react';
-import { Search, Plus, Eye, Trash2, Edit } from 'lucide-react';
-import Pagination from '../../../components/ui/Pagination';
-import { useTranslation } from 'react-i18next';
-import { useSearchSchedules, useCreateSchedule, useCreateRecurringSchedule, useUpdateSchedule, useDeleteSchedule, useDeleteGroupedSchedule } from '../hooks/useSchedules';
-import AddSessionModal from '../../../components/modals/AddSessionModal';
-import AddMultipleSessionsModal from '../../../components/modals/AddMultipleSessionsModal';
-import ViewSessionModal from '../../../components/modals/ViewSessionModal';
-import EditSessionModal from '../../../components/modals/EditSessionModal';
-import ConfirmModal from '../../../components/modals/ConfirmModal';
-import { Schedule, UpdateSchedulePayload } from '../../../types/scheduales';
-import { SessionFormData, MultipleSessionsPayload } from '../../../lib/schemas/SessionSchema';
+import { useState, useEffect } from "react";
+import { Search, Plus, Eye, Trash2, Edit } from "lucide-react";
+import Pagination from "../../../components/ui/Pagination";
+import { useTranslation } from "react-i18next";
+import {
+  useSearchSchedules,
+  useCreateSchedule,
+  useCreateRecurringSchedule,
+  useUpdateSchedule,
+  useDeleteSchedule,
+  useDeleteGroupedSchedule,
+} from "../hooks/useSchedules";
+import AddSessionModal from "../../../components/modals/AddSessionModal";
+import AddMultipleSessionsModal from "../../../components/modals/AddMultipleSessionsModal";
+import ViewSessionModal from "../../../components/modals/ViewSessionModal";
+import EditSessionModal from "../../../components/modals/EditSessionModal";
+import ConfirmModal from "../../../components/modals/ConfirmModal";
+import { Schedule, UpdateSchedulePayload } from "../../../types/scheduales";
+import {
+  SessionFormData,
+  MultipleSessionsPayload,
+} from "../../../lib/schemas/SessionSchema";
 
-import { useSubjects } from '../hooks/useSubjects';
-import { Subject } from '../../../types/subject';
-
-
+import { useSubjects } from "../hooks/useSubjects";
+import { Subject } from "../../../types/subject";
 
 export default function Sessions() {
   const { t, i18n } = useTranslation();
-  const language = i18n.language.split('-')[0];
-  const [searchTerm, setSearchTerm] = useState('');
-  const [debouncedSearch, setDebouncedSearch] = useState('');
+  const language = i18n.language.split("-")[0];
+  const [searchTerm, setSearchTerm] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [showAddModal, setShowAddModal] = useState(false);
   const [showAddMultipleModal, setShowAddMultipleModal] = useState(false);
@@ -36,13 +44,16 @@ export default function Sessions() {
   const deleteSchedule = useDeleteSchedule();
   const deleteGroupedSchedule = useDeleteGroupedSchedule();
 
-  const handleUpdateSession = async (id: string, data: UpdateSchedulePayload) => {
+  const handleUpdateSession = async (
+    id: string,
+    data: UpdateSchedulePayload,
+  ) => {
     try {
       await updateSchedule.mutateAsync({ id, data });
       setShowEditModal(false);
       setSelectedSession(null);
     } catch (error) {
-      console.error('Update session failed:', error);
+      console.error("Update session failed:", error);
     }
   };
 
@@ -54,13 +65,15 @@ export default function Sessions() {
     if (!sessionToDelete) return;
     try {
       if (sessionToDelete.is_recurring) {
-        await deleteGroupedSchedule.mutateAsync(sessionToDelete.parent_recurring_id || sessionToDelete.id);
+        await deleteGroupedSchedule.mutateAsync(
+          sessionToDelete.parent_recurring_id || sessionToDelete.id,
+        );
       } else {
         await deleteSchedule.mutateAsync(sessionToDelete.id);
       }
       setSessionToDelete(null);
     } catch (error) {
-      console.error('Delete session failed:', error);
+      console.error("Delete session failed:", error);
     }
   };
 
@@ -71,16 +84,16 @@ export default function Sessions() {
         teacherId: data.teacher,
         subject_id: data.subject,
         title: data.title,
-        description: data.description || '',
-        link: data.meetingLink || '',
-        notes: data.notes || '',
+        description: data.description || "",
+        link: data.meetingLink || "",
+        notes: data.notes || "",
         start_time: `${data.sessionDate}T${data.startTime}:00.000Z`,
         type: data.type,
-        notification_Time: data.notification_Time
+        notification_Time: data.notification_Time,
       });
       setShowAddModal(false);
     } catch (error) {
-      console.error('Add session failed:', error);
+      console.error("Add session failed:", error);
     }
   };
 
@@ -92,19 +105,23 @@ export default function Sessions() {
         teacherId: formData.teacher,
         subject_id: formData.subject,
         title: formData.title,
-        description: formData.description || '',
-        link: formData.meetingLink || '',
-        notes: formData.notes || '',
-        startTime: sessions[0]?.time || '00:00',
+        description: formData.description || "",
+        link: formData.meetingLink || "",
+        notes: formData.notes || "",
+        startTime: sessions[0]?.time || "00:00",
         days: data.selectedDays,
-        startDate: formData.monthYear ? `${formData.monthYear}-01` : new Date().toISOString().split('T')[0],
-        endDate: formData.monthYear ? `${formData.monthYear}-28` : new Date().toISOString().split('T')[0],
-        notification_Time: formData.notification_Time || '10',
-        type: formData.type
+        startDate: formData.monthYear
+          ? `${formData.monthYear}-01`
+          : new Date().toISOString().split("T")[0],
+        endDate: formData.monthYear
+          ? `${formData.monthYear}-28`
+          : new Date().toISOString().split("T")[0],
+        notification_Time: formData.notification_Time || "10",
+        type: formData.type,
       });
       setShowAddMultipleModal(false);
     } catch (error) {
-      console.error('Add multiple sessions failed:', error);
+      console.error("Add multiple sessions failed:", error);
     }
   };
 
@@ -140,7 +157,7 @@ export default function Sessions() {
 
   const displaySchedules = groupedSchedules.slice(
     (currentPage - 1) * itemsPerPage,
-    currentPage * itemsPerPage
+    currentPage * itemsPerPage,
   );
 
   const handlePageChange = (page: number) => {
@@ -149,15 +166,15 @@ export default function Sessions() {
 
   const calculateDuration = (startTime: string, endTime: string) => {
     if (!startTime || !endTime) return 0;
-    if (startTime.includes('T') && endTime.includes('T')) {
+    if (startTime.includes("T") && endTime.includes("T")) {
       const start = new Date(startTime).getTime();
       const end = new Date(endTime).getTime();
       if (!isNaN(start) && !isNaN(end)) {
         return Math.max(0, Math.round((end - start) / 60000));
       }
     }
-    const startParts = startTime.split(':').map(Number);
-    const endParts = endTime.split(':').map(Number);
+    const startParts = startTime.split(":").map(Number);
+    const endParts = endTime.split(":").map(Number);
     if (startParts.length >= 2 && endParts.length >= 2) {
       const startTotal = startParts[0] * 60 + startParts[1];
       const endTotal = endParts[0] * 60 + endParts[1];
@@ -169,32 +186,43 @@ export default function Sessions() {
   };
 
   const formatDateTime = (dateString: string) => {
-    if (!dateString) return { date: '', time: '' };
+    if (!dateString) return { date: "", time: "" };
     try {
       const date = new Date(dateString);
-      if (isNaN(date.getTime())) return { date: dateString, time: '' };
-      const formattedDate = date.toLocaleDateString(language === 'ar' ? 'ar-EG' : 'en-US', {
-        day: 'numeric',
-        month: 'long',
-        year: 'numeric'
-      });
-      const formattedTime = date.toLocaleTimeString(language === 'ar' ? 'ar-EG' : 'en-US', {
-        hour: '2-digit',
-        minute: '2-digit'
-      });
+      if (isNaN(date.getTime())) return { date: dateString, time: "" };
+      const formattedDate = date.toLocaleDateString(
+        language === "ar" ? "ar-EG" : "en-US",
+        {
+          day: "numeric",
+          month: "long",
+          year: "numeric",
+        },
+      );
+      const formattedTime = date.toLocaleTimeString(
+        language === "ar" ? "ar-EG" : "en-US",
+        {
+          hour: "2-digit",
+          minute: "2-digit",
+        },
+      );
       return { date: formattedDate, time: formattedTime };
     } catch (e) {
-      return { date: dateString, time: '' };
+      return { date: dateString, time: "" };
     }
   };
 
   const getStatusStyle = (status: string) => {
     switch (status?.toLowerCase()) {
-      case 'scheduled': return 'bg-blue-50 text-blue-700 border-blue-200';
-      case 'planned': return 'bg-blue-50 text-blue-700 border-blue-200';
-      case 'completed': return 'bg-green-50 text-green-700 border-green-200';
-      case 'cancelled': return 'bg-red-50 text-red-700 border-red-200';
-      default: return 'bg-gray-50 text-gray-700 border-gray-200';
+      case "scheduled":
+        return "bg-blue-50 text-blue-700 border-blue-200";
+      case "planned":
+        return "bg-blue-50 text-blue-700 border-blue-200";
+      case "completed":
+        return "bg-green-50 text-green-700 border-green-200";
+      case "cancelled":
+        return "bg-red-50 text-red-700 border-red-200";
+      default:
+        return "bg-gray-50 text-gray-700 border-gray-200";
     }
   };
 
@@ -203,19 +231,27 @@ export default function Sessions() {
 
   const getSubjectName = (session: Schedule) => {
     if (session.subject) {
-      return language === 'ar' ? session.subject.name_ar : session.subject.name_en;
+      return language === "ar"
+        ? session.subject.name_ar
+        : session.subject.name_en;
     }
-    const subject = dynamicsubjects.find((s: Subject) => s.id === session.subjectId);
-    return subject ? (language === 'ar' ? subject.name_ar : subject.name_en) : 'subject';
+    const subject = dynamicsubjects.find(
+      (s: Subject) => s.id === session.subjectId,
+    );
+    return subject
+      ? language === "ar"
+        ? subject.name_ar
+        : subject.name_en
+      : "subject";
   };
-
-
 
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">{t('sessionsTitle')}</h1>
+          <h1 className="text-3xl font-bold text-gray-900">
+            {t("sessionsTitle")}
+          </h1>
         </div>
       </div>
 
@@ -223,13 +259,15 @@ export default function Sessions() {
         <div className="p-6 border-b border-gray-100">
           <div className="flex flex-col md:flex-row items-center gap-3">
             <div className="flex-1 w-full relative">
-              <Search className={`absolute ${language === 'ar' ? 'right-4' : 'left-4'} top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5`} />
+              <Search
+                className={`absolute ${language === "ar" ? "right-4" : "left-4"} top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5`}
+              />
               <input
                 type="text"
-                placeholder={t('searchSessionsPlaceholder')}
+                placeholder={t("searchSessionsPlaceholder")}
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className={`w-full ${language === 'ar' ? 'pr-12 text-right' : 'pl-12'} py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent`}
+                className={`w-full ${language === "ar" ? "pr-12 text-right" : "pl-12"} py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent`}
               />
             </div>
 
@@ -239,14 +277,14 @@ export default function Sessions() {
                 className="flex flex-1 md:flex-none items-center justify-center gap-2 px-6 py-3 btn-primary text-white rounded-xl transition-colors font-medium whitespace-nowrap"
               >
                 <Plus className="w-5 h-5" />
-                {t('singleSession')}
+                {t("singleSession")}
               </button>
               <button
                 onClick={() => setShowAddMultipleModal(true)}
                 className="flex flex-1 md:flex-none items-center justify-center gap-2 px-6 py-3 btn-primary text-white rounded-xl transition-colors font-medium whitespace-nowrap"
               >
                 <Plus className="w-5 h-5" />
-                {t('multipleSessions')}
+                {t("multipleSessions")}
               </button>
             </div>
           </div>
@@ -256,22 +294,43 @@ export default function Sessions() {
           <table className="w-full">
             <thead className="bg-gray-50 border-b border-gray-100">
               <tr>
-                <th className="px-6 py-4 text-right text-sm font-semibold text-gray-700">{t('sessionTitleLabel')}</th>
-                <th className="px-6 py-4 text-right text-sm font-semibold text-gray-700">{t('studentLabel')}</th>
-                <th className="px-6 py-4 text-right text-sm font-semibold text-gray-700">{t('teacherLabel')}</th>
-                <th className="px-6 py-4 text-right text-sm font-semibold text-gray-700">{t('subjectLabel')}</th>
-                <th className="px-6 py-4 text-right text-sm font-semibold text-gray-700">{t('dateTime')}</th>
-                <th className="px-6 py-4 text-right text-sm font-semibold text-gray-700">{t('duration')}</th>
-                <th className="px-6 py-4 text-right text-sm font-semibold text-gray-700">{t('status')}</th>
-                <th className="px-6 py-4 text-right text-sm font-semibold text-gray-700">{t('actions')}</th>
+                <th className="px-6 py-4 text-right text-sm font-semibold text-gray-700">
+                  {t("sessionTitleLabel")}
+                </th>
+                <th className="px-6 py-4 text-right text-sm font-semibold text-gray-700">
+                  {t("studentLabel")}
+                </th>
+                <th className="px-6 py-4 text-right text-sm font-semibold text-gray-700">
+                  {t("teacherLabel")}
+                </th>
+                <th className="px-6 py-4 text-right text-sm font-semibold text-gray-700">
+                  {t("subjectLabel")}
+                </th>
+                <th className="px-6 py-4 text-right text-sm font-semibold text-gray-700">
+                  {t("dateTime")}
+                </th>
+                <th className="px-6 py-4 text-right text-sm font-semibold text-gray-700">
+                  {t("duration")}
+                </th>
+                <th className="px-6 py-4 text-right text-sm font-semibold text-gray-700">
+                  {t("status")}
+                </th>
+                <th className="px-6 py-4 text-right text-sm font-semibold text-gray-700">
+                  {t("actions")}
+                </th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">
               {displaySchedules.map((session) => (
-                <tr key={session.id} className="hover:bg-gray-50 transition-colors">
+                <tr
+                  key={session.id}
+                  className="hover:bg-gray-50 transition-colors"
+                >
                   <td className="px-6 py-4">
                     <div className="flex items-center gap-2">
-                      <span className="font-medium text-gray-900">{session.title}</span>
+                      <span className="font-medium text-gray-900">
+                        {session.title}
+                      </span>
                       {/* {(session.is_recurring || session.parent_recurring_id) && (
                           <span title={language === 'ar' ? 'جلسة متكررة' : 'Recurring Session'} className="flex items-center justify-center p-1 bg-indigo-50 text-indigo-500 rounded text-xs">
                             <RefreshCw className="w-3 h-3" />
@@ -279,30 +338,45 @@ export default function Sessions() {
                        )} */}
                     </div>
                   </td>
-                  <td className="px-6 py-4 text-gray-700 text-right">{session.student.user.name}</td>
-                  <td className="px-6 py-4 text-gray-700 text-right">{session.teacher.user.name}</td>
+                  <td className="px-6 py-4 text-gray-700 text-right">
+                    {session.student.user.name}
+                  </td>
+                  <td className="px-6 py-4 text-gray-700 text-right">
+                    {session.teacher.user.name}
+                  </td>
                   <td className="px-6 py-4 text-right">
-                    <span className="text-primary font-medium">{getSubjectName(session)}</span>
+                    <span className="text-primary font-medium">
+                      {getSubjectName(session)}
+                    </span>
                   </td>
                   <td className="px-6 py-4 text-gray-700 text-right">
                     {(() => {
                       const { date, time } = formatDateTime(session.start_time);
                       return (
                         <div className="flex flex-col gap-1">
-                          <span className="font-medium text-gray-900">{date}</span>
+                          <span className="font-medium text-gray-900">
+                            {date}
+                          </span>
                           <div className="flex items-center gap-2">
-                            {time && <span className="text-sm text-gray-500" dir="ltr">{time}</span>}
+                            {time && (
+                              <span className="text-sm text-gray-500" dir="ltr">
+                                {time}
+                              </span>
+                            )}
                           </div>
                         </div>
                       );
                     })()}
                   </td>
                   <td className="px-6 py-4 text-gray-700 text-right">
-                    {calculateDuration(session.start_time, session.end_time)} {t('minutes')}
+                    {calculateDuration(session.start_time, session.end_time)}{" "}
+                    {t("minutes")}
                   </td>
                   <td className="px-6 py-4 text-right">
-                    <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium border ${getStatusStyle(session.status)}`}>
-                      {t(session.status?.toLowerCase() || '')}
+                    <span
+                      className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium border ${getStatusStyle(session.status)}`}
+                    >
+                      {t(session.status?.toLowerCase() || "")}
                     </span>
                   </td>
                   <td className="px-6 py-4">
@@ -310,14 +384,18 @@ export default function Sessions() {
                       <button
                         onClick={() => {
                           const grouped = session.parent_recurring_id
-                            ? scheduleData.filter((s: Schedule) => s.parent_recurring_id === session.parent_recurring_id)
+                            ? scheduleData.filter(
+                                (s: Schedule) =>
+                                  s.parent_recurring_id ===
+                                  session.parent_recurring_id,
+                              )
                             : [session];
                           setGroupedSessions(grouped);
                           setSelectedSession(session);
                           setShowViewModal(true);
                         }}
                         className="p-2 icon-btn-primary rounded-lg transition-colors"
-                        title={t('view')}
+                        title={t("view")}
                       >
                         <Eye className="w-4 h-4" />
                       </button>
@@ -327,14 +405,14 @@ export default function Sessions() {
                           setShowEditModal(true);
                         }}
                         className="p-2 text-amber-600 hover:bg-amber-50 rounded-lg transition-colors"
-                        title={t('edit')}
+                        title={t("edit")}
                       >
                         <Edit className="w-4 h-4" />
                       </button>
                       <button
                         onClick={() => handleDeleteSession(session)}
                         className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-                        title={t('delete')}
+                        title={t("delete")}
                       >
                         <Trash2 className="w-4 h-4" />
                       </button>
@@ -368,14 +446,21 @@ export default function Sessions() {
 
       <ViewSessionModal
         isOpen={showViewModal}
-        onClose={() => { setShowViewModal(false); setSelectedSession(null); setGroupedSessions([]); }}
+        onClose={() => {
+          setShowViewModal(false);
+          setSelectedSession(null);
+          setGroupedSessions([]);
+        }}
         session={selectedSession}
         groupedSessions={groupedSessions}
       />
 
       <EditSessionModal
         isOpen={showEditModal}
-        onClose={() => { setShowEditModal(false); setSelectedSession(null); }}
+        onClose={() => {
+          setShowEditModal(false);
+          setSelectedSession(null);
+        }}
         session={selectedSession}
         onSave={handleUpdateSession}
       />
