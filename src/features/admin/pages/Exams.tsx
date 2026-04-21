@@ -1,9 +1,10 @@
-import { useState } from 'react';
-import { Search,  Filter } from 'lucide-react';
-import { useLanguage } from '../../../contexts/LanguageContext';
-import Pagination from '../../../components/ui/Pagination';
 // import AddExamModal from '../../../components/modals/ExamModal';
 // import { useConfirm } from '../../../hooks/useConfirm';
+import { useState } from "react";
+import { Search, Filter } from "lucide-react";
+import { useLanguage } from "../../../contexts/LanguageContext";
+import Pagination from "../../../components/ui/Pagination";
+import { useExams } from "../hooks/useExams";
 
 interface Exam {
   id: string;
@@ -14,108 +15,60 @@ interface Exam {
   dueDate: string;
   duration: string;
   grade: number;
-  status: 'upcoming' | 'completed';
+  status: "upcoming" | "completed";
 }
 
 export default function Exams() {
   const { language } = useLanguage();
-  const [searchTerm, setSearchTerm] = useState('');
+
+  const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [showFilters, setShowFilters] = useState(false);
-  // const [showAddModal, setShowAddModal] = useState(false);
-  // const [editingExam, setEditingExam] = useState<Exam | null>(null);
-  // const { confirm, ConfirmDialog } = useConfirm();
+
   const [filters, setFilters] = useState({
-    status: '',
-    subject: '',
-    teacher: '',
-    student: ''
+    status: "",
+    subject: "",
+    teacher: "",
+    student: "",
   });
+
   const itemsPerPage = 10;
 
-  const [exams, setExams] = useState<Exam[]>([
-    {
-      id: '1',
-      title: 'ddd',
-      subject: 'القرآن الكريم',
-      teacher: 'مها محمد',
-      studentName: 'ddd',
-      dueDate: '2026-01-29',
-      duration: '90 دقيقة',
-      grade: 100,
-      status: 'upcoming'
-    },
-    {
-      id: '2',
-      title: 'ff',
-      subject: 'الرياضيات',
-      teacher: 'ابراهيم مسلم',
-      studentName: 'ff',
-      dueDate: '2026-01-01',
-      duration: '60 دقيقة',
-      grade: 100,
-      status: 'upcoming'
-    },
-    {
-      id: '3',
-      title: 'test',
-      subject: 'نسيت',
-      teacher: 'ابراهيم مسلم',
-      studentName: 'test',
-      dueDate: '2025-12-29',
-      duration: '60 دقيقة',
-      grade: 100,
-      status: 'upcoming'
-    },
-    {
-      id: '4',
-      title: 'test',
-      subject: 'نسيت',
-      teacher: 'مها محمد',
-      studentName: 'test',
-      dueDate: '2025-12-29',
-      duration: '60 دقيقة',
-      grade: 100,
-      status: 'upcoming'
-    },
-    {
-      id: '5',
-      title: 'امتحان منتصف الترم',
-      subject: 'اللغة العربية',
-      teacher: 'مها محمد',
-      studentName: 'امتحان منتصف الترم',
-      dueDate: '2025-01-20',
-      duration: '120 دقيقة',
-      grade: 100,
-      status: 'upcoming'
-    }
-  ]);
+  // ✅ API DATA
+  const { data, isLoading, isError } = useExams();
 
+  const exams =
+    data?.data?.map((exam: any) => ({
+      id: exam.id,
+      title: exam.title,
+      subject: exam.subject?.name_en || exam.subject?.name_ar,
+      teacher: exam.teacher?.user?.name,
+      studentName: exam.student?.user?.name,
+      dueDate: exam.dueDate,
+      duration: `${exam.duration} min`,
+      grade: exam.grade,
+      status: exam.status === "pending" ? "upcoming" : "completed",
+    })) || [];
   const text = {
-    title: { ar: 'الامتحانات', en: 'Exams' },
-    search: { ar: 'بحث بالعنوان أو المعلم أو الطالب...', en: 'Search by title, teacher or student...' },
-    addExam: { ar: 'إضافة امتحان', en: 'Add Exam' },
-    filters: { ar: 'الفلاتر الشائعة', en: 'Common filters' },
-    columnTitle: { ar: 'العنوان', en: 'Title' },
-    columnSubject: { ar: 'المادة', en: 'Subject' },
-    columnTeacher: { ar: 'المعلم', en: 'Teacher' },
-    columnStudent: { ar: 'الطالب', en: 'Student' },
-    columnDueDate: { ar: 'تاريخ', en: 'Due Date' },
-    columnDuration: { ar: 'المدة (دقيقة)', en: 'Duration (min)' },
-    columnGrade: { ar: 'الدرجة', en: 'Grade' },
-    columnStatus: { ar: 'الحالة', en: 'Status' },
-    columnActions: { ar: 'الإجراءات', en: 'Actions' },
-    upcoming: { ar: 'قادم', en: 'Upcoming' },
-    completed: { ar: 'مكتمل', en: 'Completed' },
-    minutes: { ar: 'دقيقة', en: 'minutes' },
-    showing: { ar: 'الصفحة', en: 'Page' },
-    of: { ar: 'من', en: 'of' },
-    total: { ar: 'الإجمالي', en: 'Total' },
-    previous: { ar: 'السابق', en: 'Previous' },
-    next: { ar: 'التالي', en: 'Next' }
+    title: { ar: "الامتحانات", en: "Exams" },
+    search: {
+      ar: "بحث بالعنوان أو المعلم أو الطالب...",
+      en: "Search by title, teacher or student...",
+    },
+    filters: { ar: "الفلاتر الشائعة", en: "Common filters" },
+    columnTitle: { ar: "العنوان", en: "Title" },
+    columnSubject: { ar: "المادة", en: "Subject" },
+    columnTeacher: { ar: "المعلم", en: "Teacher" },
+    columnStudent: { ar: "الطالب", en: "Student" },
+    columnDueDate: { ar: "تاريخ", en: "Due Date" },
+    columnDuration: { ar: "المدة (دقيقة)", en: "Duration (min)" },
+    columnGrade: { ar: "الدرجة", en: "Grade" },
+    columnStatus: { ar: "الحالة", en: "Status" },
+    upcoming: { ar: "قادم", en: "Upcoming" },
+    completed: { ar: "مكتمل", en: "Completed" },
   };
 
-  const filteredExams = exams.filter(exam => {
+  const filteredExams = exams.filter((exam: Exam) => {
     const matchesSearch =
       exam.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
       exam.subject.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -125,53 +78,46 @@ export default function Exams() {
     const matchesStatus = !filters.status || exam.status === filters.status;
     const matchesSubject = !filters.subject || exam.subject === filters.subject;
     const matchesTeacher = !filters.teacher || exam.teacher === filters.teacher;
-    const matchesStudent = !filters.student || exam.studentName === filters.student;
+    const matchesStudent =
+      !filters.student || exam.studentName === filters.student;
 
-    return matchesSearch && matchesStatus && matchesSubject && matchesTeacher && matchesStudent;
+    return (
+      matchesSearch &&
+      matchesStatus &&
+      matchesSubject &&
+      matchesTeacher &&
+      matchesStudent
+    );
   });
 
+  // ✅ Pagination
   const totalPages = Math.ceil(filteredExams.length / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
-  const endIndex = startIndex + itemsPerPage;
-  const currentExams = filteredExams.slice(startIndex, endIndex);
+  const currentExams = filteredExams.slice(
+    startIndex,
+    startIndex + itemsPerPage,
+  );
 
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
   };
 
-// const handleSaveExam = (examData: Exam) => {
-//   if (editingExam) {
-//     setExams(exams.map(e => e.id === editingExam.id ? examData : e));
-//   } else {
-//     setExams([...exams, examData]);
-//   }
-//   handleCloseModal();
-// };
+  // ✅ Loading / Error states
+  if (isLoading) {
+    return <div className="p-10 text-center">Loading...</div>;
+  }
 
-//   const handleEditExam = (exam: Exam) => {
-//   setEditingExam(exam);
-//   setShowAddModal(true);
-// };
-
-// const handleCloseModal = () => {
-//   setShowAddModal(false);
-//   setEditingExam(null);
-// };
-
-  // const handleDeleteExam = async (examId: string) => {
-  //   const confirmed = await confirm({
-  //     title: language === 'ar' ? 'حذف امتحان' : 'Delete Exam',
-  //     message: language === 'ar' ? 'هل أنت متأكد من حذف هذا الامتحان؟' : 'Are you sure you want to delete this exam?',
-  //   });
-  //   if (confirmed) {
-  //     setExams(exams.filter(exam => exam.id !== examId));
-  //   }
-  // };
-
+  if (isError) {
+    return (
+      <div className="p-10 text-center text-red-500">Error loading exams</div>
+    );
+  }
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-bold text-gray-900">{text.title[language]}</h1>
+        <h1 className="text-3xl font-bold text-gray-900">
+          {text.title[language]}
+        </h1>
         {/* <button
           onClick={() => setShowAddModal(true)}
           className="flex items-center gap-2 px-6 py-3 btn-primary text-white rounded-xl transition-colors font-medium"
@@ -215,7 +161,9 @@ export default function Exams() {
             <div className="mt-4 grid grid-cols-1 md:grid-cols-4 gap-4 p-4 bg-gray-50 rounded-xl">
               <select
                 value={filters.status}
-                onChange={(e) => setFilters({ ...filters, status: e.target.value })}
+                onChange={(e) =>
+                  setFilters({ ...filters, status: e.target.value })
+                }
                 className="px-4 py-2 border border-gray-300 rounded-lg text-start"
                 dir="rtl"
               >
@@ -227,7 +175,9 @@ export default function Exams() {
                 type="text"
                 placeholder={text.columnSubject[language]}
                 value={filters.subject}
-                onChange={(e) => setFilters({ ...filters, subject: e.target.value })}
+                onChange={(e) =>
+                  setFilters({ ...filters, subject: e.target.value })
+                }
                 className="px-4 py-2 border border-gray-300 rounded-lg text-start"
                 dir="rtl"
               />
@@ -235,7 +185,9 @@ export default function Exams() {
                 type="text"
                 placeholder={text.columnTeacher[language]}
                 value={filters.teacher}
-                onChange={(e) => setFilters({ ...filters, teacher: e.target.value })}
+                onChange={(e) =>
+                  setFilters({ ...filters, teacher: e.target.value })
+                }
                 className="px-4 py-2 border border-gray-300 rounded-lg text-start"
                 dir="rtl"
               />
@@ -243,7 +195,9 @@ export default function Exams() {
                 type="text"
                 placeholder={text.columnStudent[language]}
                 value={filters.student}
-                onChange={(e) => setFilters({ ...filters, student: e.target.value })}
+                onChange={(e) =>
+                  setFilters({ ...filters, student: e.target.value })
+                }
                 className="px-4 py-2 border border-gray-300 rounded-lg text-start"
                 dir="rtl"
               />
@@ -255,35 +209,64 @@ export default function Exams() {
           <table className="w-full" dir={language === "ar" ? "rtl" : "ltr"}>
             <thead className="bg-gray-50 border-b border-gray-200">
               <tr>
-                <th className="px-6 py-4 text-start text-sm font-semibold text-gray-900">{text.columnTitle[language]}</th>
-                <th className="px-6 py-4 text-start text-sm font-semibold text-gray-900">{text.columnSubject[language]}</th>
-                <th className="px-6 py-4 text-start text-sm font-semibold text-gray-900">{text.columnTeacher[language]}</th>
-                <th className="px-6 py-4 text-start text-sm font-semibold text-gray-900">{text.columnDueDate[language]}</th>
-                <th className="px-6 py-4 text-start text-sm font-semibold text-gray-900">{text.columnDuration[language]}</th>
-                <th className="px-6 py-4 text-start text-sm font-semibold text-gray-900">{text.columnGrade[language]}</th>
-                <th className="px-6 py-4 text-start text-sm font-semibold text-gray-900">{text.columnStatus[language]}</th>
+                <th className="px-6 py-4 text-start text-sm font-semibold text-gray-900">
+                  {text.columnTitle[language]}
+                </th>
+                <th className="px-6 py-4 text-start text-sm font-semibold text-gray-900">
+                  {text.columnSubject[language]}
+                </th>
+                <th className="px-6 py-4 text-start text-sm font-semibold text-gray-900">
+                  {text.columnTeacher[language]}
+                </th>
+                <th className="px-6 py-4 text-start text-sm font-semibold text-gray-900">
+                  {text.columnDueDate[language]}
+                </th>
+                <th className="px-6 py-4 text-start text-sm font-semibold text-gray-900">
+                  {text.columnDuration[language]}
+                </th>
+                <th className="px-6 py-4 text-start text-sm font-semibold text-gray-900">
+                  {text.columnGrade[language]}
+                </th>
+                <th className="px-6 py-4 text-start text-sm font-semibold text-gray-900">
+                  {text.columnStatus[language]}
+                </th>
                 {/* <th className="px-6 py-4 text-start text-sm font-semibold text-gray-900">{text.columnActions[language]}</th> */}
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200">
-              {currentExams.map((exam) => (
-                <tr key={exam.id} className="hover:bg-gray-50 transition-colors">
-                  <td className="px-6 py-4 text-start text-gray-900 font-medium">{exam.studentName}</td>
+              {currentExams.map((exam: Exam) => (
+                <tr
+                  key={exam.id}
+                  className="hover:bg-gray-50 transition-colors"
+                >
+                  <td className="px-6 py-4 text-start text-gray-900 font-medium">
+                    {exam.studentName}
+                  </td>
                   <td className="px-6 py-4 text-start">
                     <span className="text-primary font-medium hover:underline cursor-pointer">
                       {exam.subject}
                     </span>
                   </td>
-                  <td className="px-6 py-4 text-start text-gray-900">{exam.teacher}</td>
-                  <td className="px-6 py-4 text-start text-gray-600">{exam.dueDate}</td>
-                  <td className="px-6 py-4 text-start text-gray-600">{exam.duration}</td>
-                  <td className="px-6 py-4 text-start text-gray-900 font-medium">{exam.grade}</td>
+                  <td className="px-6 py-4 text-start text-gray-900">
+                    {exam.teacher}
+                  </td>
+                  <td className="px-6 py-4 text-start text-gray-600">
+                    {new Date(exam.dueDate).toISOString().split("T")[0]}
+                  </td>
+                  <td className="px-6 py-4 text-start text-gray-600">
+                    {exam.duration}
+                  </td>
+                  <td className="px-6 py-4 text-start text-gray-900 font-medium">
+                    {exam.grade}
+                  </td>
                   <td className="px-6 py-4 text-start">
-                    <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${
-                      exam.status === 'upcoming'
-                        ? 'bg-yellow-100 text-yellow-800'
-                        : 'bg-green-100 text-green-800'
-                    }`}>
+                    <span
+                      className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${
+                        exam.status === "upcoming"
+                          ? "bg-yellow-100 text-yellow-800"
+                          : "bg-green-100 text-green-800"
+                      }`}
+                    >
                       {text[exam.status][language]}
                     </span>
                   </td>
