@@ -1,6 +1,6 @@
-import { X, DollarSign, TrendingUp, TrendingDown, Calendar, CreditCard, User } from 'lucide-react';
+import { X, DollarSign, TrendingUp, TrendingDown, Calendar, User } from 'lucide-react';
 import { useLanguage } from '../../contexts/LanguageContext';
-import type { Transaction } from '../../pages/Transactions';
+import { Transaction } from '../../types/transaction';
 
 interface ViewTransactionModalProps {
   isOpen: boolean;
@@ -16,24 +16,21 @@ export default function ViewTransactionModal({ isOpen, onClose, transaction, cur
   const text = {
     title: { ar: 'تفاصيل المعاملة', en: 'Transaction Details' },
     type: { ar: 'النوع', en: 'Type' },
-    income: { ar: 'إيراد', en: 'Income' },
-    teacher_expense: { ar: 'مصروف معلم', en: 'Teacher Expense' },
-    student: { ar: 'الطالب', en: 'Student' },
-    teacher: { ar: 'المعلم', en: 'Teacher' },
     amount: { ar: 'المبلغ', en: 'Amount' },
     currency: { ar: 'العملة', en: 'Currency' },
-    paymentMethod: { ar: 'طريقة الدفع', en: 'Payment Method' },
     date: { ar: 'التاريخ', en: 'Date' },
     status: { ar: 'الحالة', en: 'Status' },
     completed: { ar: 'مكتمل', en: 'Completed' },
     pending: { ar: 'معلق', en: 'Pending' },
-    notes: { ar: 'ملاحظات', en: 'Notes' },
-    sessionCount: { ar: 'عدد الحصص', en: 'Sessions' },
-    sessionDuration: { ar: 'مدة الحصة', en: 'Session Duration' },
-    ratePerHour: { ar: 'سعر الساعة', en: 'Rate/Hour' },
+    failed: { ar: 'فاشل', en: 'Failed' },
+    reason: { ar: 'السبب', en: 'Reason' },
+    walletId: { ar: 'رقم المحفظة', en: 'Wallet ID' },
+    subscriptionId: { ar: 'رقم الاشتراك', en: 'Subscription ID' },
     convertedAmount: { ar: 'المبلغ المحوّل', en: 'Converted Amount' },
     close: { ar: 'إغلاق', en: 'Close' },
-    minute: { ar: 'دقيقة', en: 'min' }
+    credit: { ar: 'إيداع', en: 'Credit' },
+    debit: { ar: 'سحب', en: 'Debit' },
+    subscription: { ar: 'اشتراك', en: 'Subscription' },
   };
 
   const getExchangeRate = (fromCurrency: string, toCurrency: string): number => {
@@ -43,13 +40,15 @@ export default function ViewTransactionModal({ isOpen, onClose, transaction, cur
     return from.rate / to.rate;
   };
 
-  const convertedAmount = transaction.amount * getExchangeRate(transaction.currency, selectedCurrency);
+  // Assuming API amount is in SAR for now, as currency symbols are not provided per transaction in the schema
+  const transactionCurrency = 'SAR'; 
+  const convertedAmount = transaction.amount * getExchangeRate(transactionCurrency, selectedCurrency);
   const currentSymbol = currencies.find(c => c.code === selectedCurrency)?.symbol || selectedCurrency;
-  const originalSymbol = currencies.find(c => c.code === transaction.currency)?.symbol || transaction.currency;
+  const originalSymbol = currencies.find(c => c.code === transactionCurrency)?.symbol || transactionCurrency;
 
   if (!isOpen) return null;
 
-  const isIncome = transaction.type === 'income';
+  const isIncome = transaction.type === 'credit' || transaction.type === 'subscription';
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
@@ -62,7 +61,7 @@ export default function ViewTransactionModal({ isOpen, onClose, transaction, cur
             </div>
             <div>
               <h2 className="text-xl font-bold">{text.title[language]}</h2>
-              <p className="text-sm opacity-80">{isIncome ? text.income[language] : text.teacher_expense[language]}</p>
+              <p className="text-sm opacity-80">{text[transaction.type] ? text[transaction.type][language] : transaction.type}</p>
             </div>
           </div>
           <button onClick={onClose} className="p-2 hover:bg-white hover:bg-opacity-20 rounded-lg">
@@ -76,88 +75,62 @@ export default function ViewTransactionModal({ isOpen, onClose, transaction, cur
             <p className={`text-5xl font-bold ${isIncome ? 'text-green-600' : 'text-orange-600'}`}>
               {transaction.amount.toFixed(2)} <span className="text-2xl">{originalSymbol}</span>
             </p>
-            {transaction.currency !== selectedCurrency && (
+            {transactionCurrency !== selectedCurrency && (
               <p className="text-sm text-gray-500 mt-2">
                 {text.convertedAmount[language]}: <span className="font-semibold">{convertedAmount.toFixed(2)} {currentSymbol}</span>
               </p>
             )}
-            <span className={`inline-flex mt-3 px-3 py-1 rounded-full text-sm font-medium ${transaction.status === 'completed' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'
-              }`}>
-              {transaction.status === 'completed' ? text.completed[language] : text.pending[language]}
+            <span className={`inline-flex mt-3 px-3 py-1 rounded-full text-sm font-medium ${
+              transaction.status === 'completed' 
+                ? 'bg-green-100 text-green-700' 
+                : transaction.status === 'pending'
+                ? 'bg-yellow-100 text-yellow-700'
+                : 'bg-red-100 text-red-700'
+            }`}>
+              {text[transaction.status] ? text[transaction.status][language] : transaction.status}
             </span>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {isIncome && transaction.studentName && (
-              <div className="bg-gray-50 rounded-xl p-4 border border-gray-200">
-                <div className="flex items-center gap-2 mb-2">
-                  <User className="w-4 h-4 text-gray-500" />
-                  <p className="text-sm text-gray-600">{text.student[language]}</p>
-                </div>
-                <p className="font-semibold text-gray-900">{transaction.studentName}</p>
-              </div>
-            )}
-
-            <div className="bg-gray-50 rounded-xl p-4 border border-gray-200">
-              <div className="flex items-center gap-2 mb-2">
-                <User className="w-4 h-4 text-gray-500" />
-                <p className="text-sm text-gray-600">{text.teacher[language]}</p>
-              </div>
-              <p className="font-semibold text-gray-900">{transaction.teacherName}</p>
-            </div>
-
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-start">
             <div className="bg-gray-50 rounded-xl p-4 border border-gray-200">
               <div className="flex items-center gap-2 mb-2">
                 <Calendar className="w-4 h-4 text-gray-500" />
                 <p className="text-sm text-gray-600">{text.date[language]}</p>
               </div>
-              <p className="font-semibold text-gray-900">{transaction.date}</p>
+              <p className="font-semibold text-gray-900">{new Date(transaction.createdAt).toLocaleString(language === 'ar' ? 'ar-EG' : 'en-US')}</p>
             </div>
 
             <div className="bg-gray-50 rounded-xl p-4 border border-gray-200">
               <div className="flex items-center gap-2 mb-2">
-                <CreditCard className="w-4 h-4 text-gray-500" />
-                <p className="text-sm text-gray-600">{text.paymentMethod[language]}</p>
+                <User className="w-4 h-4 text-gray-500" />
+                <p className="text-sm text-gray-600">{text.walletId[language]}</p>
               </div>
-              <p className="font-semibold text-gray-900">{transaction.paymentMethod || '-'}</p>
+              <p className="font-semibold text-gray-900 truncate">{transaction.walletId}</p>
             </div>
+
+            {transaction.subscriptionId && (
+              <div className="bg-gray-50 rounded-xl p-4 border border-gray-200">
+                <div className="flex items-center gap-2 mb-2">
+                  <DollarSign className="w-4 h-4 text-gray-500" />
+                  <p className="text-sm text-gray-600">{text.subscriptionId[language]}</p>
+                </div>
+                <p className="font-semibold text-gray-900">{transaction.subscriptionId}</p>
+              </div>
+            )}
 
             <div className="bg-gray-50 rounded-xl p-4 border border-gray-200">
               <div className="flex items-center gap-2 mb-2">
-                <DollarSign className="w-4 h-4 text-gray-500" />
-                <p className="text-sm text-gray-600">{text.currency[language]}</p>
+                <TrendingUp className="w-4 h-4 text-gray-500" />
+                <p className="text-sm text-gray-600">{text.type[language]}</p>
               </div>
-              <p className="font-semibold text-gray-900">{originalSymbol} ({transaction.currency})</p>
+              <p className="font-semibold text-gray-900">{text[transaction.type] ? text[transaction.type][language] : transaction.type}</p>
             </div>
           </div>
 
-          {transaction.type === 'teacher_expense' && transaction.sessionCount && (
-            <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
-              <h3 className="font-semibold text-blue-800 mb-3 text-start">{language === 'ar' ? 'تفاصيل الحساب' : 'Calculation Details'}</h3>
-              <div className="grid grid-cols-3 gap-3 text-center">
-                <div>
-                  <p className="text-xs text-gray-500">{text.sessionCount[language]}</p>
-                  <p className="font-bold text-gray-900 text-lg">{transaction.sessionCount}</p>
-                </div>
-                <div>
-                  <p className="text-xs text-gray-500">{text.sessionDuration[language]}</p>
-                  <p className="font-bold text-gray-900 text-lg">{transaction.sessionDuration} {text.minute[language]}</p>
-                </div>
-                <div>
-                  <p className="text-xs text-gray-500">{text.ratePerHour[language]}</p>
-                  <p className="font-bold text-gray-900 text-lg">{transaction.ratePerHour}</p>
-                </div>
-              </div>
-              <div className="mt-3 pt-3 border-t border-blue-200 text-center text-sm text-blue-700">
-                {transaction.sessionCount} × ({transaction.sessionDuration}/60) × {transaction.ratePerHour} = {transaction.amount.toFixed(2)} {originalSymbol}
-              </div>
-            </div>
-          )}
-
-          {transaction.notes && (
-            <div className="bg-gray-50 rounded-xl p-4 border border-gray-200">
-              <p className="text-sm text-gray-600 mb-2">{text.notes[language]}</p>
-              <p className="text-gray-900">{transaction.notes}</p>
+          {transaction.reason && (
+            <div className="bg-gray-50 rounded-xl p-4 border border-gray-200 text-start">
+              <p className="text-sm text-gray-600 mb-2">{text.reason[language]}</p>
+              <p className="text-gray-900">{transaction.reason}</p>
             </div>
           )}
 

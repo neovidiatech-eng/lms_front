@@ -6,7 +6,8 @@ import {
   Clock, Wallet, ArrowUpRight, X,
   BookOpen, Users, Star, ShieldCheck, FileText, Send
 } from 'lucide-react';
-import ErrorService from '../../../utils/ErrorService';
+import { message, Spin } from 'antd';
+import { useTeacherProfile } from '../hooks/useTeacherProfile';
 
 // Internal Withdrawal Modal Component
 function WithdrawalModal({ isOpen, onClose, balance, onWithdraw, isRtl, settings }: any) {
@@ -18,16 +19,17 @@ function WithdrawalModal({ isOpen, onClose, balance, onWithdraw, isRtl, settings
     e.preventDefault();
     const numAmount = parseFloat(amount);
     if (!numAmount || numAmount <= 0) {
-      ErrorService.error(isRtl ? 'يرجى إدخال مبلغ صالح' : 'Please enter a valid amount');
+      message.error(isRtl ? 'يرجى إدخال مبلغ صالح' : 'Please enter a valid amount');
       return;
     }
     if (numAmount > balance) {
-      ErrorService.error(isRtl ? 'المبلغ يتجاوز الرصيد الحالي' : 'Amount exceeds current balance');
+      message.error(isRtl ? 'المبلغ يتجاوز الرصيد الحالي' : 'Amount exceeds current balance');
       return;
     }
     onWithdraw(numAmount);
     setAmount('');
   };
+
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[100] p-4 animate-fade-in">
@@ -79,14 +81,36 @@ export default function TeacherProfile() {
   const { settings } = useSettings();
   const isRtl = i18n.language.split('-')[0] === 'ar';
   const [isWithdrawModalOpen, setIsWithdrawModalOpen] = useState(false);
+
+  const { data: response, isLoading, error } = useTeacherProfile();
+  
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <Spin size="large" />
+      </div>
+    );
+  }
+
+  if (error || !response) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px] text-red-500">
+        {isRtl ? 'حدث خطأ أثناء تحميل البيانات' : 'Error loading profile data'}
+      </div>
+    );
+  }
+
+  const profileData = response.data;
+  const teacher = profileData.teacher;
+  const apiStats = profileData.stats;
   
   // Teacher Personal Info
   const teacherInfo = {
-    name: isRtl ? 'أ. محمد الأحمدي' : 'Mr. Mohamed El-Ahmady',
-    email: 'teacher@lms.com',
-    phone: '+20 100 123 4567',
+    name: teacher.name || (isRtl ? 'أ. محمد الأحمدي' : 'Mr. Mohamed El-Ahmady'),
+    email: teacher.email || 'teacher@lms.com',
+    phone: teacher.phone || '+20 100 123 4567',
     joinDate: '2022-09-15',
-    title: isRtl ? 'معلم أول لغة عربية' : 'Senior Arabic Teacher',
+    title: isRtl ? 'معلم' : 'Teacher',
     id: 'TCH-2023-01',
     country: isRtl ? 'مصر' : 'Egypt',
     rating: 4.9,
@@ -105,15 +129,16 @@ export default function TeacherProfile() {
 
   // Quick Stats
   const stats = [
-    { label: isRtl ? 'الكورسات' : 'Courses', value: '4', icon: BookOpen },
-    { label: isRtl ? 'الطلاب' : 'Students', value: '145', icon: Users },
-    { label: isRtl ? 'ساعات التدريس' : 'Teaching Hours', value: '120+', icon: Clock },
+    { label: isRtl ? 'المواد' : 'Subjects', value: apiStats.totalSubjects.toString(), icon: BookOpen },
+    { label: isRtl ? 'الطلاب' : 'Students', value: apiStats.totalStudents.toString(), icon: Users },
+    { label: isRtl ? 'الحصص' : 'Sessions', value: apiStats.totalSessions.toString(), icon: Clock },
   ];
 
   const handleWithdraw = (amount: number) => {
-    ErrorService.success(isRtl ? `تم إرسال طلب سحب مبلغ $${amount} بنجاح` : `Withdrawal request for $${amount} submitted successfully`);
+    message.success(isRtl ? `تم إرسال طلب سحب مبلغ $${amount} بنجاح` : `Withdrawal request for $${amount} submitted successfully`);
     setIsWithdrawModalOpen(false);
   };
+
 
   return (
     <div className="space-y-6 animate-fade-in pb-10" dir={isRtl ? 'rtl' : 'ltr'}>

@@ -6,8 +6,9 @@ import { SettingsProvider } from './contexts/SettingsContext';
 import { useTranslation } from 'react-i18next';
 import { useEffect } from 'react';
 import ErrorBoundary from './components/layout/ErrorBoundary';
-import ErrorService from './utils/ErrorService';
 import LanguageSwitcher from './components/ui/LanguageSwitcher';
+
+
 // import { adminDashboardRoutes } from './pages/AdminDashboard/adminDashboardRoutes';
 // import { studentDashboardRoutes } from './pages/StudentDashboard/studentDashboardRoutes';
 // import { teacherDashboardRoutes } from './pages/TeacherDashboard/teacherDashboardRoutes.tsx';
@@ -37,20 +38,16 @@ const LoadingFallback = () => (
   </div>
 );
 
-// Create a client with global error handling
+// Create a client with global options
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
       retry: 1,
       refetchOnWindowFocus: false,
     },
-    mutations: {
-      onError: (error) => {
-        ErrorService.handleError(error);
-      },
-    },
   },
 });
+
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(() => {

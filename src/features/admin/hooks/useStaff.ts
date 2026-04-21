@@ -8,8 +8,7 @@ import {
     getStaffbyId
 } from "../services/StaffServices";
 import { CreateStaffPayload, UpdateStaffPayload } from "../../../types/sttuf";
-import ErrorService from "../../../utils/ErrorService";
-import { useTranslation } from "react-i18next";
+import { message } from "antd";
 
 export const useStaff = (search: string = "") => {
     return useQuery({
@@ -27,37 +26,35 @@ export const useStaffById = (id: string) => {
 
 export const useAddStaff = () => {
     const queryClient = useQueryClient();
-    const { t } = useTranslation();
     return useMutation({
         mutationFn: (staff: CreateStaffPayload) => addStaff(staff),
-        onSuccess: () => {
+        onSuccess: (data: any) => {
             queryClient.invalidateQueries({ queryKey: ["staff"] });
-            ErrorService.success(t('userAddedSuccess'));
+            message.success(data.message || 'Staff Added Successfully');
         },
     });
 };
 
 export const useUpdateStaff = () => {
     const queryClient = useQueryClient();
-    const { t } = useTranslation();
     return useMutation({
         mutationFn: ({ id, staff }: { id: string; staff: UpdateStaffPayload }) =>
             updateStaff({ id, staff }),
-        onSuccess: () => {
+        onSuccess: (data: any) => {
             queryClient.invalidateQueries({ queryKey: ["staff"] });
-            ErrorService.success(t('userUpdatedSuccess'));
+            message.success(data.message || 'Staff Updated Successfully');
         },
     });
 };
 
 export const useDeleteStaff = () => {
     const queryClient = useQueryClient();
-    const { t } = useTranslation();
     return useMutation({
         mutationFn: (id: string) => deleteStaff(id),
-        onSuccess: () => {
+        onSuccess: (data: any) => {
             queryClient.invalidateQueries({ queryKey: ["staff"] });
-            ErrorService.success(t('userDeletedSuccess'));
+            message.success(data.message || 'Staff Deleted Successfully');
         },
     });
 };
+

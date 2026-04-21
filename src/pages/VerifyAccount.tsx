@@ -7,7 +7,7 @@ import { VerifyAccountInput, getVerifyAccountSchema } from "../lib/schemas/AuthS
 import { verifyAccount, resendCode } from "../services/AuthServices";
 import { useNavigate } from "react-router-dom";
 import OtpInput from "../components/ui/OtpInput";
-import ErrorService from "../utils/ErrorService";
+import { message } from "antd";
 
 interface VerifyAccountProps {
   onVerifySuccess?: () => void;
@@ -37,7 +37,7 @@ export default function VerifyAccount({ onVerifySuccess }: VerifyAccountProps) {
         email,
         otp: data.code
       });
-      ErrorService.success(t("verify Success") || "Account verified successfully");
+      message.success(result.message || t("verifySuccess") || "Account verified successfully");
       sessionStorage.removeItem("verify_email");
       
       const token = result.data?.accessToken || result.accessToken;
@@ -58,8 +58,8 @@ export default function VerifyAccount({ onVerifySuccess }: VerifyAccountProps) {
     if (!email) return;
     setIsResending(true);
     try {
-      await resendCode({ email });
-      ErrorService.success(t("codeSentSuccess") || "New verification code sent");
+      const result = await resendCode({ email });
+      message.success(result.message || t("codeSentSuccess") || "New verification code sent");
     } catch (error) {
       console.error("Resend failed:", error);
     } finally {
@@ -140,3 +140,4 @@ export default function VerifyAccount({ onVerifySuccess }: VerifyAccountProps) {
     </div>
   );
 }
+

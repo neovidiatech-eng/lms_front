@@ -1,7 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import { getAssignments, deleteAssignment, createAssignment, updateAssignment } from "../services/AssignmentServices"
-import ErrorService from "../utils/ErrorService"
 import { Assignment } from "../types/assignment"
+import { message } from "antd"
 
 export const useGetAssignments = () => {
     return useQuery({
@@ -34,9 +34,9 @@ export const useDeleteAssignment = () => {
     const queryClient = useQueryClient();
     return useMutation({
         mutationFn: deleteAssignment,
-        onSuccess: () => {
+        onSuccess: (data: any) => {
             queryClient.invalidateQueries({ queryKey: ["assignments"] });
-            ErrorService.success("Assignment deleted successfully");
+            message.success(data.message || "Assignment deleted successfully");
         }
     });
 };
@@ -45,9 +45,9 @@ export const useCreateAssignment = () => {
     const queryClient = useQueryClient();
     return useMutation({
         mutationFn: createAssignment,
-        onSuccess: () => {
+        onSuccess: (data: any) => {
             queryClient.invalidateQueries({ queryKey: ["assignments"] });
-            ErrorService.success("Assignment created successfully");
+            message.success(data.message || "Assignment created successfully");
         }
     });
 };
@@ -56,9 +56,10 @@ export const useUpdateAssignment = () => {
     const queryClient = useQueryClient();
     return useMutation({
         mutationFn: ({ id, ...data }: { id: string } & Partial<Assignment>) => updateAssignment(id, data),
-        onSuccess: () => {
+        onSuccess: (data: any) => {
             queryClient.invalidateQueries({ queryKey: ["assignments"] });
-            ErrorService.success("Assignment updated successfully");
+            message.success(data.message || "Assignment updated successfully");
         }
     });
 };
+

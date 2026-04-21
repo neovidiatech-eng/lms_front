@@ -9,7 +9,7 @@ import { useTeacher } from '../../features/admin/hooks/useTeacher';
 import { useStudents } from '../../features/admin/hooks/useStudents';
 import { getMultipleSessionsSchema, MultipleSessionsFormData, MultipleSessionsPayload } from '../../lib/schemas/SessionSchema';
 import { DayOfWeek } from '../../types/scheduales';
-import ErrorService from '../../utils/ErrorService';
+import { message } from 'antd';
 
 export interface SessionPreviewItem {
   date: string;
@@ -92,8 +92,6 @@ export default function AddMultipleSessionsModal({ isOpen, onClose, onAdd }: Add
     totalSessions: selectedStudentData.sessions || 0,
   } : null;
 
-
-
   const sessionPreview = useMemo(() => {
     if (!watchedMonthYear) return [];
     const [year, month] = watchedMonthYear.split('-').map(Number);
@@ -131,11 +129,11 @@ export default function AddMultipleSessionsModal({ isOpen, onClose, onAdd }: Add
 
   const onSubmit = (data: MultipleSessionsFormData) => {
     if (sessionPreview.length === 0) {
-      ErrorService.warning(t('addMultipleSessions_selectOneDayMin'));
+      message.warning(t('addMultipleSessions_selectOneDayMin'));
       return;
     }
     if (sessionsExceedPackage) {
-      ErrorService.error(t('addMultipleSessions_sessionsExceedPackage'));
+      message.error(t('addMultipleSessions_sessionsExceedPackage'));
       return;
     }
 
@@ -152,6 +150,7 @@ export default function AddMultipleSessionsModal({ isOpen, onClose, onAdd }: Add
     setWeekDays(prev => prev.map(d => ({ ...d, checked: false })));
     onClose();
   };
+
 
   if (!isOpen) return null;
 

@@ -1,4 +1,4 @@
- import { useState } from "react";
+import { useState } from "react";
 import { Eye, EyeOff, ArrowLeft, ArrowRight } from "lucide-react";
 import { useLanguage } from "../contexts/LanguageContext";
 import { useForm, Controller } from "react-hook-form";
@@ -7,7 +7,7 @@ import { ResetPasswordInput, getResetPasswordSchema } from "../lib/schemas/AuthS
 import { resetPassword, resendCode } from "../services/AuthServices";
 import { useNavigate } from "react-router-dom";
 import OtpInput from "../components/ui/OtpInput";
-import ErrorService from "../utils/ErrorService";
+import { message } from "antd";
 
 export default function ResetPassword() {
   const navigate = useNavigate();
@@ -33,13 +33,13 @@ export default function ResetPassword() {
 
   const onSubmit = async (data: ResetPasswordInput) => {
     try {
-      await resetPassword({
+      const result = await resetPassword({
         email,
         otp: data.code,
         password: data.password,
         confirm: data.confirmPassword,
       });
-      ErrorService.success(t("changes Saved Success"));
+      message.success(result.message || t("changesSavedSuccess"));
       sessionStorage.removeItem("reset_email");
       navigate("/login");
     } catch (error) {
@@ -51,8 +51,8 @@ export default function ResetPassword() {
     if (!email) return;
     setIsResending(true);
     try {
-      await resendCode({ email });
-      ErrorService.success(t("codeSentSuccess") || "Code resent successfully");
+      const result = await resendCode({ email });
+      message.success(result.message || t("codeSentSuccess") || "Code resent successfully");
     } catch (error) {
       console.error("Resend failed:", error);
     } finally {
@@ -184,3 +184,4 @@ export default function ResetPassword() {
     </div>
   );
 }
+

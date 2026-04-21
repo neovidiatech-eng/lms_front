@@ -5,7 +5,7 @@ import {
   Check
 } from "lucide-react";
 import { useLanguage } from "../contexts/LanguageContext";
-import { ConfigProvider, DatePicker, Input, Select } from "antd";
+import { ConfigProvider, DatePicker, Input, Select, message } from "antd";
 import localeAr from 'antd/es/locale/ar_EG';
 import localeEn from 'antd/es/locale/en_US';
 import dayjs from 'dayjs';
@@ -17,7 +17,6 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { getRegisterSchema, RegisterInput } from "../lib/schemas/RegisterSchema";
 import { googleRegister, register as registerService } from "../services/AuthServices";
 import { GoogleLogin } from "@react-oauth/google";
-import ErrorService from "../utils/ErrorService";
 
 interface RegisterProps {
   onRegisterSuccess: () => void;
@@ -79,7 +78,7 @@ export default function Register({ onRegisterSuccess }: RegisterProps) {
     try {
       const result = await registerService(data);
       if (result.status === 201 || result.status === 200) {
-        ErrorService.success(t("registered Success"));
+        message.success(result.message || t("registeredSuccess"));
         // Store email for verification step
         sessionStorage.setItem("verify_email", data.email);
         navigate("/verify-account");
@@ -373,7 +372,7 @@ export default function Register({ onRegisterSuccess }: RegisterProps) {
                       if (token) {
                         localStorage.setItem("token", token);
                         onRegisterSuccess();
-                        ErrorService.success(t('registeredSuccess'));
+                        message.success(result.message || t('registeredSuccess'));
                         navigate("/login");
                       }
                     } catch (error) {
@@ -398,3 +397,4 @@ export default function Register({ onRegisterSuccess }: RegisterProps) {
     </ConfigProvider>
   );
 }
+
