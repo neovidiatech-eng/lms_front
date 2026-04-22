@@ -228,7 +228,7 @@ export default function StudentProfile() {
                 </div>
                 <div className="absolute -bottom-2 -left-2 px-2 py-0.5 bg-green-500 text-white text-[10px] font-bold rounded-lg border-2 border-white uppercase flex items-center gap-1">
                   <div className="w-1.5 h-1.5 bg-white rounded-full animate-pulse" />
-                  {teacherData?.user?.name}
+                  {teacherData?.user?.name || (isRtl ? 'لا يوجد معلم' : 'No Teacher')}
                 </div>
               </div>
 
@@ -236,7 +236,7 @@ export default function StudentProfile() {
                 <div className="flex flex-col md:flex-row items-center justify-between gap-4 mb-4">
                   <div className="text-right">
                     <h3 className="text-xl font-bold text-gray-900 mb-1">
-                      {teacherData?.user?.name || (isRtl ? 'جاري التحميل...' : 'Loading...')}
+                      {teacherData?.user?.name || (isRtl ? 'لا يوجد معلم' : 'No Teacher')}
                     </h3>
 
                     <p className="text-gray-600 text-sm flex items-center gap-2">
