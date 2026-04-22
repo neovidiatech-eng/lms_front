@@ -42,6 +42,8 @@ api.interceptors.response.use(
     if (data) {
       if (typeof data === 'string') {
         errorMessage = data;
+      } else if (data.error) {
+        errorMessage = data.error;
       } else if (data.message) {
         errorMessage = data.message;
         if (data.errors && Array.isArray(data.errors)) {

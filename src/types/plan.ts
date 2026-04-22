@@ -14,6 +14,7 @@ export type Plan = {
   price: string | number;
   duration: number;
   sessionsCount: number;
+  sessionTime: number;
   features: string[];
   currencyId: string;
   active: boolean;
@@ -22,6 +23,7 @@ export type Plan = {
   createdAt: string;
   updatedAt: string;
 };
+
 
 export type PlansResponse = {
   message: string;
@@ -34,3 +36,19 @@ export type PlanResponse = {
   status: number;
   data: Plan;
 };
+
+export interface PlanBody {
+  name_en: string;
+  name_ar: string;
+  price: number;
+  duration: number;
+  description: string;
+  sessionsCount: number;
+  active: boolean;
+  bestSeller: boolean;
+  features: string[];
+  currencyId: string;
+  sessionTime: number;
+}
+
+

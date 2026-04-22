@@ -404,5 +404,6 @@
   "grid": "شبكة",
   "list": "قائمة",
   "studentInfo": "معلومات الطالب",
-  "AddRequest": "طلب جديد"
+  "AddRequest": "طلب جديد",
+  "TransactionRequests": "طلبات السحب"
 }

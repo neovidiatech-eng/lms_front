@@ -6,17 +6,23 @@ interface ViewPlanModalProps {
   onClose: () => void;
   plan: {
     id: string;
-    name: string;
-    nameEn: string;
+    name_ar: string;
+    name_en: string;
     description: string;
-    price: number;
-    currency: string;
+    price: number | string;
+    currency?: { code: string };
+
     duration: number;
     sessionsCount: number;
+    sessionTime: number;
     features: string[];
-    isPopular: boolean;
-    status: 'active' | 'inactive';
+    bestSeller: boolean;
+    active: boolean;
+    createdAt: string;
+    updatedAt: string;
   };
+
+
 }
 
 export default function ViewPlanModal({ isOpen, onClose, plan }: ViewPlanModalProps) {
@@ -40,7 +46,9 @@ export default function ViewPlanModal({ isOpen, onClose, plan }: ViewPlanModalPr
     active: { ar: 'نشط', en: 'Active' },
     inactive: { ar: 'غير نشط', en: 'Inactive' },
     isPopular: { ar: 'الأكثر شعبية', en: 'Most Popular' },
+    sessionTime: { ar: 'مدة الحصة (دقيقة)', en: 'Session Time (Minutes)' },
     yes: { ar: 'نعم', en: 'Yes' },
+
     no: { ar: 'لا', en: 'No' },
     close: { ar: 'إغلاق', en: 'Close' },
     planInfo: { ar: 'معلومات الخطة', en: 'Plan Information' },
@@ -69,11 +77,12 @@ export default function ViewPlanModal({ isOpen, onClose, plan }: ViewPlanModalPr
         </div>
 
         <div className="p-6 space-y-6">
-          {plan.isPopular && (
+          {plan.bestSeller && (
             <div className="bg-gradient-to-r from-blue-600 to-cyan-600 text-white text-center py-3 px-6 rounded-xl font-bold text-lg shadow-lg">
               {text.isPopular[language]}
             </div>
           )}
+
 
           <div className="bg-gradient-to-br from-blue-50 to-cyan-50 border border-blue-200 rounded-xl p-6">
             <div className="flex items-center gap-3 mb-4">
@@ -83,11 +92,11 @@ export default function ViewPlanModal({ isOpen, onClose, plan }: ViewPlanModalPr
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <p className="text-sm text-gray-600 mb-1">{text.nameAr[language]}</p>
-                <p className="text-base font-semibold text-gray-900">{plan.name}</p>
+                <p className="text-base font-semibold text-gray-900">{plan.name_ar}</p>
               </div>
               <div>
                 <p className="text-sm text-gray-600 mb-1">{text.nameEn[language]}</p>
-                <p className="text-base font-semibold text-gray-900">{plan.nameEn}</p>
+                <p className="text-base font-semibold text-gray-900">{plan.name_en}</p>
               </div>
               <div className="md:col-span-2">
                 <p className="text-sm text-gray-600 mb-1">{text.description[language]}</p>
@@ -95,10 +104,11 @@ export default function ViewPlanModal({ isOpen, onClose, plan }: ViewPlanModalPr
               </div>
               <div>
                 <p className="text-sm text-gray-600 mb-1">{text.status[language]}</p>
-                <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium border ${getStatusStyle(plan.status)}`}>
-                  {text[plan.status][language]}
+                <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium border ${plan.active ? 'bg-green-50 text-green-700 border-green-200' : 'bg-gray-50 text-gray-700 border-gray-200'}`}>
+                  {plan.active ? text.active[language] : text.inactive[language]}
                 </span>
               </div>
+
             </div>
           </div>
 
@@ -113,9 +123,10 @@ export default function ViewPlanModal({ isOpen, onClose, plan }: ViewPlanModalPr
                 <div className="flex items-center justify-center gap-3">
                   <div className="flex items-baseline gap-2">
                     <p className="text-4xl font-bold text-green-600">{plan.price}</p>
-                    <span className="text-lg font-semibold text-gray-700">{plan.currency}</span>
+                    <span className="text-lg font-semibold text-gray-700">{plan.currency?.code}</span>
                   </div>
                 </div>
+
               </div>
               <div className="bg-white rounded-lg p-4 border border-blue-200">
                 <p className="text-sm text-gray-600 mb-3 text-center">{text.duration[language]}</p>
@@ -127,9 +138,9 @@ export default function ViewPlanModal({ isOpen, onClose, plan }: ViewPlanModalPr
                 </div>
               </div>
             </div>
-            <div className="mt-4">
-              <div className="bg-white rounded-lg p-4 border border-orange-200">
-                <p className="text-sm text-gray-600 mb-3 text-center">{text.sessionsCount[language]}</p>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+              <div className="bg-white rounded-lg p-4 border border-orange-200 text-center">
+                <p className="text-sm text-gray-600 mb-3">{text.sessionsCount[language]}</p>
                 <div className="flex items-baseline justify-center gap-2">
                   <p className="text-4xl font-bold text-orange-600">{plan.sessionsCount}</p>
                   <span className="text-lg font-semibold text-gray-700">
@@ -137,7 +148,17 @@ export default function ViewPlanModal({ isOpen, onClose, plan }: ViewPlanModalPr
                   </span>
                 </div>
               </div>
+              <div className="bg-white rounded-lg p-4 border border-indigo-200 text-center">
+                <p className="text-sm text-gray-600 mb-3">{text.sessionTime[language]}</p>
+                <div className="flex items-baseline justify-center gap-2">
+                  <p className="text-4xl font-bold text-indigo-600">{plan.sessionTime}</p>
+                  <span className="text-lg font-semibold text-gray-700">
+                    {language === 'ar' ? 'دقيقة' : 'min'}
+                  </span>
+                </div>
+              </div>
             </div>
+
           </div>
 
           <div className="bg-gradient-to-br from-purple-50 to-pink-50 border border-purple-200 rounded-xl p-6">

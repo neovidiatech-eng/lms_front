@@ -6,7 +6,7 @@ import ViewSessionModal from '../../../components/modals/ViewSessionModal';
 import { Schedule } from '../../../types/scheduales';
 import { useSubjects } from '../../../features/admin/hooks/useSubjects';
 import { Subject } from '../../../types/subject';
-import { useUserSessions } from '../../../hooks/useSessions';
+import { useJoinToSession, useUserSessions } from '../../../hooks/useSessions';
 import { TableSkeleton } from '../../../components/ui/CustomSkeleton';
 import CreateRequestModal from '../../../components/modals/CreateRequestModal';
 import { useSettings } from '../../../contexts/SettingsContext';
@@ -44,7 +44,7 @@ export default function Sessions() {
   };
 
   const { data: sessionResponse, isLoading } = useUserSessions(debouncedSearch);
-
+  const { mutateAsync: joinToSession, isPending: isJoining } = useJoinToSession();
   useEffect(() => {
     if (searchTerm.length > 2) {
       setDebouncedSearch(searchTerm);
@@ -266,15 +266,22 @@ export default function Sessions() {
                       </td>
                       <td className="px-6 py-4 text-start">
                         <button
-                          onClick={() => window.open(session.link, '_blank')}
-                          disabled={!isJoinable(session.start_time, session.end_time, session.link)}
+                          onClick={async () => {
+                            try {
+                              await joinToSession(session.id);
+                              window.open(session.link, '_blank');
+                            } catch (error) {
+                              console.log(error);
+                            }
+                          }}
+                          disabled={isJoining || !isJoinable(session.start_time, session.end_time, session.link)}
                           className={`flex items-center gap-2 px-4 py-2 rounded-xl transition-all font-medium ${isJoinable(session.start_time, session.end_time, session.link)
-                              ? 'bg-green-600 text-white hover:bg-green-700 shadow-sm hover:shadow-md'
-                              : 'bg-gray-100 text-gray-400 cursor-not-allowed opacity-60'
-                            }`}
+                            ? 'bg-green-600 text-white hover:bg-green-700 shadow-sm hover:shadow-md'
+                            : 'bg-gray-100 text-gray-400 cursor-not-allowed opacity-60'
+                            } ${isJoining ? 'opacity-50 cursor-wait' : ''}`}
                         >
                           <Video className="w-4 h-4" />
-                          <span className="text-sm">{t('joinSession')}</span>
+                          <span className="text-sm">{isJoining ? t('joining...') || 'Joining...' : t('joinSession')}</span>
                         </button>
                       </td>
 

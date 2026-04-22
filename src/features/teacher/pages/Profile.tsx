@@ -1,80 +1,18 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSettings } from '../../../contexts/SettingsContext';
-import { 
-  User, Mail, Phone, Calendar, MapPin, 
-  Clock, Wallet, ArrowUpRight, X,
-  BookOpen, Users, Star, ShieldCheck, FileText, Send
+import {
+  Mail, Phone, MapPin,
+  Clock, Wallet, ArrowUpRight,
+  BookOpen, Users, FileText,
 } from 'lucide-react';
-import { message, Spin } from 'antd';
-import { useTeacherProfile } from '../hooks/useTeacherProfile';
+import { Spin } from 'antd';
+import { useTeacherProfile, useWithdrawals, useWithdrawRequest } from '../hooks/useTeacherProfile';
+import { useCurrencyById } from '../../admin/hooks/useCurrency';
+import WithdrawalModal from '../../../components/modals/WithdrawModal';
 
 // Internal Withdrawal Modal Component
-function WithdrawalModal({ isOpen, onClose, balance, onWithdraw, isRtl, settings }: any) {
-  const [amount, setAmount] = useState('');
-  
-  if (!isOpen) return null;
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    const numAmount = parseFloat(amount);
-    if (!numAmount || numAmount <= 0) {
-      message.error(isRtl ? 'يرجى إدخال مبلغ صالح' : 'Please enter a valid amount');
-      return;
-    }
-    if (numAmount > balance) {
-      message.error(isRtl ? 'المبلغ يتجاوز الرصيد الحالي' : 'Amount exceeds current balance');
-      return;
-    }
-    onWithdraw(numAmount);
-    setAmount('');
-  };
-
-
-  return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[100] p-4 animate-fade-in">
-      <div className="bg-white rounded-2xl shadow-xl max-w-md w-full p-6 animate-scale-in">
-        <div className="flex justify-between items-center mb-6">
-          <h2 className="text-xl font-bold text-gray-900">{isRtl ? 'طلب سحب رصيد' : 'Withdrawal Request'}</h2>
-          <button onClick={onClose} className="p-2 hover:bg-gray-100 rounded-lg transition-colors">
-            <X className="w-5 h-5" />
-          </button>
-        </div>
-
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              {isRtl ? 'المبلغ المطلوب سحبه' : 'Amount to withdraw'}
-            </label>
-            <div className="relative">
-              <span className="absolute left-4 top-1/2 -translate-y-1/2 font-bold text-gray-400">$</span>
-              <input 
-                type="number" 
-                value={amount}
-                onChange={(e) => setAmount(e.target.value)}
-                placeholder="0.00"
-                className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all font-bold text-lg"
-                autoFocus
-              />
-            </div>
-            <p className="text-xs text-gray-500 mt-2">
-              {isRtl ? 'الرصيد المتاح:' : 'Available Balance:'} <span className="font-bold text-gray-900">${balance.toLocaleString()}</span>
-            </p>
-          </div>
-
-          <button 
-            type="submit"
-            className="w-full py-3 text-white rounded-xl font-bold flex items-center justify-center gap-2 transition-transform active:scale-[0.98]"
-            style={{ backgroundColor: settings.primaryColor }}
-          >
-            <Send className="w-5 h-5" />
-            {isRtl ? 'إرسال الطلب' : 'Submit Request'}
-          </button>
-        </form>
-      </div>
-    </div>
-  );
-}
 
 export default function TeacherProfile() {
   const { i18n } = useTranslation();
@@ -83,8 +21,12 @@ export default function TeacherProfile() {
   const [isWithdrawModalOpen, setIsWithdrawModalOpen] = useState(false);
 
   const { data: response, isLoading, error } = useTeacherProfile();
-  
-  if (isLoading) {
+  const { data: withdrawalsResponse, isLoading: isWithdrawalsLoading } = useWithdrawals();
+  const { mutateAsync } = useWithdrawRequest();
+
+  const { data: currency } = useCurrencyById(response?.data?.teacher?.wallet?.[0]?.currencyId);
+
+  if (isLoading || isWithdrawalsLoading) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
         <Spin size="large" />
@@ -103,28 +45,34 @@ export default function TeacherProfile() {
   const profileData = response.data;
   const teacher = profileData.teacher;
   const apiStats = profileData.stats;
-  
+  const wallet = teacher.wallet?.[0];
+  const balance = wallet?.balance ?? 0;
+
+  const currencySymbol = currency?.symbol ?? '$';
+
   // Teacher Personal Info
   const teacherInfo = {
     name: teacher.name || (isRtl ? 'أ. محمد الأحمدي' : 'Mr. Mohamed El-Ahmady'),
     email: teacher.email || 'teacher@lms.com',
     phone: teacher.phone || '+20 100 123 4567',
-    joinDate: '2022-09-15',
     title: isRtl ? 'معلم' : 'Teacher',
-    id: 'TCH-2023-01',
-    country: isRtl ? 'مصر' : 'Egypt',
-    rating: 4.9,
-    experience: isRtl ? '10 سنوات خبرة' : '10 Years Experience',
+    hourPrice: teacher.hourPrice,
   };
 
   // Financial Stats
+  const withdrawals = withdrawalsResponse?.data?.withdrawals || [];
   const financialInfo = {
-    pendingBalance: 1250,
-    totalWithdrawn: 5400,
-    transactions: [
-      { id: 1, type: isRtl ? 'تحويل بنكي' : 'Bank Transfer', amount: 2100, date: '2023-10-01', status: 'completed' },
-      { id: 2, type: isRtl ? 'تسوية أرباح حصص' : 'Session Earnings', amount: 800, date: '2023-09-25', status: 'completed' },
-    ]
+    pendingBalance: balance,
+    totalWithdrawn: withdrawals
+      ?.filter(w => w.status === 'completed')
+      .reduce((sum, w) => sum + w.amount, 0) || 0,
+    transactions: withdrawals.map(w => ({
+      id: w.id,
+      type: isRtl ? 'طلب سحب' : 'Withdrawal Request',
+      amount: w.amount,
+      date: new Date(w.createdAt).toLocaleDateString(isRtl ? 'ar-EG' : 'en-US'),
+      status: w.status
+    }))
   };
 
   // Quick Stats
@@ -135,7 +83,7 @@ export default function TeacherProfile() {
   ];
 
   const handleWithdraw = (amount: number) => {
-    message.success(isRtl ? `تم إرسال طلب سحب مبلغ $${amount} بنجاح` : `Withdrawal request for $${amount} submitted successfully`);
+    mutateAsync({ amount })
     setIsWithdrawModalOpen(false);
   };
 
@@ -147,17 +95,17 @@ export default function TeacherProfile() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        
+
         {/* Teacher Personal Info Card */}
         <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden lg:col-span-1">
-          <div 
-            className="h-24 bg-gradient-to-r" 
+          <div
+            className="h-24 bg-gradient-to-r"
             style={{ backgroundImage: `linear-gradient(to right, ${settings.primaryColor}, ${settings.accentColor})` }}
           />
           <div className="px-6 pb-6 relative">
             <div className="flex justify-center -mt-12 mb-4">
               <div className="w-24 h-24 bg-white rounded-full p-2 shadow-md">
-                <div 
+                <div
                   className="w-full h-full rounded-full flex items-center justify-center text-white text-3xl font-bold"
                   style={{ backgroundColor: settings.primaryColor }}
                 >
@@ -165,28 +113,17 @@ export default function TeacherProfile() {
                 </div>
               </div>
             </div>
-            
+
             <div className="text-center mb-6">
               <h2 className="text-xl font-bold text-gray-900">{teacherInfo.name}</h2>
               <p className="text-sm text-gray-500 mt-1">{teacherInfo.title}</p>
-              
-              <div className="flex items-center justify-center gap-4 mt-3">
-                <div className="flex items-center gap-1 text-xs">
-                  <Star className="w-3 h-3 text-yellow-400 fill-yellow-400" />
-                  <span className="font-bold text-gray-800">{teacherInfo.rating}</span>
-                </div>
-                <div className="flex items-center gap-1 text-xs text-green-600">
-                  <ShieldCheck className="w-3 h-3" />
-                  <span>{teacherInfo.experience}</span>
-                </div>
-              </div>
             </div>
 
             <div className="space-y-4 pt-4 border-t border-gray-50">
-              <div className="flex items-center gap-3 text-gray-700">
-                <User className="w-5 h-5 text-gray-400" />
-                <span className="text-sm font-medium">{teacherInfo.id}</span>
-              </div>
+              {/* <div className="flex items-center gap-3 text-gray-700">
+                <DollarSign className="w-5 h-5 text-gray-400" />
+                <span className="text-sm font-medium">{teacherInfo.hourPrice}$</span>
+              </div> */}
               <div className="flex items-center gap-3 text-gray-700">
                 <Mail className="w-5 h-5 text-gray-400" />
                 <span className="text-sm truncate">{teacherInfo.email}</span>
@@ -196,19 +133,15 @@ export default function TeacherProfile() {
                 <span className="text-sm">{teacherInfo.phone}</span>
               </div>
               <div className="flex items-center gap-3 text-gray-700">
-                <Calendar className="w-5 h-5 text-gray-400" />
-                <span className="text-sm" dir="ltr">{teacherInfo.joinDate}</span>
-              </div>
-              <div className="flex items-center gap-3 text-gray-700">
                 <MapPin className="w-5 h-5 text-gray-400" />
-                <span className="text-sm">{teacherInfo.country}</span>
+                <span className="text-sm">{"Egygpt"}</span>
               </div>
             </div>
           </div>
         </div>
 
         <div className="lg:col-span-2 space-y-6">
-          
+
           {/* Financial Balance Card */}
           <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
             <div className="flex items-center justify-between mb-8">
@@ -217,7 +150,7 @@ export default function TeacherProfile() {
                 {isRtl ? 'الرصيد والحساب' : 'Financial Balance'}
               </h2>
               <div className="flex gap-2">
-                <button 
+                <button
                   onClick={() => setIsWithdrawModalOpen(true)}
                   className="px-4 py-2 text-white rounded-xl text-sm font-bold transition-all hover:opacity-90 active:scale-95 shadow-lg shadow-primary/20"
                   style={{ backgroundColor: settings.primaryColor }}
@@ -231,15 +164,15 @@ export default function TeacherProfile() {
             </div>
 
             <div className="bg-gradient-to-br from-gray-50 to-white p-8 rounded-2xl border border-gray-100 mb-8 text-center relative overflow-hidden">
-               <div className="relative z-10">
-                 <p className="text-sm text-gray-500 mb-2">{isRtl ? 'الرصيد المستحق (هذا الشهر)' : 'Pending Balance (This Month)'}</p>
-                 <h2 className="text-5xl font-black mb-0" style={{ color: settings.primaryColor }}>
-                   ${financialInfo.pendingBalance.toLocaleString()}
-                 </h2>
-               </div>
-               {/* Decorative elements */}
-               <div className="absolute top-0 right-0 w-32 h-32 bg-gray-100 rounded-full -mr-16 -mt-16 opacity-20"></div>
-               <div className="absolute bottom-0 left-0 w-24 h-24 rounded-full -ml-12 -mb-12 opacity-30" style={{ backgroundColor: settings.primaryColor + '20' }}></div>
+              <div className="relative z-10">
+                <p className="text-sm text-gray-500 mb-2">{isRtl ? 'الرصيد المستحق (هذا الشهر)' : 'Pending Balance (This Month)'}</p>
+                <h2 className="text-5xl font-black mb-0" style={{ color: settings.primaryColor }}>
+                  {currencySymbol}{balance.toLocaleString()}
+                </h2>
+              </div>
+              {/* Decorative elements */}
+              <div className="absolute top-0 right-0 w-32 h-32 bg-gray-100 rounded-full -mr-16 -mt-16 opacity-20"></div>
+              <div className="absolute bottom-0 left-0 w-24 h-24 rounded-full -ml-12 -mb-12 opacity-30" style={{ backgroundColor: settings.primaryColor + '20' }}></div>
             </div>
 
             <div className="space-y-4">
@@ -255,9 +188,13 @@ export default function TeacherProfile() {
                       <p className="text-xs text-gray-500" dir="ltr">{tx.date}</p>
                     </div>
                   </div>
-                  <span className={`font-bold ${tx.amount > 1000 ? 'text-green-600' : 'text-gray-900'}`}>
-                    +${tx.amount.toLocaleString()}
+                  <span className={`font-bold ${tx.status === 'pending' ? 'text-orange-500' : tx.status === 'completed' ? 'text-green-600' : 'text-red-600'}`}>
+                    {tx.status}
                   </span>
+                  <span className={`font-bold ${tx.amount > 1000 ? 'text-green-600' : 'text-gray-900'}`}>
+                    +{currencySymbol}{tx.amount.toLocaleString()}
+                  </span>
+
                 </div>
               ))}
             </div>
@@ -282,10 +219,10 @@ export default function TeacherProfile() {
         </div>
       </div>
 
-      <WithdrawalModal 
+      <WithdrawalModal
         isOpen={isWithdrawModalOpen}
         onClose={() => setIsWithdrawModalOpen(false)}
-        balance={financialInfo.pendingBalance}
+        balance={balance}
         onWithdraw={handleWithdraw}
         isRtl={isRtl}
         settings={settings}

@@ -399,5 +399,6 @@
   "grid": "Grid",
   "list": "List",
   "studentInfo": "Student Info",
-  "AddRequest": "Add Request"
+  "AddRequest": "Add Request",
+  "TransactionRequests": "Transaction Requests"
 }
