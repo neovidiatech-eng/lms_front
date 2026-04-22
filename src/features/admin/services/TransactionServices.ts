@@ -1,7 +1,18 @@
 import api from "../../../lib/axios"
-import { WalletHistoryResponse } from "../../../types/transaction";
+import { WalletHistoryResponse, WithdrawalApiResponse } from "../../../types/transaction";
 
 export const getTransactions = async () : Promise<WalletHistoryResponse> =>{
     const response = await api.get("/transactions/");
     return response.data;
 }
+
+export const getAllWithdrawals = async () : Promise<WithdrawalApiResponse> =>{
+    const response = await api.get("/withdrawals/all");
+    return response.data;
+}
+
+export const updateWithdrawalStatus = async (id: string, status: 'approved' | 'rejected') : Promise<any> =>{
+    const response = await api.patch(`/withdrawals/${id}`, { status });
+    return response.data;
+}
+

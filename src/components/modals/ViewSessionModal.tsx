@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { X, Calendar, Clock, User, GraduationCap, BookOpen, Video, MapPin, FileText } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { Schedule } from '../../types/scheduales';
+import { useJoinToSession } from '../../hooks/useSessions';
 
 interface ViewSessionModalProps {
   isOpen: boolean;
@@ -14,6 +15,7 @@ interface ViewSessionModalProps {
 export default function ViewSessionModal({ isOpen, onClose, session, groupedSessions, allSessions = [] }: ViewSessionModalProps) {
   const { t, i18n } = useTranslation();
   const language = i18n.language.split('-')[0];
+  const { mutateAsync: joinToSession, isPending: isJoining } = useJoinToSession();
   const [now, setNow] = useState(new Date());
 
   useEffect(() => {
@@ -228,16 +230,23 @@ export default function ViewSessionModal({ isOpen, onClose, session, groupedSess
                               <div className="flex items-center gap-2">
                                 {s.link ? (
                                   <button
-                                    onClick={() => window.open(s.link, '_blank')}
-                                    disabled={!isJoinable(s.start_time, s.end_time, s.link)}
+                                    onClick={async () => {
+                                      try {
+                                        await joinToSession(s.id);
+                                        window.open(s.link, '_blank');
+                                      } catch (error) {
+                                        console.log(error);
+                                      }
+                                    }}
+                                    disabled={isJoining || !isJoinable(s.start_time, s.end_time, s.link)}
                                     className={`flex items-center gap-2 px-4 py-2 rounded-xl transition-all font-medium ${
                                       isJoinable(s.start_time, s.end_time, s.link)
                                         ? 'bg-green-600 text-white hover:bg-green-700 shadow-sm hover:shadow-md'
                                         : 'bg-gray-100 text-gray-400 cursor-not-allowed opacity-60'
-                                    }`}
+                                    } ${isJoining ? 'opacity-50 cursor-wait' : ''}`}
                                   >
                                     <Video className="w-4 h-4" />
-                                    <span className="text-sm">{t('joinSession')}</span>
+                                    <span className="text-sm">{isJoining ? t('joining...') || 'Joining...' : t('joinSession')}</span>
                                   </button>
                                 ) : (
                                   <span className="text-sm text-gray-400">{t('noLink') || (language === 'ar' ? 'لا يوجد رابط' : 'No link')}</span>
@@ -256,16 +265,23 @@ export default function ViewSessionModal({ isOpen, onClose, session, groupedSess
                     <p className="text-xs text-gray-500 text-start mb-2">{t('meetingLink')}</p>
                     <div className="flex items-center gap-3">
                       <button
-                        onClick={() => window.open(session.link, '_blank')}
-                        disabled={!isJoinable(session.start_time, session.end_time, session.link)}
+                        onClick={async () => {
+                          try {
+                            await joinToSession(session.id);
+                            window.open(session.link, '_blank');
+                          } catch (error) {
+                            console.log(error);
+                          }
+                        }}
+                        disabled={isJoining || !isJoinable(session.start_time, session.end_time, session.link)}
                         className={`flex items-center gap-2 px-4 py-2 rounded-xl transition-all font-medium ${
                           isJoinable(session.start_time, session.end_time, session.link)
                             ? 'bg-green-600 text-white hover:bg-green-700 shadow-sm hover:shadow-md'
                             : 'bg-gray-100 text-gray-400 cursor-not-allowed opacity-60'
-                        }`}
+                        } ${isJoining ? 'opacity-50 cursor-wait' : ''}`}
                       >
                         <Video className="w-4 h-4" />
-                        <span className="text-sm">{t('joinSession')}</span>
+                        <span className="text-sm">{isJoining ? t('joining...') || 'Joining...' : t('joinSession')}</span>
                       </button>
                       <div className="flex-1 text-sm text-gray-600 break-all text-start font-medium" dir="ltr">
                         {session.link}

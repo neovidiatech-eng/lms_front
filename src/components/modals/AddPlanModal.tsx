@@ -4,7 +4,10 @@ import { PlanFormData, getPlanSchema } from '../../lib/schemas/PlanSchema';
 import { Resolver, useForm, Controller } from 'react-hook-form';
 import CustomSelect from '../ui/CustomSelect';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
+import { getCurrencies } from '../../features/admin/services/CurrencyServices';
+import { Currency } from '../../types/currency';
+
 
 interface AddPlanModalProps {
   isOpen: boolean;
@@ -23,13 +26,15 @@ export default function AddPlanModal({ isOpen, onClose, onSave, initialData }: A
       nameEn: '',
       description: '',
       price: 0,
-      currency: 'EGP',
+      currencyId: '',
       duration: 1,
       sessionsCount: 0,
+      sessionTime: 60,
       features: [''],
       isPopular: false,
       status: 'active',
     },
+
   });
   const features = watch('features');
   const addFeature = () => {
@@ -41,11 +46,26 @@ export default function AddPlanModal({ isOpen, onClose, onSave, initialData }: A
     setValue('features', updated);
   };
 
+  const [availableCurrencies, setAvailableCurrencies] = useState<Currency[]>([]);
+
+  useEffect(() => {
+    const fetchCurrencies = async () => {
+      try {
+        const data = await getCurrencies();
+        setAvailableCurrencies(data.currencies);
+      } catch (error) {
+        console.error('Failed to fetch currencies:', error);
+      }
+    };
+    fetchCurrencies();
+  }, []);
+
   const updateFeature = (index: number, value: string) => {
     const updated = [...features];
     updated[index] = value;
     setValue('features', updated);
   };
+
 
   useEffect(() => {
     if (isOpen) {
@@ -57,16 +77,19 @@ export default function AddPlanModal({ isOpen, onClose, onSave, initialData }: A
           nameEn: '',
           description: '',
           price: 0,
-          currency: 'EGP',
+          currencyId: availableCurrencies.find(c => c.default)?.id || '',
           duration: 1,
           sessionsCount: 0,
+          sessionTime: 60,
           features: [''],
           isPopular: false,
           status: 'active',
         });
+
       }
     }
-  }, [initialData, reset, isOpen]);
+  }, [initialData, reset, isOpen, availableCurrencies]);
+
 
 
   const text = {
@@ -78,7 +101,9 @@ export default function AddPlanModal({ isOpen, onClose, onSave, initialData }: A
     currency: { ar: 'العملة', en: 'Currency' },
     duration: { ar: 'المدة (شهر)', en: 'Duration (Months)' },
     sessionsCount: { ar: 'عدد الحصص', en: 'Sessions Count' },
+    sessionTime: { ar: 'مدة الحصة (دقيقة)', en: 'Session Time (Minutes)' },
     features: { ar: 'المميزات', en: 'Features' },
+
     addFeature: { ar: 'إضافة ميزة', en: 'Add Feature' },
     isPopular: { ar: 'الأكثر شعبية', en: 'Most Popular' },
     status: { ar: 'الحالة', en: 'Status' },
@@ -89,17 +114,6 @@ export default function AddPlanModal({ isOpen, onClose, onSave, initialData }: A
     featurePlaceholder: { ar: 'اكتب الميزة...', en: 'Enter feature...' }
   };
 
-  const currencies = [
-    { code: 'EGP', nameAr: 'جنيه مصري', nameEn: 'Egyptian Pound' },
-    { code: 'USD', nameAr: 'دولار أمريكي', nameEn: 'US Dollar' },
-    { code: 'EUR', nameAr: 'يورو', nameEn: 'Euro' },
-    { code: 'GBP', nameAr: 'جنيه إسترليني', nameEn: 'British Pound' },
-    { code: 'SAR', nameAr: 'ريال سعودي', nameEn: 'Saudi Riyal' },
-    { code: 'AED', nameAr: 'درهم إماراتي', nameEn: 'UAE Dirham' },
-    { code: 'KWD', nameAr: 'دينار كويتي', nameEn: 'Kuwaiti Dinar' },
-    { code: 'QAR', nameAr: 'ريال قطري', nameEn: 'Qatari Riyal' }
-  ];
-
   const onSubmit = (data: PlanFormData) => {
     onSave({
       ...data,
@@ -108,6 +122,7 @@ export default function AddPlanModal({ isOpen, onClose, onSave, initialData }: A
     reset();
     onClose();
   };
+
 
   if (!isOpen) return null;
 
@@ -181,24 +196,25 @@ export default function AddPlanModal({ isOpen, onClose, onSave, initialData }: A
                 {text.currency[language]}
               </label>
               <Controller
-                name="currency"
+                name="currencyId"
                 control={control}
                 render={({ field }) => (
                   <CustomSelect
                     {...field}
-                    options={currencies.map((curr) => ({
-                      value: curr.code,
-                      label: `${curr.code} - ${language === 'ar' ? curr.nameAr : curr.nameEn}`
+                    options={availableCurrencies.map((curr) => ({
+                      value: curr.id,
+                      label: `${curr.code} - ${language === 'ar' ? curr.name_ar : curr.name_en}`
                     }))}
                   />
                 )}
               />
-              {errors.currency && (
+              {errors.currencyId && (
                 <p className="text-red-500 text-sm mt-1 text-start">
-                  {errors.currency.message}
+                  {errors.currencyId.message}
                 </p>
               )}
             </div>
+
 
           </div>
           {/* Duration + Sessions */}
@@ -236,10 +252,27 @@ export default function AddPlanModal({ isOpen, onClose, onSave, initialData }: A
               )}
             </div>
 
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2 text-start">
+                {text.sessionTime[language]}
+              </label>
+              <input
+                type="number"
+                {...register('sessionTime', { valueAsNumber: true })}
+                className="w-full px-4 py-2.5 border rounded-lg text-start"
+              />
+              {errors.sessionTime && (
+                <p className="text-red-500 text-sm mt-1 text-start">
+                  {errors.sessionTime.message}
+                </p>
+              )}
+            </div>
+
           </div>
 
           {/* Features */}
           <div>
+
             <div className="flex justify-between mb-3">
               <button type="button" onClick={addFeature}
                 className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-sm font-medium"

@@ -23,6 +23,7 @@ import {
   ShieldCheck,
   Repeat
 } from 'lucide-react';
+import TransactionRequests from "../../features/admin/pages/TransactionRequests";
 
 export interface RouteConfig {
   id: string;
@@ -239,15 +240,23 @@ export const adminDashboardRoutes: RouteConfig[] = [
         path: "transactions",
         element: <TransactionsPage />,
       },
+
+      {
+        id: "transaction-requests",
+        label: "TransactionRequests",
+        icon: FileQuestion,
+        path: "transaction-requests",
+        element: <TransactionRequests />,
+      }
     ],
   },
-   {
-        id: "requests",
-        label: "sidebar_requests",
-        icon: FileQuestion,
-        path: "requests",
-        element: <TeacherRequestsPage />,
-      },
+  {
+    id: "requests",
+    label: "sidebar_requests",
+    icon: FileQuestion,
+    path: "requests",
+    element: <TeacherRequestsPage />,
+  },
   {
     id: "settings",
     label: "sidebar_settings",

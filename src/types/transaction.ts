@@ -34,3 +34,42 @@ export interface WalletHistoryResponse {
   lang: 'ar' | 'en';
   data: Transaction[];
 }
+
+export type WithdrawalStatus = 'pending' | 'approved' | 'rejected' | 'completed';
+export type AuthProvider = 'local' | 'google' | 'facebook';
+
+export interface WithdrawalTeacher {
+  id: string;
+  email: string;
+  name: string;
+  phone: string;
+  createdAt: string;
+  updatedAt: string;
+  confirmAt: string | null;
+  roleId: string;
+  code_country: string;
+  status: string;
+  googleId: string | null;
+  provider: AuthProvider;
+  password?: string;
+}
+
+export interface WithdrawalRequest {
+  id: string;
+  teacherId: string;
+  amount: number;
+  status: WithdrawalStatus;
+  adminNotes: string | null;
+  createdAt: string;
+  updatedAt: string;
+  teacher: WithdrawalTeacher;
+}
+
+export interface WithdrawalApiResponse {
+  message: string;
+  status: number;
+  lang: string;
+  data: {
+    withdrawals: WithdrawalRequest[];
+  };
+}

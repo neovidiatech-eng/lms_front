@@ -5,3 +5,8 @@ export const getUserSessions = async (search: string): Promise<GetUserSchedulesR
     const response = await api.get<GetUserSchedulesResponse>(`/schedules/user/schedules?search=${search}`)
     return response.data
 }
+
+export const joinToSession = async (id:string)=>{
+    const response = await api.post(`/schedules/${id}/join`);
+    return response.data;
+}

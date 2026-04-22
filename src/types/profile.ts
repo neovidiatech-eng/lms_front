@@ -1,3 +1,5 @@
+import { Schedule } from "./scheduales";
+
 export interface ProfileUser {
   id: string;
   email: string;
@@ -36,9 +38,10 @@ export interface ProfileData {
   country: string;
   status: string;
   user: ProfileUser;
-  schedules: any[];
+  schedules: Schedule[];
   plan: ProfilePlan;
 }
+
 
 export interface StudentProfileResponse {
   message: string;
@@ -54,8 +57,19 @@ export interface TeacherProfileInfo {
   hourPrice: number;
   status: string;
   active: boolean;
+  wallet: Wallet[];
 }
 
+export interface Wallet {
+  id: string;
+  type: string;
+  ownerId: string;
+  balance: number;
+  currencyId: string;
+  createdAt: string;
+  updatedAt: string;
+  userId: string;
+}
 export interface TeacherProfileStats {
   totalStudents: number;
   totalSubjects: number;
@@ -110,12 +124,32 @@ export interface TeacherProfileStudent {
   sessions: string;
 }
 
+export interface Withdrawal {
+  id: string;
+  teacherId: string;
+  amount: number;
+  status: 'pending' | 'completed' | 'rejected';
+  adminNotes: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export interface TeacherProfileData {
   teacher: TeacherProfileInfo;
   stats: TeacherProfileStats;
   subjects: TeacherProfileSubject[];
   schedules: TeacherProfileSchedule[];
   students: TeacherProfileStudent[];
+  withdrawals: Withdrawal[];
+}
+
+export interface WithdrawalsResponse {
+  message: string;
+  status: number;
+  lang: string;
+  data: {
+    withdrawals: Withdrawal[];
+  };
 }
 
 export interface TeacherProfileResponse {
