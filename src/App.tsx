@@ -24,12 +24,13 @@ const ForgotPassword = lazy(() => import('./pages/ForgotPassword'));
 const ResetPassword = lazy(() => import('./pages/ResetPassword'));
 const VerifyAccount = lazy(() => import('./pages/VerifyAccount'));
 const AdminDashboard = lazy(() => import('./pages/AdminDashboard/AdminDashboard'));
-const StudentDashboard = lazy(() => import('./pages/StudentDashboard/StudentDashboard'));
+const StudentDashboard = lazy(() => import('./features/student/pages/StudentDashboard'));
 const TeacherDashboard = lazy(() => import('./pages/TeacherDashboard/TeacherDashboard'));
 import AuthGuard from './components/guards/AuthGuard';
 import GuestGuard from './components/guards/GuestGuard';
 import { Provider } from "react-redux";
 import { store } from './store/store';
+import { useChatSocket } from './hooks/useChat';
 
 // Centralized Loading Fallback UI
 const LoadingFallback = () => (
@@ -67,56 +68,60 @@ function App() {
   };
 
 
-
+function SocketProvider() {
+  useChatSocket();
+  return null;
+}
   return (
- <Provider store={store}>
-     <ErrorBoundary>
-      <GoogleOAuthProvider clientId={googleClientId}>
-        <QueryClientProvider client={queryClient}>
-          <SettingsProvider>
-            <SessionsProvider>
-              <Router >
-                {!isAuthenticated && <LanguageSwitcher />}
-                <Suspense fallback={<LoadingFallback />}>
-                  <Routes>
-                    {/* Auth Routes */}
-                    <Route element={<GuestGuard />}>
-                      <Route element={<AuthLayout />}>
-                        <Route path="/login" element={<Login onLoginSuccess={handleLogin} />} />
-                        <Route path="/register" element={<Register onRegisterSuccess={handleLogin} />} />
-                        <Route path="/forgot-password" element={<ForgotPassword />} />
-                        <Route path="/reset-password" element={<ResetPassword />} />
-                        <Route path="/verify-account" element={<VerifyAccount onVerifySuccess={handleLogin} />} />
+    <Provider store={store}>
+      <ErrorBoundary>
+        <GoogleOAuthProvider clientId={googleClientId}>
+          <QueryClientProvider client={queryClient}>
+            <SettingsProvider>
+              <SessionsProvider>
+                <Router >
+                  {!isAuthenticated && <LanguageSwitcher />}
+                  {isAuthenticated && <SocketProvider />}
+                  <Suspense fallback={<LoadingFallback />}>
+                    <Routes>
+                      {/* Auth Routes */}
+                      <Route element={<GuestGuard />}>
+                        <Route element={<AuthLayout />}>
+                          <Route path="/login" element={<Login onLoginSuccess={handleLogin} />} />
+                          <Route path="/register" element={<Register onRegisterSuccess={handleLogin} />} />
+                          <Route path="/forgot-password" element={<ForgotPassword />} />
+                          <Route path="/reset-password" element={<ResetPassword />} />
+                          <Route path="/verify-account" element={<VerifyAccount onVerifySuccess={handleLogin} />} />
+                        </Route>
                       </Route>
-                    </Route>
 
-                    {/* Protected Dashboard Routes */}
-                    <Route element={<AuthGuard allowedRoles={['super_admin', 'admin']} />}>
-                      <Route path="/dashboard/*" element={<AdminDashboard />} />
-                    </Route>
-
-
-                    <Route element={<AuthGuard allowedRoles={['student']} />}>
-                      <Route path="/student-dashboard/*" element={<StudentDashboard />} />
-                    </Route>
+                      {/* Protected Dashboard Routes */}
+                      <Route element={<AuthGuard allowedRoles={['super_admin', 'admin']} />}>
+                        <Route path="/dashboard/*" element={<AdminDashboard />} />
+                      </Route>
 
 
-                    <Route element={<AuthGuard allowedRoles={['teacher']} />}>
-                      <Route path="/teacher-dashboard/*" element={<TeacherDashboard />} />
-                    </Route>
+                      <Route element={<AuthGuard allowedRoles={['student']} />}>
+                        <Route path="/student-dashboard/*" element={<StudentDashboard />} />
+                      </Route>
 
 
-                    <Route path="/" element={<Navigate to="/login" replace />} />
-                    <Route path="*" element={<Navigate to="/login" replace />} />
-                  </Routes>
-                </Suspense>
-              </Router>
-            </SessionsProvider>
-          </SettingsProvider>
-        </QueryClientProvider>
-      </GoogleOAuthProvider>
-    </ErrorBoundary>
- </Provider>
+                      <Route element={<AuthGuard allowedRoles={['teacher']} />}>
+                        <Route path="/teacher-dashboard/*" element={<TeacherDashboard />} />
+                      </Route>
+
+
+                      <Route path="/" element={<Navigate to="/login" replace />} />
+                      <Route path="*" element={<Navigate to="/login" replace />} />
+                    </Routes>
+                  </Suspense>
+                </Router>
+              </SessionsProvider>
+            </SettingsProvider>
+          </QueryClientProvider>
+        </GoogleOAuthProvider>
+      </ErrorBoundary>
+    </Provider>
   );
 }
 

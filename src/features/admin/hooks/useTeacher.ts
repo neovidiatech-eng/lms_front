@@ -9,10 +9,10 @@ export const useTeacher = (search?: string) => {
         queryFn: () => search ? searchTeacher(search) : getTeacher(),
     })
 }
-export const useTeacherById = (id: string) => {
+export const useTeacherById = (id?: string) => {
     return useQuery({
         queryKey: ["teachers", id],
-        queryFn: () => getTeacherById(id),
+        queryFn: () => getTeacherById(id!),
         enabled: !!id,
     })
 }

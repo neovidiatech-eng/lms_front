@@ -130,11 +130,29 @@ export default function TeacherProfile() {
               </div>
               <div className="flex items-center gap-3 text-gray-700">
                 <Phone className="w-5 h-5 text-gray-400" />
-                <span className="text-sm">{teacherInfo.phone}</span>
+                <span className="text-sm" dir="ltr">
+                  {(() => {
+                    const parts = teacherInfo.phone.split(' ').filter(Boolean);
+                    if (parts.length > 1) {
+                      const code = parts[0];
+                      let number = parts.slice(1).join(' ');
+                      if (number.startsWith(code)) {
+                        number = number.slice(code.length);
+                      }
+                      return (
+                        <>
+                          <span className="text-gray-400 font-medium">{code}</span>
+                          <span className="ml-1 text-gray-900 font-semibold">{number}</span>
+                        </>
+                      );
+                    }
+                    return teacherInfo.phone;
+                  })()}
+                </span>
               </div>
               <div className="flex items-center gap-3 text-gray-700">
                 <MapPin className="w-5 h-5 text-gray-400" />
-                <span className="text-sm">{"Egygpt"}</span>
+                <span className="text-sm">{isRtl ? "مصر" : "Egypt"}</span>
               </div>
             </div>
           </div>

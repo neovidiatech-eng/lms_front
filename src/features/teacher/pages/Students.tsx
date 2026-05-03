@@ -1,14 +1,18 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Users, Search, Mail, Phone, BookOpen, Clock } from 'lucide-react';
+import { Users, Search, Mail, Phone, BookOpen, Clock, MessageCircle } from 'lucide-react';
 import { useSettings } from '../../../contexts/SettingsContext';
 import { useMyStudents } from '../hooks/useMyStudents';
+import { useNavigate } from 'react-router-dom';
+import { useCreateChat, useConversations } from '../../../hooks/useChat';
+import { useTeacherProfile } from '../hooks/useTeacherProfile';
 
 
 
 export default function TeacherStudents() {
   const { i18n } = useTranslation();
   const { settings } = useSettings();
+  const navigate = useNavigate();
   const isRtl = i18n.language.split('-')[0] === 'ar';
 
   const [searchQuery, setSearchQuery] = useState('');
@@ -20,7 +24,11 @@ export default function TeacherStudents() {
     student.email.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-
+  const { data: profileResponse } = useTeacherProfile();
+  const teacherId = profileResponse?.data?.teacher?.user_id;
+  const teacherUserId = profileResponse?.data?.teacher?.id;
+  const { data: conversations } = useConversations();
+  const { mutateAsync: createChat } = useCreateChat();
   return (
     <div className="space-y-6 animate-fade-in pb-10" dir={isRtl ? 'rtl' : 'ltr'}>
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
@@ -57,6 +65,56 @@ export default function TeacherStudents() {
                   <p className="text-xs text-gray-500">{student.code}</p>
                 </div>
               </div>
+              <button
+                onClick={async () => {
+                  const targetStudentId = student.user_id || student.id || student.studentId || student.userId || student.user?.id;
+                  
+                  if (!targetStudentId) {
+                    console.error("Student ID is missing!", student);
+                    alert("لا يمكن بدء المحادثة: معرف الطالب مفقود");
+                    return;
+                  }
+
+                  let existingConv = conversations?.find(c => c.otherParty?.id === targetStudentId);
+                  
+                  if (!existingConv && teacherUserId && targetStudentId) {
+                    try {
+                      existingConv = await createChat({ teacherId: teacherUserId as string, studentId: targetStudentId });
+                    } catch (err) {
+                      console.error("Failed to create chat:", err);
+                      return;
+                    }
+                  }
+
+                  if (existingConv) {
+                    // Inject the student name and details if missing from the chat creation response
+                    if (!existingConv.otherParty || !existingConv.otherParty.name) {
+                      existingConv = {
+                        ...existingConv,
+                        otherParty: {
+                          id: targetStudentId,
+                          name: student.name,
+                          email: student.email || ''
+                        }
+                      };
+                    }
+
+                    navigate('/teacher-dashboard/chat', {
+                      state: {
+                        conversation: existingConv
+                      }
+                    });
+                  } else {
+                    // Fallback navigate
+                    navigate('/teacher-dashboard/chat');
+                  }
+                }}
+                className="p-2.5 rounded-xl text-white shadow-sm transition-all hover:scale-105 active:scale-95"
+                style={{ backgroundColor: settings.primaryColor }}
+                title={isRtl ? 'بدء محادثة' : 'Start Conversation'}
+              >
+                <MessageCircle className="w-5 h-5" />
+              </button>
             </div>
 
             <div className="space-y-3 mb-6">

@@ -2,6 +2,7 @@ import { Bell, Menu, Moon, Sun, User, LogOut, ChevronDown } from "lucide-react";
 import { useState } from "react";
 import { useLanguage } from "../../contexts/LanguageContext";
 import { useSettings } from "../../contexts/SettingsContext";
+import { disconnectSocket } from "../../utils/socket";
 
 interface HeaderProps {
   onMenuClick: () => void;
@@ -36,6 +37,7 @@ export default function Header({
   ];
 
   const handleLogout = () => {
+    disconnectSocket();
     localStorage.removeItem("platform_settings");
     sessionStorage.removeItem("platform_settings");
     localStorage.removeItem("token");

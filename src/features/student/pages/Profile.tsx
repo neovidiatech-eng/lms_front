@@ -1,18 +1,22 @@
 import { useTranslation } from 'react-i18next';
-import { useSettings } from '../../../contexts/SettingsContext';
+import { useSettings } from '../../../contexts/SettingsContext'; // Re-parsing
 import {
   Mail, Phone, Calendar, MapPin,
   Package, Clock, CheckCircle, Award, RefreshCw,
-  GraduationCap,
   User,
-  BookOpen,
-  ShieldCheck,
-  Star
 } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import SubscribePlanModal from '../../../components/modals/SubscribePlanModal';
 import { useProfile } from '../hooks/useProfile';
-import { useTeacherById } from '../../admin/hooks/useTeacher';
+import { TeacherInfoCard } from '../components/TeacherInfoCard';
+
+export interface TeacherInfoCardProps {
+  teacher: any;
+  isRtl: boolean;
+  settings: any;
+}
+
+
 
 export default function StudentProfile() {
   const { i18n, t } = useTranslation();
@@ -50,17 +54,25 @@ export default function StudentProfile() {
     sessionsRemaining: profileData?.sessions_remaining,
     features: plan?.features || [],
   };
-  const uniqueTeacher = profileData?.schedules?.[0]?.teacher;
+  const teachers = useMemo(() => {
+    const teacherMap = new Map();
+    profileData?.schedules?.forEach(schedule => {
+      const teacher = schedule.teacher;
+      if (teacher && !teacherMap.has(teacher.id)) {
+        teacherMap.set(teacher.id, {
+          id: teacher.id,
+          name: teacher.user?.name,
+          hour_price: teacher.hour_price,
+          status: schedule.status,
+          subject: isRtl ? schedule.subject?.name_ar : schedule.subject?.name_en,
+          nextSession: schedule.start_time
+        });
+      }
+    });
+    return Array.from(teacherMap.values());
+  }, [profileData, isRtl]);
 
-  const teacherInfo = {
-    name: uniqueTeacher?.user?.name,
-    hour_price: uniqueTeacher?.hour_price,
-    status: profileData?.schedules?.[0]?.status,
-    subject: isRtl ? profileData?.schedules?.[0]?.subject?.name_ar : profileData?.schedules?.[0]?.subject?.name_en,
-  };
-  const { data: teacherData } = useTeacherById(uniqueTeacher?.id);
 
-  
   if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
@@ -88,49 +100,83 @@ export default function StudentProfile() {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
-        {/* Student Personal Info Card */}
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden lg:col-span-1">
+ <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden lg:col-span-1">
+
+  {/* Header Gradient */}
+  <div
+    className="h-60 relative"
+    style={{
+      background: `linear-gradient(135deg, ${settings.primaryColor}, ${settings.accentColor})`
+    }}
+  >
+    <div className="absolute inset-0 bg-black/10" />
+  </div>
+
+  {/* Content */}
+  <div className="px-6 pb-6 relative">
+
+    {/* Avatar */}
+    <div className="flex justify-center -mt-12">
+      <div className="relative">
+        <div className="w-24 h-24 rounded-full bg-white p-1 shadow-lg">
           <div
-            className="h-24 bg-gradient-to-r"
-            style={{ backgroundImage: `linear-gradient(to right, ${settings.primaryColor}, ${settings.accentColor})` }}
-          />
-          <div className="px-6 pb-6 relative">
-            <div className="flex justify-center -mt-12 mb-4">
-              <div className="w-24 h-24 bg-white rounded-full p-2 shadow-md">
-                <div
-                  className="w-full h-full rounded-full flex items-center justify-center text-white text-3xl font-bold"
-                  style={{ backgroundColor: settings.primaryColor }}
-                >
-                  {studentInfo?.name?.charAt(0)}
-                </div>
-              </div>
-            </div>
-
-            <div className="text-center mb-6">
-              <h2 className="text-xl font-bold text-gray-900">{studentInfo.name}</h2>
-              <p className="text-sm text-gray-500 mt-1">{isRtl ? 'طالب' : 'Student'}</p>
-            </div>
-
-            <div className="space-y-4">
-              <div className="flex items-center gap-3 text-gray-700">
-                <Mail className="w-5 h-5 text-gray-400" />
-                <span className="text-sm truncate">{studentInfo.email}</span>
-              </div>
-              <div className="flex items-center gap-3 text-gray-700">
-                <Phone className="w-5 h-5 text-gray-400" />
-                <span className="text-sm">{studentInfo.phone}</span>
-              </div>
-              <div className="flex items-center gap-3 text-gray-700">
-                <Calendar className="w-5 h-5 text-gray-400" />
-                <span className="text-sm" dir="ltr">{studentInfo.birthDate}</span>
-              </div>
-              <div className="flex items-center gap-3 text-gray-700">
-                <MapPin className="w-5 h-5 text-gray-400" />
-                <span className="text-sm">{studentInfo.country}</span>
-              </div>
-            </div>
+            className="w-full h-full rounded-full flex items-center justify-center text-white text-2xl font-bold"
+            style={{ backgroundColor: settings.primaryColor }}
+          >
+            {studentInfo?.name?.charAt(0)}
           </div>
         </div>
+
+        {/* Status dot */}
+        <span className="absolute bottom-1 right-1 w-4 h-4 bg-green-500 border-2 border-white rounded-full" />
+      </div>
+    </div>
+
+    {/* Name + role */}
+    <div className="text-center mt-4 mb-6">
+      <h2 className="text-xl font-bold text-gray-900">
+        {studentInfo.name}
+      </h2>
+
+      <span className="inline-flex mt-2 px-3 py-1 text-xs font-semibold rounded-full bg-gray-100 text-gray-600">
+        {isRtl ? 'طالب' : 'Student'}
+      </span>
+    </div>
+
+    {/* Info Grid */}
+    <div className="space-y-3">
+
+      <div className="flex items-center gap-3 p-3 rounded-xl bg-gray-50 hover:bg-gray-100 transition">
+        <Mail className="w-5 h-5 text-gray-400" />
+        <span className="text-sm text-gray-700 truncate">
+          {studentInfo.email}
+        </span>
+      </div>
+
+      <div className="flex items-center gap-3 p-3 rounded-xl bg-gray-50 hover:bg-gray-100 transition">
+        <Phone className="w-5 h-5 text-gray-400" />
+        <span className="text-sm text-gray-700" dir="ltr">
+          {studentInfo.phone}
+        </span>
+      </div>
+
+      <div className="flex items-center gap-3 p-3 rounded-xl bg-gray-50 hover:bg-gray-100 transition">
+        <Calendar className="w-5 h-5 text-gray-400" />
+        <span className="text-sm text-gray-700">
+          {studentInfo.birthDate}
+        </span>
+      </div>
+
+      <div className="flex items-center gap-3 p-3 rounded-xl bg-gray-50 hover:bg-gray-100 transition">
+        <MapPin className="w-5 h-5 text-gray-400" />
+        <span className="text-sm text-gray-700">
+          {studentInfo.country}
+        </span>
+      </div>
+
+    </div>
+  </div>
+</div>
 
         <div className="lg:col-span-2 space-y-6">
 
@@ -208,77 +254,18 @@ export default function StudentProfile() {
             </div>
           </div>
 
-          {/* Teacher Info Card */}
-          <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="text-lg font-bold text-gray-900 flex items-center gap-2">
-                <GraduationCap className="w-6 h-6" style={{ color: settings.primaryColor }} />
-                {isRtl ? 'المعلم الخاص بك' : 'Your Teacher'}
-              </h2>
-              <div className="flex items-center gap-1 bg-yellow-50 px-2 py-1 rounded-lg border border-yellow-100">
-                <Star className="w-4 h-4 text-yellow-500 fill-yellow-500" />
-                <span className="text-sm font-bold text-yellow-700">{teacherInfo.status}</span>
+          {/* Teachers Info Cards */}
+          <div className="space-y-6">
+            {teachers.length > 0 ? (
+              teachers.map((teacher) => (
+                <TeacherInfoCard key={teacher.id} teacher={teacher} isRtl={isRtl} settings={settings} />
+              ))
+            ) : (
+              <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-10 text-center">
+                <User className="w-12 h-12 mx-auto text-gray-300 mb-4" />
+                <p className="text-gray-500">{isRtl ? 'لا يوجد معلمين مسجلين حالياً' : 'No teachers assigned currently'}</p>
               </div>
-            </div>
-
-            <div className="flex flex-col md:flex-row items-center md:items-start gap-6">
-              <div className="relative">
-                <div className="w-24 h-24 bg-gray-100 rounded-2xl flex items-center justify-center text-gray-400 shrink-0 overflow-hidden border-2 border-dashed border-gray-200">
-                  <User className="w-12 h-12" />
-                </div>
-                <div className="absolute -bottom-2 -left-2 px-2 py-0.5 bg-green-500 text-white text-[10px] font-bold rounded-lg border-2 border-white uppercase flex items-center gap-1">
-                  <div className="w-1.5 h-1.5 bg-white rounded-full animate-pulse" />
-                  {teacherData?.user?.name}
-                </div>
-              </div>
-
-              <div className="flex-1 text-center md:text-right">
-                <div className="flex flex-col md:flex-row items-center justify-between gap-4 mb-4">
-                  <div className="text-right">
-                    <h3 className="text-xl font-bold text-gray-900 mb-1">
-                      {teacherData?.user?.name || (isRtl ? 'جاري التحميل...' : 'Loading...')}
-                    </h3>
-
-                    <p className="text-gray-600 text-sm flex items-center gap-2">
-                      <BookOpen className="w-4 h-4" style={{ color: settings.primaryColor }} />
-                      {teacherInfo.subject}
-                    </p>
-                  </div>
-
-                </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div className="p-3 bg-gray-50 rounded-xl border border-gray-100 flex items-center gap-3 text-right">
-                    <div className="w-10 h-10 rounded-lg bg-white flex items-center justify-center shadow-sm">
-                      <ShieldCheck className="w-5 h-5 text-green-500" />
-                    </div>
-                    <div>
-                      <p className="text-[10px] text-gray-500 uppercase font-bold tracking-wider">{isRtl ? 'معلم معتمد' : 'Verified Teacher'}</p>
-                      <p className="text-xs font-semibold text-gray-700">{isRtl ? 'هوية محققة' : 'Identity Verified'}</p>
-                    </div>
-                  </div>
-                  <div className="p-3 bg-blue-50/50 rounded-xl border border-blue-100 flex items-center gap-3 text-right">
-                    <div className="w-10 h-10 rounded-lg bg-white flex items-center justify-center shadow-sm">
-                      <Calendar className="w-5 h-5 text-blue-500" />
-                    </div>
-                    <div>
-                      <p className="text-[10px] text-blue-500 uppercase font-bold tracking-wider">{isRtl ? 'الجلسة القادمة' : 'Next Session'}</p>
-                      <p className="text-xs font-semibold text-gray-700 leading-tight">
-                        {profileData?.schedules?.[0]?.start_time ? (
-                          new Date(profileData.schedules[0].start_time).toLocaleDateString(isRtl ? 'ar-EG' : 'en-US', {
-                            weekday: 'long',
-                            month: 'long',
-                            day: 'numeric'
-                          })
-                        ) : (
-                          isRtl ? 'لا توجد جلسات قادمة' : 'No upcoming sessions'
-                        )}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
+            )}
           </div>
         </div>
       </div>
