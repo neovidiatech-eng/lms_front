@@ -7,6 +7,7 @@ import { StudentFormData, getStudentSchema } from '../../lib/schemas/StudentSche
 import { Controller, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { usePlans } from '../../features/admin/hooks/usePlans';
+import { Plan } from '../../types/plan';
 
 interface AddStudentModalProps {
   isOpen: boolean;
@@ -47,7 +48,7 @@ export default function AddStudentModal({ isOpen, onClose, onSubmit }: AddStuden
 
   const planOptions = [
     { value: '', label: t('noPlan') },
-    ...plans.map((p: any) => ({
+    ...plans.map((p: Plan) => ({
       value: p.id,
       label: language === 'ar' ? p.name_ar : p.name_en,
     }))

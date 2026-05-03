@@ -10,6 +10,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { CustomCheckbox } from "../components/ui/CustomCheckbox";
 import { GoogleLogin } from "@react-oauth/google";
 import { message } from "antd";
+import { connectSocket } from "../utils/socket";
 
 interface LoginProps {
   onLoginSuccess: () => void;
@@ -70,7 +71,10 @@ export default function Login({ onLoginSuccess }: LoginProps) {
         } else {
           navigate("/dashboard");
         }
+
+
       }
+      connectSocket(token);
     } catch (error) {
       console.error("Login failed:", error);
     }
@@ -191,6 +195,7 @@ export default function Login({ onLoginSuccess }: LoginProps) {
 
                     if (token) {
                       localStorage.setItem("token", token);
+                      connectSocket(token);
                       onLoginSuccess();
                       message.success(result.message || t('loginSuccess'));
                       navigate("/dashboard");

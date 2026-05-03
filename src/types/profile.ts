@@ -50,6 +50,7 @@ export interface StudentProfileResponse {
 }
 
 export interface TeacherProfileInfo {
+  id: string;
   name: string;
   email: string;
   phone: string;
@@ -57,6 +58,7 @@ export interface TeacherProfileInfo {
   hourPrice: number;
   status: string;
   active: boolean;
+  user_id?: string;
   wallet: Wallet[];
 }
 

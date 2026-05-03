@@ -17,10 +17,18 @@ export default function TeacherDashboardHome() {
   return (
     <div className="space-y-6 animate-fade-in pb-10" dir={isRtl ? 'rtl' : 'ltr'}>
       {/* Welcome Banner */}
-      <div className="rounded-2xl p-8 text-white relative overflow-hidden" style={{ background: `linear-gradient(to right, ${settings.primaryColor}, ${settings.accentColor})` }}>
-        <div className="relative z-10">
-          <h1 className="text-3xl font-bold mb-2">{isRtl ? 'مرحباً بعودتك، أ. محمد!' : 'Welcome back, Mr. Mohamed!'}</h1>
-          <p className="opacity-80">{isRtl ? 'إليك نظرة سريعة على نشاطك اليوم' : 'Here is a quick overview of your activity today'}</p>
+     <div className="rounded-2xl p-8 text-white relative overflow-hidden" style={{ background: `linear-gradient(to right, ${settings.primaryColor}, ${settings.accentColor})` }}>
+        <h1 className='text-2xl font-bold text-white'> أهلا بك! أحمد</h1>
+        <div className="flex items-center gap-2 text-white mt-1">
+          <Calendar size={16} />
+          <span className="text-sm">
+            {new Intl.DateTimeFormat('ar-EG', { 
+              weekday: 'long', 
+              day: 'numeric', 
+              month: 'long', 
+              year: 'numeric' 
+            }).format(new Date())}
+          </span>
         </div>
       </div>
 

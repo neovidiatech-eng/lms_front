@@ -2,7 +2,6 @@ import { useState } from 'react';
 import Header from '../../components/layout/Header';
 import StudentSidebar from './StudentSidebar';
 import { useLanguage } from '../../contexts/LanguageContext';
-
 interface StudentDashboardLayoutProps {
   children: React.ReactNode;
   userRole?: 'admin' | 'teacher' | 'student';
