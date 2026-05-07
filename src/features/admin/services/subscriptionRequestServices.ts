@@ -11,13 +11,12 @@ export interface SubscriptionRequestApi {
     name_ar: string;
     name_en: string;
     price: string;
-    hours: number;
+    sessionsCount: number;
   };
   createdAt: string;
   status: "pending" | "approved" | "rejected";
 }
 
-//get method
 export const getSubscriptionRequests = async () => {
   const response = await api.get("/subscription/requests");
   const data = response.data.data;

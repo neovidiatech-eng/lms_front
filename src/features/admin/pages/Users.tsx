@@ -60,6 +60,7 @@ export default function Users() {
         codeCountry: userData.countryCode,
         phone: userData.phone,
         roleId: userData.role,
+        timezone: userData.timezone || Intl.DateTimeFormat().resolvedOptions().timeZone,
       },
       {
         onSuccess: () => {
@@ -79,6 +80,7 @@ export default function Users() {
           codeCountry: userData.countryCode,
           phone: userData.phone,
           roleId: userData.role,
+          timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
           ...(userData.password ? { password: userData.password } : {}),
         },
       },

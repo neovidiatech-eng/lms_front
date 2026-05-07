@@ -156,6 +156,7 @@ export default function Teachers() {
       active: formData.status === 'active',
       code_country: '+20', // Default if missing, ideally extracted from phone
       subject_ids: formData.subjects,
+      timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
     };
   };
 

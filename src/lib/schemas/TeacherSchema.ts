@@ -19,6 +19,7 @@ export const getTeacherSchema = (t: TFunc) => z.object({
 
   // Changed from a fixed object to a dynamic array of GUIDs
   subjects: z.array(z.string()).min(1, t("validation.required")),
+  timezone: z.string().optional(),
 });
 
 export type TeacherFormData = z.infer<ReturnType<typeof getTeacherSchema>>;

@@ -82,7 +82,11 @@ export default function EditUserModal({ isOpen, onClose, onSubmit, userData }: E
   if (!isOpen) return null;
 
   const onFormSubmit = (data: UserFormData) => {
-    onSubmit({ ...data, id: userData.id });
+    onSubmit({
+      ...data,
+      id: userData.id,
+      timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+    });
     onClose();
   };
 

@@ -25,7 +25,7 @@ export default function TeacherStudents() {
   );
 
   const { data: profileResponse } = useTeacherProfile();
-  const teacherId = profileResponse?.data?.teacher?.user_id;
+ // const teacherId = profileResponse?.data?.teacher?.user_id;
   const teacherUserId = profileResponse?.data?.teacher?.id;
   const { data: conversations } = useConversations();
   const { mutateAsync: createChat } = useCreateChat();

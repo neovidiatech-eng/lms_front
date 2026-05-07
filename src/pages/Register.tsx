@@ -76,7 +76,11 @@ export default function Register({ onRegisterSuccess }: RegisterProps) {
 
   const onSubmit = async (data: RegisterInput) => {
     try {
-      const result = await registerService(data);
+      const registrationData = {
+        ...data,
+        timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+      };
+      const result = await registerService(registrationData);
       if (result.status === 201 || result.status === 200) {
         message.success(result.message || t("registeredSuccess"));
         // Store email for verification step
@@ -325,7 +329,7 @@ export default function Register({ onRegisterSuccess }: RegisterProps) {
                           {language === "ar" ? pkg.name_ar : pkg.name_en}
                         </div>
                         <div className="text-gray-600 text-sm">
-                          {pkg.duration} {t("sessionsCount")} • {pkg.currency?.symbol} {pkg.price}
+                          {pkg.sessionsCount} {t("sessionsCount")} • {pkg.currency?.symbol} {pkg.price}
                         </div>
                       </div>
                       {selectedPackage === pkg.id && (

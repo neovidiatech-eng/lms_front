@@ -91,7 +91,10 @@ export default function AddUserModal({ isOpen, onClose, onSubmit }: AddUserModal
   if (!isOpen) return null;
 
   const onFormSubmit = (data: UserFormData) => {
-    onSubmit(data);
+    onSubmit({
+      ...data,
+      timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+    });
     reset();
     onClose();
   };
