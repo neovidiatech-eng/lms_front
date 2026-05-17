@@ -41,7 +41,7 @@ export default function ViewTransactionModal({ isOpen, onClose, transaction, cur
   };
 
   // Assuming API amount is in SAR for now, as currency symbols are not provided per transaction in the schema
-  const transactionCurrency = 'SAR'; 
+  const transactionCurrency = 'SAR';
   const convertedAmount = transaction.amount * getExchangeRate(transactionCurrency, selectedCurrency);
   const currentSymbol = currencies.find(c => c.code === selectedCurrency)?.symbol || selectedCurrency;
   const originalSymbol = currencies.find(c => c.code === transactionCurrency)?.symbol || transactionCurrency;
@@ -51,8 +51,8 @@ export default function ViewTransactionModal({ isOpen, onClose, transaction, cur
   const isIncome = transaction.type === 'credit' || transaction.type === 'subscription';
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh]  overflow-y-auto no-scrollbar">
+    <div className="fixed inset-0  !mt-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh]  overflow-y-auto no-scrollbar" dir={language === 'ar' ? 'rtl' : 'ltr'}>
         <div className={`sticky top-0 px-6 py-5 flex items-center justify-between rounded-t-2xl ${isIncome ? 'bg-gradient-to-r from-green-600 to-emerald-600' : 'bg-gradient-to-r from-orange-500 to-amber-600'
           } text-white`}>
           <div className="flex items-center gap-3">
@@ -80,13 +80,12 @@ export default function ViewTransactionModal({ isOpen, onClose, transaction, cur
                 {text.convertedAmount[language]}: <span className="font-semibold">{convertedAmount.toFixed(2)} {currentSymbol}</span>
               </p>
             )}
-            <span className={`inline-flex mt-3 px-3 py-1 rounded-full text-sm font-medium ${
-              transaction.status === 'completed' 
-                ? 'bg-green-100 text-green-700' 
+            <span className={`inline-flex mt-3 px-3 py-1 rounded-full text-sm font-medium ${transaction.status === 'completed'
+                ? 'bg-green-100 text-green-700'
                 : transaction.status === 'pending'
-                ? 'bg-yellow-100 text-yellow-700'
-                : 'bg-red-100 text-red-700'
-            }`}>
+                  ? 'bg-yellow-100 text-yellow-700'
+                  : 'bg-red-100 text-red-700'
+              }`}>
               {text[transaction.status] ? text[transaction.status][language] : transaction.status}
             </span>
           </div>

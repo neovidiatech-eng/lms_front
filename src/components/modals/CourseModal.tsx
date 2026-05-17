@@ -1,3 +1,4 @@
+import { useLanguage } from '../../contexts/LanguageContext';
 import { useRef, useEffect } from 'react';
 import { X } from 'lucide-react';
 import { FormProvider, useForm } from 'react-hook-form';
@@ -24,6 +25,7 @@ export default function CourseModal({
   levels,
   subjectCategories,
 }: CourseModalProps) {
+  const { language } = useLanguage();
   const { t } = useTranslation();
   const thumbnailInputRef = useRef<HTMLInputElement>(null);
   const attachInputRef = useRef<HTMLInputElement>(null);
@@ -75,9 +77,9 @@ export default function CourseModal({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4 backdrop-blur-sm" onClick={onClose}>
+    <div className="fixed inset-0 !mt-0 bg-black/50 z-50 flex items-center justify-center p-4 backdrop-blur-sm" onClick={onClose}>
       <div
-        className="bg-white rounded-2xl shadow-2xl max-w-lg w-full max-h-[90vh] overflow-y-auto no-scrollbar border border-gray-100 flex flex-col"
+        className="bg-white rounded-2xl shadow-2xl max-w-lg w-full max-h-[90vh] overflow-y-auto no-scrollbar flex flex-col" dir={language === 'ar' ? 'rtl' : 'ltr'}
         onClick={e => e.stopPropagation()}
       >
         <div className="sticky top-0 bg-[var(--color-primary)] px-8 py-6 flex items-center justify-between rounded-t-2xl z-10">

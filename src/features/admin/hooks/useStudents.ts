@@ -10,10 +10,11 @@ export const useStudents = () => {
         queryFn: getStudents,
     });
 }
-export const useStudentById = (id: string) => {
+export const useStudentById = (id?: string) => {
     return useQuery({
         queryKey: ["student", id],
-        queryFn: () => getStudentById(id),
+        queryFn: () => getStudentById(id as string),
+        enabled: !!id,
     });
 }
 export const useUpdateStudent = () => {

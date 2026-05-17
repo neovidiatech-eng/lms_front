@@ -4,12 +4,7 @@ import { useLanguage } from '../../../contexts/LanguageContext';
 import ViewTransactionModal from '../../../components/modals/ViewTransactionModal';
 import { useTransactions } from '../hooks/useTransaction';
 import { Transaction, TransactionType } from '../../../types/transaction';
-
-const CURRENCIES = [
-  { code: 'SAR', symbol: 'ر.س', rate: 1 },
-  { code: 'EGP', symbol: 'ج.م', rate: 0.11 },
-  { code: 'USD', symbol: '$', rate: 3.75 }
-];
+import { useCurrency } from '../hooks/useCurrency';
 
 export default function Transactions() {
   const { language } = useLanguage();
@@ -22,6 +17,20 @@ export default function Transactions() {
   
   const { data: response, isLoading, error } = useTransactions();
   const transactions = response?.data || [];
+
+    const { data: currenciesData } = useCurrency();
+    
+    const CURRENCIES = useMemo(() => {
+    if (!currenciesData?.currencies) return [];
+    return currenciesData.currencies.map(c => ({
+      name: language === 'ar' ? c.name_ar : c.name_en,
+      symbol: c.symbol,
+      code: c.code,
+      rate: c.exchangeRate,
+    }));
+  }, [currenciesData, language]);
+
+
 
   const text = {
     title: { ar: 'المعاملات المالية', en: 'Financial Transactions' },
@@ -125,14 +134,14 @@ export default function Transactions() {
         <h1 className="text-3xl font-bold text-gray-900">{text.title[language]}</h1>
         <div className="flex items-center gap-3">
           <div className="flex items-center gap-2 px-4 py-2.5 border border-gray-300 rounded-xl bg-white">
-            <DollarSign className="w-4 h-4 text-gray-500" />
+            {/* <DollarSign className="w-4 h-4 text-gray-500" /> */}
             <select
               value={selectedCurrency}
               onChange={(e) => setSelectedCurrency(e.target.value)}
               className="text-sm font-medium text-gray-700 bg-transparent border-none outline-none"
             >
               {CURRENCIES.map(c => (
-                <option key={c.code} value={c.code}>{c.symbol} {c.code}</option>
+                <option key={c.code} value={c.code}>{c.symbol} {c.name}</option>
               ))}
             </select>
           </div>

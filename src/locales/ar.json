@@ -406,5 +406,11 @@
   "scheduledDays": "أيام الحصة",
   "grid": "شبكة",
   "list": "قائمة",
-  "AddRequest": "طلب جديد"
+  "AddRequest": "طلب جديد",
+  "VideoURL": "رابط الفيديو",
+  "enterVideoURL": "أدخل رابط الفيديو",
+  "pendingStudents": "الطلاب المعلقين",
+  "studentInfo": "معلومات الطالب",
+  "TransactionRequests": "طلبات السحب",
+  "sidebar_student_requests": "طلبات الطلاب"
 }

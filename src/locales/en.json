@@ -401,5 +401,16 @@
   "scheduledDays": "Recurring Day",
   "grid": "Grid",
   "list": "List",
-  "AddRequest": "Add Request"
+  "AddRequest": "Add Request",
+  "VideoURL": "Video URL",
+  "enterVideoURL": "Enter Video URL",
+  "file": "File",
+  "courses_filter": "Try changing the search filter",
+  "profile": "Profile",
+  "logout": "Logout",
+  "earningsFormula_ar": "الأرباح = عدد الساعات × {rate} {currency}/ساعة",
+  "earningsFormula_en": "Earnings = Hours × {rate} {currency}/hour",
+  "pendingStudents": "Pending Students",
+  "studentInfo": "Student Info",
+  "TransactionRequests": "Transaction Requests"
 }

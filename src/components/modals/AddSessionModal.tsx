@@ -103,22 +103,22 @@ export default function AddSessionModal({
   const availableSubjects = useMemo(() => {
     return selectedTeacherData
       ? selectedTeacherData.teacherSubjects.map((ts) => ({
-          value: ts.subject.id,
-          label: language === "ar" ? ts.subject.name_ar : ts.subject.name_en,
-        }))
+        value: ts.subject.id,
+        label: language === "ar" ? ts.subject.name_ar : ts.subject.name_en,
+      }))
       : [];
   }, [selectedTeacherData, language]);
 
   const selectedStudentData = students.find((s) => s.id === selectedStudent);
   const selectedStudentPackage = selectedStudentData
     ? {
-        name:
-          language === "ar"
-            ? selectedStudentData.plan?.name_ar
-            : selectedStudentData.plan?.name_en || "No Package",
-        sessionsRemaining: selectedStudentData.sessions_remaining || 0,
-        totalSessions: selectedStudentData.sessions || 0,
-      }
+      name:
+        language === "ar"
+          ? selectedStudentData.plan?.name_ar
+          : selectedStudentData.plan?.name_en || "No Package",
+      sessionsRemaining: selectedStudentData.sessions_remaining || 0,
+      totalSessions: selectedStudentData.sessions || 0,
+    }
     : null;
 
   const onFormSubmit = (data: SessionFormData) => {
@@ -129,7 +129,7 @@ export default function AddSessionModal({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+    <div className="fixed inset-0  !mt-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
       <div className="bg-white rounded-2xl shadow-xl w-full max-w-4xl max-h-[90vh]  overflow-y-auto no-scrollbar">
         <div className="sticky top-0 bg-primary border-b border-gray-100 px-6 py-4 flex items-center justify-between z-10">
           <h2 className="text-2xl font-bold text-white">

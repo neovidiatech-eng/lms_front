@@ -246,8 +246,8 @@ export default function Teachers() {
       </div>
 
       {/* Search and Filters */}
-      <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 ">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 !mb-0">
           {/* Search */}
           <div className="relative">
             <input
@@ -270,9 +270,11 @@ export default function Teachers() {
             className="h-[46px]"
           />
         </div>
-        {/* Teachers Table Section */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-          {isLoading ? (
+      </div>
+
+      {/* Teachers Table Section */}
+      <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+        {isLoading ? (
             <TableSkeleton rows={itemsPerPage} columns={6} />
           ) : (
             <div className="overflow-x-auto">
@@ -393,7 +395,6 @@ export default function Teachers() {
             />
           )}
         </div>
-      </div>
 
       {/* Add Teacher Modal */}
       <AddTeacherModal
