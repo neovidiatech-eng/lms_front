@@ -65,6 +65,7 @@ export interface CreateTeacherInput {
     hour_price: number;
     active: boolean;
     subject_ids: string[];
+    timezone?: string;
 }
 
 export type TeachersData = TeachersFetchResponse['data'];

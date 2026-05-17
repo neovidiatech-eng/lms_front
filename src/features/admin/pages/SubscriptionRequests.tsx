@@ -17,9 +17,11 @@ interface SubscriptionRequest {
   parentName: string;
   phone: string;
   email: string;
-  planName: string;
-  planPrice: string;
-  sessionsCount: number;
+   plan: {
+    name: string;
+    price: number;
+    sessionsCount: number;
+  };
   requestDate: string;
   status: "pending" | "approved" | "rejected";
   notes?: string;
@@ -90,9 +92,11 @@ export default function SubscriptionRequests() {
           parentName: typeof item.user?.name === 'string' ? item.user.name : "—",
           phone: typeof item.user?.phone === 'string' ? item.user.phone : "—",
           email: typeof item.user?.email === 'string' ? item.user.email : "—",
-          planName: item.plan?.name_ar || item.plan?.name_en || "—",
-          planPrice: item.plan?.price || "—",
-          sessionsCount: typeof item.plan?.hours === 'number' ? item.plan.hours : 0,
+          plan: {
+            name: item.plan?.name_ar || item.plan?.name_en || "—",
+            price: item.plan?.price || 0,
+            sessionsCount: typeof item.plan?.sessionsCount === 'number' ? item.plan.sessionsCount : 0,
+          },
           requestDate: typeof item.createdAt === 'string' ? item.createdAt.split("T")[0] : "—",
           status: item.status,
         }));
@@ -260,14 +264,15 @@ export default function SubscriptionRequests() {
                       {request.email}
                     </td>
                     <td className="px-4 py-4 text-start text-sm text-gray-900">
-                      {request.planName}
+                      {request.plan.name}
                     </td>
                     <td className="px-4 py-4 text-start text-sm font-semibold text-gray-900">
-                      {request.planPrice}
+                      {request.plan.price}
                     </td>
                     <td className="px-4 py-4 text-start text-sm text-gray-900">
-                      <span className="font-semibold">{request.sessionsCount}</span>{" "}
+                      <span className="font-semibold">{request.plan.sessionsCount}</span>{" "}
                       {text.session[language]}
+                      
                     </td>
                     <td className="px-4 py-4 text-start text-sm text-gray-900">
                       {request.requestDate}

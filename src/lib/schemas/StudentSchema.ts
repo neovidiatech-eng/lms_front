@@ -13,6 +13,7 @@ export const getStudentSchema = (t: TFunc) => z.object({
   country: z.string().min(1, t("validation.required")),
   status: z.enum(['approved', 'pending', 'rejected']),
   password: z.string().min(6, t("validation.min", { count: 6 })).optional().or(z.literal('')),
+  timezone: z.string().optional(),
 }).superRefine((data, ctx) => {
   const { phone_code, phone } = data;
 

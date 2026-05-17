@@ -8,9 +8,11 @@ interface SubscriptionRequest {
   parentName: string;
   phone: string;
   email: string;
-  planName: string;
-  planPrice: string;
-  sessionsCount: number;
+  plan: {
+    name: string;
+    price: number;
+    sessionsCount: number;
+  };
   requestDate: string;
   status: 'pending' | 'approved' | 'rejected';
   notes?: string;
@@ -107,14 +109,14 @@ export default function ViewSubscriptionRequestModal({ isOpen, onClose, request 
               <label className="block text-sm font-semibold text-gray-700 mb-2">
                 {text.plan[language]}
               </label>
-              <p className="text-gray-900 text-lg">{request.planName}</p>
+              <p className="text-gray-900 text-lg">{request.plan.name}</p>
             </div>
 
             <div>
               <label className="block text-sm font-semibold text-gray-700 mb-2">
                 {text.price[language]}
               </label>
-              <p className="text-gray-900 text-lg font-semibold">{request.planPrice}</p>
+              <p className="text-gray-900 text-lg font-semibold">{request.plan.price}</p>
             </div>
 
             <div>
@@ -122,7 +124,7 @@ export default function ViewSubscriptionRequestModal({ isOpen, onClose, request 
                 {text.sessionsCount[language]}
               </label>
               <p className="text-gray-900 text-lg">
-                <span className="font-semibold">{request.sessionsCount}</span> {text.session[language]}
+                <span className="font-semibold">{request.plan.sessionsCount}</span> {text.session[language]}
               </p>
             </div>
 

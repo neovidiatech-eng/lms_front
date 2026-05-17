@@ -17,6 +17,7 @@ export const getRegisterSchema = (t: (key: string, options?: any) => string) =>
     country: z.string().min(1, t("validation.required")),
     password: z.string().min(8, t("validation.min", { count: 8 })),
     plan_id: z.string().min(1, t("validation.required")),
+    timezone: z.string().optional(),
   });
 
 export type RegisterInput = z.infer<ReturnType<typeof getRegisterSchema>>;

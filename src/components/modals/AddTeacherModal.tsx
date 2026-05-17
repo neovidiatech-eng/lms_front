@@ -46,7 +46,10 @@ export default function AddTeacherModal({ isOpen, onClose, onSubmit }: AddTeache
   }, [currenciesData, language]);
 
   const handleOnSubmit = (data: TeacherFormData) => {
-    onSubmit(data);
+    onSubmit({
+      ...data,
+      timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+    });
     onClose();
     reset();
   };

@@ -30,7 +30,10 @@ export default function AddParentModal({ onClose, onAdd }: AddParentModalProps) 
   });
 
   const handleOnSubmit = (data: ParentFormData) => {
-    onAdd(data);
+    onAdd({
+      ...data,
+      timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+    });
     onClose();
   };
 

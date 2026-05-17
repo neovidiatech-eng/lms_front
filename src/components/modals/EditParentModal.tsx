@@ -30,7 +30,11 @@ export default function EditParentModal({ parent, onClose, onSubmit }: EditParen
   });
 
   const handleOnSubmit = (data: ParentFormData) => {
-    onSubmit({ ...data, id: parent.id });
+    onSubmit({
+      ...data,
+      id: parent.id,
+      timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+    });
     onClose();
   };
 

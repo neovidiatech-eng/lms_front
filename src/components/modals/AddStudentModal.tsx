@@ -30,7 +30,10 @@ export default function AddStudentModal({ isOpen, onClose, onSubmit }: AddStuden
     }
   });
   const onFormSubmit = (data: StudentFormData) => {
-    onSubmit(data);
+    onSubmit({
+      ...data,
+      timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+    });
     reset();
     onClose();
   };

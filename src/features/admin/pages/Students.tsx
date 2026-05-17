@@ -392,6 +392,7 @@ export default function Students() {
               gender: studentData.gender,
               country: studentData.country,
               active: studentData.status === 'approved',
+              timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
             };
 
             // Only include planId if it's a valid GUID string (not empty)
@@ -447,6 +448,7 @@ export default function Students() {
               birth_date: (updatedData.birthDate && updatedData.birthDate !== "") ? new Date(updatedData.birthDate).toISOString() : null,
               gender: updatedData.gender,
               active: updatedData.status === 'approved',
+              timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
             };
 
             if (updatedData.plan && updatedData.plan.trim() !== "") {
