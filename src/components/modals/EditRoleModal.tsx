@@ -1,3 +1,4 @@
+import { useLanguage } from '../../contexts/LanguageContext';
 // import { useEffect } from 'react';
 // import { X } from 'lucide-react';
 // import { useTranslation } from 'react-i18next';
@@ -34,6 +35,7 @@
 // ];
 
 // export default function EditRoleModal({ isOpen, onClose, onSubmit, roleData }: EditRoleModalProps) {
+const { language } = useLanguage();
 //   const { t, i18n } = useTranslation();
 
 //   const {
@@ -72,7 +74,7 @@
 
 //   return (
 //     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-in fade-in duration-300">
-//       <div className="bg-white rounded-3xl w-full max-w-2xl max-h-[90vh] overflow-hidden flex flex-col shadow-2xl animate-in zoom-in-95 duration-300">
+//       <div className="bg-white rounded-3xl w-full max-w-2xl max-h-[90vh] overflow-hidden flex flex-col shadow-2xl animate-in zoom-in-95 duration-300" dir={language === 'ar' ? 'rtl' : 'ltr'}>
 //         {/* Header */}
 //         <div className="p-6 border-b border-gray-100 flex items-center justify-between bg-primary relative overflow-hidden">
 //           <div className="absolute inset-0 bg-gradient-to-r from-primary-dark/20 to-transparent pointer-events-none" />
@@ -140,8 +142,8 @@
 //                       className="peer hidden"
 //                     />
 //                     <div className={`py-3 px-4 rounded-xl border-2 text-center font-medium transition-all ${
-//                       status === 'active' 
-//                         ? 'peer-checked:border-green-500 peer-checked:bg-green-50 bg-gray-50 text-gray-600 peer-checked:text-green-700' 
+//                       status === 'active'
+//                         ? 'peer-checked:border-green-500 peer-checked:bg-green-50 bg-gray-50 text-gray-600 peer-checked:text-green-700'
 //                         : 'peer-checked:border-red-500 peer-checked:bg-red-50 bg-gray-50 text-gray-600 peer-checked:text-red-700'
 //                     }`}>
 //                       {t(status)}

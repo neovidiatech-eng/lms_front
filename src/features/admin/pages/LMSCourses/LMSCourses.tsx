@@ -13,6 +13,19 @@ import LevelsModal from '../../../../components/modals/ShowLevelModal';
 
 
 const subjectCategories = ['الكل', 'رياضيات', 'علوم', 'لغة عربية', 'لغة إنجليزية', 'فيزياء', 'كيمياء', 'أحياء', 'تاريخ', 'جغرافيا', 'تربية إسلامية'];
+const categoryTranslations: Record<string, string> = {
+  'الكل': 'all',
+  'رياضيات': 'cat_math',
+  'علوم': 'cat_science',
+  'لغة عربية': 'cat_arabic',
+  'لغة إنجليزية': 'cat_english',
+  'فيزياء': 'cat_physics',
+  'كيمياء': 'cat_chemistry',
+  'أحياء': 'cat_biology',
+  'تاريخ': 'cat_history',
+  'جغرافيا': 'cat_geography',
+  'تربية إسلامية': 'cat_religion',
+};
 const levelColorOptions: LevelColorOption[] = [
   { label: 'green', value: 'bg-green-100 text-green-700' },
   { label: 'blue', value: 'bg-blue-100 text-blue-700' },
@@ -312,7 +325,7 @@ export default function LMSCoursesPage() {
               className={`px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition-colors ${selectedCategory === cat ? 'btn-primary text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                 }`}
             >
-              {cat}
+              {cat === 'الكل' ? t('all') : t(categoryTranslations[cat] || cat)}
             </button>
           ))}
         </div>
@@ -408,7 +421,7 @@ export default function LMSCoursesPage() {
 
                   <div className="p-4">
                     <div className="flex items-center gap-2 mb-2">
-                      <span className="text-xs bg-primary-light text-white px-2 py-1 rounded-full font-medium">{course.category}</span>
+                      <span className="text-xs bg-primary-light text-white px-2 py-1 rounded-full font-medium">{t(categoryTranslations[course.category] || course.category)}</span>
                       {level && <span className={`text-xs px-2 py-1 rounded-full font-medium ${level.color}`}>{level.name}</span>}
                       {course.attachments.length > 0 && (
                         <span className="text-xs bg-gray-100 text-gray-500 px-2 py-1 rounded-full">{course.attachments.length} {t('file')}</span>
@@ -471,7 +484,7 @@ export default function LMSCoursesPage() {
                         </div>
                       </td>
                       <td className="px-4 py-3">
-                        <span className="text-xs bg-primary-light text-white px-2 py-1 rounded-full">{course.category}</span>
+                        <span className="text-xs bg-primary-light text-white px-2 py-1 rounded-full">{t(categoryTranslations[course.category] || course.category)}</span>
                       </td>
                       <td className="px-4 py-3">
                         {level && <span className={`text-xs px-2 py-1 rounded-full ${level.color}`}>{level.name}</span>}

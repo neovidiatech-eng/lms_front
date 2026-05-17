@@ -1,8 +1,10 @@
+import { useLanguage } from '../../contexts/LanguageContext';
 import { message } from "antd";
 import { Send, X } from "lucide-react";
 import { useState } from "react";
 
 export default function WithdrawalModal({ isOpen, onClose, balance, onWithdraw, isRtl, settings }: any) {
+  const { language } = useLanguage();
   const [amount, setAmount] = useState('');
 
   if (!isOpen) return null;
@@ -28,7 +30,7 @@ export default function WithdrawalModal({ isOpen, onClose, balance, onWithdraw, 
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[100] p-4 animate-fade-in">
-      <div className="bg-white rounded-2xl shadow-xl max-w-md w-full p-6 animate-scale-in">
+      <div className="bg-white rounded-2xl shadow-xl max-w-md w-full p-6 animate-scale-in" dir={language === 'ar' ? 'rtl' : 'ltr'}>
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-xl font-bold text-gray-900">{isRtl ? 'طلب سحب رصيد' : 'Withdrawal Request'}</h2>
           <button onClick={onClose} className="p-2 hover:bg-gray-100 rounded-lg transition-colors">

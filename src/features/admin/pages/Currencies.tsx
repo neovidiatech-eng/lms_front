@@ -119,7 +119,7 @@ export default function Currencies() {
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
         <div className="bg-white rounded-2xl border border-gray-200 p-5 flex items-center gap-4">
           <div className="w-12 h-12 rounded-xl bg-primary-light flex items-center justify-center flex-shrink-0">
-            <DollarSign className="w-6 h-6 text-primary" />
+            <DollarSign className="w-6 h-6 text-white" />
           </div>
           <div>
             <p className="text-sm text-gray-500">{text.totalCurrencies[language]}</p>

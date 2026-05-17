@@ -1,3 +1,4 @@
+import { useLanguage } from '../../contexts/LanguageContext';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { X } from 'lucide-react';
@@ -16,6 +17,7 @@ interface CreateRequestModalProps {
 }
 
 export default function CreateRequestModal({ isOpen, onClose, sessionId, sessionTitle }: CreateRequestModalProps) {
+  const { language } = useLanguage();
   const { i18n } = useTranslation();
   const { settings } = useSettings();
   const isRtl = i18n.language.split('-')[0] === 'ar';
@@ -66,8 +68,8 @@ export default function CreateRequestModal({ isOpen, onClose, sessionId, session
   ];
 
   return (
-    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-fade-in">
-      <div className="bg-white rounded-2xl shadow-xl w-full max-w-lg overflow-hidden animate-slide-up">
+    <div className="fixed inset-0 !mt-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-fade-in">
+      <div className="bg-white rounded-2xl shadow-xl w-full max-w-lg overflow-hidden animate-slide-up" dir={language === 'ar' ? 'rtl' : 'ltr'}>
         <div className="px-6 py-4 border-b border-gray-100 flex justify-between items-center" style={{ backgroundColor: settings.primaryColor }}>
           <h2 className="text-lg font-bold text-white">
             {isRtl ? 'تقديم طلب ' : 'Add Request'}

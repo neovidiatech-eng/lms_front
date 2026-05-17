@@ -17,10 +17,10 @@ interface AddAssignmentModalProps {
 
 export default function AddAssignmentModal({ isOpen, onClose, initialData }: AddAssignmentModalProps) {
   const { language, t } = useLanguage();
-  
+
   const { data: studentsData, isLoading: isLoadingStudents } = useGetStudents();
   const { data: subjectsData, isLoading: isLoadingSubjects } = useGetSubjects();
-  
+
   const createMutation = useCreateAssignment();
   const updateMutation = useUpdateAssignment();
 
@@ -107,7 +107,7 @@ export default function AddAssignmentModal({ isOpen, onClose, initialData }: Add
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+    <div className="fixed inset-0  !mt-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
       <div className="bg-white rounded-2xl shadow-xl max-w-2xl w-full max-h-[90vh]  overflow-y-auto no-scrollbar">
         <div className="sticky top-0 bg-primary border-b border-gray-200 px-6 py-4 flex items-center justify-between rounded-t-2xl">
           <h2 className="text-2xl font-bold text-white">{text.title[language]}</h2>

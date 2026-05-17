@@ -70,10 +70,10 @@ export default function TeacherRequests() {
 
   const handleConfirmAction = () => {
     if (!actionModal.requestId || !actionModal.type) return;
-    changeStatus({ 
-      id: actionModal.requestId, 
-      status: actionModal.type, 
-      adminNotes 
+    changeStatus({
+      id: actionModal.requestId,
+      status: actionModal.type,
+      adminNotes
     });
     setActionModal({ isOpen: false, type: null, requestId: null });
     setAdminNotes('');
@@ -123,7 +123,7 @@ export default function TeacherRequests() {
     <div className="p-6 space-y-6" dir={language === 'ar' ? 'rtl' : 'ltr'}>
       <div className="flex items-center justify-between flex-wrap gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">{language === 'ar' ? 'طلبات المعلمين' : 'Teacher Requests'}</h1>
+          <h1 className="text-3xl font-bold text-gray-900">{language === 'ar' ? 'طلبات المستخدمين' : 'Users Requests'}</h1>
           <p className="text-gray-500 text-sm mt-1">{language === 'ar' ? 'إجازات، استئذانات، وطلبات أخرى' : 'Leaves, permissions, and other requests'}</p>
         </div>
       </div>
@@ -234,7 +234,7 @@ export default function TeacherRequests() {
                       </span>
                     </td>
                     <td className="px-5 py-4 text-start">
-                        {request.requesterRole}
+                      {request.requesterRole}
                     </td>
                     <td className="px-5 py-4 text-start">
                       <p className="text-sm text-gray-900">{new Date(request.schedule.start_time).toLocaleDateString(language === 'ar' ? 'ar-EG' : 'en-US')}</p>
@@ -381,7 +381,7 @@ export default function TeacherRequests() {
           <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden" onClick={e => e.stopPropagation()}>
             <div className={`px-6 py-4 flex items-center justify-between border-b ${actionModal.type === 'approve' ? 'bg-green-50 border-green-100' : 'bg-red-50 border-red-100'}`}>
               <h3 className={`font-bold text-lg ${actionModal.type === 'approve' ? 'text-green-700' : 'text-red-700'}`}>
-                {actionModal.type === 'approve' 
+                {actionModal.type === 'approve'
                   ? (language === 'ar' ? 'قبول الطلب' : 'Approve Request')
                   : (language === 'ar' ? 'رفض الطلب' : 'Reject Request')
                 }
@@ -393,7 +393,7 @@ export default function TeacherRequests() {
             <div className="p-6 space-y-4">
               <div className="space-y-2">
                 <label className="text-sm font-medium text-gray-700 block text-start">
-                  {actionModal.type === 'approve' 
+                  {actionModal.type === 'approve'
                     ? (language === 'ar' ? 'ملاحظات الإدارة' : 'Admin Notes')
                     : (language === 'ar' ? 'سبب الرفض' : 'Rejection Reason')
                   }
@@ -415,9 +415,8 @@ export default function TeacherRequests() {
                 <button
                   onClick={handleConfirmAction}
                   disabled={isUpdating}
-                  className={`flex-1 py-3 px-4 text-white rounded-xl font-medium transition-colors flex items-center justify-center gap-2 ${
-                    actionModal.type === 'approve' ? 'bg-green-600 hover:bg-green-700' : 'bg-red-600 hover:bg-red-700'
-                  } disabled:opacity-50`}
+                  className={`flex-1 py-3 px-4 text-white rounded-xl font-medium transition-colors flex items-center justify-center gap-2 ${actionModal.type === 'approve' ? 'bg-green-600 hover:bg-green-700' : 'bg-red-600 hover:bg-red-700'
+                    } disabled:opacity-50`}
                 >
                   {isUpdating && <Loader2 className="w-4 h-4 animate-spin" />}
                   {actionModal.type === 'approve' ? (language === 'ar' ? 'تأكيد القبول' : 'Confirm Approval') : (language === 'ar' ? 'تأكيد الرفض' : 'Confirm Rejection')}

@@ -1,4 +1,4 @@
-import { Bell, Menu, Moon, Sun, User, LogOut, ChevronDown } from "lucide-react";
+import { Bell, Menu, User, LogOut, ChevronDown } from "lucide-react";
 import { useState } from "react";
 import { useLanguage } from "../../contexts/LanguageContext";
 import { useSettings } from "../../contexts/SettingsContext";
@@ -19,7 +19,6 @@ export default function Header({
 }: HeaderProps) {
   const { language, toggleLanguage, t } = useLanguage();
   const { settings } = useSettings();
-  const [isDarkMode, setIsDarkMode] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
   const [showProfileMenu, setShowProfileMenu] = useState(false);
   const isRtl = language === "ar";
@@ -108,16 +107,6 @@ export default function Header({
             className="px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
           >
             {language === "ar" ? "English" : "العربية"}
-          </button>
-          <button
-            onClick={() => setIsDarkMode(!isDarkMode)}
-            className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
-          >
-            {isDarkMode ? (
-              <Sun className="w-5 h-5 text-gray-600" />
-            ) : (
-              <Moon className="w-5 h-5 text-gray-600" />
-            )}
           </button>
           <div className="relative">
             <button

@@ -1,3 +1,4 @@
+import { useLanguage } from '../../contexts/LanguageContext';
 import {
   X,
   Calendar,
@@ -29,6 +30,7 @@ interface Props {
 }
 
 export default function ViewExamModal({ isOpen, onClose, exam }: Props) {
+  const { language } = useLanguage();
   if (!isOpen || !exam) return null;
 
   const formatDate = (date: string) => {
@@ -55,13 +57,13 @@ export default function ViewExamModal({ isOpen, onClose, exam }: Props) {
   if (!exam) {
     return (
       <div className="fixed inset-0 flex items-center justify-center bg-black/50">
-        <div className="bg-white p-6 rounded-xl">Loading...</div>
+        <div className="bg-white p-6 rounded-xl" dir={language === 'ar' ? 'rtl' : 'ltr'}>Loading...</div>
       </div>
     );
   }
   return (
     <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-3xl shadow-2xl w-full max-w-5xl max-h-[90vh] overflow-hidden flex flex-col">
+      <div className="bg-white rounded-3xl shadow-2xl w-full max-w-5xl max-h-[90vh] overflow-hidden flex flex-col" dir={language === 'ar' ? 'rtl' : 'ltr'}>
         {/* Header */}
         <div className="flex items-center justify-between p-6 bg-gradient-to-r from-primary to-indigo-600">
           <h2 className="text-2xl font-bold text-white">Exam Details</h2>

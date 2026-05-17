@@ -100,8 +100,8 @@ export default function SubscribePlanModal({ isOpen, onClose }: SubscribePlanMod
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-[9999] bg-white  overflow-y-auto no-scrollbar">
-      <div className="min-h-screen p-6 sm:p-12 relative flex flex-col">
+    <div className="fixed inset-0 !mt-0 z-[9999] bg-white  overflow-y-auto no-scrollbar">
+      <div className="min-h-screen p-6 sm:p-12 relative flex flex-col" dir={language === 'ar' ? 'rtl' : 'ltr'}>
         <button
           onClick={onClose}
           className="absolute top-6 left-6 p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-full transition-colors z-10"

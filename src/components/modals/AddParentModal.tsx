@@ -52,7 +52,7 @@ export default function AddParentModal({ onClose, onAdd }: AddParentModalProps) 
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+    <div className="fixed inset-0  !mt-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
       <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh]  overflow-y-auto no-scrollbar">
         <div className="sticky top-0 bg-primary px-6 py-4 flex items-center justify-between rounded-t-2xl z-10">
           <h2 className="text-2xl font-bold text-white">{text.title[language]}</h2>
@@ -125,8 +125,8 @@ export default function AddParentModal({ onClose, onAdd }: AddParentModalProps) 
                   type={showPassword ? "text" : "password"}
                   {...register("password")}
                   className={`w-full px-12 py-3 border rounded-xl text-start focus:outline-none focus:ring-2 transition-all ${errors.password
-                      ? "border-red-500 focus:ring-red-100"
-                      : "border-gray-200 focus:ring-purple-100 focus:border-purple-500"
+                    ? "border-red-500 focus:ring-red-100"
+                    : "border-gray-200 focus:ring-purple-100 focus:border-purple-500"
                     }`}
                   dir="ltr"
                 />

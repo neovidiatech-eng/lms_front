@@ -3,6 +3,8 @@ import { useLanguage } from '../../contexts/LanguageContext';
 import WhatsAppPhone from '../ui/WhatsAppPhone';
 import { useTranslation } from 'react-i18next';
 import { Student } from '../../types/student';
+import { useStudentById } from '../../features/admin/hooks/useStudents';
+import { useMemo } from 'react';
 
 interface ViewStudentModalProps {
   isOpen: boolean;
@@ -13,8 +15,33 @@ interface ViewStudentModalProps {
 export default function ViewStudentModal({ isOpen, onClose, studentData }: ViewStudentModalProps) {
   const { language } = useLanguage();
   const { t } = useTranslation();
+  const { data: fetchedData } = useStudentById(studentData?.id);
 
-  if (!isOpen || !studentData) return null;
+  const student = useMemo(() => {
+    if (!fetchedData) return studentData;
+
+    // Robust parsing of different API response formats
+    if ('id' in fetchedData && 'user' in fetchedData) {
+      return fetchedData as unknown as Student;
+    }
+
+    const resData = (fetchedData as any).data;
+    if (resData) {
+      if ('id' in resData && 'user' in resData) {
+        return resData as Student;
+      }
+      if (resData.student && 'id' in resData.student && 'user' in resData.student) {
+        return resData.student as Student;
+      }
+      if (Array.isArray(resData.studentsData) && resData.studentsData.length > 0) {
+        return resData.studentsData[0] as Student;
+      }
+    }
+
+    return studentData;
+  }, [fetchedData, studentData]);
+
+  if (!isOpen || !studentData || !student) return null;
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
@@ -33,18 +60,18 @@ export default function ViewStudentModal({ isOpen, onClose, studentData }: ViewS
         </div>
 
         {/* Content */}
-        <div className="flex-1  overflow-y-auto no-scrollbar p-6">
+        <div className="flex-1 overflow-y-auto no-scrollbar p-6">
           <div className="space-y-6">
             {/* Profile Section */}
             <div className="flex items-center gap-4 pb-6 border-b border-gray-200">
               <div className="w-20 h-20 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0">
                 <span className="text-2xl font-bold text-blue-600">
-                  {studentData.user.name.charAt(0).toUpperCase()}
+                  {student.user.name ? student.user.name.charAt(0).toUpperCase() : '?'}
                 </span>
               </div>
               <div className="text-start flex-1">
-                <h3 className="text-2xl font-bold text-gray-900 mb-1">{studentData.user.name}</h3>
-                <p className="text-gray-600">{studentData.user.email}</p>
+                <h3 className="text-2xl font-bold text-gray-900 mb-1">{student.user.name}</h3>
+                <p className="text-gray-600">{student.user.email}</p>
               </div>
             </div>
 
@@ -55,7 +82,7 @@ export default function ViewStudentModal({ isOpen, onClose, studentData }: ViewS
                 <label className="text-sm font-medium text-gray-500 block mb-1">
                   {language === 'ar' ? 'البريد الإلكتروني' : 'Email'}
                 </label>
-                <p className="text-base text-gray-900">{studentData.user.email}</p>
+                <p className="text-base text-gray-900">{student.user.email}</p>
               </div>
 
               {/* Phone */}
@@ -64,7 +91,7 @@ export default function ViewStudentModal({ isOpen, onClose, studentData }: ViewS
                   {language === 'ar' ? 'رقم الهاتف' : 'Phone Number'}
                 </label>
                 <WhatsAppPhone
-                  phone={`${studentData.user.code_country} ${studentData.user.phone}`}
+                  phone={`${student.user.code_country} ${student.user.phone}`}
                   className="text-base text-gray-900"
                 />
               </div>
@@ -75,7 +102,7 @@ export default function ViewStudentModal({ isOpen, onClose, studentData }: ViewS
                   {language === 'ar' ? 'الخطة' : 'Plan'}
                 </label>
                 <span className="inline-flex px-3 py-1 bg-purple-100 text-purple-700 rounded-full text-sm font-medium">
-                  {studentData.planId || t('noPlan')}
+                  {student.plan?.name_ar || student.plan?.name_en || student.planId || t('noPlan')}
                 </span>
               </div>
 
@@ -84,7 +111,7 @@ export default function ViewStudentModal({ isOpen, onClose, studentData }: ViewS
                 <label className="text-sm font-medium text-gray-500 block mb-1">
                   {language === 'ar' ? 'الدولة' : 'Country'}
                 </label>
-                <p className="text-base text-gray-900">{studentData.country}</p>
+                <p className="text-base text-gray-900">{student.country}</p>
               </div>
 
               {/* Status */}
@@ -93,32 +120,32 @@ export default function ViewStudentModal({ isOpen, onClose, studentData }: ViewS
                   {language === 'ar' ? 'الحالة' : 'Status'}
                 </label>
                 <span
-                  className={`inline-flex px-3 py-1 rounded-full text-sm font-medium ${studentData.status === 'active'
+                  className={`inline-flex px-3 py-1 rounded-full text-sm font-medium ${student.status === 'approved'
                     ? 'bg-green-100 text-green-700'
-                    : studentData.status === 'pending'
+                    : student.status === 'pending'
                       ? 'bg-orange-100 text-orange-700'
                       : 'bg-gray-100 text-gray-700'
                     }`}
                 >
-                  {studentData.status === 'active'
+                  {student.status === 'approved'
                     ? t('active')
-                    : studentData.status === 'pending'
+                    : student.status === 'pending'
                       ? t('pending')
                       : t('inactive')}
                 </span>
               </div>
 
-              {/* Hours Info */}
+              {/* Sessions Info */}
               <div className="text-start">
                 <label className="text-sm font-medium text-gray-500 block mb-1">
-                  {t('hours')}
+                  {language === 'ar' ? 'الجلسات' : 'Sessions'}
                 </label>
                 <div className="space-y-1">
                   <p className="text-base text-gray-900">
-                    {studentData.hours_attended} / {studentData.hours} {t('minutes')}
+                    {student.sessions_attended || 0} / {student.sessions || 0} {language === 'ar' ? 'جلسة' : 'sessions'}
                   </p>
                   <p className="text-xs text-gray-500">
-                    {language === 'ar' ? 'المتبقي:' : 'Remaining:'} {studentData.hours_remaining}
+                    {language === 'ar' ? 'المتبقي:' : 'Remaining:'} {student.sessions_remaining || 0}
                   </p>
                 </div>
               </div>
@@ -128,7 +155,7 @@ export default function ViewStudentModal({ isOpen, onClose, studentData }: ViewS
                 <label className="text-sm font-medium text-gray-500 block mb-1">
                   {language === 'ar' ? 'رقم الطالب' : 'Student ID'}
                 </label>
-                <p className="text-base text-gray-900 font-mono">{studentData.id}</p>
+                <p className="text-base text-gray-900 font-mono">{student.user.phone}</p>
               </div>
             </div>
           </div>

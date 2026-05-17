@@ -1,3 +1,4 @@
+import { useLanguage } from '../../contexts/LanguageContext';
 import { X, Trash2, Plus } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { Level, LevelColorOption } from '../../types/lmsCourses';
@@ -27,17 +28,18 @@ const LevelsModal = ({
     levelColorOptions,
     handleAddLevel,
 }: LevelsModalProps) => {
+    const { language } = useLanguage();
     const { t } = useTranslation();
 
     if (!isOpen) return null;
 
     return (
         <div
-            className="fixed inset-0 bg-black/60 z-[60] flex items-center justify-center p-4 backdrop-blur-sm"
+            className="fixed inset-0 !mt-0 bg-black/60 z-[60] flex items-center justify-center p-4 backdrop-blur-sm"
             onClick={onClose}
         >
             <div
-                className="bg-white rounded-2xl shadow-2xl max-w-sm w-full overflow-hidden flex flex-col animate-in fade-in zoom-in duration-200"
+                className="bg-white rounded-2xl shadow-2xl max-w-sm w-full overflow-hidden flex flex-col animate-in fade-in zoom-in duration-200" dir={language === 'ar' ? 'rtl' : 'ltr'}
                 onClick={e => e.stopPropagation()}
             >
                 {/* Header */}

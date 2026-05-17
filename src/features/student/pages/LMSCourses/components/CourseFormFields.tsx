@@ -1,10 +1,22 @@
 import React from 'react';
 import { Upload } from 'lucide-react';
 import { useFormContext, Controller } from 'react-hook-form';
-import CustomSelect from '../../../../../components/ui/CustomSelect';
 import { CourseFormFieldsProps } from '../../../../../types/lmsCourses';
+import CustomSelect from '../../../../../components/ui/CustomSelect';
 import { useLanguage } from '../../../../../contexts/LanguageContext';
 
+const categoryTranslations: Record<string, string> = {
+  'رياضيات': 'cat_math',
+  'علوم': 'cat_science',
+  'لغة عربية': 'cat_arabic',
+  'لغة إنجليزية': 'cat_english',
+  'فيزياء': 'cat_physics',
+  'كيمياء': 'cat_chemistry',
+  'أحياء': 'cat_biology',
+  'تاريخ': 'cat_history',
+  'جغرافيا': 'cat_geography',
+  'تربية إسلامية': 'cat_religion',
+};
 
 const CourseFormFields = ({
   levels,
@@ -28,14 +40,14 @@ const CourseFormFields = ({
   const handleAttachFiles = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files ?? []);
     const currentAttachments = watch('attachments') || [];
-    
+
     const newAttachments = files.map(file => ({
-      id: Math.random(), 
+      id: Math.random(),
       name: file.name,
       size: file.size,
       type: file.type,
       url: URL.createObjectURL(file),
-      file: file 
+      file: file
     }));
 
     setValue('attachments', [...currentAttachments, ...newAttachments]);
@@ -45,30 +57,41 @@ const CourseFormFields = ({
   return (
     <div className="space-y-4">
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1 text-right">
+        <label className="block text-sm font-medium text-gray-700 mb-1 text-start">
           {t('courseTitle')} <span className="text-red-500">*</span>
         </label>
         <input
           type="text"
           {...register("title")}
-          className={`w-full px-3 py-2.5 border rounded-lg text-sm focus:outline-none focus:ring-2 text-right ${
-            errors.title ? 'border-red-500 focus:ring-red-200' : 'border-gray-200 focus:ring-blue-500'
-          }`}
+          className={`w-full px-3 py-2.5 border rounded-lg text-sm focus:outline-none focus:ring-2 text-start ${errors.title ? 'border-red-500 focus:ring-red-200' : 'border-gray-200 focus:ring-blue-500'
+            }`}
           placeholder={t('enterCourseTitle')}
         />
-        {errors.title && <p className="text-red-500 text-xs mt-1 text-right">{errors.title.message as string}</p>}
+        {errors.title && <p className="text-red-500 text-xs mt-1 text-start">{errors.title.message as string}</p>}
       </div>
 
-      {/* الوصف */}
+      {/* video url */}
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1 text-right">{t('courseDescription')}</label>
+        <label className="block text-sm font-medium text-gray-700 mb-1 text-start">{t('VideoURL')}</label>
+        <input
+          type="text"
+          {...register("videoUrl")}
+          className={`w-full px-3 py-2.5 border rounded-lg text-sm focus:outline-none focus:ring-2 text-start ${errors.videoUrl ? 'border-red-500 focus:ring-red-200' : 'border-gray-200 focus:ring-blue-500'}`}
+          placeholder={t('enterVideoURL')}
+        />
+        {errors.videoUrl && <p className="text-red-500 text-xs mt-1 text-start">{errors.videoUrl.message as string}</p>}
+      </div>
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-1 text-start">{t('courseDescription')}</label>
         <textarea
           rows={3}
           {...register("description")}
-          className="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 text-right resize-none"
+          className="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 text-start resize-none"
           placeholder={t('enterCourseDescription')}
         />
+        {errors.description && <p className="text-red-500 text-xs mt-1 text-start">{errors.description.message as string}</p>}
       </div>
+
 
       <div className="grid grid-cols-2 gap-3">
         <Controller
@@ -81,7 +104,7 @@ const CourseFormFields = ({
               onChange={field.onChange}
               options={subjectCategories
                 .filter(c => c !== 'الكل' && c !== 'All')
-                .map(c => ({ value: c, label: c }))
+                .map(c => ({ value: c, label: t(categoryTranslations[c] || c) }))
               }
               className="h-[42px]"
               placeholder={t('selectSubject')}
@@ -108,7 +131,7 @@ const CourseFormFields = ({
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1 text-right">{t('thumbnailImage')}</label>
+        <label className="block text-sm font-medium text-gray-700 mb-1 text-start">{t('thumbnailImage')}</label>
         <div
           onClick={() => thumbnailInputRef.current?.click()}
           className="border-2 border-dashed border-gray-200 rounded-xl overflow-hidden cursor-pointer hover:border-blue-400 transition-colors"

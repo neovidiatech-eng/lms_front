@@ -1,6 +1,5 @@
 import { useState } from "react";
-import { Eye, EyeOff, ArrowLeft, ArrowRight } from "lucide-react";
-// import { GoogleLogin } from "@react-oauth/google";
+import { Eye, EyeOff, Mail, Lock, ArrowLeft, ArrowRight } from "lucide-react";
 import { useLanguage } from "../contexts/LanguageContext";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -40,16 +39,13 @@ export default function Login({ onLoginSuccess }: LoginProps) {
     try {
       const result = await login({ email, password });
 
-      // The API returns the token in result.data.accessToken or result.accessToken
       const token = result.data?.accessToken || result.accessToken;
       console.log(data);
 
       if (token) {
-        // Clear anything old
         localStorage.removeItem("token");
         sessionStorage.removeItem("token");
 
-        // Save to the appropriate storage
         if (data.rememberMe) {
           localStorage.setItem("token", token);
         } else {
@@ -61,8 +57,8 @@ export default function Login({ onLoginSuccess }: LoginProps) {
         onLoginSuccess();
         message.success(result.message || t('loginSuccess'));
 
-        const email = data.email;
-        localStorage.setItem("email", email);
+        const userEmail = data.email;
+        localStorage.setItem("email", userEmail);
 
         if (role === "teacher") {
           navigate("/teacher-dashboard");
@@ -71,75 +67,68 @@ export default function Login({ onLoginSuccess }: LoginProps) {
         } else {
           navigate("/dashboard");
         }
-
-
       }
       connectSocket(token);
     } catch (error) {
       console.error("Login failed:", error);
     }
   };
-  // const handleCreateAccount = () => {
-  //   navigate("/register");
-  // };
 
   const ArrowIcon = language === "ar" ? ArrowLeft : ArrowRight;
 
   return (
-    <div>
+    <div className="w-full">
       <div className="text-center mb-8">
-        <h1 className="text-xl font-bold text-gray-900 mb-2">{t("login")}</h1>
-        <p className="text-gray-600">{t("joinAcademy")}</p>
+        <h1 className="text-2xl font-bold text-slate-800 mb-2">{t("login")}</h1>
+        <p className="text-slate-500 text-sm font-medium">{t("joinAcademy")}</p>
       </div>
 
       {/* Form */}
-      <form onSubmit={handleFormSubmit(onSubmit)} className="space-y-4">
-        {" "}
+      <form onSubmit={handleFormSubmit(onSubmit)} className="space-y-6">
         {/* Email */}
-        <div>
-          <label className="block text-right text-gray-700 font-medium mb-2">
-            {t("email")}
+        <div className="text-start">
+          <label className="block text-sm font-semibold text-slate-700 mb-2">
+            {t("email")} *
           </label>
-          <input
-            type="email"
-            {...register("email")}
-            className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl 
-                focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary 
-                transition-all text-right hover:border-gray-300"
-            placeholder="admin@admin.com"
-            dir="ltr"
-          />
+          <div className="relative">
+            <input
+              type="email"
+              {...register("email")}
+              className={`w-full h-14 px-5 py-3 ${language === 'ar' ? 'pr-12 pl-4' : 'pl-12 pr-4'} bg-slate-50 border ${errors.email ? 'border-red-400 focus:ring-red-100' : 'border-slate-200 focus:border-primary focus:ring-primary/10'} rounded-2xl outline-none transition-all focus:ring-4 hover:border-slate-300 font-medium`}
+              placeholder="admin@example.com"
+              dir="ltr"
+            />
+            <div className={`absolute ${language === 'ar' ? 'right-4' : 'left-4'} top-1/2 -translate-y-1/2 text-slate-400`}>
+              <Mail className="w-5 h-5" />
+            </div>
+          </div>
           {errors.email && (
-            <p className="text-red-500 text-xs mt-1 text-right">
+            <p className="text-red-500 text-xs mt-1.5 font-semibold">
               {errors.email.message}
             </p>
           )}
         </div>
+
         {/* Password */}
-        <div>
-          <label className="block text-right text-gray-700 font-medium mb-2">
-            {t("password")}
+        <div className="text-start">
+          <label className="block text-sm font-semibold text-slate-700 mb-2">
+            {t("password")} *
           </label>
           <div className="relative">
             <input
               type={showPassword ? "text" : "password"}
               {...register("password")}
-              className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl 
-                  focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary 
-                  transition-all pr-12"
-              dir={language === "ar" ? "rtl" : "ltr"}
-              placeholder="********"
+              className={`w-full h-14 ${language === 'ar' ? 'pr-12 pl-12' : 'pl-12 pr-12'} bg-slate-50 border ${errors.password ? 'border-red-400 focus:ring-red-100' : 'border-slate-200 focus:border-primary focus:ring-primary/10'} rounded-2xl outline-none transition-all focus:ring-4 hover:border-slate-300 font-medium`}
+              dir="ltr"
+              placeholder="••••••••"
             />
-            {errors.password && (
-              <p className="text-red-500 text-xs mt-1 text-right">
-                {errors.password.message}
-              </p>
-            )}
-
+            <div className={`absolute ${language === 'ar' ? 'right-4' : 'left-4'} top-1/2 -translate-y-1/2 text-slate-400`}>
+              <Lock className="w-5 h-5" />
+            </div>
             <button
               type="button"
               onClick={() => setShowPassword(!showPassword)}
-              className={`absolute ${language === "ar" ? "left" : "right"}-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600`}
+              className={`absolute ${language === "ar" ? "left-4" : "right-4"} top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 focus:outline-none`}
             >
               {showPassword ? (
                 <EyeOff className="w-5 h-5" />
@@ -148,16 +137,16 @@ export default function Login({ onLoginSuccess }: LoginProps) {
               )}
             </button>
           </div>
+          {errors.password && (
+            <p className="text-red-500 text-xs mt-1.5 font-semibold">
+              {errors.password.message}
+            </p>
+          )}
         </div>
+
         {/* Remember + Forgot */}
         <div className="flex items-center justify-between">
-          <Link
-            to="/forgot-password"
-            className="text-sm text-primary hover:text-primary-dark font-medium transition-colors"
-          >
-            {t("forgotPassword")}
-          </Link>
-          <div className="flex items-center justify-between">
+          <div className="flex items-center">
             <Controller
               name="rememberMe"
               control={control}
@@ -170,54 +159,64 @@ export default function Login({ onLoginSuccess }: LoginProps) {
               )}
             />
           </div>
+          <Link
+            to="/forgot-password"
+            className="text-sm text-primary hover:text-primary-dark font-semibold transition-colors"
+          >
+            {t("forgotPassword")}
+          </Link>
         </div>
+
         {/* Login Button */}
         <button
           type="submit"
-          className="w-full bg-primary text-white rounded-xl py-4 px-6 font-semibold 
-              hover:bg-primary-dark transition-all duration-200 flex items-center justify-center gap-2
-              shadow-md hover:shadow-lg active:scale-[0.98]"
+          className="w-full h-14 bg-gradient-to-r from-primary to-primary-dark text-white rounded-2xl font-bold hover:shadow-lg hover:shadow-primary/20 transition-all duration-300 flex items-center justify-center gap-2 active:scale-[0.99] border-none outline-none cursor-pointer text-base"
         >
           <span>{t("login")}</span>
-          <ArrowIcon className="w-5 h-5" />
+          <ArrowIcon className="w-5 h-5 animate-pulse" />
         </button>
-        <p className="text-center text-gray-500">{t("or")}</p>
-        <div className="space-y-4 mb-6">
-          <div className="flex justify-center w-full">
-            <GoogleLogin
-              onSuccess={async (credentialResponse) => {
-                const idToken = credentialResponse.credential;
-                console.log(idToken);
-                if (idToken) {
-                  try {
-                    const result = await googleLogin({ idToken, provider: "google" });
-                    const token = result.data?.accessToken || result.accessToken;
 
-                    if (token) {
-                      localStorage.setItem("token", token);
-                      connectSocket(token);
-                      onLoginSuccess();
-                      message.success(result.message || t('loginSuccess'));
-                      navigate("/dashboard");
-                    }
-                  } catch (error) {
-                    console.error("Google Login failed:", error);
-                  }
-                }
-              }}
-              onError={() => {
-                console.log("Login Failed");
-              }}
-              useOneTap
-              theme="outline"
-              size="large"
-              shape="circle"
-              width="384px"
-            />
+        {/* Divider */}
+        <div className="relative flex items-center justify-center my-6">
+          <div className="absolute inset-0 flex items-center">
+            <div className="w-full border-t border-slate-100"></div>
           </div>
+          <span className="relative px-4 text-xs font-bold text-slate-400 bg-white uppercase tracking-wider">{t("or")}</span>
+        </div>
+
+        {/* Google Login Wrapper */}
+        <div className="flex justify-center w-full">
+          <GoogleLogin
+            onSuccess={async (credentialResponse) => {
+              const idToken = credentialResponse.credential;
+              if (idToken) {
+                try {
+                  const result = await googleLogin({ idToken, provider: "google" });
+                  const token = result.data?.accessToken || result.accessToken;
+
+                  if (token) {
+                    localStorage.setItem("token", token);
+                    connectSocket(token);
+                    onLoginSuccess();
+                    message.success(result.message || t('loginSuccess'));
+                    navigate("/dashboard");
+                  }
+                } catch (error) {
+                  console.error("Google Login failed:", error);
+                }
+              }
+            }}
+            onError={() => {
+              console.log("Login Failed");
+            }}
+            useOneTap
+            theme="outline"
+            size="large"
+            shape="circle"
+            width="384px"
+          />
         </div>
       </form>
     </div>
   );
 }
-

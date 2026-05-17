@@ -1,3 +1,4 @@
+import { useLanguage } from '../../contexts/LanguageContext';
 import { X } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useForm } from 'react-hook-form';
@@ -20,6 +21,7 @@ export default function AddRoleModal({
     initialData,
     isLoading,
 }: AddRoleModalProps) {
+  const { language } = useLanguage();
     const { t } = useTranslation();
 
     const isEdit = !!initialData;
@@ -58,8 +60,8 @@ export default function AddRoleModal({
     if (!isOpen) return null;
 
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
-            <div className="bg-white rounded-3xl w-full max-w-2xl overflow-hidden shadow-2xl flex flex-col">
+        <div className="fixed inset-0 !mt-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+            <div className="bg-white rounded-3xl w-full max-w-2xl overflow-hidden shadow-2xl flex flex-col" dir={language === 'ar' ? 'rtl' : 'ltr'}>
 
                 {/* Header */}
                 <div className="p-6 flex justify-between items-center bg-primary text-white">
