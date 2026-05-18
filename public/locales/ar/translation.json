@@ -135,7 +135,7 @@
   "registeredSuccess": "تم التسجيل بنجاح",
   "sessionsTitle": "الحصص",
   "searchSessionsPlaceholder": "بحث عن الطالب أو المعلم أو المادة...",
-  "singleSession": "حصة واحدة",
+  "singleSession": " اضافة حصة",
   "multipleSessions": "حصص متعددة",
   "filters": "تصفية",
   "sessionTitleLabel": "العنوان",
@@ -387,7 +387,7 @@
   "full": "حصة كاملة",
   "half": "نصف حصة",
   "notificationTime": "وقت التنبيه",
-  "addSingleSession_title": "إضافة حصة واحدة",
+  "addSingleSession_title": "إضافة حصة ",
   "selectStudent": "اختر الطالب",
   "selectTeacher": "اختر المعلم",
   "teacherQuestion": "اختر المعلم أولاً",
@@ -412,5 +412,6 @@
   "loginSuccess": "تم تسجيل الدخول بنجاح",
   "verifySuccess": "تم التحقق من الحساب بنجاح",
   "codeSentSuccess": "تم إرسال رمز التحقق بنجاح",
-  "totalRoles": "إجمالي الأدوار"
+  "totalRoles": "إجمالي الأدوار",
+  "zoomLink": "رابط زووم"
 }

@@ -230,6 +230,20 @@ export default function AddTeacherModal({ isOpen, onClose, onSubmit }: AddTeache
               />
             </div>
 
+            {/* Row 5: Zoom Link */}
+          <div className="grid grid-cols-1 md:grid-cols-1">
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            {t('zoomLink')}
+          </label>
+          <input
+            type="text"
+            placeholder="https://zoom.us/j/123456789"
+            {...register('meeting_link')}
+            className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary text-start"
+          />
+          {errors.meeting_link && <p className="text-red-500 text-xs mt-1">{errors.meeting_link.message}</p>}
+            </div>
+
             {/* Subjects */}
             <div className="text-start">
               <label className="block text-sm font-medium text-gray-700 mb-3">

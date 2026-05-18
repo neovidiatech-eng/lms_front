@@ -136,7 +136,7 @@
   "registeredSuccess": "Registered successfully",
   "sessionsTitle": "Sessions",
   "searchSessionsPlaceholder": "Search for student, teacher or subject...",
-  "singleSession": "Single Session",
+  "singleSession": "Add Session",
   "multipleSessions": "Multiple Sessions",
   "filters": "Filters",
   "sessionTitleLabel": "Title",
@@ -382,7 +382,7 @@
   "full": "Full Session",
   "half": "Half Session",
   "notificationTime": "Notification Time",
-  "addSingleSession_title": "Add Single Session",
+  "addSingleSession_title": "Add Session",
   "selectStudent": "Select Student",
   "selectTeacher": "Select Teacher",
   "teacherQuestion": "Select Teacher First",
@@ -412,5 +412,6 @@
   "loginSuccess": "Logged in successfully",
   "verifySuccess": "Account verified successfully",
   "codeSentSuccess": "Verification code sent successfully",
-  "totalRoles": "Total Roles"
+  "totalRoles": "Total Roles",
+  "zoomLink": "Zoom Link"
 }

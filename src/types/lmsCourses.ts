@@ -41,8 +41,7 @@ export interface LevelColorOption {
 }
 
 export interface CourseFormFieldsProps {
-  levels: Level[];
-  subjectCategories: string[];
+  subjectCategories: { id: string; name: string }[];
   thumbnailInputRef: React.RefObject<HTMLInputElement>;
   attachInputRef: React.RefObject<HTMLInputElement>;
 }

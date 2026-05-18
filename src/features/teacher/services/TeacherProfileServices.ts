@@ -15,3 +15,8 @@ export const withdrawRequest = async (data: { amount: number }) => {
     const response = await api.post(`/withdrawals/request`, data);
     return response.data;
 }
+
+export const updateMeetingLink = async (data: { meeting_link: string }) => {
+    const response = await api.patch("/teacher/profile/meeting-link", data);
+    return response.data;
+}

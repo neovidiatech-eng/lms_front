@@ -5,9 +5,10 @@ import {
   Mail, Phone, MapPin,
   Clock, Wallet, ArrowUpRight,
   BookOpen, Users, FileText,
+  Video, Check, ExternalLink, Edit2, DollarSign
 } from 'lucide-react';
 import { Spin } from 'antd';
-import { useTeacherProfile, useWithdrawals, useWithdrawRequest } from '../hooks/useTeacherProfile';
+import { useTeacherProfile, useWithdrawals, useWithdrawRequest, useUpdateMeetingLink } from '../hooks/useTeacherProfile';
 import { useCurrencyById } from '../../admin/hooks/useCurrency';
 import WithdrawalModal from '../../../components/modals/WithdrawModal';
 
@@ -23,6 +24,11 @@ export default function TeacherProfile() {
   const { data: response, isLoading, error } = useTeacherProfile();
   const { data: withdrawalsResponse, isLoading: isWithdrawalsLoading } = useWithdrawals();
   const { mutateAsync } = useWithdrawRequest();
+  const updateMeetingMutation = useUpdateMeetingLink();
+
+  const [isEditingMeeting, setIsEditingMeeting] = useState(false);
+  const [newMeetingLink, setNewMeetingLink] = useState('');
+  // const [isCopied, setIsCopied] = useState(false);
 
   const { data: currency } = useCurrencyById(response?.data?.teacher?.wallet?.[0]?.currencyId);
 
@@ -87,6 +93,28 @@ export default function TeacherProfile() {
     setIsWithdrawModalOpen(false);
   };
 
+  const handleStartEdit = () => {
+    setNewMeetingLink(teacher.meeting_link || '');
+    setIsEditingMeeting(true);
+  };
+
+  const handleSaveMeeting = async () => {
+    try {
+      await updateMeetingMutation.mutateAsync({ meeting_link: newMeetingLink });
+      setIsEditingMeeting(false);
+    } catch (e) {
+      // Handled by hook onError
+    }
+  };
+
+  // const handleCopyLink = () => {
+  //   if (teacher.meeting_link) {
+  //     navigator.clipboard.writeText(teacher.meeting_link);
+  //     setIsCopied(true);
+  //     setTimeout(() => setIsCopied(false), 2000);
+  //   }
+  // };
+
 
   return (
     <div className="space-y-6 animate-fade-in pb-10" dir={isRtl ? 'rtl' : 'ltr'}>
@@ -96,65 +124,163 @@ export default function TeacherProfile() {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
-        {/* Teacher Personal Info Card */}
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden lg:col-span-1">
-          <div
-            className="h-24 bg-gradient-to-r"
-            style={{ backgroundImage: `linear-gradient(to right, ${settings.primaryColor}, ${settings.accentColor})` }}
-          />
-          <div className="px-6 pb-6 relative">
-            <div className="flex justify-center -mt-12 mb-4">
-              <div className="w-24 h-24 bg-white rounded-full p-2 shadow-md">
-                <div
-                  className="w-full h-full rounded-full flex items-center justify-center text-white text-3xl font-bold"
-                  style={{ backgroundColor: settings.primaryColor }}
-                >
-                  {teacherInfo.name.includes('أ. ') ? teacherInfo.name.split('أ. ')[1].charAt(0) : teacherInfo.name.charAt(0)}
+        {/* Left Column */}
+        <div className="lg:col-span-1 space-y-6">
+          {/* Teacher Personal Info Card */}
+          <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+            <div
+              className="h-24 bg-gradient-to-r"
+              style={{ backgroundImage: `linear-gradient(to right, ${settings.primaryColor}, ${settings.accentColor})` }}
+            />
+            <div className="px-6 pb-6 relative">
+              <div className="flex justify-center -mt-12 mb-4">
+                <div className="w-24 h-24 bg-white rounded-full p-2 shadow-md">
+                  <div
+                    className="w-full h-full rounded-full flex items-center justify-center text-white text-3xl font-bold"
+                    style={{ backgroundColor: settings.primaryColor }}
+                  >
+                    {teacherInfo.name.includes('أ. ') ? teacherInfo.name.split('أ. ')[1].charAt(0) : teacherInfo.name.charAt(0)}
+                  </div>
+                </div>
+              </div>
+
+              <div className="text-center mb-6">
+                <h2 className="text-xl font-bold text-gray-900">{teacherInfo.name}</h2>
+                <p className="text-sm text-gray-500 mt-1">{teacherInfo.title}</p>
+              </div>
+
+              <div className="space-y-4 pt-4 border-t border-gray-50">
+                <div className="flex items-center gap-3 text-gray-700">
+                  <DollarSign className="w-5 h-5 text-gray-400" />
+                  <span className="text-sm font-medium">{teacherInfo.hourPrice}$</span>
+                </div>
+                <div className="flex items-center gap-3 text-gray-700">
+                  <Mail className="w-5 h-5 text-gray-400" />
+                  <span className="text-sm truncate">{teacherInfo.email}</span>
+                </div>
+                <div className="flex items-center gap-3 text-gray-700">
+                  <Phone className="w-5 h-5 text-gray-400" />
+                  <span className="text-sm" dir="ltr">
+                    {(() => {
+                      const parts = teacherInfo.phone.split(' ').filter(Boolean);
+                      if (parts.length > 1) {
+                        const code = parts[0];
+                        let number = parts.slice(1).join(' ');
+                        if (number.startsWith(code)) {
+                          number = number.slice(code.length);
+                        }
+                        return (
+                          <>
+                            <span className="text-gray-400 font-medium">{code}</span>
+                            <span className="ml-1 text-gray-900 font-semibold">{number}</span>
+                          </>
+                        );
+                      }
+                      return teacherInfo.phone;
+                    })()}
+                  </span>
+                </div>
+                <div className="flex items-center gap-3 text-gray-700">
+                  <MapPin className="w-5 h-5 text-gray-400" />
+                  <span className="text-sm">{isRtl ? "مصر" : "Egypt"}</span>
                 </div>
               </div>
             </div>
+          </div>
 
-            <div className="text-center mb-6">
-              <h2 className="text-xl font-bold text-gray-900">{teacherInfo.name}</h2>
-              <p className="text-sm text-gray-500 mt-1">{teacherInfo.title}</p>
+          {/* Meeting Link Card */}
+          <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 space-y-4">
+            <div className="flex items-center justify-between">
+              <h3 className="text-lg font-bold text-gray-900 flex items-center gap-2">
+                <Video className="w-5 h-5" style={{ color: settings.primaryColor }} />
+                {isRtl ? 'غرفة الاجتماعات' : 'Meeting Room'}
+              </h3>
+              {!isEditingMeeting && (
+                <button
+                  onClick={handleStartEdit}
+                  className="text-xs font-bold flex items-center gap-1 hover:opacity-85 transition-opacity"
+                  style={{ color: settings.primaryColor }}
+                >
+                  <Edit2 className="w-3.5 h-3.5" />
+                  {isRtl ? 'تعديل' : 'Edit'}
+                </button>
+              )}
             </div>
 
-            <div className="space-y-4 pt-4 border-t border-gray-50">
-              {/* <div className="flex items-center gap-3 text-gray-700">
-                <DollarSign className="w-5 h-5 text-gray-400" />
-                <span className="text-sm font-medium">{teacherInfo.hourPrice}$</span>
-              </div> */}
-              <div className="flex items-center gap-3 text-gray-700">
-                <Mail className="w-5 h-5 text-gray-400" />
-                <span className="text-sm truncate">{teacherInfo.email}</span>
+            {isEditingMeeting ? (
+              <div className="space-y-3">
+                <p className="text-xs text-gray-500">
+                  {isRtl
+                    ? 'أدخل رابط الاجتماع الخاص بك (مثل Zoom أو Google Meet)'
+                    : 'Enter your meeting link (e.g. Zoom or Google Meet)'}
+                </p>
+                <input
+                  type="text"
+                  value={newMeetingLink}
+                  onChange={(e) => setNewMeetingLink(e.target.value)}
+                  placeholder="https://zoom.us/j/..."
+                  className="w-full px-4 py-2 text-sm border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent text-start"
+                  dir="ltr"
+                />
+                <div className="flex justify-end gap-2 pt-1">
+                  <button
+                    onClick={() => setIsEditingMeeting(false)}
+                    disabled={updateMeetingMutation.isPending}
+                    className="px-3 py-1.5 bg-gray-50 hover:bg-gray-100 text-gray-700 text-xs font-bold rounded-lg border border-gray-200 transition-colors"
+                  >
+                    {isRtl ? 'إلغاء' : 'Cancel'}
+                  </button>
+                  <button
+                    onClick={handleSaveMeeting}
+                    disabled={updateMeetingMutation.isPending}
+                    className="px-3 py-1.5 text-white text-xs font-bold rounded-lg transition-all hover:opacity-90 flex items-center gap-1 shadow-sm"
+                    style={{ backgroundColor: settings.primaryColor }}
+                  >
+                    {updateMeetingMutation.isPending ? (
+                      <Spin size="small" className="text-white" />
+                    ) : (
+                      <Check className="w-3.5 h-3.5" />
+                    )}
+                    {isRtl ? 'حفظ' : 'Save'}
+                  </button>
+                </div>
               </div>
-              <div className="flex items-center gap-3 text-gray-700">
-                <Phone className="w-5 h-5 text-gray-400" />
-                <span className="text-sm" dir="ltr">
-                  {(() => {
-                    const parts = teacherInfo.phone.split(' ').filter(Boolean);
-                    if (parts.length > 1) {
-                      const code = parts[0];
-                      let number = parts.slice(1).join(' ');
-                      if (number.startsWith(code)) {
-                        number = number.slice(code.length);
-                      }
-                      return (
-                        <>
-                          <span className="text-gray-400 font-medium">{code}</span>
-                          <span className="ml-1 text-gray-900 font-semibold">{number}</span>
-                        </>
-                      );
-                    }
-                    return teacherInfo.phone;
-                  })()}
-                </span>
+            ) : (
+              <div className="space-y-4">
+                {teacher.meeting_link ? (
+                  <>
+                    <div className="p-3 bg-gray-50 rounded-xl border border-gray-100">
+                      <p className="text-xs text-gray-400 mb-1 text-start">{isRtl ? 'الرابط الحالي' : 'Current Link'}</p>
+                      <a
+                        href={teacher.meeting_link}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-sm font-semibold truncate block text-blue-600 hover:underline text-start items-center gap-1"
+                        dir="ltr"
+                      >
+                        <ExternalLink className="w-3.5 h-3.5 flex-shrink-0" />
+                        <span className="truncate">{teacher.meeting_link}</span>
+                      </a>
+                    </div>
+                   
+                  </>
+                ) : (
+                  <div className="text-center py-6">
+                    <Video className="w-8 h-8 text-gray-300 mx-auto mb-2" />
+                    <p className="text-sm text-gray-500">
+                      {isRtl ? 'لم تقم بإضافة رابط اجتماع بعد.' : 'You haven\'t added a meeting link yet.'}
+                    </p>
+                    <button
+                      onClick={handleStartEdit}
+                      className="mt-3 text-xs font-bold hover:underline"
+                      style={{ color: settings.primaryColor }}
+                    >
+                      {isRtl ? '+ إضافة رابط اجتماع' : '+ Add Meeting Link'}
+                    </button>
+                  </div>
+                )}
               </div>
-              <div className="flex items-center gap-3 text-gray-700">
-                <MapPin className="w-5 h-5 text-gray-400" />
-                <span className="text-sm">{isRtl ? "مصر" : "Egypt"}</span>
-              </div>
-            </div>
+            )}
           </div>
         </div>
 

@@ -1,489 +1,608 @@
-import { X } from "lucide-react";
-import { useEffect, useMemo } from "react";
-import { useLanguage } from "../../contexts/LanguageContext";
-import CustomSelect from "../ui/CustomSelect";
-import DatePickerField from "../ui/DatePickerField";
+import { useState, useMemo, useEffect } from 'react';
 import {
-  SessionFormData,
+  X,
+  Search,
+  Video,
+  AlertCircle,
+  Calendar,
+  MonitorPlay,
+  AlertTriangle,
+  BookOpen,
+  Layers,
+} from 'lucide-react';
+
+import { useForm, Controller } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+
+import {
   getSessionSchema,
-} from "../../lib/schemas/SessionSchema";
-import { useStudents } from "../../features/admin/hooks/useStudents";
-import { useTeacher } from "../../features/admin/hooks/useTeacher";
-import { Controller, useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import CustomTimePicker from "../ui/CustomTime";
+  getMultipleSessionsSchema,
+  SessionFormData,
+  MultipleSessionsPayload,
+  MultipleSessionsFormData,
+} from '../../lib/schemas/SessionSchema';
+
+import CustomSelect from '../ui/CustomSelect';
+
+import { useStudents } from '../../features/admin/hooks/useStudents';
+import { useTeacher } from '../../features/admin/hooks/useTeacher';
+
+import { Student } from '../../types/student';
+import { Teacher, DayOfWeek } from '../../types/scheduales';
+
+import { useTranslation } from 'react-i18next';
+
+// Sub-components
+import StudentPlanCard from './add-session/StudentPlanCard';
+import SchedulingSettings from './add-session/SchedulingSettings';
+import TypeSelector from './add-session/TypeSelector';
+import SessionPreview from './add-session/SessionPreview';
+import ModalStyles from './add-session/ModalStyles';
+import { useSubjects } from '../../features/admin/hooks/useSubjects';
+import { Subject } from '../../types/subject';
 
 interface AddSessionModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onAdd: (session: SessionFormData) => void;
+  onAdd: (data: any) => void;
 }
+
+const DAYS: DayOfWeek[] = [
+  'Monday',
+  'Tuesday',
+  'Wednesday',
+  'Thursday',
+  'Friday',
+  'Saturday',
+  'Sunday',
+];
 
 export default function AddSessionModal({
   isOpen,
   onClose,
   onAdd,
 }: AddSessionModalProps) {
-  const { language, t } = useLanguage();
+  const { t, i18n } = useTranslation();
+
+  const language = i18n.language.split('-')[0];
+
+  const [schedulingMode, setSchedulingMode] = useState<'single' | 'batch'>(
+    'single'
+  );
+
+  const { data: students } = useStudents();
+  const { data: instructors } = useTeacher();
+  const { data: subjectData } = useSubjects();
+
+  const singleSchema = getSessionSchema(t);
+  const batchSchema = getMultipleSessionsSchema(t);
+
+  const subjects: Subject[] = subjectData?.subjects || [];
+
+  const subjectOptions = subjects.map((subject: Subject) => ({
+    value: String(subject.id),
+    label: language === 'ar' ? subject.name_ar : (subject.name_en || subject.name_ar),
+  }));
 
   const {
     register,
     handleSubmit,
     control,
     watch,
-    setValue,
     reset,
+    setValue,
     formState: { errors },
-  } = useForm<SessionFormData>({
-    resolver: zodResolver(getSessionSchema(t)),
+  } = useForm<any>({
+    resolver: zodResolver(
+      schedulingMode === 'single' ? singleSchema : batchSchema
+    ),
     defaultValues: {
-      student: "",
-      teacher: "",
-      subject: "",
-      title: "",
-      description: "",
-      type: "full",
-      notification_Time: "10",
-      sessionDate: "",
-      duration: "",
-      startTime: "",
-      endTime: "",
-      meetingLink: "",
-      notes: "",
+      type: 'full',
+      notification_Time: '10',
+      student: '',
+      teacher: '',
+      subject: '',
+      title: '',
+      description: '',
+      notes: '',
+      platform: 'zoom',
+      meetingLink: '',
+      sessionDate: (() => {
+        const tom = new Date();
+        tom.setDate(tom.getDate() + 1);
+        return tom.toISOString().split('T')[0];
+      })(),
+      batchStartDate: (() => {
+        const tom = new Date();
+        tom.setDate(tom.getDate() + 1);
+        return tom.toISOString().split('T')[0];
+      })(),
+      batchEndDate: (() => {
+        const nextMonth = new Date();
+        nextMonth.setDate(nextMonth.getDate() + 29);
+        return nextMonth.toISOString().split('T')[0];
+      })(),
+      startTime: '14:00',
+      endTime: '15:00',
+      duration: '60',
+      monthYear: new Date().toISOString().substring(0, 7),
+      selectedDays: [],
+      language: language === 'ar' ? 'ar' : 'en',
     },
   });
 
-  const selectedTeacher = watch("teacher");
-  const selectedStudent = watch("student");
-  const selectedDurationId = watch("duration");
-  const startTimeVal = watch("startTime");
+  const watchTitle = watch('title');
+  const watchSubject = watch('subject');
+  const watchStudent = watch('student');
+  const watchType = watch('type') as 'full' | 'half';
+  const watchStartTime = watch('startTime');
+
+  const watchSelectedDays =
+    (watch('selectedDays') as DayOfWeek[]) || [];
 
   useEffect(() => {
-    if (!isOpen) reset();
-  }, [isOpen, reset]);
+    if (!watchStartTime || !watchType) return;
 
-  const { data: studentsData } = useStudents();
-  const { data: teachersData } = useTeacher();
+    const durationMinutes = watchType === 'full' ? 60 : 30;
 
-  const students = studentsData?.data?.studentsData || [];
-  const teachers = teachersData?.teachers || [];
+    setValue('duration', String(durationMinutes));
 
-  const studentOptions = students.map((s) => ({
-    value: s.id,
-    label: s.user.name,
-  }));
-  const teacherOptions = teachers.map((t) => ({
-    value: t.id,
-    label: t.user.name,
-  }));
+    const [hours, minutes] = watchStartTime
+      .split(':')
+      .map(Number);
 
-  const durationPackages: Record<string, { name: string; duration: number }> = {
-    "1": { name: "30 دقيقة", duration: 30 },
-    "2": { name: "45 دقيقة", duration: 45 },
-    "3": { name: "60 دقيقة", duration: 60 },
+    const date = new Date();
+
+    date.setHours(hours, minutes, 0, 0);
+
+    date.setMinutes(date.getMinutes() + durationMinutes);
+
+    const endHours = String(date.getHours()).padStart(2, '0');
+
+    const endMinutes = String(date.getMinutes()).padStart(2, '0');
+
+    setValue('endTime', `${endHours}:${endMinutes}`);
+  }, [watchStartTime, watchType, setValue]);
+
+  const selectedStudentData = useMemo(() => {
+    if (!watchStudent || !students?.data?.studentsData) return null;
+
+    return (
+      students.data.studentsData.find(
+        (s: Student) => String(s.id) === String(watchStudent)
+      ) || null
+    );
+  }, [watchStudent, students]);
+
+  const studentPlanInfo = useMemo(() => {
+    if (!selectedStudentData) return null;
+
+    return {
+      planName: (language === 'ar' ? selectedStudentData.plan?.name_ar : selectedStudentData.plan?.name_en) || null,
+      totalSessions: selectedStudentData.sessions || 0,
+      sessionsAttended:
+        selectedStudentData.sessions_attended || 0,
+      sessionsRemaining:
+        selectedStudentData.sessions_remaining || 0,
+    };
+  }, [selectedStudentData]);
+
+  const selectedSubject = useMemo(() => {
+    return (
+      subjects.find(
+        (subject: Subject) =>
+          String(subject.id) === String(watchSubject)
+      ) || null
+    );
+  }, [subjects, watchSubject]);
+
+  const previewSessions = useMemo(() => {
+    if (schedulingMode === 'single') {
+      const singleDate = watch('sessionDate');
+      if (!singleDate) return [];
+      return [
+        {
+          date: singleDate,
+          available: true,
+        },
+      ];
+    }
+
+    const sessions: {
+      date: string;
+      available: boolean;
+    }[] = [];
+
+    const startDateStr = watch('batchStartDate');
+    const endDateStr = watch('batchEndDate');
+
+    if (!startDateStr || !endDateStr || !watchSelectedDays.length) return sessions;
+
+    const startDate = new Date(startDateStr);
+    const endDate = new Date(endDateStr);
+
+    const tomorrow = new Date();
+    tomorrow.setHours(0, 0, 0, 0);
+    tomorrow.setDate(tomorrow.getDate() + 1);
+
+    const currentDate = startDate < tomorrow ? new Date(tomorrow) : new Date(startDate);
+
+    while (currentDate <= endDate) {
+      const currentDay = currentDate.toLocaleDateString('en-US', {
+        weekday: 'long',
+      }) as DayOfWeek;
+
+      if (watchSelectedDays.includes(currentDay)) {
+        const y = currentDate.getFullYear();
+        const m = String(currentDate.getMonth() + 1).padStart(2, '0');
+        const d = String(currentDate.getDate()).padStart(2, '0');
+
+        sessions.push({
+          date: `${y}-${m}-${d}`,
+          available: true,
+        });
+      }
+
+      currentDate.setDate(currentDate.getDate() + 1);
+    }
+
+    return sessions;
+  }, [
+    schedulingMode,
+    watchSelectedDays,
+    watch('batchStartDate'),
+    watch('batchEndDate'),
+    watch('sessionDate'),
+  ]);
+
+  const formatDateCard = (date: string) => {
+    if (!date) {
+      return {
+        month: 'N/A',
+        day: 0,
+      };
+    }
+    // Handle both YYYY-MM-DD and ISO strings safely
+    const datePart = date.includes('T') ? date.split('T')[0] : date;
+    const [year, month, day] = datePart.split('-').map(Number);
+    if (isNaN(year) || isNaN(month) || isNaN(day)) {
+      return {
+        month: 'N/A',
+        day: 0,
+      };
+    }
+    const d = new Date(year, month - 1, day);
+
+    return {
+      month: d.toLocaleDateString('en-US', {
+        month: 'short',
+      }),
+      day: d.getDate(),
+    };
   };
 
-  useEffect(() => {
-    if (selectedDurationId && startTimeVal) {
-      const durationMins = durationPackages[selectedDurationId]?.duration || 0;
-      if (durationMins > 0) {
-        const [hours, minutes] = startTimeVal.split(":").map(Number);
-        if (!isNaN(hours) && !isNaN(minutes)) {
-          const date = new Date();
-          date.setHours(hours, minutes + durationMins, 0, 0);
-          const endH = String(date.getHours()).padStart(2, "0");
-          const endM = String(date.getMinutes()).padStart(2, "0");
-          setValue("endTime", `${endH}:${endM}`, { shouldValidate: true });
-        }
-      }
+  const onSubmit = (data: any) => {
+    if (schedulingMode === 'single') {
+      onAdd(data as SessionFormData);
+    } else {
+      const batchData: MultipleSessionsPayload = {
+        formData: data as MultipleSessionsFormData,
+        selectedDays: watchSelectedDays,
+        sessions: previewSessions.map((session) => ({
+          date: session.date,
+          day: new Date(session.date + 'T00:00:00').toLocaleDateString(
+            'en-US',
+            {
+              weekday: 'long',
+            }
+          ) as DayOfWeek,
+          time: data.startTime,
+        })),
+      };
+
+      onAdd(batchData);
     }
-  }, [selectedDurationId, startTimeVal, setValue]);
 
-  const selectedTeacherData = teachers.find((t) => t.id === selectedTeacher);
-  const availableSubjects = useMemo(() => {
-    return selectedTeacherData
-      ? selectedTeacherData.teacherSubjects.map((ts) => ({
-        value: ts.subject.id,
-        label: language === "ar" ? ts.subject.name_ar : ts.subject.name_en,
-      }))
-      : [];
-  }, [selectedTeacherData, language]);
+    reset();
 
-  const selectedStudentData = students.find((s) => s.id === selectedStudent);
-  const selectedStudentPackage = selectedStudentData
-    ? {
-      name:
-        language === "ar"
-          ? selectedStudentData.plan?.name_ar
-          : selectedStudentData.plan?.name_en || "No Package",
-      sessionsRemaining: selectedStudentData.sessions_remaining || 0,
-      totalSessions: selectedStudentData.sessions || 0,
-    }
-    : null;
-
-  const onFormSubmit = (data: SessionFormData) => {
-    onAdd(data);
     onClose();
   };
 
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0  !mt-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-2xl shadow-xl w-full max-w-4xl max-h-[90vh]  overflow-y-auto no-scrollbar">
-        <div className="sticky top-0 bg-primary border-b border-gray-100 px-6 py-4 flex items-center justify-between z-10">
-          <h2 className="text-2xl font-bold text-white">
-            {t("addSingleSession_title")}
-          </h2>
+    <div className="fixed inset-0 z-[100] !mt-0 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center p-4">
+      <div className="w-full max-w-[1000px] max-h-[92vh] overflow-hidden bg-white rounded-[28px] shadow-[0_20px_50px_rgba(0,0,0,0.15)] flex flex-col">
+
+        {/* Header */}
+        <div className="px-8 py-5 border-b border-gray-100 flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 rounded-2xl bg-indigo-50 flex items-center justify-center">
+              <Calendar className="w-6 h-6 text-indigo-600" />
+            </div>
+
+            <div>
+              <h2 className="text-xl font-bold text-gray-900">
+                Create New Session
+              </h2>
+
+              <p className="text-sm text-gray-400">
+                Configure and schedule sessions.
+              </p>
+            </div>
+          </div>
+
           <button
             onClick={onClose}
-            className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+            className="p-2 rounded-full hover:bg-gray-100 transition"
           >
-            <X className="w-6 h-6 text-white" />
+            <X className="w-5 h-5 text-gray-500" />
           </button>
         </div>
 
-        <form onSubmit={handleSubmit(onFormSubmit)} className="p-6">
-          <div className="space-y-6">
-            {/* Student and Teacher */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <form
+          onSubmit={handleSubmit(onSubmit)}
+          className="flex flex-col lg:flex-row overflow-hidden"
+        >
+          <input type="hidden" {...register('type')} />
+
+          {/* LEFT */}
+          <div className="w-full lg:w-[58%] p-8 overflow-y-auto custom-scrollbar">
+
+            {/* Student + Teacher */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 mb-6">
+
+              {/* Student */}
               <div>
+                <label className="label">
+                  <Search className="w-3.5 h-3.5" />
+                  {t('studentLabel') || 'Student'}
+                </label>
+
                 <Controller
                   name="student"
                   control={control}
                   render={({ field }) => (
                     <CustomSelect
-                      label={t("studentLabel")}
+                      options={
+                        students?.data?.studentsData?.map(
+                          (student: Student) => ({
+                            value: String(student.id),
+                            label: student.user.name,
+                          })
+                        ) || []
+                      }
                       value={field.value}
-                      options={studentOptions}
                       onChange={field.onChange}
-                      placeholder={t("selectStudent")}
-                      className="h-[46px]"
+                      placeholder={t('selectStudent') || 'Select Student'}
                     />
                   )}
                 />
+
                 {errors.student && (
-                  <span className="text-red-500 text-xs mt-1 block text-start">
-                    {errors.student.message}
-                  </span>
+                  <p className="error-text">
+                    {errors.student.message as string}
+                  </p>
                 )}
               </div>
 
+              {/* Teacher */}
               <div>
+                <label className="label">
+                  <Search className="w-3.5 h-3.5" />
+                  {t('teacherLabel') || 'Instructor'}
+                </label>
+
                 <Controller
                   name="teacher"
                   control={control}
                   render={({ field }) => (
                     <CustomSelect
-                      label={t("teacherLabel")}
+                      options={
+                        instructors?.teachers?.map(
+                          (teacher: Teacher) => ({
+                            value: String(teacher.id),
+                            label: teacher.user.name,
+                          })
+                        ) || []
+                      }
                       value={field.value}
-                      options={teacherOptions}
-                      onChange={(val) => {
-                        field.onChange(val);
-                        setValue("subject", "");
-                      }}
-                      placeholder={t("selectTeacher")}
-                      className="h-[46px]"
+                      onChange={field.onChange}
+                      placeholder={t('selectTeacher') || 'Select Instructor'}
                     />
                   )}
                 />
+
                 {errors.teacher && (
-                  <span className="text-red-500 text-xs mt-1 block text-start">
-                    {errors.teacher.message}
-                  </span>
+                  <p className="error-text">
+                    {errors.teacher.message as string}
+                  </p>
                 )}
               </div>
             </div>
 
-            {/* Package Details */}
-            {selectedStudentPackage && (
-              <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
-                <h3 className="text-sm font-semibold text-blue-900 mb-3 text-start">
-                  {t("packageInfo")}
-                </h3>
-                <div className="grid grid-cols-3 gap-4 text-start">
-                  <div>
-                    <p className="text-xs text-blue-600 mb-1">
-                      {t("packageName")}
-                    </p>
-                    <p className="text-sm font-medium text-blue-900">
-                      {language === "ar"
-                        ? selectedStudentData?.plan?.name_ar
-                        : selectedStudentData?.plan?.name_en}
-                    </p>
-                  </div>
-                  <div>
-                    <p className="text-xs text-blue-600 mb-1">
-                      {t("sessionsRemaining")}
-                    </p>
-                    <p className="text-sm font-medium text-blue-900">
-                      {selectedStudentPackage.sessionsRemaining}
-                    </p>
-                  </div>
-                  <div>
-                    <p className="text-xs text-blue-600 mb-1">
-                      {t("totalSessions")}
-                    </p>
-                    <p className="text-sm font-medium text-blue-900">
-                      {selectedStudentPackage.totalSessions}
-                    </p>
-                  </div>
-                </div>
-              </div>
-            )}
+            {/* Plan Card */}
+            <StudentPlanCard studentPlanInfo={studentPlanInfo} />
 
-            {/* Subject */}
-            <div className="space-y-2">
-              <Controller
-                name="subject"
-                control={control}
-                render={({ field }) => (
-                  <CustomSelect
-                    label={t("subjectLabel")}
-                    value={field.value}
-                    options={availableSubjects}
-                    onChange={field.onChange}
-                    placeholder={
-                      selectedTeacher
-                        ? t("selectSubject")
-                        : t("teacherQuestion")
-                    }
-                    className="h-[46px]"
-                    disabled={!selectedTeacher}
-                  />
-                )}
+            {/* Title */}
+            <div className="mb-6">
+              <label className="label">
+                <Video className="w-3.5 h-3.5" />
+                {t('sessionTitleLabel') || 'Session Title'}
+              </label>
+
+              <input
+                type="text"
+                {...register('title')}
+                placeholder={t('sessionTitlePlaceholder') || 'Session Title'}
+                className="input"
               />
-              {errors.subject && (
-                <span className="text-red-500 text-xs block text-start">
-                  {errors.subject.message}
-                </span>
+
+              {errors.title && (
+                <p className="error-text">
+                  {errors.title.message as string}
+                </p>
               )}
             </div>
 
-            {/* Date and Title */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="space-y-2 text-start">
-                <DatePickerField
-                  label={`${t("sessionDate")} `}
-                  value={watch("sessionDate")}
-                  onChange={(val) =>
-                    setValue("sessionDate", val, { shouldValidate: true })
-                  }
-                  error={errors.sessionDate?.message}
-                />
-              </div>
+            {/* Description */}
+            <div className="mb-6">
+              <label className="label">
+                <AlertCircle className="w-3.5 h-3.5" />
+                {t('description') || 'Description'}
+              </label>
 
-              <div className="space-y-2 text-start">
-                <label className="block text-sm font-medium text-gray-700">
-                  {t("sessionTitleLabel")}{" "}
-                  <span className="text-red-500">*</span>
-                </label>
-                <input
-                  type="text"
-                  {...register("title")}
-                  placeholder={t("sessionTitlePlaceholder")}
-                  className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent text-start"
-                />
-                {errors.title && (
-                  <span className="text-red-500 text-xs">
-                    {errors.title.message}
-                  </span>
-                )}
-              </div>
+              <textarea
+                {...register('description')}
+                placeholder={t('descriptionPlaceholder') || 'Description...'}
+                className="textarea"
+              />
+
+              {errors.description && (
+                <p className="error-text">
+                  {errors.description.message as string}
+                </p>
+              )}
             </div>
 
-            {/* Description and Type */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="space-y-2 text-start">
-                <label className="block text-sm font-medium text-gray-700">
-                  {t("description")}
-                </label>
-                <textarea
-                  {...register("description")}
-                  placeholder={t("descriptionPlaceholder")}
-                  rows={2}
-                  className={`w-full px-4 py-3 border rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent text-start resize-none ${errors.description ? "border-red-500" : "border-gray-200"}`}
-                />
-                {errors.description && (
-                  <span className="text-red-500 text-xs mt-1 block text-start">
-                    {errors.description.message}
-                  </span>
-                )}
-              </div>
+            {/* Subject + Language */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 mb-6">
 
-              <div className="space-y-2">
+              {/* Subject */}
+              <div>
+                <label className="label">
+                  <BookOpen className="w-3.5 h-3.5" />
+                  {t('subjectLabel') || 'Subject'}
+                </label>
+
                 <Controller
-                  name="type"
+                  name="subject"
                   control={control}
                   render={({ field }) => (
                     <CustomSelect
-                      label={t("type")}
+                      options={subjectOptions}
                       value={field.value}
-                      options={[
-                        { value: "full", label: t("full") },
-                        { value: "half", label: t("half") },
-                      ]}
                       onChange={field.onChange}
-                      className="h-[46px]"
+                      placeholder={t('selectSubject') || 'Select Subject'}
                     />
                   )}
                 />
-                {errors.type && (
-                  <span className="text-red-500 text-xs mt-1 block text-start">
-                    {errors.type.message}
-                  </span>
+
+                {errors.subject && (
+                  <p className="error-text">
+                    {errors.subject.message as string}
+                  </p>
+                )}
+              </div>
+
+              {/* Language */}
+              <div>
+                <label className="label">
+                  <Layers className="w-3.5 h-3.5" />
+                  Language
+                </label>
+
+                <Controller
+                  name="language"
+                  control={control}
+                  render={({ field }) => (
+                    <CustomSelect
+                      options={[
+                        { value: 'en', label: 'English' },
+                        { value: 'ar', label: 'Arabic' },
+                      ]}
+                      value={field.value}
+                      onChange={field.onChange}
+                    />
+                  )}
+                />
+              </div>
+            </div>
+
+            <SchedulingSettings
+              schedulingMode={schedulingMode}
+              setSchedulingMode={setSchedulingMode}
+              register={register}
+              watchSelectedDays={watchSelectedDays}
+              setValue={setValue}
+              DAYS={DAYS}
+              control={control}
+            />
+
+            {/* Meeting Link */}
+            <div className="grid grid-cols-1 gap-5 mb-6">
+              <div>
+                <label className="label">
+                  <MonitorPlay className="w-3.5 h-3.5" />
+                  {t('meetingLink') || 'Meeting Link'}
+                </label>
+
+                <input
+                  type="url"
+                  {...register('meetingLink')}
+                  placeholder="https://zoom.us/j/..."
+                  className="input"
+                />
+
+                {errors.meetingLink && (
+                  <p className="error-text">
+                    {errors.meetingLink.message as string}
+                  </p>
                 )}
               </div>
             </div>
 
-            {/* Notification Time */}
-            <div className="space-y-2">
-              <Controller
-                name="notification_Time"
-                control={control}
-                render={({ field }) => (
-                  <CustomSelect
-                    label={t("notificationTime")}
-                    value={field.value}
-                    options={[
-                      {
-                        value: "10",
-                        label: language === "ar" ? "10 دقائق" : "10 min",
-                      },
-                      {
-                        value: "30",
-                        label: language === "ar" ? "30 دقيقة" : "30 min",
-                      },
-                      {
-                        value: "60",
-                        label: language === "ar" ? "60 دقيقة" : "60 min",
-                      },
-                    ]}
-                    onChange={field.onChange}
-                    className="h-[46px]"
-                  />
-                )}
+            {/* Notes */}
+            <div className="mb-6">
+              <label className="label">
+                <AlertTriangle className="w-3.5 h-3.5" />
+                Notes
+              </label>
+
+              <textarea
+                {...register('notes')}
+                placeholder="Private notes..."
+                className="textarea"
               />
             </div>
 
-            {/* Duration and Time */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <div className="space-y-2">
-                <Controller
-                  name="duration"
-                  control={control}
-                  render={({ field }) => (
-                    <CustomSelect
-                      label={t("duration")}
-                      value={field.value}
-                      options={Object.entries(durationPackages).map(
-                        ([id, pkg]) => ({
-                          value: id,
-                          label: pkg.name,
-                        }),
-                      )}
-                      onChange={field.onChange}
-                      placeholder={t("selectDuration")}
-                      className="h-[46px]"
-                    />
-                  )}
-                />
-                {errors.duration && (
-                  <span className="text-red-500 text-xs block text-start">
-                    {errors.duration.message}
-                  </span>
-                )}
-              </div>
+            <TypeSelector
+              watchType={watchType}
+              setValue={setValue}
+            />
 
-              <div className="space-y-2 text-start">
-                {/* <input
-                  type="time"
-                  {...register('startTime')}
-                  className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent text-start"
-                />
-                {errors.startTime && <span className="text-red-500 text-xs">{errors.startTime.message}</span>} */}
-                <Controller
-                  name="startTime"
-                  control={control}
-                  render={({ field }) => (
-                    <CustomTimePicker
-                      label={t("startTime")}
-                      value={field.value}
-                      onChange={field.onChange}
-                      error={errors.startTime?.message}
-                    />
-                  )}
-                />
-              </div>
+            {/* Footer Buttons */}
+            <div className="flex items-center justify-end gap-4">
 
-              <div className="space-y-2 text-start">
-                <label className="block text-sm font-medium text-gray-700">
-                  {t("endTime")} <span className="text-red-500">*</span>
-                </label>
-                <input
-                  type="time"
-                  disabled
-                  {...register("endTime")}
-                  className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent text-start"
-                />
-                {errors.endTime && (
-                  <span className="text-red-500 text-xs">
-                    {errors.endTime.message}
-                  </span>
-                )}
-              </div>
-            </div>
+              <button
+                type="button"
+                onClick={onClose}
+                className="secondary-btn"
+              >
+                Cancel
+              </button>
 
-            {/* Meeting Link and Notes */}
-            <div className="space-y-4">
-              <div className="space-y-2 text-start">
-                <label className="block text-sm font-medium text-gray-700">
-                  {t("meetingLink")}
-                </label>
-                <input
-                  type="url"
-                  {...register("meetingLink")}
-                  placeholder="https://zoom.us/..."
-                  className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent text-start"
-                  dir="ltr"
-                />
-              </div>
-              <div className="space-y-2 text-start">
-                <label className="block text-sm font-medium text-gray-700">
-                  {t("notes")}
-                </label>
-                <textarea
-                  {...register("notes")}
-                  placeholder={t("notesPlaceholder")}
-                  rows={3}
-                  className={`w-full px-4 py-3 border rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent text-start resize-none ${errors.notes ? "border-red-500" : "border-gray-200"}`}
-                />
-                {errors.notes && (
-                  <span className="text-red-500 text-xs mt-1 block text-start">
-                    {errors.notes.message}
-                  </span>
-                )}
-              </div>
+              <button
+                type="submit"
+                className="primary-btn"
+              >
+                {schedulingMode === 'single'
+                  ? 'Create Session'
+                  : 'Schedule Batch'}
+              </button>
             </div>
           </div>
 
-          {/* Buttons */}
-          <div className="flex gap-3 mt-8">
-            <button
-              type="submit"
-              className="flex-1 px-6 py-3 bg-blue-600 text-white rounded-xl transition-colors font-medium hover:bg-blue-700"
-            >
-              {t("add")}
-            </button>
-            <button
-              type="button"
-              onClick={onClose}
-              className="flex-1 px-6 py-3 border border-gray-200 text-gray-700 rounded-xl hover:bg-gray-50 transition-colors font-medium"
-            >
-              {t("cancel")}
-            </button>
-          </div>
+          <SessionPreview
+            previewSessions={previewSessions}
+            formatDateCard={formatDateCard}
+            watchTitle={watchTitle}
+            selectedSubject={selectedSubject}
+            watchStartTime={watchStartTime}
+          />
         </form>
+
+        <ModalStyles />
       </div>
     </div>
   );

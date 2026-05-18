@@ -157,6 +157,7 @@ export default function Teachers() {
       code_country: '+20', // Default if missing, ideally extracted from phone
       subject_ids: formData.subjects,
       timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+      meeting_link: formData.meeting_link,
     };
   };
 

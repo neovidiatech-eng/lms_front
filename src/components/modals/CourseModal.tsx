@@ -4,17 +4,17 @@ import { X } from 'lucide-react';
 import { FormProvider, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { CourseFormData, getCourseSchema } from '../../lib/schemas/CourseSchema';
-import { Course, Level } from '../../types/lmsCourses';
+
 import { useTranslation } from 'react-i18next';
 import CourseFormFields from '../../features/admin/pages/LMSCourses/components/CourseFormFields';
+import { CourseItem } from '../../types/course';
 
 interface CourseModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSubmit: (data: CourseFormData) => void;
-  course?: Course | null;
-  levels: Level[];
-  subjectCategories: string[];
+  course?: CourseItem | null;
+  subjectCategories: { id: string; name: string }[];
 }
 
 export default function CourseModal({
@@ -22,7 +22,6 @@ export default function CourseModal({
   onClose,
   onSubmit,
   course,
-  levels,
   subjectCategories,
 }: CourseModalProps) {
   const { language } = useLanguage();
@@ -35,8 +34,7 @@ export default function CourseModal({
     defaultValues: {
       title: '',
       description: '',
-      category: subjectCategories.filter(c => c !== 'الكل' && c !== 'All')[0] || '',
-      levelId: levels[0]?.id || 1,
+      category: subjectCategories.filter(c => c.id !== 'الكل' && c.id !== 'All')[0]?.id || '',
       videoUrl: '',
       thumbnailFile: null,
       thumbnailPreview: '',
@@ -52,19 +50,18 @@ export default function CourseModal({
         reset({
           title: course.title,
           description: course.description,
-          category: course.category,
-          levelId: course.levelId,
+          category: course.subjectId || course.subject?.id || '',
           videoUrl: course.videoUrl,
+          pdfUrl: course.pdfurl,
           thumbnailFile: null,
-          thumbnailPreview: course.thumbnailUrl,
-          attachments: [...course.attachments],
+          thumbnailPreview: course.image,
+          attachments: course.attatchments ? [course.attatchments] : [],
         });
       } else {
         reset({
           title: '',
           description: '',
-          category: subjectCategories.filter(c => c !== 'الكل' && c !== 'all')[0] || '',
-          levelId: levels[0]?.id || 1,
+          category: subjectCategories.filter(c => c.id !== 'الكل' && c.id !== 'all')[0]?.id || '',
           videoUrl: '',
           thumbnailFile: null,
           thumbnailPreview: '',
@@ -72,7 +69,7 @@ export default function CourseModal({
         });
       }
     }
-  }, [isOpen, course, reset, levels, subjectCategories]);
+  }, [isOpen, course, reset, subjectCategories]);
 
   if (!isOpen) return null;
 
@@ -95,7 +92,6 @@ export default function CourseModal({
           <FormProvider {...methods}>
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
               <CourseFormFields
-                levels={levels}
                 subjectCategories={subjectCategories}
                 thumbnailInputRef={thumbnailInputRef}
                 attachInputRef={attachInputRef}

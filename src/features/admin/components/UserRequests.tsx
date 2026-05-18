@@ -1,7 +1,14 @@
 import { useNavigate } from 'react-router-dom';
 
-export default function UserRequests() {
+interface UserRequestsProps {
+  pendingCount?: number;
+}
+
+export default function UserRequests({ pendingCount = 0 }: UserRequestsProps) {
   const navigate = useNavigate();
+
+  // Dynamic percentage for pending requests bar
+  const pendingPercentage = Math.min(100, Math.max(10, pendingCount * 5));
 
   return (
     <div className="bg-white rounded-3xl shadow-sm border border-gray-100 p-6 flex flex-col h-full">
@@ -12,11 +19,14 @@ export default function UserRequests() {
       <div className="space-y-8 flex-grow">
         <div>
           <div className="flex justify-between text-sm mb-2">
-            <span className="text-blue-600 font-bold">42</span>
+            <span className="text-blue-600 font-bold">{pendingCount}</span>
             <span className="text-gray-600 text-xs font-medium">بانتظار المراجعة</span>
           </div>
           <div className="h-1 w-full bg-gray-100 rounded-full overflow-hidden flex justify-end">
-            <div className="h-full bg-blue-600 rounded-full" style={{ width: '60%' }}></div>
+            <div 
+              className="h-full bg-blue-600 rounded-full transition-all duration-500" 
+              style={{ width: `${pendingPercentage}%` }}
+            ></div>
           </div>
         </div>
         

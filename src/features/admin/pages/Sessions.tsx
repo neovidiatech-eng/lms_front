@@ -11,13 +11,11 @@ import {
   useDeleteGroupedSchedule,
 } from "../hooks/useSchedules";
 import AddSessionModal from "../../../components/modals/AddSessionModal";
-import AddMultipleSessionsModal from "../../../components/modals/AddMultipleSessionsModal";
 import ViewSessionModal from "../../../components/modals/ViewSessionModal";
 import EditSessionModal from "../../../components/modals/EditSessionModal";
 import ConfirmModal from "../../../components/modals/ConfirmModal";
 import { Schedule, UpdateSchedulePayload } from "../../../types/scheduales";
 import {
-  SessionFormData,
   MultipleSessionsPayload,
 } from "../../../lib/schemas/SessionSchema";
 
@@ -31,7 +29,6 @@ export default function Sessions() {
   const [debouncedSearch, setDebouncedSearch] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [showAddModal, setShowAddModal] = useState(false);
-  const [showAddMultipleModal, setShowAddMultipleModal] = useState(false);
   const [showViewModal, setShowViewModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [selectedSession, setSelectedSession] = useState<Schedule | null>(null);
@@ -77,53 +74,61 @@ export default function Sessions() {
     }
   };
 
-  const handleAddSession = async (data: SessionFormData) => {
+  const handleAddSession = async (data: any) => {
     try {
-      await createSchedule.mutateAsync({
-        studentId: data.student,
-        teacherId: data.teacher,
-        subject_id: data.subject,
-        title: data.title,
-        description: data.description || "",
-        link: data.meetingLink || "",
-        notes: data.notes || "",
-        start_time: `${data.sessionDate}T${data.startTime}:00.000Z`,
-        type: data.type,
-        notification_Time: data.notification_Time,
-      });
+      if (data.formData) {
+        // Batch / Recurring Scheduling
+        const { formData, sessions, selectedDays } = data as MultipleSessionsPayload;
+
+        const tomorrowStr = (() => {
+          const tom = new Date();
+          tom.setDate(tom.getDate() + 1);
+          return tom.toISOString().split("T")[0];
+        })();
+
+        const rawStartDate = formData.batchStartDate || (formData.monthYear ? `${formData.monthYear}-01` : tomorrowStr);
+        const rawEndDate = formData.batchEndDate || (formData.monthYear ? `${formData.monthYear}-28` : tomorrowStr);
+
+        const startDate = rawStartDate < tomorrowStr ? tomorrowStr : rawStartDate;
+        const endDate = rawEndDate;
+
+        await createRecurringSchedule.mutateAsync({
+          studentId: formData.student,
+          teacherId: formData.teacher,
+          subject_id: formData.subject,
+          title: formData.title,
+          description: formData.description || "",
+          link: formData.meetingLink || "",
+          notes: formData.notes || "",
+          startTime: sessions[0]?.time || "00:00",
+          days: selectedDays,
+          startDate,
+          endDate,
+          notification_Time: formData.notification_Time || "10",
+          type: formData.type,
+        });
+      } else {
+        // Single Session Scheduling
+        await createSchedule.mutateAsync({
+          studentId: data.student,
+          teacherId: data.teacher,
+          subject_id: data.subject,
+          title: data.title,
+          description: data.description || "",
+          link: data.meetingLink || "",
+          notes: data.notes || "",
+          start_time: `${data.sessionDate}T${data.startTime}:00.000Z`,
+          type: data.type,
+          notification_Time: data.notification_Time,
+        });
+      }
       setShowAddModal(false);
     } catch (error) {
       console.error("Add session failed:", error);
     }
   };
 
-  const handleAddMultipleSessions = async (data: MultipleSessionsPayload) => {
-    const { formData, sessions } = data;
-    try {
-      await createRecurringSchedule.mutateAsync({
-        studentId: formData.student,
-        teacherId: formData.teacher,
-        subject_id: formData.subject,
-        title: formData.title,
-        description: formData.description || "",
-        link: formData.meetingLink || "",
-        notes: formData.notes || "",
-        startTime: sessions[0]?.time || "00:00",
-        days: data.selectedDays,
-        startDate: formData.monthYear
-          ? `${formData.monthYear}-01`
-          : new Date().toISOString().split("T")[0],
-        endDate: formData.monthYear
-          ? `${formData.monthYear}-28`
-          : new Date().toISOString().split("T")[0],
-        notification_Time: formData.notification_Time || "10",
-        type: formData.type,
-      });
-      setShowAddMultipleModal(false);
-    } catch (error) {
-      console.error("Add multiple sessions failed:", error);
-    }
-  };
+ 
 
   useEffect(() => {
     if (searchTerm.length > 2) {
@@ -141,11 +146,48 @@ export default function Sessions() {
   const groupedSchedules: Schedule[] = [];
   const seenParents = new Set<string>();
 
+  // Map each parent_recurring_id to all of its sessions in the list
+  const parentGroups = new Map<string, Schedule[]>();
+  scheduleData.forEach((schedule: Schedule) => {
+    if (schedule.parent_recurring_id) {
+      const group = parentGroups.get(schedule.parent_recurring_id) || [];
+      group.push(schedule);
+      parentGroups.set(schedule.parent_recurring_id, group);
+    }
+  });
+
   scheduleData.forEach((schedule: Schedule) => {
     if (schedule.parent_recurring_id) {
       if (!seenParents.has(schedule.parent_recurring_id)) {
         seenParents.add(schedule.parent_recurring_id);
-        groupedSchedules.push(schedule);
+
+        const groupSessions = parentGroups.get(schedule.parent_recurring_id) || [];
+        const now = new Date().getTime();
+
+        // Separate upcoming vs past sessions to determine the nearest one
+        const upcoming = groupSessions.filter(
+          (s) => new Date(s.start_time).getTime() >= now
+        );
+
+        let nearestSession = schedule;
+        if (upcoming.length > 0) {
+          // Sort upcoming ascending (closest future date first)
+          upcoming.sort(
+            (a, b) =>
+              new Date(a.start_time).getTime() - new Date(b.start_time).getTime()
+          );
+          nearestSession = upcoming[0];
+        } else if (groupSessions.length > 0) {
+          // Sort past descending (closest past date first)
+          const past = [...groupSessions];
+          past.sort(
+            (a, b) =>
+              new Date(b.start_time).getTime() - new Date(a.start_time).getTime()
+          );
+          nearestSession = past[0];
+        }
+
+        groupedSchedules.push(nearestSession);
       }
     } else {
       groupedSchedules.push(schedule);
@@ -164,25 +206,36 @@ export default function Sessions() {
     setCurrentPage(page);
   };
 
-  const calculateDuration = (startTime: string, endTime: string) => {
+  const calculateDuration = (startTime: any, endTime: any) => {
     if (!startTime || !endTime) return 0;
-    if (startTime.includes("T") && endTime.includes("T")) {
-      const start = new Date(startTime).getTime();
-      const end = new Date(endTime).getTime();
-      if (!isNaN(start) && !isNaN(end)) {
-        return Math.max(0, Math.round((end - start) / 60000));
-      }
+    
+    // Check if they are full ISO/Date strings by trying to parse them with Date
+    const start = new Date(startTime).getTime();
+    const end = new Date(endTime).getTime();
+    
+    if (!isNaN(start) && !isNaN(end)) {
+      return Math.max(0, Math.round((end - start) / 60000));
     }
-    const startParts = startTime.split(":").map(Number);
-    const endParts = endTime.split(":").map(Number);
-    if (startParts.length >= 2 && endParts.length >= 2) {
-      const startTotal = startParts[0] * 60 + startParts[1];
-      const endTotal = endParts[0] * 60 + endParts[1];
-      let duration = endTotal - startTotal;
-      if (duration < 0) duration += 24 * 60;
-      return duration;
+    
+    // If not parseable as full dates, fall back to "HH:MM" string split
+    try {
+      const getMinutes = (timeStr: string) => {
+        // If it contains "T", extract the time part first
+        const cleanTime = timeStr.includes("T") ? timeStr.split("T")[1] : timeStr;
+        const parts = cleanTime.split(":");
+        const h = Number(parts[0]) || 0;
+        const m = Number(parts[1]) || 0;
+        return h * 60 + m;
+      };
+      
+      const startTotal = getMinutes(String(startTime));
+      const endTotal = getMinutes(String(endTime));
+      let diff = endTotal - startTotal;
+      if (diff < 0) diff += 24 * 60;
+      return diff;
+    } catch {
+      return 0;
     }
-    return 0;
   };
 
   const formatDateTime = (dateString: string) => {
@@ -279,13 +332,7 @@ export default function Sessions() {
                 <Plus className="w-5 h-5" />
                 {t("singleSession")}
               </button>
-              <button
-                onClick={() => setShowAddMultipleModal(true)}
-                className="flex flex-1 md:flex-none items-center justify-center gap-2 px-6 py-3 btn-primary text-white rounded-xl transition-colors font-medium whitespace-nowrap"
-              >
-                <Plus className="w-5 h-5" />
-                {t("multipleSessions")}
-              </button>
+            
             </div>
           </div>
         </div>
@@ -438,11 +485,6 @@ export default function Sessions() {
         onAdd={handleAddSession}
       />
 
-      <AddMultipleSessionsModal
-        isOpen={showAddMultipleModal}
-        onClose={() => setShowAddMultipleModal(false)}
-        onAdd={handleAddMultipleSessions}
-      />
 
       <ViewSessionModal
         isOpen={showViewModal}

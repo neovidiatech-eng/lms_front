@@ -59,6 +59,7 @@ export interface TeacherProfileInfo {
   status: string;
   active: boolean;
   user_id?: string;
+  meeting_link:string;
   wallet: Wallet[];
 }
 

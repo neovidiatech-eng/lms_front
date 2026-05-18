@@ -1,91 +1,21 @@
-import { useState, } from 'react';
-import { PlayCircle, Plus, Search, BookOpen, MoreVertical, Edit, Trash2, Eye, Layers } from 'lucide-react';
+import { useState } from 'react';
+import { PlayCircle, Plus, Search, BookOpen, MoreVertical, Edit, Trash2, Eye } from 'lucide-react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useLocation } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
-import { Course, Level, LevelColorOption } from '../../../../types/lmsCourses';
+import { CourseItem } from '../../../../types/course';
 import { useLanguage } from '../../../../contexts/LanguageContext';
 import { CourseFormData, getCourseSchema } from '../../../../lib/schemas/CourseSchema';
 import CourseViewer from '../../../../components/features/LMS/CourseViewer';
 import CourseModal from '../../../../components/modals/CourseModal';
-import LevelsModal from '../../../../components/modals/ShowLevelModal';
+import { useCourses, useDeleteCourse, useCreateCourse, useUpdateCourse } from '../../hooks/useCourses';
+import { useSubjects } from '../../hooks/useSubjects';
+import { baseURL } from '../../../../consts';
 
+import { useConfirm } from "../../../../hooks/useConfirm";
 
-
-const subjectCategories = ['الكل', 'رياضيات', 'علوم', 'لغة عربية', 'لغة إنجليزية', 'فيزياء', 'كيمياء', 'أحياء', 'تاريخ', 'جغرافيا', 'تربية إسلامية'];
-const categoryTranslations: Record<string, string> = {
-  'الكل': 'all',
-  'رياضيات': 'cat_math',
-  'علوم': 'cat_science',
-  'لغة عربية': 'cat_arabic',
-  'لغة إنجليزية': 'cat_english',
-  'فيزياء': 'cat_physics',
-  'كيمياء': 'cat_chemistry',
-  'أحياء': 'cat_biology',
-  'تاريخ': 'cat_history',
-  'جغرافيا': 'cat_geography',
-  'تربية إسلامية': 'cat_religion',
-};
-const levelColorOptions: LevelColorOption[] = [
-  { label: 'green', value: 'bg-green-100 text-green-700' },
-  { label: 'blue', value: 'bg-blue-100 text-blue-700' },
-  { label: 'red', value: 'bg-red-100 text-red-700' },
-  { label: 'yellow', value: 'bg-yellow-100 text-yellow-700' },
-  { label: 'orange', value: 'bg-orange-100 text-orange-700' },
-];
-
-export const defaultLevels: Level[] = [
-  { id: 1, name: 'مبتدئ', color: 'bg-green-100 text-green-700' },
-  { id: 2, name: 'متوسط', color: 'bg-yellow-100 text-yellow-700' },
-  { id: 3, name: 'متقدم', color: 'bg-red-100 text-red-700' },
-];
-
-const mockCourses: Course[] = [
-  {
-    id: 1,
-    title: 'أساسيات الرياضيات',
-    description: 'كورس شامل في أساسيات الرياضيات يغطي الجبر والهندسة والحساب',
-    category: 'رياضيات',
-    levelId: 1,
-    videoUrl: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
-    thumbnailUrl: 'https://images.pexels.com/photos/6256258/pexels-photo-6256258.jpeg?auto=compress&cs=tinysrgb&w=400',
-    attachments: [],
-    createdAt: '2024-01-15'
-  },
-  {
-    id: 2,
-    title: 'الفيزياء المتقدمة',
-    description: 'دراسة متعمقة في مفاهيم الفيزياء الكلاسيكية والحديثة',
-    category: 'فيزياء',
-    levelId: 3,
-    videoUrl: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
-    thumbnailUrl: 'https://images.pexels.com/photos/2280571/pexels-photo-2280571.jpeg?auto=compress&cs=tinysrgb&w=400',
-    attachments: [],
-    createdAt: '2024-02-10'
-  },
-  {
-    id: 3,
-    title: 'اللغة العربية والإملاء',
-    description: 'تعلم قواعد اللغة العربية والإملاء الصحيح للمراحل الابتدائية',
-    category: 'لغة عربية',
-    levelId: 1,
-    videoUrl: '',
-    thumbnailUrl: 'https://images.pexels.com/photos/256417/pexels-photo-256417.jpeg?auto=compress&cs=tinysrgb&w=400',
-    attachments: [],
-    createdAt: '2024-01-20'
-  },
-  {
-    id: 4,
-    title: 'الكيمياء العضوية',
-    description: 'مقدمة في الكيمياء العضوية وأهم المركبات والتفاعلات الكيميائية',
-    category: 'كيمياء',
-    levelId: 2,
-    videoUrl: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
-    thumbnailUrl: '',
-    attachments: [],
-    createdAt: '2024-03-05'
-  },
-];
+// Remove static subjectCategories
+// const subjectCategories = ['الكل', ...];
 
 export function getVideoEmbed(url: string): string | null {
   if (!url) return null;
@@ -116,23 +46,35 @@ export function getYoutubeThumbnail(url: string): string | null {
 // let attachFileId = 1;
 
 export default function LMSCoursesPage() {
-  const [courses, setCourses] = useState<Course[]>(mockCourses);
-  const [levels, setLevels] = useState<Level[]>(defaultLevels);
+  const { data: coursesResponse } = useCourses();
+  const { data: subjectsResponse } = useSubjects();
+  const createCourseMutation = useCreateCourse();
+  const updateCourseMutation = useUpdateCourse();
+  const deleteCourseMutation = useDeleteCourse();
+  const { confirm, ConfirmDialog } = useConfirm();
+  
+  const courses = coursesResponse?.data?.items || [];
+  const subjects = subjectsResponse?.subjects || [];
+const filters = courses.map((s)=>{
+  return {
+    id: s.subject.id,
+    name_en: s.subject.name_en,
+    name_ar: s.subject.name_ar
+  }
+})
+const uniqueFilters = [{ id: 'الكل', name_ar: 'الكل', name_en: 'All' },...new Set(filters)]
+
+
+
+
   const [search, setSearch] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('الكل');
-  const [selectedLevelId, setSelectedLevelId] = useState<number | null>(null);
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
-  const [openMenuId, setOpenMenuId] = useState<number | null>(null);
+  const [openMenuId, setOpenMenuId] = useState<string | null>(null);
 
   const [showAddModal, setShowAddModal] = useState(false);
-  const [editCourse, setEditCourse] = useState<Course | null>(null);
-  const [viewCourse, setViewCourse] = useState<Course | null>(null);
-
-  const [showLevelsModal, setShowLevelsModal] = useState(false);
-  const [newLevelName, setNewLevelName] = useState('');
-  const [newLevelColor, setNewLevelColor] = useState(levelColorOptions[0].value);
-
-  const [nextId, setNextId] = useState(mockCourses.length + 1);
+  const [editCourse, setEditCourse] = useState<CourseItem | null>(null);
+  const [viewCourse, setViewCourse] = useState<CourseItem | null>(null);
   const { t, language } = useLanguage()
   const methods = useForm<CourseFormData>({
     resolver: zodResolver(getCourseSchema(t)),
@@ -140,8 +82,8 @@ export default function LMSCoursesPage() {
       title: '',
       description: '',
       category: '',
-      levelId: 1,
       videoUrl: '',
+      pdfUrl: '',
       thumbnailFile: null,
       thumbnailPreview: '',
       attachments: [],
@@ -155,22 +97,25 @@ export default function LMSCoursesPage() {
 
 
   const filtered = courses.filter(c => {
-    const matchSearch = c.title.includes(search) || c.description.includes(search);
-    const matchCategory = selectedCategory === 'الكل' || c.category === selectedCategory;
-    const matchLevel = selectedLevelId === null || c.levelId === selectedLevelId;
-    return matchSearch && matchCategory && matchLevel;
+    const matchSearch = c.title.toLowerCase().includes(search.toLowerCase()) || c.description.toLowerCase().includes(search.toLowerCase());
+    const matchCategory = selectedCategory === 'الكل' || c.subject?.id === selectedCategory || c.subject?.name_ar === selectedCategory;
+    return matchSearch && matchCategory;
   });
 
-  const getLevelById = (id: number) => levels.find(l => l.id === id);
-
-  const getDisplayThumbnail = (course: Course) => {
-    if (course.thumbnailUrl) return course.thumbnailUrl;
+  const getDisplayThumbnail = (course: CourseItem) => {
+    if (course.image) return `${baseURL}/${course.image}`;
     if (course.videoUrl) return getYoutubeThumbnail(course.videoUrl);
     return null;
   };
 
-  const handleDelete = (id: number) => {
-    setCourses(prev => prev.filter(c => c.id !== id));
+  const handleDelete = async (id: string) => {
+    const confirmed = await confirm({
+      title: t('delete_course') || 'حذف الكورس',
+      message: t('confirm_delete_course') || 'هل أنت متأكد من حذف هذا الكورس؟',
+    });
+    if (confirmed) {
+      deleteCourseMutation.mutate(id);
+    }
     setOpenMenuId(null);
   };
 
@@ -178,82 +123,77 @@ export default function LMSCoursesPage() {
     reset({
       title: '',
       description: '',
-      category: 'رياضيات',
-      levelId: levels[0]?.id ?? 1,
+      category: subjects.length > 0 ? subjects[0].id : '',
       videoUrl: '',
+      pdfUrl: '',
       attachments: [],
       thumbnailPreview: ''
     });
     setShowAddModal(true);
   };
 
-  const openEdit = (course: Course) => {
+  const openEdit = (course: CourseItem) => {
     reset({
       title: course.title,
       description: course.description,
-      category: course.category,
-      levelId: course.levelId,
+      category: course.subjectId || '',
       videoUrl: course.videoUrl,
+      pdfUrl: course.pdfurl,
       thumbnailFile: null,
-      thumbnailPreview: course.thumbnailUrl,
-      attachments: [...course.attachments],
+      thumbnailPreview: course.image,
+      attachments: course.attatchments ? [course.attatchments] : [],
     });
     setEditCourse(course);
     setOpenMenuId(null);
   };
 
-  const onAddSubmit = (data: CourseFormData) => {
-    const newCourse: Course = {
-      id: nextId,
-      title: data.title,
-      description: data.description || '',
-      category: data.category,
-      levelId: data.levelId,
-      videoUrl: data.videoUrl || '',
-      thumbnailUrl: data.thumbnailPreview || '',
-      attachments: data.attachments || [],
-      createdAt: new Date().toISOString().slice(0, 10),
-    };
+  const buildFormData = (data: CourseFormData) => {
+    const formData = new FormData();
+    formData.append('title', data.title);
+    formData.append('description', data.description || '');
+    formData.append('subjectId', data.category);
+    if (data.videoUrl) formData.append('videoUrl', data.videoUrl);
+    if (data.pdfUrl) formData.append('pdfurl', data.pdfUrl);
+    
+    if (data.thumbnailFile instanceof File) {
+      formData.append('image', data.thumbnailFile);
+    }
 
-    setCourses(prev => [...prev, newCourse]);
-    setNextId(n => n + 1);
-    setShowAddModal(false);
-    reset();
+    if (data.attachments && data.attachments.length > 0) {
+      data.attachments.forEach(att => {
+        if (att.file instanceof File) {
+          formData.append('attatchments', att.file);
+        }
+      });
+    }
+    return formData;
   };
+
+  const onAddSubmit = (data: CourseFormData) => {
+    const formData = buildFormData(data);
+    createCourseMutation.mutate(formData, {
+      onSuccess: () => {
+        setShowAddModal(false);
+        reset();
+      }
+    });
+  };
+
   const onEditSubmit = (data: CourseFormData) => {
     if (!editCourse) return;
-
-    setCourses(prev => prev.map(c => c.id === editCourse.id ? {
-      ...c,
-      title: data.title,
-      description: data.description || '',
-      category: data.category,
-      levelId: data.levelId,
-      videoUrl: data.videoUrl || '',
-      thumbnailUrl: data.thumbnailPreview || c.thumbnailUrl,
-      attachments: data.attachments || [],
-    } : c));
-
-    setEditCourse(null);
-    reset();
+    const formData = buildFormData(data);
+    updateCourseMutation.mutate({ id: editCourse.id, courseData: formData }, {
+      onSuccess: () => {
+        setEditCourse(null);
+        reset();
+      }
+    });
   }
-  const handleAddLevel = () => {
-    if (!newLevelName.trim()) return;
-    const newId = Math.max(0, ...levels.map(l => l.id)) + 1;
-    setLevels(prev => [...prev, { id: newId, name: newLevelName.trim(), color: newLevelColor }]);
-    setNewLevelName('');
-    setNewLevelColor(levelColorOptions[0].value);
-  };
-
-  const handleDeleteLevel = (id: number) => {
-    setLevels(prev => prev.filter(l => l.id !== id));
-  };
 
   if (viewCourse) {
     return (
       <CourseViewer
-        course={viewCourse}
-        levels={levels}
+        course={viewCourse as any}
         onBack={() => setViewCourse(null)}
       />
     );
@@ -271,13 +211,6 @@ export default function LMSCoursesPage() {
         {!isStudent && (
           <div className="flex gap-2">
             <button
-              onClick={() => setShowLevelsModal(true)}
-              className="flex items-center gap-2 border border-gray-200 bg-white hover:bg-gray-50 text-gray-700 px-4 py-2.5 rounded-xl font-medium transition-colors text-sm"
-            >
-              <Layers className="w-4 h-4" />
-              {t('courses_manage_levels')}
-            </button>
-            <button
               onClick={openAdd}
               className="flex items-center gap-2 btn-primary text-white px-5 py-2.5 rounded-xl font-medium transition-colors shadow-sm text-sm"
             >
@@ -292,7 +225,6 @@ export default function LMSCoursesPage() {
       <div className="grid grid-cols-2 gap-4">
         {[
           { label: t('courses_total'), value: courses.length, color: 'bg-primary-light text-white', icon: BookOpen },
-          { label: t('courses_levels'), value: levels.length, color: 'bg-green-50 text-green-600', icon: Layers },
         ].map((s, i) => (
           <div key={i} className="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
             <div className={`inline-flex p-2 rounded-lg ${s.color} mb-2`}>
@@ -318,40 +250,19 @@ export default function LMSCoursesPage() {
         </div>
 
         <div className="flex gap-2 overflow-x-auto pb-1">
-          {subjectCategories.map(cat => (
+          {uniqueFilters.map(cat => (
             <button
-              key={cat}
-              onClick={() => setSelectedCategory(cat)}
-              className={`px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition-colors ${selectedCategory === cat ? 'btn-primary text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+              key={cat.id}
+              onClick={() => setSelectedCategory(cat.id === 'الكل' ? 'الكل' : cat.name_ar)}
+              className={`px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition-colors ${(selectedCategory === cat.name_ar || selectedCategory === cat.id) ? 'btn-primary text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                 }`}
             >
-              {cat === 'الكل' ? t('all') : t(categoryTranslations[cat] || cat)}
+              {cat.id === 'الكل' ? t('all') : cat.name_ar}
             </button>
           ))}
         </div>
 
-        {levels.length > 0 && (
-          <div className="flex gap-2 overflow-x-auto pb-1">
-            <button
-              onClick={() => setSelectedLevelId(null)}
-              className={`px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition-colors ${selectedLevelId === null ? 'bg-gray-700 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                }`}
-            >
-              {t('courses_all_levels')}
-            </button>
-            {levels.map(l => (
-              <button
-                key={l.id}
-                onClick={() => setSelectedLevelId(selectedLevelId === l.id ? null : l.id)}
-                className={`px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition-colors ${selectedLevelId === l.id ? l.color + ' ring-2 ring-offset-1 ring-gray-400' : l.color + ' opacity-60 hover:opacity-100'
-                  }`}
-              >
-                {l.name}
-              </button>
-            ))}
-          </div>
-        )}
-      </div>
+</div>
 
       {/* Results bar */}
       <div className="flex items-center justify-between">
@@ -367,7 +278,6 @@ export default function LMSCoursesPage() {
         viewMode === 'grid' && (
           <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-5">
             {filtered.map(course => {
-              const level = getLevelById(course.levelId);
               const thumb = getDisplayThumbnail(course);
               return (
                 <div key={course.id} className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-md transition-all group">
@@ -421,10 +331,9 @@ export default function LMSCoursesPage() {
 
                   <div className="p-4">
                     <div className="flex items-center gap-2 mb-2">
-                      <span className="text-xs bg-primary-light text-white px-2 py-1 rounded-full font-medium">{t(categoryTranslations[course.category] || course.category)}</span>
-                      {level && <span className={`text-xs px-2 py-1 rounded-full font-medium ${level.color}`}>{level.name}</span>}
-                      {course.attachments.length > 0 && (
-                        <span className="text-xs bg-gray-100 text-gray-500 px-2 py-1 rounded-full">{course.attachments.length} {t('file')}</span>
+                      <span className="text-xs bg-primary-light text-white px-2 py-1 rounded-full font-medium">{course.subject?.name_ar || ''}</span>
+                      {course.attatchments && (
+                        <span className="text-xs bg-gray-100 text-gray-500 px-2 py-1 rounded-full">1 {t('file')}</span>
                       )}
                     </div>
                     <h3 className="font-bold text-gray-900 mb-1 text-right">{course.title}</h3>
@@ -457,14 +366,12 @@ export default function LMSCoursesPage() {
                 <tr>
                   <th className="text-right px-4 py-3 text-xs font-semibold text-gray-600">{t('courses_table_course')}</th>
                   <th className="text-right px-4 py-3 text-xs font-semibold text-gray-600">{t('courses_table_subject')}</th>
-                  <th className="text-right px-4 py-3 text-xs font-semibold text-gray-600">{t('courses_table_level')}</th>
                   <th className="text-right px-4 py-3 text-xs font-semibold text-gray-600">{t('courses_table_files')}</th>
                   {!isStudent && <th className="text-right px-4 py-3 text-xs font-semibold text-gray-600">{t('courses_table_actions')}</th>}
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-50">
                 {filtered.map(course => {
-                  const level = getLevelById(course.levelId);
                   const thumb = getDisplayThumbnail(course);
                   return (
                     <tr key={course.id} className="hover:bg-gray-50 transition-colors">
@@ -484,13 +391,10 @@ export default function LMSCoursesPage() {
                         </div>
                       </td>
                       <td className="px-4 py-3">
-                        <span className="text-xs bg-primary-light text-white px-2 py-1 rounded-full">{t(categoryTranslations[course.category] || course.category)}</span>
+                        <span className="text-xs bg-primary-light text-white px-2 py-1 rounded-full">{course.subject?.name_ar || ''}</span>
                       </td>
                       <td className="px-4 py-3">
-                        {level && <span className={`text-xs px-2 py-1 rounded-full ${level.color}`}>{level.name}</span>}
-                      </td>
-                      <td className="px-4 py-3">
-                        <span className="text-xs text-gray-500">{course.attachments.length} {t('file')} </span>
+                        <span className="text-xs text-gray-500">{course.attatchments ? 1 : 0} {t('file')} </span>
                       </td>
                       {!isStudent && (
                         <td className="px-4 py-3">
@@ -532,24 +436,11 @@ export default function LMSCoursesPage() {
           setEditCourse(null);
         }}
         onSubmit={editCourse ? onEditSubmit : onAddSubmit}
-        course={editCourse}
-        levels={levels}
-        subjectCategories={subjectCategories}
+        course={editCourse as any}
+        subjectCategories={subjects.map((s: any) => ({ id: s.id, name: s.name_ar })) as any}
       />
-
-      <LevelsModal
-        isOpen={showLevelsModal}
-        onClose={() => setShowLevelsModal(false)}
-        levels={levels}
-        handleDeleteLevel={handleDeleteLevel}
-        newLevelName={newLevelName}
-        setNewLevelName={setNewLevelName}
-        newLevelColor={newLevelColor}
-        setNewLevelColor={setNewLevelColor}
-        levelColorOptions={levelColorOptions}
-        handleAddLevel={handleAddLevel}
-      />
-    </div >
+      {ConfirmDialog}
+    </div>
   );
 }
 

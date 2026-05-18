@@ -9,6 +9,7 @@ import { RoleFormData } from "../../../lib/schemas/RoleSchema";
 import { TableSkeleton } from "../../../components/ui/CustomSkeleton";
 import { useConfirm } from "../../../hooks/useConfirm";
 
+
 export default function Roles() {
     const { t, i18n } = useTranslation();
     const language = i18n.language.split('-')[0];
