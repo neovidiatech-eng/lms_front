@@ -5,21 +5,9 @@ import { CourseFormFieldsProps } from '../../../../../types/lmsCourses';
 import CustomSelect from '../../../../../components/ui/CustomSelect';
 import { useLanguage } from '../../../../../contexts/LanguageContext';
 
-const categoryTranslations: Record<string, string> = {
-  'رياضيات': 'cat_math',
-  'علوم': 'cat_science',
-  'لغة عربية': 'cat_arabic',
-  'لغة إنجليزية': 'cat_english',
-  'فيزياء': 'cat_physics',
-  'كيمياء': 'cat_chemistry',
-  'أحياء': 'cat_biology',
-  'تاريخ': 'cat_history',
-  'جغرافيا': 'cat_geography',
-  'تربية إسلامية': 'cat_religion',
-};
+
 
 const CourseFormFields = ({
-  levels,
   subjectCategories,
   thumbnailInputRef,
   attachInputRef,
@@ -81,6 +69,18 @@ const CourseFormFields = ({
         />
         {errors.videoUrl && <p className="text-red-500 text-xs mt-1 text-start">{errors.videoUrl.message as string}</p>}
       </div>
+
+      {/* pdf url */}
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-1 text-start">رابط ملف PDF</label>
+        <input
+          type="text"
+          {...register("pdfUrl")}
+          className={`w-full px-3 py-2.5 border rounded-lg text-sm focus:outline-none focus:ring-2 text-start ${errors.pdfUrl ? 'border-red-500 focus:ring-red-200' : 'border-gray-200 focus:ring-blue-500'}`}
+          placeholder="أدخل رابط ملف PDF (اختياري)"
+        />
+        {errors.pdfUrl && <p className="text-red-500 text-xs mt-1 text-start">{errors.pdfUrl.message as string}</p>}
+      </div>
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-1 text-start">{t('courseDescription')}</label>
         <textarea
@@ -93,7 +93,7 @@ const CourseFormFields = ({
       </div>
 
 
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-1 gap-3">
         <Controller
           name="category"
           control={control}
@@ -103,8 +103,8 @@ const CourseFormFields = ({
               value={field.value}
               onChange={field.onChange}
               options={subjectCategories
-                .filter(c => c !== 'الكل' && c !== 'All')
-                .map(c => ({ value: c, label: t(categoryTranslations[c] || c) }))
+                .filter(c => c.id !== 'الكل' && c.id !== 'all')
+                .map(c => ({ value: c.id, label: c.name }))
               }
               className="h-[42px]"
               placeholder={t('selectSubject')}
@@ -113,21 +113,6 @@ const CourseFormFields = ({
           )}
         />
 
-        <Controller
-          name="levelId"
-          control={control}
-          render={({ field }) => (
-            <CustomSelect
-              label={t('level')}
-              value={field.value}
-              onChange={(val) => field.onChange(Number(val))}
-              options={levels.map(l => ({ value: l.id, label: l.name }))}
-              placeholder={t('selectLevel')}
-              className="h-[42px]"
-              error={errors.levelId?.message as string}
-            />
-          )}
-        />
       </div>
 
       <div>
@@ -150,6 +135,7 @@ const CourseFormFields = ({
             </div>
           )}
         </div>
+        {errors.thumbnailFile && <p className="text-red-500 text-xs mt-1 text-start">{errors.thumbnailFile.message as string}</p>}
         <input ref={thumbnailInputRef} type="file" accept="image/*" className="hidden" onChange={handleThumbnailChange} />
       </div>
 

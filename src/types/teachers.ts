@@ -35,6 +35,7 @@ export interface Teacher {
         confirmAt: string | null;
     };
     teacherSubjects: TeacherSubject[];
+    meeting_link?: string;
 }
 
 export interface TeachersFetchResponse {
@@ -55,6 +56,21 @@ export interface TeachersFetchResponse {
 }
 
 export interface CreateTeacherInput {
+    name: string;
+    email: string;
+    password?: string;
+    phone: string;
+    code_country: string;
+    currency_id: string;
+    gender: 'male' | 'female';
+    hour_price: number;
+    active: boolean;
+    subject_ids: string[];
+    meeting_link: string;
+    timezone?: string;
+}
+
+export interface UpdateTeacherInput {
     name: string;
     email: string;
     password?: string;

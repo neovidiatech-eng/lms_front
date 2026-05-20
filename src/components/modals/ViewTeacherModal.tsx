@@ -4,6 +4,7 @@ import { useSessions } from '../../contexts/SessionsContext';
 import { Teacher } from '../../types/teachers';
 import { useCurrency } from '../../features/admin/hooks/useCurrency';
 import { Currency } from '../../types/currency';
+import { useTeacherById } from '../../features/admin/hooks/useTeacher';
 
 interface ViewTeacherModalProps {
   isOpen: boolean;
@@ -15,10 +16,13 @@ export default function ViewTeacherModal({ isOpen, onClose, teacher }: ViewTeach
   const { language, t } = useLanguage();
   const { sessions } = useSessions();
   const { data: currenciesData } = useCurrency();
+  const { data: fetchedTeacher, isLoading } = useTeacherById(isOpen && teacher ? teacher.id : undefined);
 
   if (!isOpen || !teacher) return null;
 
-  const teacherSessions = sessions.filter(s => s.teacherName === teacher.user?.name);
+  const activeTeacher = fetchedTeacher || teacher;
+
+  const teacherSessions = sessions.filter(s => s.teacherName === activeTeacher.user?.name);
   const today = new Date().toISOString().split('T')[0];
   const todaySessions = teacherSessions.filter(s => s.date === today);
   const upcomingSessions = teacherSessions.filter(s => s.date >= today);
@@ -43,18 +47,18 @@ export default function ViewTeacherModal({ isOpen, onClose, teacher }: ViewTeach
   const completedHours = completedSessions.reduce((sum, s) => sum + calcSessionHours(s), 0);
   const pendingHours = upcomingSessions.reduce((sum, s) => sum + calcSessionHours(s), 0);
 
-  const hourPrice = teacher.hour_price || 0;
+  const hourPrice = activeTeacher.hour_price || 0;
   const totalEarnings = completedHours * hourPrice;
   const pendingEarnings = pendingHours * hourPrice;
   const totalOwed = totalHours * hourPrice;
 
   const currencies = currenciesData?.currencies || [];
   const teacherCurrency = currencies.find(
-    (c: Currency) => c.id === teacher.currencyId
+    (c: Currency) => c.id === activeTeacher.currencyId
   );
   const currencySymbol = teacherCurrency?.symbol || teacherCurrency?.code || 'EGP';
   // Safe subject extraction
-  const subjects = (teacher.teacherSubjects || []).map((s: any) => {
+  const subjects = (activeTeacher.teacherSubjects || []).map((s: any) => {
     if (s.subject) {
       return s.subject.name_ar || s.subject.name_en || s.subject.name || '';
     }
@@ -65,7 +69,12 @@ export default function ViewTeacherModal({ isOpen, onClose, teacher }: ViewTeach
     <div className="fixed inset-0  !mt-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
       <div className="bg-white rounded-2xl shadow-2xl w-full max-w-5xl max-h-[90vh]  overflow-y-auto no-scrollbar" dir={language === "ar" ? "rtl" : "ltr"}>
         <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between rounded-t-2xl z-10" >
-          <h2 className="text-xl font-bold text-gray-900">{teacher.user?.name}</h2>
+          <div className="flex items-center gap-3">
+            <h2 className="text-xl font-bold text-gray-900">{activeTeacher.user?.name}</h2>
+            {isLoading && (
+              <div className="w-4 h-4 border-2 border-blue-600 border-t-transparent rounded-full animate-spin" title={t('loading') || 'Loading...'} />
+            )}
+          </div>
           <button onClick={onClose} className="p-2 hover:bg-gray-100 rounded-lg transition-colors">
             <X className="w-5 h-5 text-gray-500" />
           </button>
@@ -75,16 +84,16 @@ export default function ViewTeacherModal({ isOpen, onClose, teacher }: ViewTeach
             <div className="w-24 h-24 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center mb-4 shadow-lg">
               <GraduationCap className="w-12 h-12 text-white" />
             </div>
-            <h3 className="text-2xl font-bold text-gray-900 mb-2">{teacher.user?.name}</h3>
+            <h3 className="text-2xl font-bold text-gray-900 mb-2">{activeTeacher.user?.name}</h3>
 
             <div className="flex items-center gap-4 mb-4 flex-wrap justify-center">
-              <a href={`tel:${teacher.user?.code_country}${teacher.user?.phone}`} className="flex items-center gap-2 text-gray-600 hover:text-blue-600 transition-colors">
+              <a href={`tel:${activeTeacher.user?.code_country}${activeTeacher.user?.phone}`} className="flex items-center gap-2 text-gray-600 hover:text-blue-600 transition-colors">
                 <Phone className="w-4 h-4" />
-                <span className="text-sm">{teacher.user?.code_country} {teacher.user?.phone}</span>
+                <span className="text-sm">{activeTeacher.user?.code_country} {activeTeacher.user?.phone}</span>
               </a>
-              <a href={`mailto:${teacher.user?.email}`} className="flex items-center gap-2 text-gray-600 hover:text-blue-600 transition-colors">
+              <a href={`mailto:${activeTeacher.user?.email}`} className="flex items-center gap-2 text-gray-600 hover:text-blue-600 transition-colors">
                 <Mail className="w-4 h-4" />
-                <span className="text-sm">{teacher.user?.email}</span>
+                <span className="text-sm">{activeTeacher.user?.email}</span>
               </a>
             </div>
 
@@ -97,10 +106,10 @@ export default function ViewTeacherModal({ isOpen, onClose, teacher }: ViewTeach
             </div>
 
             <div className="flex gap-4 items-center flex-wrap justify-center">
-              <div className={`rounded-xl px-6 py-3 text-center border ${teacher.active ? 'bg-green-50 border-green-100' : 'bg-gray-50 border-gray-200'}`}>
+              <div className={`rounded-xl px-6 py-3 text-center border ${activeTeacher.active ? 'bg-green-50 border-green-100' : 'bg-gray-50 border-gray-200'}`}>
                 <p className="text-xs text-gray-500 mb-1">{t('status')}</p>
-                <p className={`text-lg font-bold ${teacher.active ? 'text-green-700' : 'text-gray-600'}`}>
-                  {teacher.active ? t('active') : t('inactive')}
+                <p className={`text-lg font-bold ${activeTeacher.active ? 'text-green-700' : 'text-gray-600'}`}>
+                  {activeTeacher.active ? t('active') : t('inactive')}
                 </p>
               </div>
               <div className="bg-blue-50 rounded-xl px-6 py-3 text-center border border-blue-100">

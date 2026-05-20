@@ -1,10 +1,19 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
-import { getAllWithdrawals, getTransactions, updateWithdrawalStatus } from "../services/TransactionServices"
+import { getAllWithdrawals, getTransactions, getTransactionStats, updateWithdrawalStatus } from "../services/TransactionServices"
 
-export const useTransactions = () => {
+export const useTransactions = (currencyId: string) => {
     return useQuery({
-        queryKey: ["transactions"],
-        queryFn: getTransactions,
+        queryKey: ["transactions", currencyId],
+        queryFn: () => getTransactions(currencyId),
+        enabled: !!currencyId,
+    })
+}
+
+export const useTransactionStats = (currencyId: string) => {
+    return useQuery({
+        queryKey: ["transaction-stats", currencyId],
+        queryFn: () => getTransactionStats(currencyId),
+        enabled: !!currencyId,
     })
 }
 
@@ -18,7 +27,7 @@ export const useWithdrawals = () => {
 export const useUpdateWithdrawal = () => {
     const queryClient = useQueryClient();
     return useMutation({
-        mutationFn: ({ id, status }: { id: string, status: 'approved' | 'rejected' }) => 
+        mutationFn: ({ id, status }: { id: string, status: 'approved' | 'rejected' }) =>
             updateWithdrawalStatus(id, status),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ["withdrawals"] });

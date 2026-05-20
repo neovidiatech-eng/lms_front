@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { createTeacher, deleteTeacher, getTeacher, getTeacherById, searchTeacher, updateTeacher } from "../services/TeacherServices"
-import { CreateTeacherInput, Teacher, TeachersData } from "../../../types/teachers"
+import { CreateTeacherInput , TeachersData, UpdateTeacherInput } from "../../../types/teachers"
 import { message } from "antd"
 
 export const useTeacher = (search?: string) => {
@@ -19,7 +19,7 @@ export const useTeacherById = (id?: string) => {
 export const useUpdateTeacher = () => {
     const queryClient = useQueryClient();
     return useMutation({
-        mutationFn: ({ id, data }: { id: string; data: CreateTeacherInput | Partial<Teacher> }) => updateTeacher(id, data),
+        mutationFn: ({ id, data }: { id: string; data: UpdateTeacherInput }) => updateTeacher(id, data),
         onSuccess: (data: any, variables) => {
             queryClient.invalidateQueries({ queryKey: ["teachers"] });
             queryClient.invalidateQueries({ queryKey: ["teachers", variables.id] });

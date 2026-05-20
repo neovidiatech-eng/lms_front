@@ -3,14 +3,17 @@ import { z } from "zod";
 type TFunc = (key: string, options?: any) => string;
 
 export const getCourseSchema = (t: TFunc) => z.object({
-  title: z.string().min(3, t("validation.min", { count: 3 })),
-  category: z.string().min(1, t("validation.required")),
-  levelId: z.number().min(1, t("validation.required")),
-  attachments: z.array(z.any()).optional().default([]),
-  description: z.string().optional().default(""),
-  videoUrl: z.string().optional().default(""),
-  thumbnailFile: z.any().nullable().optional(),
-  thumbnailPreview: z.string().optional().default(""),
+  title: z.string().trim().min(3, t("validation.min", { count: 3 })),
+  category: z.string().trim().min(1, t("validation.required")),
+  attachments: z.array(z.any()).optional(),
+  description: z.string().trim().min(1, t("validation.required")),
+  videoUrl: z.string().trim().url(t("validation.invalidUrl")),
+  pdfUrl: z.string().trim().url(t("validation.invalidUrl")),
+  thumbnailFile: z.any().nullable(),
+  thumbnailPreview: z.string().trim().optional(),
+}).refine((data) => data.thumbnailFile !== null || (data.thumbnailPreview && data.thumbnailPreview.trim() !== ""), {
+  message: t("validation.required"),
+  path: ["thumbnailFile"],
 });
 
 export type CourseFormData = z.infer<ReturnType<typeof getCourseSchema>>;

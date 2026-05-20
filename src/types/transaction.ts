@@ -1,38 +1,36 @@
-import { SubscriptionData } from "./subscription";
 
-export type TransactionType = 'credit' | 'subscription' | 'debit';
+export type TransactionType = 'credit' | 'subscription' | 'debit' | 'expense';
 export type TransactionStatus = 'completed' | 'pending' | 'failed';
-
-export interface Wallet {
-  id: string;
-  type: string; 
-  ownerId: string | null;
-  balance: number;
-  currencyId: string;
-  createdAt: string;
-  updatedAt: string;
-  userId: string | null;
-}
 
 export interface Transaction {
   id: string;
   walletId: string;
   type: TransactionType;
-  amount: number;
   status: TransactionStatus;
   reason: string;
-  subscriptionId: string | null;
-  expenseId: string | null;
   createdAt: string;
-  wallet: Wallet;
-  subscription: SubscriptionData; 
+  originalAmount: number;
+  convertedAmount: number;
+  currencyCode: string;
+  exchangeRateUsed: number;
+}
+
+export interface Pagination {
+  page: number;
+  limit: number;
+  totalItems: number;
+  totalPages: number;
+  hasNextPage: boolean;
 }
 
 export interface WalletHistoryResponse {
   message: string;
   status: number;
-  lang: 'ar' | 'en';
-  data: Transaction[];
+  lang: string;
+  data: {
+    transactions: Transaction[];
+    pagination: Pagination;
+  };
 }
 
 export type WithdrawalStatus = 'pending' | 'approved' | 'rejected' | 'completed';
@@ -52,6 +50,29 @@ export interface WithdrawalTeacher {
   googleId: string | null;
   provider: AuthProvider;
   password?: string;
+}
+
+export interface CurrencyBody {
+  name_en: string;
+  name_ar: string;
+  symbol: string;
+  code: string;
+  exchangeRate: number;
+}
+
+export interface TransactionStats {
+  totalRevenue: number;
+  totalExpenses: number;
+  netProfit: number;
+  completedTransactions: number;
+  pendingTransactions: number;
+}
+
+export interface TransactionStatsResponse {
+  message: string;
+  status: number;
+  lang: string;
+  data: TransactionStats;
 }
 
 export interface WithdrawalRequest {

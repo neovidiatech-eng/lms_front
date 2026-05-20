@@ -1,4 +1,4 @@
-import { X, DollarSign, TrendingUp, TrendingDown, Calendar, User } from 'lucide-react';
+import { X , TrendingUp, TrendingDown, Calendar, User } from 'lucide-react';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { Transaction } from '../../types/transaction';
 
@@ -31,20 +31,11 @@ export default function ViewTransactionModal({ isOpen, onClose, transaction, cur
     credit: { ar: 'إيداع', en: 'Credit' },
     debit: { ar: 'سحب', en: 'Debit' },
     subscription: { ar: 'اشتراك', en: 'Subscription' },
+    expense: { ar: 'مصروف', en: 'Expense' },
   };
 
-  const getExchangeRate = (fromCurrency: string, toCurrency: string): number => {
-    const from = currencies.find(c => c.code === fromCurrency);
-    const to = currencies.find(c => c.code === toCurrency);
-    if (!from || !to) return 1;
-    return from.rate / to.rate;
-  };
-
-  // Assuming API amount is in SAR for now, as currency symbols are not provided per transaction in the schema
-  const transactionCurrency = 'SAR';
-  const convertedAmount = transaction.amount * getExchangeRate(transactionCurrency, selectedCurrency);
   const currentSymbol = currencies.find(c => c.code === selectedCurrency)?.symbol || selectedCurrency;
-  const originalSymbol = currencies.find(c => c.code === transactionCurrency)?.symbol || transactionCurrency;
+  const originalSymbol = currencies.find(c => c.code === transaction.currencyCode)?.symbol || transaction.currencyCode;
 
   if (!isOpen) return null;
 
@@ -61,7 +52,7 @@ export default function ViewTransactionModal({ isOpen, onClose, transaction, cur
             </div>
             <div>
               <h2 className="text-xl font-bold">{text.title[language]}</h2>
-              <p className="text-sm opacity-80">{text[transaction.type] ? text[transaction.type][language] : transaction.type}</p>
+              <p className="text-sm opacity-80">{text[transaction.type as keyof typeof text] ? text[transaction.type as keyof typeof text][language] : transaction.type}</p>
             </div>
           </div>
           <button onClick={onClose} className="p-2 hover:bg-white hover:bg-opacity-20 rounded-lg">
@@ -73,11 +64,11 @@ export default function ViewTransactionModal({ isOpen, onClose, transaction, cur
           <div className={`rounded-xl p-5 text-center ${isIncome ? 'bg-green-50 border border-green-200' : 'bg-orange-50 border border-orange-200'}`}>
             <p className="text-sm text-gray-600 mb-2">{text.amount[language]}</p>
             <p className={`text-5xl font-bold ${isIncome ? 'text-green-600' : 'text-orange-600'}`}>
-              {transaction.amount.toFixed(2)} <span className="text-2xl">{originalSymbol}</span>
+              {(transaction.convertedAmount ?? 0).toFixed(2)} <span className="text-2xl">{currentSymbol}</span>
             </p>
-            {transactionCurrency !== selectedCurrency && (
+            {transaction.currencyCode !== selectedCurrency && (
               <p className="text-sm text-gray-500 mt-2">
-                {text.convertedAmount[language]}: <span className="font-semibold">{convertedAmount.toFixed(2)} {currentSymbol}</span>
+                {text.convertedAmount[language]}: <span className="font-semibold">{(transaction.originalAmount ?? 0).toFixed(2)} {originalSymbol}</span>
               </p>
             )}
             <span className={`inline-flex mt-3 px-3 py-1 rounded-full text-sm font-medium ${transaction.status === 'completed'
@@ -107,15 +98,6 @@ export default function ViewTransactionModal({ isOpen, onClose, transaction, cur
               <p className="font-semibold text-gray-900 truncate">{transaction.walletId}</p>
             </div>
 
-            {transaction.subscriptionId && (
-              <div className="bg-gray-50 rounded-xl p-4 border border-gray-200">
-                <div className="flex items-center gap-2 mb-2">
-                  <DollarSign className="w-4 h-4 text-gray-500" />
-                  <p className="text-sm text-gray-600">{text.subscriptionId[language]}</p>
-                </div>
-                <p className="font-semibold text-gray-900">{transaction.subscriptionId}</p>
-              </div>
-            )}
 
             <div className="bg-gray-50 rounded-xl p-4 border border-gray-200">
               <div className="flex items-center gap-2 mb-2">

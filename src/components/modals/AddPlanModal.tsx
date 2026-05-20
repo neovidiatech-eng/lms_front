@@ -256,11 +256,22 @@ export default function AddPlanModal({ isOpen, onClose, onSave, initialData }: A
               <label className="block text-sm font-medium text-gray-700 mb-2 text-start">
                 {text.sessionTime[language]}
               </label>
-              <input
-                type="number"
-                {...register('sessionTime', { valueAsNumber: true })}
-                className="w-full px-4 py-2.5 border rounded-lg text-start"
-              />
+<Controller
+  name="sessionTime"
+  control={control}
+  render={({ field }) => (
+    <CustomSelect
+      options={[
+        { label: t('30minutes'), value: 30 },
+        { label: t('60minutes'), value: 60 },
+        { label: t('90minutes'), value: 90 },
+        { label: t('120minutes'), value: 120 },
+      ]}  
+      className='text-start'
+      {...field}
+    />
+  )}
+/>
               {errors.sessionTime && (
                 <p className="text-red-500 text-sm mt-1 text-start">
                   {errors.sessionTime.message}

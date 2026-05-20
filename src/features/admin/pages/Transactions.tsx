@@ -2,7 +2,7 @@ import { useState, useMemo } from 'react';
 import { TrendingUp, TrendingDown, DollarSign, Search, Eye, RefreshCw } from 'lucide-react';
 import { useLanguage } from '../../../contexts/LanguageContext';
 import ViewTransactionModal from '../../../components/modals/ViewTransactionModal';
-import { useTransactions } from '../hooks/useTransaction';
+import { useTransactionStats, useTransactions } from '../hooks/useTransaction';
 import { Transaction, TransactionType } from '../../../types/transaction';
 import { useCurrency } from '../hooks/useCurrency';
 
@@ -15,11 +15,19 @@ export default function Transactions() {
   const [selectedTransaction, setSelectedTransaction] = useState<Transaction | null>(null);
   const [showViewModal, setShowViewModal] = useState(false);
   
-  const { data: response, isLoading, error } = useTransactions();
-  const transactions = response?.data || [];
+  const { data: currenciesData } = useCurrency();
+  
+  const selectedCurrencyId = useMemo(() => {
+    const curr = currenciesData?.currencies?.find(c => c.code === selectedCurrency);
+    return curr?.id || '';
+  }, [currenciesData, selectedCurrency]);
 
-    const { data: currenciesData } = useCurrency();
-    
+  const { data: response, isLoading: transactionsLoading, error } = useTransactions(selectedCurrencyId);
+  const transactions = response?.data?.transactions || [];
+
+  const { data: statsData, isLoading: statsLoading } = useTransactionStats(selectedCurrencyId);
+
+
     const CURRENCIES = useMemo(() => {
     if (!currenciesData?.currencies) return [];
     return currenciesData.currencies.map(c => ({
@@ -63,18 +71,6 @@ export default function Transactions() {
     error: { ar: 'حدث خطأ أثناء تحميل البيانات', en: 'Error loading data' }
   };
 
-  const getExchangeRate = (fromCurrency: string, toCurrency: string): number => {
-    const from = CURRENCIES.find(c => c.code === fromCurrency);
-    const to = CURRENCIES.find(c => c.code === toCurrency);
-    if (!from || !to) return 1;
-    return from.rate / to.rate;
-  };
-
-  const convertAmount = (amount: number, fromCurrency: string): number => {
-    const rate = getExchangeRate(fromCurrency, selectedCurrency);
-    return amount * rate;
-  };
-
   const getTransactionLabel = (type: TransactionType) => {
     switch (type) {
       case 'credit': return text.credit[language];
@@ -95,23 +91,17 @@ export default function Transactions() {
   }, [transactions, searchQuery, filterStatus, filterType]);
 
   const stats = useMemo(() => {
-    const incomeTypes: TransactionType[] = ['credit', 'subscription'];
-    const expenseTypes: TransactionType[] = ['debit'];
-
-    const totalIncome = transactions
-      .filter(t => incomeTypes.includes(t.type))
-      .reduce((sum, t) => sum + convertAmount(t.amount, 'SAR'), 0); 
-
-    const totalExpenses = transactions
-      .filter(t => expenseTypes.includes(t.type))
-      .reduce((sum, t) => sum + convertAmount(t.amount, 'SAR'), 0);
-
-    const netProfit = totalIncome - totalExpenses;
-    const pendingCount = transactions.filter(t => t.status === 'pending').length;
-    const completedCount = transactions.filter(t => t.status === 'completed').length;
-
-    return { totalIncome, totalExpenses, netProfit, pendingCount, completedCount };
-  }, [transactions, selectedCurrency]);
+    if (statsData) {
+      return {
+        totalIncome: statsData.totalRevenue || 0,
+        totalExpenses: statsData.totalExpenses || 0,
+        netProfit: statsData.netProfit || 0,
+        pendingCount: statsData.pendingTransactions || 0,
+        completedCount: statsData.completedTransactions || 0,
+      };
+    }
+    return { totalIncome: 0, totalExpenses: 0, netProfit: 0, pendingCount: 0, completedCount: 0 };
+  }, [statsData]);
 
   const getCurrencySymbol = (code: string) => {
     return CURRENCIES.find(c => c.code === code)?.symbol || code;
@@ -125,7 +115,7 @@ export default function Transactions() {
   const currentSymbol = getCurrencySymbol(selectedCurrency);
   const profitPercentage = stats.totalIncome > 0 ? ((stats.netProfit / stats.totalIncome) * 100).toFixed(1) : '0.0';
 
-  if (isLoading) return <div className="p-6 text-center">{text.loading[language]}</div>;
+  if (transactionsLoading || statsLoading) return <div className="p-6 text-center">{text.loading[language]}</div>;
   if (error) return <div className="p-6 text-center text-red-600">{text.error[language]}</div>;
 
   return (
@@ -277,7 +267,7 @@ export default function Transactions() {
                     <td className="px-5 py-4 text-start">
                       <div className="flex items-center gap-1 justify-start">
                         <span className={`text-sm font-bold ${transaction.type === 'credit' || transaction.type === 'subscription' ? 'text-green-600' : 'text-orange-600'}`}>
-                          {convertAmount(transaction.amount, 'SAR').toFixed(2)}
+                          {(transaction.convertedAmount ?? 0).toFixed(2)}
                         </span>
                         <span className="text-xs text-gray-500">{currentSymbol}</span>
                       </div>

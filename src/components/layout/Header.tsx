@@ -6,7 +6,7 @@ import { disconnectSocket } from "../../utils/socket";
 
 interface HeaderProps {
   onMenuClick: () => void;
-  userRole: "admin" | "teacher" | "student";
+  userRole: "admin" | "teacher" | "student"| "parent";
   userName: string;
   userEmail: string;
   isCollapsed?: boolean;
@@ -23,10 +23,11 @@ export default function Header({
   const [showProfileMenu, setShowProfileMenu] = useState(false);
   const isRtl = language === "ar";
 
-  const roleSubtitle = {
+  const roleSubtitle: Record<"admin" | "teacher" | "student" | "parent", Record<string, string>> = {
     admin: { ar: "لوحة التحكم", en: "Control Panel" },
     teacher: { ar: "لوحة المعلم", en: "Teacher Panel" },
     student: { ar: "لوحة الطالب", en: "Student Panel" },
+    parent: { ar: "لوحة ولي الأمر", en: "Parent Panel" },
   };
 
   const notifications = [

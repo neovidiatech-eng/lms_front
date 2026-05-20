@@ -1,8 +1,17 @@
+export interface Permission {
+    id: string;
+    name: string;
+    code: string;
+    resource: string;
+    method: string;
+}
+
 export interface Role {
     id: string;
     name: string;
-    createdAt: string;
-    updatedAt: string;
+    permissions?: Permission[];
+    createdAt?: string;
+    updatedAt?: string;
 }
 
 export interface RolesResponse {

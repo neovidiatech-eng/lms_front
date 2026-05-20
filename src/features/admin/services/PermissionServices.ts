@@ -12,7 +12,7 @@ export const searchPermissions = async (search: string): Promise<PermissionRespo
 };
 
 export const addPermission = async (permission: CreatePermissionPayload): Promise<PermissionResponse> => {
-    const response = await api.post("/system/permissions/create", permission);
+    const response = await api.post("/system/permissions/", permission);
     return response.data;
 };
 
