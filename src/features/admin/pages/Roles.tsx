@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Trash2, Plus, Pencil, Search, ShieldCheck, Home } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import Pagination from "../../../components/ui/Pagination";
-import { useDeleteRole, useAddRole, useSearchRoles, useUpdateRole } from "../hooks/useRoles";
+import { useDeleteRole, useAddRole, useSearchRoles, useUpdateRole, useAddPermissionsToRole, useRevokePermissionsToRole } from "../hooks/useRoles";
 import AddRoleModal from "../../../components/modals/AddRoleModal";
 import { Role } from "../../../types/roles";
 import { RoleFormData } from "../../../lib/schemas/RoleSchema";
@@ -22,6 +22,8 @@ export default function Roles() {
     const { mutate: addRole, isPending: isAdding } = useAddRole();
     const { mutate: updateRole, isPending: isUpdating } = useUpdateRole();
     const { mutate: deleteRole } = useDeleteRole();
+    const { mutateAsync: assignPermissions } = useAddPermissionsToRole();
+    const { mutateAsync: revokePermissions } = useRevokePermissionsToRole();
     const { confirm, ConfirmDialog } = useConfirm();
 
     const itemsPerPage = 7;
@@ -61,19 +63,33 @@ export default function Roles() {
         setIsModalOpen(true);
     };
 
-    const handleSubmitRole = (data: RoleFormData) => {
+    const handleSubmitRole = async (data: RoleFormData) => {
         if (selectedRole) {
-            updateRole({
-                id: selectedRole.id,
-                role: { name: data.name },
-            }, {
-                onSuccess: () => {
-                    setIsModalOpen(false);
-                    setSelectedRole(null);
+            const permissionsToAdd = data.permissionIds?.filter(
+                (id: string) => !selectedRole.permissions?.some((p: any) => p.id === id)
+            ) || [];
+            const permissionsToRevoke = selectedRole.permissions?.filter(
+                (p: any) => !data.permissionIds?.includes(p.id)
+            ).map((p: any) => p.id) || [];
+            try {
+                const promises = [];
+                if (permissionsToAdd.length > 0) {
+                    promises.push(assignPermissions({ roleId: selectedRole.id, permissionIds: permissionsToAdd }));
                 }
-            });
+                if (permissionsToRevoke.length > 0) {
+                    promises.push(revokePermissions({ roleId: selectedRole.id, permissionIds: permissionsToRevoke }));
+                }
+                if (promises.length > 0) {
+                    await Promise.all(promises);
+                }
+
+                setIsModalOpen(false);
+                setSelectedRole(null);
+            } catch (error) {
+                console.error("Failed to update role permissions:", error);
+            }
         } else {
-            addRole({ name: data.name }, {
+            addRole({ name: data.name, permissionIds: data.permissionIds || [] }, {
                 onSuccess: () => {
                     setIsModalOpen(false);
                 }
@@ -115,27 +131,6 @@ export default function Roles() {
                 </button>
             </div>
 
-            {/* Stats Cards */}
-            {/* <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-                {stats.map((stat) => (
-                    <div
-                        key={stat.id}
-                        className={`${stat.bgColor} rounded-2xl p-6 border border-gray-100 hover:shadow-lg transition-shadow duration-300`}
-                    >
-                        <div className="flex items-center justify-between mb-4">
-                            <div className={`p-3 rounded-xl ${stat.bgColor.replace('50', '100')}`}>
-                                <stat.icon className={`w-6 h-6 ${stat.iconColor}`} />
-                            </div>
-                        </div>
-                        <div className="text-right">
-                            <p className={`text-4xl font-bold ${stat.valueColor} mb-2`}>
-                                {isLoading ? "..." : stat.value}
-                            </p>
-                            <p className="text-sm font-medium text-gray-700">{stat.label}</p>
-                        </div>
-                    </div>
-                ))}
-            </div> */}
 
             {/* Search Bar */}
             <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6">

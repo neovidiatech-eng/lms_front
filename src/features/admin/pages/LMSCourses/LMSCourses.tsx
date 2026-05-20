@@ -55,15 +55,19 @@ export default function LMSCoursesPage() {
   
   const courses = coursesResponse?.data?.items || [];
   const subjects = subjectsResponse?.subjects || [];
-const filters = courses.map((s)=>{
-  return {
-    id: s.subject.id,
-    name_en: s.subject.name_en,
-    name_ar: s.subject.name_ar
-  }
-})
-const uniqueFilters = [{ id: 'الكل', name_ar: 'الكل', name_en: 'All' },...new Set(filters)]
+const filters = courses.map((s) => ({
+  id: s.subject.id,
+  name_en: s.subject.name_en,
+  name_ar: s.subject.name_ar,
+}));
 
+const uniqueFilters = [
+  { id: "الكل", name_ar: "الكل", name_en: "All" },
+
+  ...Array.from(
+    new Map(filters.map((item) => [item.id, item])).values()
+  ),
+];
 
 
 

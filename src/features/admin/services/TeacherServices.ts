@@ -1,5 +1,5 @@
 import api from "../../../lib/axios"
-import { CreateTeacherInput, Teacher, TeachersData, TeachersFetchResponse } from "../../../types/teachers"
+import { CreateTeacherInput, Teacher, TeachersData, TeachersFetchResponse, UpdateTeacherInput } from "../../../types/teachers"
 
 export const getTeacher = async (): Promise<TeachersData> => {
     const response = await api.get("/teachers");
@@ -21,7 +21,7 @@ export const createTeacher = async (data: CreateTeacherInput): Promise<TeachersF
     return response.data
 }
 
-export const updateTeacher = async (id: string, data: CreateTeacherInput | Partial<Teacher>): Promise<TeachersFetchResponse> => {
+export const updateTeacher = async (id: string, data: UpdateTeacherInput): Promise<TeachersFetchResponse> => {
     const response = await api.patch(`/teachers/update/${id}`, data);
     return response.data
 }

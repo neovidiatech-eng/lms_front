@@ -1,3 +1,4 @@
+import { Currency } from "./currency";
 import { Schedule } from "./scheduales";
 
 export interface ProfileUser {
@@ -72,6 +73,8 @@ export interface Wallet {
   createdAt: string;
   updatedAt: string;
   userId: string;
+  currency: Currency;
+
 }
 export interface TeacherProfileStats {
   totalStudents: number;

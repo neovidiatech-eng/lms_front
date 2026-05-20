@@ -9,7 +9,7 @@ export interface CreateSchedulePayload {
     link: string;
     notes: string;
     start_time: string;
-    type: ScheduleType;
+    // type: ScheduleType;
     notification_Time: string;
 }
 
@@ -20,7 +20,7 @@ export interface UpdateSchedulePayload {
     notes: string;
     status: string;
     start_time: string;
-    type: ScheduleType;
+    // type: ScheduleType;
     notification_Time: string;
 }
 export type DayOfWeek =
@@ -45,7 +45,7 @@ export interface CreateRecurringSchedulePayload {
     startDate: string;
     endDate: string;
     notification_Time: string;
-    type: ScheduleType;
+    // type: ScheduleType;
 }
 
 // Aliases for Services
@@ -89,6 +89,7 @@ export interface Teacher {
     updatedAt: string;
     roleId: string | null;
     user: User;
+    meeting_link?: string;
 }
 
 export interface ScheduleSubject {

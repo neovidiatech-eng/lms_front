@@ -9,7 +9,6 @@ import {
 } from 'lucide-react';
 import { Spin } from 'antd';
 import { useTeacherProfile, useWithdrawals, useWithdrawRequest, useUpdateMeetingLink } from '../hooks/useTeacherProfile';
-import { useCurrencyById } from '../../admin/hooks/useCurrency';
 import WithdrawalModal from '../../../components/modals/WithdrawModal';
 
 // Internal Withdrawal Modal Component
@@ -30,7 +29,6 @@ export default function TeacherProfile() {
   const [newMeetingLink, setNewMeetingLink] = useState('');
   // const [isCopied, setIsCopied] = useState(false);
 
-  const { data: currency } = useCurrencyById(response?.data?.teacher?.wallet?.[0]?.currencyId);
 
   if (isLoading || isWithdrawalsLoading) {
     return (
@@ -53,8 +51,7 @@ export default function TeacherProfile() {
   const apiStats = profileData.stats;
   const wallet = teacher.wallet?.[0];
   const balance = wallet?.balance ?? 0;
-
-  const currencySymbol = currency?.symbol ?? '$';
+  const currencySymbol = wallet.currency.symbol;
 
   // Teacher Personal Info
   const teacherInfo = {
@@ -152,7 +149,7 @@ export default function TeacherProfile() {
               <div className="space-y-4 pt-4 border-t border-gray-50">
                 <div className="flex items-center gap-3 text-gray-700">
                   <DollarSign className="w-5 h-5 text-gray-400" />
-                  <span className="text-sm font-medium">{teacherInfo.hourPrice}$</span>
+                  <span className="text-sm font-medium">{teacherInfo.hourPrice} {currencySymbol}</span>
                 </div>
                 <div className="flex items-center gap-3 text-gray-700">
                   <Mail className="w-5 h-5 text-gray-400" />
@@ -300,9 +297,6 @@ export default function TeacherProfile() {
                   style={{ backgroundColor: settings.primaryColor }}
                 >
                   {isRtl ? 'طلب سحب رصيد' : 'Withdrawal Request'}
-                </button>
-                <button className="px-4 py-2 bg-gray-50 text-gray-700 hover:bg-gray-100 rounded-xl text-sm font-bold border border-gray-200 transition-colors">
-                  {isRtl ? 'التاريخ' : 'History'}
                 </button>
               </div>
             </div>

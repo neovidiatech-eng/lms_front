@@ -10,3 +10,8 @@ export const joinToSession = async (id:string)=>{
     const response = await api.post(`/schedules/${id}/join`);
     return response.data;
 }
+
+export const leaveSession = async (id:string) =>{
+    const response = await api.post(`/schedules/${id}/leave`);
+    return response.data;
+}

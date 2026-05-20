@@ -21,7 +21,8 @@ import {
   Package,
   Coins,
   ShieldCheck,
-  Repeat
+  Repeat,
+  KeyRound
 } from 'lucide-react';
 import TransactionRequests from "../../features/admin/pages/TransactionRequests";
 
@@ -60,6 +61,7 @@ const SubjectsPage = lazy(() => import("../../features/admin/pages/Subjects"));
 const LMSCoursesPage = lazy(() => import("../../features/admin/pages/LMSCourses/LMSCourses"));
 const SettingsPage = lazy(() => import("../../features/admin/pages/Settings"));
 const RolesPage = lazy(() => import("../../features/admin/pages/Roles"));
+const PermissionsPage = lazy(() => import("../../features/admin/pages/Permissions"));
 
 export const adminDashboardRoutes: RouteConfig[] = [
   {
@@ -207,11 +209,26 @@ export const adminDashboardRoutes: RouteConfig[] = [
     ],
   },
   {
-    id: 'roles',
+    id: 'roles-group',
     label: 'sidebar_roles',
     icon: ShieldCheck,
-    path: 'roles',
-    element: <RolesPage />
+    path: 'roles-group',
+    subItems: [
+      {
+        id: 'roles',
+        label: 'sidebar_roles',
+        icon: ShieldCheck,
+        path: 'roles',
+        element: <RolesPage />
+      },
+      {
+        id: 'permissions',
+        label: 'sidebar_permissions',
+        icon: KeyRound,
+        path: 'permissions',
+        element: <PermissionsPage />
+      },
+    ],
   },
   {
     id: "finance",

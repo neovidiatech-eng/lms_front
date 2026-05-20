@@ -1,16 +1,15 @@
 import { useState, useEffect } from 'react';
-import { Search, Eye, Video, Plus, X } from 'lucide-react';
+import { Search, Eye } from 'lucide-react';
 import Pagination from '../../../components/ui/Pagination';
 import { useTranslation } from 'react-i18next';
 import ViewSessionModal from '../../../components/modals/ViewSessionModal';
 import { Schedule } from '../../../types/scheduales';
 import { useSubjects } from '../../../features/admin/hooks/useSubjects';
 import { Subject } from '../../../types/subject';
-import { useJoinToSession, useUserSessions } from '../../../hooks/useSessions';
+import {  useUserSessions } from '../../../hooks/useSessions';
 import { TableSkeleton } from '../../../components/ui/CustomSkeleton';
 import { useSettings } from '../../../contexts/SettingsContext';
 import CreateRequestModal from '../../../components/modals/CreateRequestModal';
-import { leaveSession } from '../../../services/SessionsServices';
 
 export default function Sessions() {
   const { t, i18n } = useTranslation();
@@ -23,23 +22,15 @@ export default function Sessions() {
   const [groupedSessions, setGroupedSessions] = useState<Schedule[]>([]);
   const [now, setNow] = useState(new Date());
 
-  const { settings } = useSettings();
   const [isRequestModalOpen, setIsRequestModalOpen] = useState(false);
   const [sessionForRequest, setSessionForRequest] = useState<Schedule | null>(null);
-  const isRtl = language === 'ar';
 
   useEffect(() => {
     const timer = setInterval(() => setNow(new Date()), 30000);
     return () => clearInterval(timer);
   }, []);
 
-  const isJoinable = (startTime: string, endTime: string, link: string) => {
-    if (!link) return false;
-    const start = new Date(startTime);
-    const end = new Date(endTime);
-    const oneMinuteBefore = new Date(start.getTime() - 60000);
-    return now >= oneMinuteBefore && now <= end;
-  };
+
 
   useEffect(() => {
     if (searchTerm.length > 2) {
@@ -50,7 +41,6 @@ export default function Sessions() {
   }, [searchTerm]);
 
   const { data: allSchedules, isLoading } = useUserSessions(debouncedSearch);
-  const { mutateAsync: joinToSession, isPending: isJoining } = useJoinToSession();
 
   const itemsPerPage = 5;
 
@@ -187,7 +177,6 @@ export default function Sessions() {
                   <th className="px-6 py-4 text-start text-sm font-semibold text-gray-700">{t('duration')}</th>
                   <th className="px-6 py-4 text-start text-sm font-semibold text-gray-700">{t('status')}</th>
                   <th className="px-6 py-4 text-start text-sm font-semibold text-gray-700">{t('joinSession')}</th>
-                  <th className="px-6 py-4 text-start text-sm font-semibold text-gray-700">{t('leaveSession')}</th>
                   <th className="px-6 py-4 text-start text-sm font-semibold text-gray-700">{t('AddRequest')}</th>
                   <th className="px-6 py-4 text-start text-sm font-semibold text-gray-700">{t('actions')}</th>
                 </tr>
@@ -224,56 +213,7 @@ export default function Sessions() {
                           {t(session.status?.toLowerCase() || '')}
                         </span>
                       </td>
-                      <td className="px-6 py-4 text-start">
-                        <button
-                          onClick={async () => {
-                            try {
-                              await joinToSession(session.id);
-                              window.open(session.link, '_blank');
-                            } catch (error) {
-                              console.log(error);
-                            }
-                          }}
-                          disabled={isJoining || !isJoinable(session.start_time, session.end_time, session.link)}
-                          className={`flex items-center gap-2 px-4 py-2 rounded-xl transition-all font-medium ${isJoinable(session.start_time, session.end_time, session.link)
-                            ? 'bg-green-600 text-white hover:bg-green-700 shadow-sm hover:shadow-md'
-                            : 'bg-gray-100 text-gray-400 cursor-not-allowed opacity-60'
-                            } ${isJoining ? 'opacity-50 cursor-wait' : ''}`}
-                        >
-                          <Video className="w-4 h-4" />
-                          <span className="text-sm">{isJoining ? t('joining...') || 'Joining...' : t('joinSession')}</span>
-                        </button>
-                      </td>
 
-                        <td className="px-6 py-4 text-start">
-                                              <button
-                                                onClick={async () => {
-                                                  try {
-                                                    await leaveSession(session.id);
-                                                  } catch (error) {
-                                                    console.log(error);
-                                                  }
-                                                }}
-                                                className={`flex items-center gap-2 px-4 py-2 rounded-xl transition-all font-medium ${'bg-red-600 text-white hover:bg-red-700 shadow-sm hover:shadow-md'}`}
-                                              >
-                                                <X className="w-4 h-4" />
-                                                <span className="text-sm">{t('leaveSession')}</span>
-                                              </button>
-                                            </td>
-
-                      <td className="px-3 py-3 text-start">
-                        <button
-                          onClick={() => {
-                            setSessionForRequest(session);
-                            setIsRequestModalOpen(true);
-                          }}
-                          className="flex items-center gap-2 px-3 py-2 rounded-xl text-white font-normal transition-all hover:opacity-90 shadow-sm hover:shadow-md"
-                          style={{ backgroundColor: settings.primaryColor }}
-                        >
-                          <Plus className="w-5 h-5" />
-                          {isRtl ? 'تقديم طلب' : 'Add Request'}
-                        </button>
-                      </td>
                       <td className="px-6 py-4 text-start">
                         <div className="flex items-center gap-2 justify-start">
                           <button

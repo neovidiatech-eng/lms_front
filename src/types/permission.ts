@@ -1,8 +1,10 @@
 export interface Permission {
   id: string;
   name: string;
-  code: string;
-  action: string;
+  code?: string;
+  action?: string;
+  resource?: string;
+  method?: string;
 }
 
 export interface PermissionsData {
@@ -35,4 +37,17 @@ export interface PermissionsResponse {
   status: number;
   lang: string;
   data: PermissionsData;
+}
+
+export interface CreatePermissionPayload {
+  name: string;
+  resource: string;
+  method: string;
+}
+
+export interface PermissionResponse {
+  message: string;
+  status: number;
+  lang: string;
+  data: Permission;
 }

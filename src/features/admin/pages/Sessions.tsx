@@ -105,10 +105,14 @@ export default function Sessions() {
           startDate,
           endDate,
           notification_Time: formData.notification_Time || "10",
-          type: formData.type,
+          // type: formData.type,
         });
       } else {
         // Single Session Scheduling
+        const [year, month, day] = data.sessionDate.split("-").map(Number);
+        const [hour, minute] = data.startTime.split(":").map(Number);
+        const localDate = new Date(year, month - 1, day, hour, minute);
+
         await createSchedule.mutateAsync({
           studentId: data.student,
           teacherId: data.teacher,
@@ -117,8 +121,8 @@ export default function Sessions() {
           description: data.description || "",
           link: data.meetingLink || "",
           notes: data.notes || "",
-          start_time: `${data.sessionDate}T${data.startTime}:00.000Z`,
-          type: data.type,
+          start_time: localDate.toISOString(),
+          // type: data.type,
           notification_Time: data.notification_Time,
         });
       }
@@ -138,15 +142,15 @@ export default function Sessions() {
     }
   }, [searchTerm]);
 
-  const { data: searchResults } = useSearchSchedules(debouncedSearch);
+  const itemsPerPage = 10;
+  const { data: searchResults } = useSearchSchedules(debouncedSearch, currentPage, itemsPerPage);
 
-  const itemsPerPage = 5;
   const scheduleData: Schedule[] = searchResults?.data?.schedule ?? [];
 
   const groupedSchedules: Schedule[] = [];
   const seenParents = new Set<string>();
 
-  // Map each parent_recurring_id to all of its sessions in the list
+  // Map each parent_recurring_id to all of its sessions in the list 
   const parentGroups = new Map<string, Schedule[]>();
   scheduleData.forEach((schedule: Schedule) => {
     if (schedule.parent_recurring_id) {
@@ -194,13 +198,10 @@ export default function Sessions() {
     }
   });
 
-  const totalItems = groupedSchedules.length;
-  const totalPages = Math.ceil(totalItems / itemsPerPage);
+  const totalItems = searchResults?.data?.pagination?.totalItems || 0;
+  const totalPages = searchResults?.data?.pagination?.totalPages || 1;
 
-  const displaySchedules = groupedSchedules.slice(
-    (currentPage - 1) * itemsPerPage,
-    currentPage * itemsPerPage,
-  );
+  const displaySchedules = groupedSchedules;
 
   const handlePageChange = (page: number) => {
     setCurrentPage(page);

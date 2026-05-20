@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Search, Eye, Plus, Video } from 'lucide-react';
+import { Search, Eye, Plus, Video, X } from 'lucide-react';
 import Pagination from '../../../components/ui/Pagination';
 import { useTranslation } from 'react-i18next';
 import ViewSessionModal from '../../../components/modals/ViewSessionModal';
@@ -10,6 +10,7 @@ import { useJoinToSession, useUserSessions } from '../../../hooks/useSessions';
 import { TableSkeleton } from '../../../components/ui/CustomSkeleton';
 import CreateRequestModal from '../../../components/modals/CreateRequestModal';
 import { useSettings } from '../../../contexts/SettingsContext';
+import { leaveSession } from '../../../services/SessionsServices';
 
 
 
@@ -79,25 +80,36 @@ export default function Sessions() {
     setCurrentPage(page);
   };
 
-  const calculateDuration = (startTime: string, endTime: string) => {
+  const calculateDuration = (startTime: any, endTime: any) => {
     if (!startTime || !endTime) return 0;
-    if (startTime.includes("T") && endTime.includes("T")) {
-      const start = new Date(startTime).getTime();
-      const end = new Date(endTime).getTime();
-      if (!isNaN(start) && !isNaN(end)) {
-        return Math.max(0, Math.round((end - start) / 60000));
-      }
+    
+    // Check if they are full ISO/Date strings by trying to parse them with Date
+    const start = new Date(startTime).getTime();
+    const end = new Date(endTime).getTime();
+    
+    if (!isNaN(start) && !isNaN(end)) {
+      return Math.max(0, Math.round((end - start) / 60000));
     }
-    const startParts = startTime.split(":").map(Number);
-    const endParts = endTime.split(":").map(Number);
-    if (startParts.length >= 2 && endParts.length >= 2) {
-      const startTotal = startParts[0] * 60 + startParts[1];
-      const endTotal = endParts[0] * 60 + endParts[1];
-      let duration = endTotal - startTotal;
-      if (duration < 0) duration += 24 * 60;
-      return duration;
+    
+    // If not parseable as full dates, fall back to "HH:MM" string split
+    try {
+      const getMinutes = (timeStr: string) => {
+        // If it contains "T", extract the time part first
+        const cleanTime = timeStr.includes("T") ? timeStr.split("T")[1] : timeStr;
+        const parts = cleanTime.split(":");
+        const h = Number(parts[0]) || 0;
+        const m = Number(parts[1]) || 0;
+        return h * 60 + m;
+      };
+      
+      const startTotal = getMinutes(String(startTime));
+      const endTotal = getMinutes(String(endTime));
+      let diff = endTotal - startTotal;
+      if (diff < 0) diff += 24 * 60;
+      return diff;
+    } catch {
+      return 0;
     }
-    return 0;
   };
 
   const formatDateTime = (dateString: string) => {
@@ -202,6 +214,7 @@ export default function Sessions() {
                   <th className="px-6 py-4 text-start text-sm font-semibold text-gray-700">{t('duration')}</th>
                   <th className="px-6 py-4 text-start text-sm font-semibold text-gray-700">{t('status')}</th>
                   <th className="px-6 py-4 text-start text-sm font-semibold text-gray-700">{t('joinSession')}</th>
+                  <th className="px-6 py-4 text-start text-sm font-semibold text-gray-700">{t('leaveSession')}</th>
                   <th className="px-6 py-4 text-start text-sm font-semibold text-gray-700">{t('AddRequest')}</th>
                   <th className="px-6 py-4 text-start text-sm font-semibold text-gray-700">{t('actions')}</th>
                 </tr>
@@ -282,6 +295,22 @@ export default function Sessions() {
                         >
                           <Video className="w-4 h-4" />
                           <span className="text-sm">{isJoining ? t('joining...') || 'Joining...' : t('joinSession')}</span>
+                        </button>
+                      </td>
+
+                        <td className="px-6 py-4 text-start">
+                        <button
+                          onClick={async () => {
+                            try {
+                              await leaveSession(session.id);
+                            } catch (error) {
+                              console.log(error);
+                            }
+                          }}
+                          className={`flex items-center gap-2 px-4 py-2 rounded-xl transition-all font-medium ${'bg-red-600 text-white hover:bg-red-700 shadow-sm hover:shadow-md'}`}
+                        >
+                          <X className="w-4 h-4" />
+                          <span className="text-sm">{t('leaveSession')}</span>
                         </button>
                       </td>
 

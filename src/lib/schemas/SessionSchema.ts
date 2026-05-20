@@ -9,7 +9,7 @@ const getBaseSession = (t: TFunc) => z.object({
   subject: z.string().min(1, t("validation.required")),
   title: z.string().min(3, t("validation.min", { count: 3 })),
   description: z.string().min(5, t("validation.required")),
-  type: z.enum(['full', 'half']),
+  // type: z.enum(['full', 'half']),
   notification_Time: z.string(),
   meetingLink: z.string().min(1, t("validation.required")).url(t("validation.email")),
   notes: z.string().min(10, t("validation.min", { count: 10 })),

@@ -35,11 +35,9 @@ import { useTranslation } from 'react-i18next';
 // Sub-components
 import StudentPlanCard from './add-session/StudentPlanCard';
 import SchedulingSettings from './add-session/SchedulingSettings';
-import TypeSelector from './add-session/TypeSelector';
 import SessionPreview from './add-session/SessionPreview';
 import ModalStyles from './add-session/ModalStyles';
-import { useSubjects } from '../../features/admin/hooks/useSubjects';
-import { Subject } from '../../types/subject';
+import { TeacherSubject } from '../../types/teachers';
 
 interface AddSessionModalProps {
   isOpen: boolean;
@@ -72,17 +70,9 @@ export default function AddSessionModal({
 
   const { data: students } = useStudents();
   const { data: instructors } = useTeacher();
-  const { data: subjectData } = useSubjects();
 
   const singleSchema = getSessionSchema(t);
   const batchSchema = getMultipleSessionsSchema(t);
-
-  const subjects: Subject[] = subjectData?.subjects || [];
-
-  const subjectOptions = subjects.map((subject: Subject) => ({
-    value: String(subject.id),
-    label: language === 'ar' ? subject.name_ar : (subject.name_en || subject.name_ar),
-  }));
 
   const {
     register,
@@ -136,6 +126,7 @@ export default function AddSessionModal({
   const watchStudent = watch('student');
   const watchType = watch('type') as 'full' | 'half';
   const watchStartTime = watch('startTime');
+  const watchTeacher = watch('teacher');
 
   const watchSelectedDays =
     (watch('selectedDays') as DayOfWeek[]) || [];
@@ -174,6 +165,33 @@ export default function AddSessionModal({
     );
   }, [watchStudent, students]);
 
+  const selectedTeacherData = useMemo(() => {
+    if (!watchTeacher || !instructors?.teachers) return null;
+
+    return (
+      instructors.teachers.find(
+        (t: Teacher) => String(t.id) === String(watchTeacher)
+      ) || null
+    );
+  }, [watchTeacher, instructors]);
+
+  const subjects: TeacherSubject[] = useMemo(() => {
+    return selectedTeacherData?.teacherSubjects || [];
+  }, [selectedTeacherData]);
+
+  const subjectOptions = useMemo(() => {
+    return subjects.map((subject: TeacherSubject) => ({
+      value: String(subject.subject.id),
+      label: language === 'ar' ? subject.subject.name_ar : (subject.subject.name_en || subject.subject.name_ar),
+    }));
+  }, [subjects, language]);
+
+  useEffect(() => {
+    if (selectedTeacherData) {
+      setValue('meetingLink', selectedTeacherData.meeting_link || '');
+    }
+  }, [selectedTeacherData, setValue]);
+
   const studentPlanInfo = useMemo(() => {
     if (!selectedStudentData) return null;
 
@@ -188,12 +206,11 @@ export default function AddSessionModal({
   }, [selectedStudentData]);
 
   const selectedSubject = useMemo(() => {
-    return (
-      subjects.find(
-        (subject: Subject) =>
-          String(subject.id) === String(watchSubject)
-      ) || null
+    const found = subjects.find(
+      (subject: TeacherSubject) =>
+        String(subject.subject.id) === String(watchSubject)
     );
+    return found ? found.subject : null;
   }, [subjects, watchSubject]);
 
   const previewSessions = useMemo(() => {
@@ -566,10 +583,7 @@ export default function AddSessionModal({
               />
             </div>
 
-            <TypeSelector
-              watchType={watchType}
-              setValue={setValue}
-            />
+
 
             {/* Footer Buttons */}
             <div className="flex items-center justify-end gap-4">

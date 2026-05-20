@@ -19,6 +19,8 @@ import { TableSkeleton } from "../../../components/ui/CustomSkeleton";
 import { useExpenses, useCreateExpense, useUpdateExpense, useDeleteExpense } from "../hooks/useExpenses";
 import { Expense } from "../../../types/expenses";
 import { message } from "antd";
+import { useCurrency } from "../hooks/useCurrency";
+import { Currency } from "../../../types/currency";
 
 export default function Expenses() {
   const { language } = useLanguage();
@@ -69,6 +71,13 @@ export default function Expenses() {
     other: { ar: "أخرى", en: "Other" },
     allStatuses: { ar: "كل الحالات", en: "All Statuses" },
   };
+
+  const {data: currenciesData} = useCurrency();
+
+  const defaultCurrency = currenciesData?.currencies.find((c: Currency) => c.default);
+  console.log(defaultCurrency);
+
+  
 
   const handleSaveExpense = async (expenseData: any) => {
     try {
@@ -158,7 +167,7 @@ export default function Expenses() {
               <h2 className="text-4xl font-bold text-gray-900">
                 {totalAmount.toLocaleString()}
               </h2>
-              <span className="text-sm font-medium text-gray-400">USD</span>
+              <span className="text-sm font-medium text-gray-400">{defaultCurrency?.symbol}</span>
             </div>
           </div>
         </div>

@@ -135,6 +135,7 @@ const CourseFormFields = ({
             </div>
           )}
         </div>
+        {errors.thumbnailFile && <p className="text-red-500 text-xs mt-1 text-start">{errors.thumbnailFile.message as string}</p>}
         <input ref={thumbnailInputRef} type="file" accept="image/*" className="hidden" onChange={handleThumbnailChange} />
       </div>
 
