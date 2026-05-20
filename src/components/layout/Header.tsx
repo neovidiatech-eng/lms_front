@@ -57,7 +57,7 @@ export default function Header({
 
   return (
     <header
-      className={`bg-white border-b border-gray-200 sticky top-0 z-40 transition-all duration-300 ${
+      className={`bg-white border-b border-gray-200 sticky top-0 z-40 transition-all duration-300 ${role === "parent" ?"!ms-0" : ""} ${
         isRtl
           ? isCollapsed
             ? "lg:mr-20"

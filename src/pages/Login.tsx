@@ -64,6 +64,9 @@ export default function Login({ onLoginSuccess }: LoginProps) {
           navigate("/teacher-dashboard");
         } else if (role === "student") {
           navigate("/student-dashboard");
+        }else if (role==="parent") {
+
+          navigate("/parent-dashboard");
         } else {
           navigate("/dashboard");
         }
@@ -193,13 +196,24 @@ export default function Login({ onLoginSuccess }: LoginProps) {
                 try {
                   const result = await googleLogin({ idToken, provider: "google" });
                   const token = result.data?.accessToken || result.accessToken;
+                  const role = result.data?.role || result.role;
 
                   if (token) {
                     localStorage.setItem("token", token);
+                    localStorage.setItem("role", role);
                     connectSocket(token);
                     onLoginSuccess();
                     message.success(result.message || t('loginSuccess'));
-                    navigate("/dashboard");
+
+                    if (role === "teacher") {
+                      navigate("/teacher-dashboard");
+                    } else if (role === "student") {
+                      navigate("/student-dashboard");
+                    } else if (role === "parent") {
+                      navigate("/parent-dashboard");
+                    } else {
+                      navigate("/dashboard");
+                    }
                   }
                 } catch (error) {
                   console.error("Google Login failed:", error);

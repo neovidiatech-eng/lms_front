@@ -31,6 +31,7 @@ import GuestGuard from './components/guards/GuestGuard';
 import { Provider } from "react-redux";
 import { store } from './store/store';
 import { useChatSocket } from './hooks/useChat';
+const ParentDashboard = lazy(() => import('./features/parent/pages/ParentDashboard'));
 
 // Centralized Loading Fallback UI
 const LoadingFallback = () => (
@@ -108,6 +109,10 @@ function SocketProvider() {
 
                       <Route element={<AuthGuard allowedRoles={['teacher']} />}>
                         <Route path="/teacher-dashboard/*" element={<TeacherDashboard />} />
+                      </Route>
+
+                      <Route element={<AuthGuard allowedRoles={['parent']} />}>
+                        <Route path="/parent-dashboard/*" element={<ParentDashboard />} />
                       </Route>
 
 

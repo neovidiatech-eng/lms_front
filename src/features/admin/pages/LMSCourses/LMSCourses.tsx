@@ -14,8 +14,7 @@ import { baseURL } from '../../../../consts';
 
 import { useConfirm } from "../../../../hooks/useConfirm";
 
-// Remove static subjectCategories
-// const subjectCategories = ['الكل', ...];
+
 
 export function getVideoEmbed(url: string): string | null {
   if (!url) return null;
@@ -137,6 +136,37 @@ const uniqueFilters = [
   };
 
   const openEdit = (course: CourseItem) => {
+    const normalizeCourseAttachments = (att: CourseItem['attatchments']) => {
+      if (!att) return [];
+      if (Array.isArray(att)) return att;
+      if (typeof att === 'string') {
+        const url = att.startsWith('http') ? att : `${baseURL}/${att}`;
+        return [
+          {
+            id: Math.random(),
+            name: att.split('/').pop() || 'ملف مرفق',
+            size: 0,
+            type: '',
+            url,
+          },
+        ];
+      }
+      const url = att.url
+        ? att.url.startsWith('http')
+          ? att.url
+          : `${baseURL}/${att.url}`
+        : '';
+      return [
+        {
+          id: att.id ?? Math.random(),
+          name: att.name || 'ملف مرفق',
+          size: att.size ?? 0,
+          type: att.type ?? '',
+          url,
+        },
+      ];
+    };
+
     reset({
       title: course.title,
       description: course.description,
@@ -145,7 +175,7 @@ const uniqueFilters = [
       pdfUrl: course.pdfurl,
       thumbnailFile: null,
       thumbnailPreview: course.image,
-      attachments: course.attatchments ? [course.attatchments] : [],
+      attachments: normalizeCourseAttachments(course.attatchments),
     });
     setEditCourse(course);
     setOpenMenuId(null);
@@ -166,7 +196,7 @@ const uniqueFilters = [
     if (data.attachments && data.attachments.length > 0) {
       data.attachments.forEach(att => {
         if (att.file instanceof File) {
-          formData.append('attatchments', att.file);
+          formData.append('attachments', att.file);
         }
       });
     }
@@ -270,7 +300,7 @@ const uniqueFilters = [
 
       {/* Results bar */}
       <div className="flex items-center justify-between">
-        <p className="text-sm text-gray-500">{filtered.length} </p>
+        <p className="text-sm text-gray-500"> {isRtl ? "عدد الكورسات:" : "Total Courses:"} {filtered.length} </p>
         < div className="flex gap-1 bg-gray-100 rounded-lg p-1" >
           <button onClick={() => setViewMode('grid')} className={`px-3 py-1.5 rounded-md text-xs font-medium transition-colors ${viewMode === 'grid' ? 'bg-white shadow-sm text-gray-800' : 'text-gray-500'}`}>{t('grid')}</button>
           <button onClick={() => setViewMode('list')} className={`px-3 py-1.5 rounded-md text-xs font-medium transition-colors ${viewMode === 'list' ? 'bg-white shadow-sm text-gray-800' : 'text-gray-500'}`}>{t('list')}</button>

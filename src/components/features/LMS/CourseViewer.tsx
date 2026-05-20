@@ -18,6 +18,51 @@ interface Props {
   onBack: () => void;
 }
 
+type RawAttachment = string | AttachedFile | AttachedFile[] | null;
+
+function normalizeSingleAttachment(
+  attachment: string | AttachedFile,
+  index: number,
+): AttachedFile {
+  if (typeof attachment === "string") {
+    const url = attachment.startsWith("http")
+      ? attachment
+      : `${baseURL}/${attachment}`;
+
+    return {
+      id: index + 1,
+      name: "ملف مرفق",
+      size: 0,
+      type: "",
+      url,
+    };
+  }
+
+  const url = attachment.url
+    ? attachment.url.startsWith("http")
+      ? attachment.url
+      : `${baseURL}/${attachment.url}`
+    : "";
+
+  return {
+    id: attachment.id ?? index + 1,
+    name: attachment.name || "ملف مرفق",
+    size: attachment.size ?? 0,
+    type: attachment.type ?? "",
+    url,
+  };
+}
+
+function normalizeAttachments(attachment: RawAttachment): AttachedFile[] {
+  if (!attachment) return [];
+
+  if (Array.isArray(attachment)) {
+    return attachment.map((item, index) => normalizeSingleAttachment(item, index));
+  }
+
+  return [normalizeSingleAttachment(attachment, 0)];
+}
+
 function formatFileSize(bytes: number): string {
   if (bytes < 1024) return bytes + " B";
   if (bytes < 1024 * 1024)
@@ -37,23 +82,28 @@ function getFileIcon(type: string) {
 function normalizeVideoUrl(url: string) {
   if (!url) return "";
 
+  // google drive
+  const driveMatch = url.match(/(?:drive\.google\.com\/file\/d\/|drive\.google\.com\/open\?id=)([a-zA-Z0-9_-]+)/);
+  if (driveMatch) {
+    const fileId = driveMatch[1];
+    return `https://drive.google.com/file/d/${fileId}/preview`;
+  }
+
   // youtube
   const youtubeMatch = url.match(
     /(?:youtube\.com\/watch\?v=|youtu\.be\/)([^&]+)/,
   );
-
   if (youtubeMatch) {
     return `https://www.youtube.com/embed/${youtubeMatch[1]}`;
   }
 
   // vimeo
   const vimeoMatch = url.match(/vimeo\.com\/(\d+)/);
-
   if (vimeoMatch) {
     return `https://player.vimeo.com/video/${vimeoMatch[1]}`;
   }
 
-  // mp4 or direct url
+  // direct url (http/https) or relative path
   return url.startsWith("http")
     ? url
     : `${baseURL}/${url}`;
@@ -104,23 +154,11 @@ export default function CourseViewer({
     ? `${baseURL}/${course.image}`
     : ytThumb;
 
-  const attachmentsList = [];
-
-  if (course.attatchments) {
-    attachmentsList.push({
-      id: 1,
-      name: "ملف مرفق",
-      size: 0,
-      type: "",
-      url: course.attatchments.startsWith("http")
-        ? course.attatchments
-        : `${baseURL}/${course.attatchments}`,
-    });
-  }
+  const attachmentsList = normalizeAttachments(course.attatchments);
 
   if (course.pdfurl) {
     attachmentsList.push({
-      id: 2,
+      id: attachmentsList.length + 1,
       name: "ملف PDF",
       size: 0,
       type: "application/pdf",
@@ -155,20 +193,9 @@ export default function CourseViewer({
       {/* Video */}
       <div className="overflow-hidden rounded-2xl bg-black shadow-lg">
         {course.videoUrl ? (
-          finalVideoUrl.includes(".mp4") ? (
-            <video
-              controls
-              className="max-h-[500px] w-full object-contain"
-              poster={displayThumb || undefined}
-            >
-              <source
-                src={finalVideoUrl}
-                type="video/mp4"
-              />
-
-              Your browser does not support video.
-            </video>
-          ) : (
+          finalVideoUrl.includes("drive.google.com") ||
+          finalVideoUrl.includes("youtube.com") ||
+          finalVideoUrl.includes("vimeo.com") ? (
             <div
               className="relative w-full"
               style={{ paddingBottom: "56.25%" }}
@@ -181,6 +208,19 @@ export default function CourseViewer({
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
               />
             </div>
+          ) : (
+            <video
+              controls
+              className="max-h-[500px] w-full object-contain"
+              poster={displayThumb || undefined}
+            >
+              <source src={finalVideoUrl} type="video/mp4" />
+              <source src={finalVideoUrl} type="video/webm" />
+              <source src={finalVideoUrl} type="video/ogg" />
+              <source src={finalVideoUrl} type="video/quicktime" />
+
+              Your browser does not support video.
+            </video>
           )
         ) : displayThumb ? (
           <div className="relative">

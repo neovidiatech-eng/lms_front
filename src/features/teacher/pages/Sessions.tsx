@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Search, Eye, Plus, Video, X } from 'lucide-react';
+import { Search, Eye, Plus, Video, X, MessageSquare } from 'lucide-react';
 import Pagination from '../../../components/ui/Pagination';
 import { useTranslation } from 'react-i18next';
 import ViewSessionModal from '../../../components/modals/ViewSessionModal';
@@ -9,6 +9,7 @@ import { Subject } from '../../../types/subject';
 import { useJoinToSession, useUserSessions } from '../../../hooks/useSessions';
 import { TableSkeleton } from '../../../components/ui/CustomSkeleton';
 import CreateRequestModal from '../../../components/modals/CreateRequestModal';
+import FeedbackModal from '../components/FeedbackModal';
 import { useSettings } from '../../../contexts/SettingsContext';
 import { leaveSession } from '../../../services/SessionsServices';
 
@@ -24,6 +25,8 @@ export default function Sessions() {
   const [selectedSession, setSelectedSession] = useState<Schedule | null>(null);
   const [groupedSessions, setGroupedSessions] = useState<Schedule[]>([]);
   const [now, setNow] = useState(new Date());
+  const [showFeedbackModal, setShowFeedbackModal] = useState(false);
+  const [sessionForFeedback, setSessionForFeedback] = useState<Schedule | null>(null);
 
   const { settings } = useSettings();
   const [isRequestModalOpen, setIsRequestModalOpen] = useState(false);
@@ -307,10 +310,14 @@ export default function Sessions() {
                               console.log(error);
                             }
                           }}
-                          className={`flex items-center gap-2 px-4 py-2 rounded-xl transition-all font-medium ${'bg-red-600 text-white hover:bg-red-700 shadow-sm hover:shadow-md'}`}
+                          disabled={session.status?.toLowerCase() === 'completed'}
+                          className={`flex items-center gap-2 px-4 py-2 rounded-xl transition-all font-medium ${session.status?.toLowerCase() === 'completed'
+                            ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                            : 'bg-red-600 text-white hover:bg-red-700 shadow-sm hover:shadow-md'
+                          }`}
                         >
                           <X className="w-4 h-4" />
-                          <span className="text-sm">{t('leaveSession')}</span>
+                          <span className="text-sm">{t('endSession') || 'End Session'}</span>
                         </button>
                       </td>
 
@@ -344,7 +351,16 @@ export default function Sessions() {
                             <Eye className="w-4 h-4" />
                           </button>
 
-
+                          <button
+                            onClick={() => {
+                              setSessionForFeedback(session);
+                              setShowFeedbackModal(true);
+                            }}
+                            className="p-2 icon-btn-primary rounded-lg transition-colors"
+                            title={t('feedback') || 'Feedback'}
+                          >
+                            <MessageSquare className="w-4 h-4" />
+                          </button>
                         </div>
                       </td>
                     </tr>
@@ -387,6 +403,16 @@ export default function Sessions() {
         sessionId={sessionForRequest?.id}
         sessionTitle={sessionForRequest?.title}
       />
+
+ <FeedbackModal
+  visible={showFeedbackModal}
+  onClose={() => {
+    setShowFeedbackModal(false);
+    setSessionForFeedback(null);
+  }}
+  sessionId={sessionForFeedback?.id || ""}
+  sessionTitle={sessionForFeedback?.title || ""}
+/>
     </div>
   );
 }

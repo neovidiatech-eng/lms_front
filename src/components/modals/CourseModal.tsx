@@ -8,6 +8,8 @@ import { CourseFormData, getCourseSchema } from '../../lib/schemas/CourseSchema'
 import { useTranslation } from 'react-i18next';
 import CourseFormFields from '../../features/admin/pages/LMSCourses/components/CourseFormFields';
 import { CourseItem } from '../../types/course';
+import { AttachedFile } from '../../types/lmsCourses';
+import { baseURL } from '../../consts';
 
 interface CourseModalProps {
   isOpen: boolean;
@@ -15,6 +17,42 @@ interface CourseModalProps {
   onSubmit: (data: CourseFormData) => void;
   course?: CourseItem | null;
   subjectCategories: { id: string; name: string }[];
+}
+
+type RawCourseAttachment = CourseItem['attatchments'];
+
+function normalizeCourseAttachments(att: RawCourseAttachment): AttachedFile[] {
+  if (!att) return [];
+  if (Array.isArray(att)) return att;
+
+  if (typeof att === 'string') {
+    const url = att.startsWith('http') ? att : `${baseURL}/${att}`;
+    return [
+      {
+        id: Math.random(),
+        name: att.split('/').pop() || 'ملف مرفق',
+        size: 0,
+        type: '',
+        url,
+      },
+    ];
+  }
+
+  const url = att.url
+    ? att.url.startsWith('http')
+      ? att.url
+      : `${baseURL}/${att.url}`
+    : '';
+
+  return [
+    {
+      id: att.id ?? Math.random(),
+      name: att.name || 'ملف مرفق',
+      size: att.size ?? 0,
+      type: att.type ?? '',
+      url,
+    },
+  ];
 }
 
 export default function CourseModal({
@@ -55,7 +93,7 @@ export default function CourseModal({
           pdfUrl: course.pdfurl,
           thumbnailFile: null,
           thumbnailPreview: course.image,
-          attachments: course.attatchments ? [course.attatchments] : [],
+          attachments: normalizeCourseAttachments(course.attatchments),
         });
       } else {
         reset({
