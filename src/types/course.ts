@@ -1,3 +1,5 @@
+import { AttachedFile } from './lmsCourses';
+
 export interface CoursesResponse {
   message: string;
   status: number;
@@ -20,7 +22,7 @@ export interface CourseItem {
   duration: number;
   pdfurl: string;
   subjectId: string;
-  attatchments: string | null;
+  attatchments: string | AttachedFile | AttachedFile[] | null;
   createdAt: string;
   updatedAt: string;
   subject: Subject;

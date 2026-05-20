@@ -1,10 +1,11 @@
 import { useState } from 'react';
-import { X, User, Mail, Phone, Lock, Users, Hash, Eye, EyeOff } from 'lucide-react';
+import { X, User, Mail, Phone, Lock, Users, Eye, EyeOff } from 'lucide-react';
 import { useLanguage } from '../../contexts/LanguageContext';
-import { useForm, Controller, Resolver } from 'react-hook-form'; // أضفت Controller
+import { useForm, Controller, Resolver } from 'react-hook-form';
 import { ParentFormData, getParentSchema } from '../../lib/schemas/ParentSchema';
 import { zodResolver } from '@hookform/resolvers/zod';
 import CustomSelect from '../ui/CustomSelect';
+import { useStudents } from '../../features/admin/hooks/useStudents';
 
 interface AddParentModalProps {
   isOpen: boolean;
@@ -15,6 +16,12 @@ interface AddParentModalProps {
 export default function AddParentModal({ onClose, onAdd }: AddParentModalProps) {
   const { language, t } = useLanguage();
   const [showPassword, setShowPassword] = useState(false);
+  const { data: studentsData } = useStudents();
+
+  const studentOptions = (studentsData?.data?.studentsData || []).map((s) => ({
+    value: s.id,
+    label: s.user.name,
+  }));
 
   const { register, handleSubmit, control, formState: { errors } } = useForm<ParentFormData>({
     resolver: zodResolver(getParentSchema(t)) as Resolver<ParentFormData>,
@@ -22,10 +29,10 @@ export default function AddParentModal({ onClose, onAdd }: AddParentModalProps) 
       name: '',
       email: '',
       phone: '',
-      username: '',
       password: '',
-      numberOfChildren: 0,
-      studentNames: []
+      codeCountry: '+20',
+      country: 'Egypt',
+      students: []
     },
   });
 
@@ -94,25 +101,9 @@ export default function AddParentModal({ onClose, onAdd }: AddParentModalProps) 
               </div>
             </div>
 
-            {/* حقل عدد الأطفال (Input جديد) */}
-            <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2 text-start">{text.childrenCount[language]}</label>
-              <div className="relative">
-                <Hash className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-                <input type="number" {...register('numberOfChildren', { valueAsNumber: true })} className="w-full pr-12 py-3 border border-gray-200 rounded-xl text-start" />
-                {errors.numberOfChildren && <p className="text-red-500 text-xs mt-1 text-start">{errors.numberOfChildren.message}</p>}
-              </div>
-            </div>
-
-            {/* اسم المستخدم / واتساب */}
-            <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2 text-start">{text.userName[language]}</label>
-              <div className="relative">
-                <Phone className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-                <input type="text" {...register('username')} className="w-full pr-12 py-3 border border-gray-200 rounded-xl text-start" />
-                {errors.username && <p className="text-red-500 text-xs mt-1 text-start">{errors.username.message}</p>}
-              </div>
-            </div>
+            {/* Country Data (Hidden or read-only, but let's keep it in data) */}
+            <input type="hidden" {...register('codeCountry')} value="+20" />
+            <input type="hidden" {...register('country')} value="Egypt" />
 
             {/* كلمة المرور */}
             <div className="md:col-span-2">
@@ -151,21 +142,19 @@ export default function AddParentModal({ onClose, onAdd }: AddParentModalProps) 
               <div className="relative">
                 <Users className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5 z-10 pointer-events-none" />
                 <Controller
-                  name="studentNames"
+                  name="students"
                   control={control}
                   render={({ field }) => (
                     <CustomSelect
-                      options={[
-                        { value: "student1", label: "أحمد علي" },
-                        { value: "student2", label: "منى يوسف" }
-                      ]}
+                      mode="multiple"
+                      options={studentOptions}
                       value={Array.isArray(field.value) ? field.value : []}
                       onChange={(val) => field.onChange(Array.isArray(val) ? val : [val])}
                       placeholder={text.selectStudents[language]}
                     />
                   )}
                 />
-                {errors.studentNames && <p className="text-red-500 text-xs mt-1 text-start">{errors.studentNames.message}</p>}
+                {errors.students && <p className="text-red-500 text-xs mt-1 text-start">{errors.students.message}</p>}
               </div>
             </div>
           </div>

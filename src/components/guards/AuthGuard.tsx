@@ -18,8 +18,8 @@ const AuthGuard = ({ allowedRoles }: AuthGuardProps) => {
 
     if (role === 'student') return <Navigate to="/student-dashboard" replace />;
     if (role === 'teacher') return <Navigate to="/teacher-dashboard" replace />;
-    if (role === 'super_admin') return <Navigate to="/dashboard" replace />;
-    if (role === "admin") return <Navigate to="/dashboard" replace />
+    if (role === 'parent') return <Navigate to="/parent-dashboard" replace />;
+    if (role === 'super_admin' || role === "admin") return <Navigate to="/dashboard" replace />;
 
     // If no valid role is found, clear and redirect to login
     localStorage.removeItem('token');

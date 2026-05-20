@@ -45,14 +45,19 @@ export default function LMSCoursesPage() {
   const { confirm, ConfirmDialog } = useConfirm();
   
   const courses = coursesResponse?.data?.items || [];
-const filters = courses.map((s)=>{
-  return {
-    id: s.subject.id,
-    name_en: s.subject.name_en,
-    name_ar: s.subject.name_ar
-  }
-})
-const uniqueFilters = [{ id: 'الكل', name_ar: 'الكل', name_en: 'All' },...new Set(filters)]
+const filters = courses.map((s) => ({
+  id: s.subject.id,
+  name_en: s.subject.name_en,
+  name_ar: s.subject.name_ar,
+}));
+
+const uniqueFilters = [
+  { id: "الكل", name_ar: "الكل", name_en: "All" },
+
+  ...Array.from(
+    new Map(filters.map((item) => [item.id, item])).values()
+  ),
+];
 
 
 
@@ -154,7 +159,7 @@ const uniqueFilters = [{ id: 'الكل', name_ar: 'الكل', name_en: 'All' },.
 
       {/* Results bar */}
       <div className="flex items-center justify-between">
-        <p className="text-sm text-gray-500">{filtered.length} </p>
+        <p className="text-sm text-gray-500"> {isRtl ? "عدد الكورسات:" : "Total Courses:"} {filtered.length} </p>
         < div className="flex gap-1 bg-gray-100 rounded-lg p-1" >
           <button onClick={() => setViewMode('grid')} className={`px-3 py-1.5 rounded-md text-xs font-medium transition-colors ${viewMode === 'grid' ? 'bg-white shadow-sm text-gray-800' : 'text-gray-500'}`}>{t('grid')}</button>
           <button onClick={() => setViewMode('list')} className={`px-3 py-1.5 rounded-md text-xs font-medium transition-colors ${viewMode === 'list' ? 'bg-white shadow-sm text-gray-800' : 'text-gray-500'}`}>{t('list')}</button>

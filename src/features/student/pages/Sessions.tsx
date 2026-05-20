@@ -246,19 +246,23 @@ export default function Sessions() {
                       </td>
 
                         <td className="px-6 py-4 text-start">
-                                              <button
-                                                onClick={async () => {
-                                                  try {
-                                                    await leaveSession(session.id);
-                                                  } catch (error) {
-                                                    console.log(error);
-                                                  }
-                                                }}
-                                                className={`flex items-center gap-2 px-4 py-2 rounded-xl transition-all font-medium ${'bg-red-600 text-white hover:bg-red-700 shadow-sm hover:shadow-md'}`}
-                                              >
-                                                <X className="w-4 h-4" />
-                                                <span className="text-sm">{t('leaveSession')}</span>
-                                              </button>
+                                                   <button
+                          onClick={async () => {
+                            try {
+                              await leaveSession(session.id);
+                            } catch (error) {
+                              console.log(error);
+                            }
+                          }}
+                          disabled={session.status?.toLowerCase() === 'completed'}
+                          className={`flex items-center gap-2 px-4 py-2 rounded-xl transition-all font-medium ${session.status?.toLowerCase() === 'completed'
+                            ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                            : 'bg-red-600 text-white hover:bg-red-700 shadow-sm hover:shadow-md'
+                          }`}
+                        >
+                          <X className="w-4 h-4" />
+                          <span className="text-sm">{t('endSession') || 'End Session'}</span>
+                        </button>
                                             </td>
 
                       <td className="px-3 py-3 text-start">

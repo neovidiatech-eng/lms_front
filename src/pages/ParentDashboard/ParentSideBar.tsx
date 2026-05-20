@@ -80,7 +80,7 @@ export default function ParentSidebar({ isOpen, onClose, isCollapsed, setIsColla
             )}
             <div className={`text-right transition-all duration-300 ${isCollapsed ? 'opacity-0 invisible w-0' : 'opacity-100'}`}>
               <h2 className="text-lg font-bold text-gray-900 line-clamp-1">{settings.name}</h2>
-              <p className="text-xs text-gray-500">لوحة الطالب</p>
+              <p className="text-xs text-gray-500">لوحة ولي الأمر</p>
             </div>
           </div>
         </div>

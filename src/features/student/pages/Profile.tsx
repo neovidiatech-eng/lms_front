@@ -3,7 +3,7 @@ import { useSettings } from '../../../contexts/SettingsContext'; // Re-parsing
 import {
   Mail, Phone, Calendar, MapPin,
   Package, Clock, CheckCircle, Award, RefreshCw,
-  User,
+  User, Star
 } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import SubscribePlanModal from '../../../components/modals/SubscribePlanModal';
@@ -36,6 +36,7 @@ export default function StudentProfile() {
   const profileData = profileResponse?.data;
   const user = profileData?.user;
   const plan = profileData?.plan;
+  const reviews = user?.reviewsReceived || [];
 
   const studentInfo = {
     name: user?.name,
@@ -267,6 +268,116 @@ export default function StudentProfile() {
               </div>
             )}
           </div>
+          {/* Reviews Section */}
+          {/* Reviews Section */}
+<div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+  <div className="flex items-center justify-between mb-6">
+    <div className="flex items-center gap-2">
+      <Star
+        className="w-6 h-6 animate-pulse"
+        style={{ color: settings.primaryColor }}
+      />
+      <h2 className="text-lg font-bold text-gray-900">
+        {isRtl ? 'التقييمات' : 'Reviews'}
+      </h2>
+    </div>
+
+    <span className="text-xs text-gray-500 bg-gray-50 px-3 py-1 rounded-full border">
+      {reviews.length} {isRtl ? 'تقييم' : 'reviews'}
+    </span>
+  </div>
+
+  {reviews.length > 0 ? (
+    <div className="space-y-4">
+      {reviews.map((review: any, index: number) => (
+        <div
+          key={review.id}
+          className="
+            group relative rounded-2xl border border-gray-100
+            bg-gradient-to-br from-gray-50 to-white p-5
+            hover:shadow-lg hover:-translate-y-1
+            transition-all duration-300
+            animate-fade-in
+          "
+          style={{
+            animationDelay: `${index * 80}ms`,
+            animationFillMode: 'both',
+          }}
+        >
+          {/* top row */}
+          <div className="flex items-start justify-between gap-4 mb-3">
+
+            {/* user */}
+            <div className="flex items-center gap-3">
+              <div
+                className="
+                  w-10 h-10 rounded-full flex items-center justify-center text-white font-bold shadow-sm
+                  transition-transform duration-300 group-hover:scale-110
+                "
+                style={{ backgroundColor: settings.primaryColor }}
+              >
+                {review.role?.charAt(0)?.toUpperCase() || 'R'}
+              </div>
+
+              <div>
+                <h3 className="text-sm font-semibold text-gray-900">
+                  {isRtl ? 'تقييم جديد' : 'New Review'}
+                </h3>
+
+                <p className="text-xs text-gray-500">
+                  {new Date(review.createdAt).toLocaleString(
+                    isRtl ? 'ar-EG' : 'en-US',
+                    {
+                      year: 'numeric',
+                      month: 'short',
+                      day: 'numeric',
+                    }
+                  )}
+                </p>
+              </div>
+            </div>
+
+            {/* rating */}
+            <div className="flex items-center gap-1 bg-white px-2 py-1 rounded-full border">
+              {[1, 2, 3, 4, 5].map((star) => (
+                <Star
+                  key={star}
+                  className={`
+                    w-4 h-4 transition-all duration-300
+                    ${star <= review.rating
+                      ? 'fill-yellow-400 text-yellow-400 scale-110'
+                      : 'text-gray-300'
+                    }
+                  `}
+                />
+              ))}
+            </div>
+          </div>
+
+          {/* comment */}
+          <p className="
+            text-sm text-gray-700 leading-relaxed
+            bg-white p-3 rounded-xl border border-gray-100
+            transition-all duration-300
+            group-hover:border-gray-200
+          ">
+            {review.comment || (isRtl ? 'لا يوجد تعليق' : 'No comment')}
+          </p>
+        </div>
+      ))}
+    </div>
+  ) : (
+    <div className="text-center py-12 animate-fade-in">
+      <div className="w-14 h-14 mx-auto rounded-full bg-gray-100 flex items-center justify-center mb-3 animate-bounce">
+        <Star className="w-6 h-6 text-gray-300" />
+      </div>
+
+      <p className="text-gray-500">
+        {isRtl ? 'لا توجد تقييمات حالياً' : 'No reviews yet'}
+      </p>
+    </div>
+  )}
+</div>
         </div>
       </div>
 

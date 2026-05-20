@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import Header from '../../components/layout/Header';
 import { useLanguage } from '../../contexts/LanguageContext';
-import ParentSidebar from './ParentSideBar';
 interface StudentDashboardLayoutProps {
   children: React.ReactNode;
   userRole?: 'admin' | 'teacher' | 'student' | 'parent';
@@ -16,7 +15,6 @@ export default function StudentDashboardLayout({
   userEmail = 'parent@parent.com',
 }: StudentDashboardLayoutProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [isCollapsed, setIsCollapsed] = useState(false);
   const { language } = useLanguage();
 
   const isRtl = language === 'ar';
@@ -28,18 +26,11 @@ export default function StudentDashboardLayout({
         userRole={userRole}
         userName={userName}
         userEmail={userEmail}
-        isCollapsed={isCollapsed}
+        isCollapsed={true}
       />
 
-      <ParentSidebar
-        isOpen={sidebarOpen}
-        onClose={() => setSidebarOpen(false)}
-        isCollapsed={isCollapsed}
-        setIsCollapsed={setIsCollapsed}
-      />
-
-      <main className={`${isRtl ? (isCollapsed ? 'lg:mr-20' : 'lg:mr-72') : (isCollapsed ? 'lg:ml-20' : 'lg:ml-72')} transition-all duration-300`}>
-        <div className={`transition-all duration-300 ${isCollapsed ? 'p-4' : 'p-6'}`}>
+      <main className="w-full transition-all duration-300">
+        <div className="p-4 md:p-6 lg:p-8 w-full mx-auto max-w-[1600px]">
           {children}
         </div>
       </main>

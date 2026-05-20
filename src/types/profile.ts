@@ -1,6 +1,19 @@
 import { Currency } from "./currency";
 import { Schedule } from "./scheduales";
 
+export interface ReviewReceived {
+  id: string;
+  scheduleId: string;
+  reviewerId: string;
+  revieweeId: string;
+  rating: number;
+  comment: string;
+  role: string;
+  isHidden: boolean;
+  createdAt: string;
+}
+
+
 export interface ProfileUser {
   id: string;
   email: string;
@@ -11,6 +24,8 @@ export interface ProfileUser {
   createdAt: string;
   code_country: string;
   status: string;
+  reviewsReceived: ReviewReceived[];
+
 }
 
 export interface ProfilePlan {

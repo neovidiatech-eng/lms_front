@@ -3,7 +3,7 @@ import {
   Play,
   FileText,
   ClipboardList,
-
+  Users,
 } from 'lucide-react';
 
 export interface ParentRouteConfig {
@@ -20,10 +20,23 @@ export interface ParentRouteConfig {
 const SessionsPage = lazy(() => import('../../features/parent/pages/Sessions'));
 const ExamsPage = lazy(() => import('../../features/parent/pages/Exams'));
 const AssignmentsPage = lazy(() => import('../../features/parent/pages/Assignments'));
+const ChildrenPage = lazy(() => import('../../features/parent/pages/Children'));
+const ChildDashboard = lazy(() => import('../../features/parent/pages/ChildDashboard'));
 
 export const parentDashboardRoutes: ParentRouteConfig[] = [
-
-
+      {
+        id: 'parent-children',
+        label: 'أبنائي',
+        icon: Users,
+        path: 'children',
+        element: <ChildrenPage />,
+      },
+      {
+        id: 'child-dashboard',
+        label: 'لوحة الطالب',
+        path: 'children/:studentId/:tab',
+        element: <ChildDashboard />,
+      },
       {
         id: 'student-sessions',
         label: 'sidebar_sessions',

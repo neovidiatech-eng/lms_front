@@ -6,6 +6,9 @@ import EditParentModal from '../../../components/modals/EditParentModal';
 import ViewParentModal from '../../../components/modals/ViewParentModal';
 import Pagination from '../../../components/ui/Pagination';
 import { useConfirm } from '../../../hooks/useConfirm';
+import { useCreateParent } from '../hooks/useParents';
+import { ParentFormData } from '../../../lib/schemas/ParentSchema';
+import { message } from 'antd';
 
 interface Parent {
   id: string;
@@ -77,13 +80,16 @@ export default function Parents() {
     setCurrentPage(page);
   };
 
-  const handleAddParent = (parentData: Omit<Parent, 'id'>) => {
-    const newParent = {
-      ...parentData,
-      id: (parents.length + 1).toString()
-    };
-    setParents([...parents, newParent]);
-    setShowAddModal(false);
+  const { mutateAsync: createParentMutate } = useCreateParent();
+
+  const handleAddParent = async (parentData: ParentFormData) => {
+    try {
+      await createParentMutate(parentData);
+      message.success(language === 'ar' ? 'تم إضافة ولي الأمر بنجاح' : 'Parent added successfully');
+      setShowAddModal(false);
+    } catch (error: any) {
+      message.error(error.response?.data?.message || (language === 'ar' ? 'حدث خطأ أثناء إضافة ولي الأمر' : 'Failed to add parent'));
+    }
   };
 
   const handleEditParent = (parentData: Omit<Parent, 'id'>) => {
