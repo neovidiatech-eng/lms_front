@@ -1,16 +1,7 @@
 import { X, User, Users as UsersIcon, Calendar } from 'lucide-react';
 import { useLanguage } from '../../contexts/LanguageContext';
-
-interface Parent {
-  id: string;
-  name: string;
-  email: string;
-  phone: string;
-  numberOfChildren: number;
-  studentNames: string[];
-  username: string;
-  password: string;
-}
+import { Parent } from '../../types/parentsAdmin';
+import { useGetParentById } from '../../features/admin/hooks/useParents';
 
 interface ViewParentModalProps {
   parent: Parent;
@@ -19,6 +10,7 @@ interface ViewParentModalProps {
 
 export default function ViewParentModal({ parent, onClose }: ViewParentModalProps) {
   const { language } = useLanguage();
+  const { data: fetchedParent } = useGetParentById(parent.id);
 
   const text = {
     title: { ar: 'تفاصيل ولي الأمر', en: 'Parent Details' },
@@ -53,11 +45,11 @@ export default function ViewParentModal({ parent, onClose }: ViewParentModalProp
         <div className="p-6 space-y-6">
           <div className="flex items-center gap-4 pb-6 border-b border-gray-100">
             <div className="w-20 h-20 bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl flex items-center justify-center shadow-lg">
-              <span className="text-white font-bold text-3xl">{parent.name[0]}</span>
+              <span className="text-white font-bold text-3xl">{fetchedParent?.name?.charAt(0) || 'P'}</span>
             </div>
             <div className="text-start flex-1">
-              <h3 className="text-2xl font-bold text-gray-900">{parent.name}</h3>
-              <p className="text-gray-600 mt-1">{parent.email}</p>
+              <h3 className="text-2xl font-bold text-gray-900">{fetchedParent?.name}</h3>
+              <p className="text-gray-600 mt-1">{fetchedParent?.email}</p>
             </div>
           </div>
 
@@ -68,18 +60,18 @@ export default function ViewParentModal({ parent, onClose }: ViewParentModalProp
             </h4>
             <div className="bg-gray-50 rounded-xl p-4 space-y-3">
               <div className="flex justify-between items-center">
-                <span className="text-gray-900 font-medium">{parent.name}</span>
+                <span className="text-gray-900 font-medium">{fetchedParent?.name}</span>
                 <span className="text-gray-600 text-sm">{text.name[language]}</span>
               </div>
               <div className="flex justify-between items-center">
-                <a href={`mailto:${parent.email}`} className="text-blue-600 hover:underline font-medium">
-                  {parent.email}
+                <a href={`mailto:${fetchedParent?.email}`} className="text-blue-600 hover:underline font-medium">
+                  {fetchedParent?.email}
                 </a>
                 <span className="text-gray-600 text-sm">{text.email[language]}</span>
               </div>
               <div className="flex justify-between items-center">
-                <a href={`https://wa.me/${parent.phone.replace(/\s/g, '')}`} target="_blank" rel="noopener noreferrer" className="text-green-600 hover:underline font-medium">
-                  {parent.phone}
+                <a href={`https://wa.me/${fetchedParent?.phone.replace(/\s/g, '')}`} target="_blank" rel="noopener noreferrer" className="text-green-600 hover:underline font-medium">
+                  {fetchedParent?.phone}
                 </a>
                 <span className="text-gray-600 text-sm">{text.phone[language]}</span>
               </div>
@@ -93,16 +85,16 @@ export default function ViewParentModal({ parent, onClose }: ViewParentModalProp
             </h4>
             <div className="bg-gray-50 rounded-xl p-4 space-y-3">
               <div className="flex justify-between items-center">
-                <span className="text-gray-900 font-semibold text-lg">{parent.numberOfChildren}</span>
+                <span className="text-gray-900 font-semibold text-lg">{fetchedParent?.students?.length || 0}</span>
                 <span className="text-gray-600 text-sm">{text.numberOfChildren[language]}</span>
               </div>
-              {parent.studentNames.length > 0 ? (
+              {fetchedParent?.students && fetchedParent.students.length > 0 ? (
                 <div>
                   <span className="text-gray-600 text-sm block mb-2 text-start">{text.studentNames[language]}</span>
                   <div className="space-y-2">
-                    {parent.studentNames.map((studentName, index) => (
-                      <div key={index} className="bg-white p-3 rounded-lg border border-gray-200">
-                        <span className="text-gray-900 font-medium">{studentName}</span>
+                    {fetchedParent?.students.map((student) => (
+                      <div key={student.id} className="bg-white p-3 rounded-lg border border-gray-200">
+                        <span className="text-gray-900 font-medium">{student.user.name}</span>
                       </div>
                     ))}
                   </div>
@@ -122,13 +114,15 @@ export default function ViewParentModal({ parent, onClose }: ViewParentModalProp
             </h4>
             <div className="bg-gray-50 rounded-xl p-4 space-y-3">
               <div className="flex justify-between items-center">
-                <span className="inline-flex items-center gap-2 px-3 py-1 bg-green-100 text-green-700 rounded-full text-sm font-medium">
-                  {text.active[language]}
+                <span className={`inline-flex items-center gap-2 px-3 py-1 rounded-full text-sm font-medium ${
+                  fetchedParent?.active ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
+                }`}>
+                  {fetchedParent?.active ? text.active[language] : 'Inactive'}
                 </span>
                 <span className="text-gray-600 text-sm">{text.accountStatus[language]}</span>
               </div>
               <div className="flex justify-between items-center">
-                <span className="text-gray-900 font-medium">01/03/2026</span>
+                <span className="text-gray-900 font-medium">{fetchedParent?.createdAt ? new Date(fetchedParent.createdAt).toLocaleDateString() : '-'}</span>
                 <span className="text-gray-600 text-sm">{text.joinDate[language]}</span>
               </div>
             </div>

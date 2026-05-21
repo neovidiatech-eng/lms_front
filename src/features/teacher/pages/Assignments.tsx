@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Search, Trash2, Filter, Edit2, Plus } from 'lucide-react';
+import { Search, Trash2, Filter , Plus } from 'lucide-react';
 import { useLanguage } from '../../../contexts/LanguageContext';
 import Pagination from '../../../components/ui/Pagination';
 import AddAssignmentModal from '../../../components/modals/AddAssignmentModal';
@@ -55,7 +55,7 @@ export default function Assignments() {
     loading: { ar: 'جاري التحميل...', en: 'Loading...' }
   };
 
-  const filteredAssignments = assignments.filter(assignment => {
+  const filteredAssignments = assignments.filter((assignment: Assignment) => {
     const studentName = assignment.student?.user?.name || '';
     const subjectName = language === 'ar' ? assignment.subject?.name_ar : assignment.subject?.name_en || assignment.subject?.name_ar;
 
@@ -199,7 +199,7 @@ export default function Assignments() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-200">
-                {currentAssignments.map((assignment) => (
+                {currentAssignments.map((assignment: Assignment) => (
                   <tr key={assignment.id} className="hover:bg-gray-50 transition-colors">
                     <td className="px-6 py-4 text-start text-gray-900 font-medium">{assignment.student?.user?.name}</td>
                     <td className="px-6 py-4 text-start">
@@ -225,13 +225,7 @@ export default function Assignments() {
                     </td>
                     <td className="px-6 py-4 text-start">
                       <div className="flex items-center gap-2 justify-start">
-                        <button
-                          onClick={() => handleEditAssignment(assignment)}
-                          className="p-2 icon-btn-primary rounded-lg transition-colors"
-                          title="تعديل"
-                        >
-                          <Edit2 className="w-5 h-5" />
-                        </button>
+                       
                         <button
                           onClick={() => handleDeleteAssignment(assignment.id)}
                           disabled={deleteMutation.isPending}

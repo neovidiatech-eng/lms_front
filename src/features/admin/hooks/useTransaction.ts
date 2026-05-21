@@ -27,8 +27,8 @@ export const useWithdrawals = () => {
 export const useUpdateWithdrawal = () => {
     const queryClient = useQueryClient();
     return useMutation({
-        mutationFn: ({ id, status }: { id: string, status: 'approved' | 'rejected' }) =>
-            updateWithdrawalStatus(id, status),
+        mutationFn: ({ id, status, adminNotes }: { id: string; status: 'approve' | 'reject'; adminNotes?: string }) =>
+            updateWithdrawalStatus(id, status, adminNotes),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ["withdrawals"] });
         },

@@ -1,12 +1,13 @@
 import { useEffect } from 'react';
 import { X, Save } from 'lucide-react';
 import { useLanguage } from '../../contexts/LanguageContext';
-import { Expense, ExpenseFormData, getExpenseSchema } from '../../lib/schemas/ExpenseSchema';
+import { ExpenseFormData, getExpenseSchema } from '../../lib/schemas/ExpenseSchema';
 import { Resolver, useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import CustomSelect from '../ui/CustomSelect';
 import DatePickerField from '../ui/DatePickerField';
 import { useCurrency } from '../../features/admin/hooks/useCurrency';
+import { Expense } from '../../types/expenses';
 
 interface AddExpenseModalProps {
   isOpen: boolean;

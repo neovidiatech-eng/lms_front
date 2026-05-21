@@ -271,14 +271,14 @@ export default function Agenda() {
 
                   <p className="text-xs mt-1">{s.status}</p>
 
-                  {s.link && (
+                  {/* {s.link && (
                     <button
                       onClick={() => window.open(s.link, "_blank")}
                       className="w-full mt-3 bg-green-600 text-white py-2 rounded-lg text-sm"
                     >
                       Join Session
                     </button>
-                  )}
+                  )} */}
                 </div>
               ))}
             </div>

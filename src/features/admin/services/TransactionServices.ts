@@ -25,7 +25,12 @@ export const getAllWithdrawals = async (): Promise<WithdrawalApiResponse> => {
     return response.data;
 }
 
-export const updateWithdrawalStatus = async (id: string, status: 'approved' | 'rejected'): Promise<any> => {
-    const response = await api.patch(`/withdrawals/${id}`, { status });
+export const updateWithdrawalStatus = async (
+    id: string,
+    status: 'approve' | 'reject',
+    adminNotes?: string,
+): Promise<any> => {
+    const body = adminNotes ? { adminNotes } : {};
+    const response = await api.patch(`/withdrawals/${id}/${status}`, body);
     return response.data;
 }

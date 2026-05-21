@@ -13,7 +13,13 @@ export default function TransactionRequests() {
   
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
-  
+  const [actionModal, setActionModal] = useState<{ isOpen: boolean; type: 'approve' | 'reject' | null; requestId: string | null }>({
+    isOpen: false,
+    type: null,
+    requestId: null,
+  });
+  const [adminNotes, setAdminNotes] = useState("");
+
   const itemsPerPage = 10;
 
   const text = {
@@ -72,10 +78,27 @@ export default function TransactionRequests() {
     }
   };
 
-  const handleStatusUpdate = async (id: string, status: 'approved' | 'rejected') => {
-    if (window.confirm(language === 'ar' ? 'هل أنت متأكد من تغيير حالة الطلب؟' : 'Are you sure you want to change the request status?')) {
-        updateStatusMutation.mutate({ id, status });
-    }
+  const handleApprove = (id: string) => {
+    setActionModal({ isOpen: true, type: 'approve', requestId: id });
+    setAdminNotes('');
+  };
+
+  const handleReject = (id: string) => {
+    setActionModal({ isOpen: true, type: 'reject', requestId: id });
+    setAdminNotes('');
+  };
+
+  const handleConfirmAction = () => {
+    if (!actionModal.requestId || !actionModal.type) return;
+
+    updateStatusMutation.mutate({
+      id: actionModal.requestId,
+      status: actionModal.type,
+      adminNotes,
+    });
+
+    setActionModal({ isOpen: false, type: null, requestId: null });
+    setAdminNotes('');
   };
 
   return (
@@ -187,7 +210,7 @@ export default function TransactionRequests() {
                     <td className="px-4 py-4">
                       <div className="flex items-center gap-2 justify-start">
                         <button
-                          onClick={() => handleStatusUpdate(request.id, "approved")}
+                          onClick={() => handleApprove(request.id)}
                           disabled={request.status !== "pending" || updateStatusMutation.isPending}
                           className={`p-2 rounded-lg transition-colors ${
                             request.status === "pending"
@@ -199,7 +222,7 @@ export default function TransactionRequests() {
                           <CheckCircle className="w-5 h-5" />
                         </button>
                         <button
-                          onClick={() => handleStatusUpdate(request.id, "rejected")}
+                          onClick={() => handleReject(request.id)}
                           disabled={request.status !== "pending" || updateStatusMutation.isPending}
                           className={`p-2 rounded-lg transition-colors ${
                             request.status === "pending"
@@ -231,6 +254,63 @@ export default function TransactionRequests() {
           </div>
         )}
       </div>
+      {actionModal.isOpen && (
+        <div
+          className="fixed inset-0 !mt-0 bg-black bg-opacity-50 flex items-center justify-center z-[60] p-4"
+          onClick={() => setActionModal({ ...actionModal, isOpen: false })}
+        >
+          <div
+            className="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className={`px-6 py-4 flex items-center justify-between border-b ${actionModal.type === 'approve' ? 'bg-green-50 border-green-100' : 'bg-red-50 border-red-100'}`}>
+              <h3 className={`font-bold text-lg ${actionModal.type === 'approve' ? 'text-green-700' : 'text-red-700'}`}>
+                {actionModal.type === 'approve'
+                  ? (language === 'ar' ? 'قبول الطلب' : 'Approve Request')
+                  : (language === 'ar' ? 'رفض الطلب' : 'Reject Request')
+                }
+              </h3>
+              <button onClick={() => setActionModal({ ...actionModal, isOpen: false })} className="p-1 hover:bg-white/50 rounded-lg transition-colors">
+                <XCircle className={`w-5 h-5 ${actionModal.type === 'approve' ? 'text-green-400' : 'text-red-400'}`} />
+              </button>
+            </div>
+            <div className="p-6 space-y-4">
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-gray-700 block text-start">
+                  {actionModal.type === 'approve'
+                    ? (language === 'ar' ? 'ملاحظات الإدارة' : 'Admin Notes')
+                    : (language === 'ar' ? 'سبب الرفض' : 'Rejection Reason')
+                  }
+                </label>
+                <textarea
+                  value={adminNotes}
+                  onChange={(e) => setAdminNotes(e.target.value)}
+                  placeholder={language === 'ar' ? 'اكتب هنا...' : 'Type here...'}
+                  className="w-full h-32 px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all resize-none text-start"
+                />
+              </div>
+              <div className="flex gap-3">
+                <button
+                  onClick={() => setActionModal({ ...actionModal, isOpen: false })}
+                  className="flex-1 py-3 px-4 border border-gray-200 text-gray-600 rounded-xl hover:bg-gray-50 font-medium transition-colors"
+                >
+                  {language === 'ar' ? 'إلغاء' : 'Cancel'}
+                </button>
+                <button
+                  onClick={handleConfirmAction}
+                  disabled={updateStatusMutation.isPending}
+                  className={`flex-1 py-3 px-4 text-white rounded-xl font-medium transition-colors flex items-center justify-center gap-2 ${actionModal.type === 'approve' ? 'bg-green-600 hover:bg-green-700' : 'bg-red-600 hover:bg-red-700'} disabled:opacity-50`}
+                >
+                  {actionModal.type === 'approve'
+                    ? (language === 'ar' ? 'تأكيد القبول' : 'Confirm Approval')
+                    : (language === 'ar' ? 'تأكيد الرفض' : 'Confirm Rejection')
+                  }
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -2,7 +2,7 @@ import { useTranslation } from 'react-i18next';
 import { useSettings } from '../../../contexts/SettingsContext'; // Re-parsing
 import {
   Mail, Phone, Calendar, MapPin,
-  Package, Clock, CheckCircle, Award, RefreshCw,
+  Package, Clock, CheckCircle, Award,
   User, Star
 } from 'lucide-react';
 import { useMemo, useState } from 'react';
@@ -194,14 +194,14 @@ export default function StudentProfile() {
                   {subscriptionInfo.status}
                 </span>
               </div>
-              <button
+              {/* <button
                 onClick={() => setIsPlanModalOpen(true)}
                 className="flex items-center gap-2 px-4 py-2 rounded-xl text-white font-medium text-sm transition-all hover:opacity-90"
                 style={{ backgroundColor: settings.primaryColor }}
               >
                 <RefreshCw className="w-4 h-4" />
                 {isRtl ? 'اشتراك بخطة' : 'Subscribe to Plan'}
-              </button>
+              </button> */}
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">

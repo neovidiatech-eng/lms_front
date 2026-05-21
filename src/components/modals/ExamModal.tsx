@@ -182,11 +182,7 @@ export default function AddExamModal({
           </div>
 
           <div>
-            {errors.dueDate && (
-              <p className="text-red-500 text-xs mt-1 text-start">
-                {errors.dueDate.message}
-              </p>
-            )}
+          
             <DatePickerField
               label={text.dueDate[language]}
               value={watch("dueDate")}
