@@ -43,6 +43,10 @@ export default function ViewStudentModal({ isOpen, onClose, studentData }: ViewS
 
   if (!isOpen || !studentData || !student) return null;
 
+  const totalSessions = Number(student.sessions) || 0;
+  const remainSessions = Number(student.sessions_remaining) || 0;
+  const scheduledSessions = totalSessions - remainSessions;
+
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
       <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-hidden flex flex-col">
@@ -145,18 +149,17 @@ export default function ViewStudentModal({ isOpen, onClose, studentData }: ViewS
                     {student.sessions_attended || 0} / {student.sessions || 0} {language === 'ar' ? 'جلسة' : 'sessions'}
                   </p>
                   <p className="text-xs text-gray-500">
-                    {language === 'ar' ? 'المتبقي:' : 'Remaining:'} {student.sessions_remaining || 0}
+                    {language === 'ar' ? ' الحصص المتبقية من الخطة :' : 'Remaining Sessions From Plan:'} {student.sessions_remaining || 0}
                   </p>
+                     <p className="text-xs text-gray-500">
+                    {language === 'ar' ? ' الحصص  المتجدولة  :' : 'Scheduled Sessions:'} {scheduledSessions}
+                  </p>
+
+
                 </div>
               </div>
 
-              {/* Student ID */}
-              <div className="text-start">
-                <label className="text-sm font-medium text-gray-500 block mb-1">
-                  {language === 'ar' ? 'رقم الطالب' : 'Student ID'}
-                </label>
-                <p className="text-base text-gray-900 font-mono">{student.user.phone}</p>
-              </div>
+             
             </div>
           </div>
         </div>

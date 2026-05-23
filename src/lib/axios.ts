@@ -7,7 +7,6 @@ const api = axios.create({
   baseURL: baseURL,
   timeout: 300000,
   headers: {
-    "Accept-Language": i18n.language
 
   }
 });
@@ -19,6 +18,7 @@ api.interceptors.request.use(
 
     if (token) {
       config.headers ??= {};
+      config.headers["Accept-Language"] = i18n.language;
       config.headers.Authorization = `Bearer ${token}`;
     }
 

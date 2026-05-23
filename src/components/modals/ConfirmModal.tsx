@@ -12,7 +12,7 @@ interface ConfirmModalProps {
   cancelText?: string;
 }
 
-export default function ConfirmModal({
+export default function Modal({
   isOpen,
   onClose,
   onConfirm,

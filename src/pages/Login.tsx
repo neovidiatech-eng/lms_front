@@ -179,57 +179,7 @@ export default function Login({ onLoginSuccess }: LoginProps) {
           <ArrowIcon className="w-5 h-5 animate-pulse" />
         </button>
 
-        {/* Divider */}
-        <div className="relative flex items-center justify-center my-6">
-          <div className="absolute inset-0 flex items-center">
-            <div className="w-full border-t border-slate-100"></div>
-          </div>
-          <span className="relative px-4 text-xs font-bold text-slate-400 bg-white uppercase tracking-wider">{t("or")}</span>
-        </div>
-
-        {/* Google Login Wrapper */}
-        <div className="flex justify-center w-full">
-          <GoogleLogin
-            onSuccess={async (credentialResponse) => {
-              const idToken = credentialResponse.credential;
-              if (idToken) {
-                try {
-                  const result = await googleLogin({ idToken, provider: "google" });
-                  const token = result.data?.accessToken || result.accessToken;
-                  const role = result.data?.role || result.role;
-
-                  if (token) {
-                    localStorage.setItem("token", token);
-                    localStorage.setItem("role", role);
-                    connectSocket(token);
-                    onLoginSuccess();
-                    message.success(result.message || t('loginSuccess'));
-
-                    if (role === "teacher") {
-                      navigate("/teacher-dashboard");
-                    } else if (role === "student") {
-                      navigate("/student-dashboard");
-                    } else if (role === "parent") {
-                      navigate("/parent-dashboard");
-                    } else {
-                      navigate("/dashboard");
-                    }
-                  }
-                } catch (error) {
-                  console.error("Google Login failed:", error);
-                }
-              }
-            }}
-            onError={() => {
-              console.log("Login Failed");
-            }}
-            useOneTap
-            theme="outline"
-            size="large"
-            shape="circle"
-            width="384px"
-          />
-        </div>
+      
       </form>
     </div>
   );

@@ -34,6 +34,7 @@ export default function AddTeacherModal({ isOpen, onClose, onSubmit }: AddTeache
       gender: 'male',
       status: 'active',
       subjects: [],
+      meeting_link: '',
     }
   });
 

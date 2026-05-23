@@ -157,7 +157,7 @@ export default function Teachers() {
       code_country: '+20', // Default if missing, ideally extracted from phone
       subject_ids: formData.subjects,
       timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
-      meeting_link: formData.meeting_link,
+      meeting_link: formData.meeting_link?.trim() || undefined,
     };
   };
 
@@ -176,8 +176,7 @@ export default function Teachers() {
     if (!selectedTeacher) return;
     try {
       const apiData = mapFormToApi(formData);
-      const { meeting_link, ...updateData } = apiData;
-      await updateTeacherMutation.mutateAsync({ id: selectedTeacher.id, data: updateData });
+      await updateTeacherMutation.mutateAsync({ id: selectedTeacher.id, data: apiData });
       setIsEditModalOpen(false);
       setSelectedTeacher(null);
     } catch (error) {

@@ -8,6 +8,7 @@ import { usePermissions } from '../../features/admin/hooks/usePermissions';
 import { Controller } from 'react-hook-form';
 import { CustomCheckbox } from '../ui/CustomCheckbox';
 import { Role } from '../../types/roles';
+import { Permission } from '../../types/permission';
 
 interface AddRoleModalProps {
     isOpen: boolean;
@@ -24,7 +25,8 @@ export default function AddRoleModal({
     initialData,
     isLoading,
 }: AddRoleModalProps) {
-    const { t } = useTranslation();
+    const { t, i18n } = useTranslation();
+    const language = i18n.language.split('-')[0];
     const isEdit = !!initialData;
     const [collapsedCategories, setCollapsedCategories] = useState<Set<string>>(new Set());
     const [searchQuery, setSearchQuery] = useState('');
@@ -44,6 +46,198 @@ export default function AddRoleModal({
     });
 
     const { data: permissions, isLoading: isLoadingPermissions } = usePermissions();
+
+    const normalizeKey = (value?: string | null) =>
+        value
+            ?.trim()
+            .toLowerCase()
+            .replace(/[^a-z0-9]+/g, '_')
+            .replace(/^_+|_+$/g, '') || '';
+
+    const prettify = (value?: string | null) =>
+        value
+            ?.replace(/[_-]+/g, ' ')
+            .replace(/\s+/g, ' ')
+            .trim()
+            .replace(/\b\w/g, (char) => char.toUpperCase()) || '';
+
+    const actionKeys = new Set([
+        'get',
+        'post',
+        'put',
+        'patch',
+        'delete',
+        'create',
+        'read',
+        'view',
+        'list',
+        'update',
+        'edit',
+        'remove',
+        'approve',
+        'reject',
+        'assign',
+        'revoke',
+        'join',
+        'leave',
+        'handle',
+        'manage',
+    ]);
+
+    const permissionActionLabels: Record<string, { ar: string; en: string }> = {
+        get: { ar: 'عرض', en: 'View' },
+        post: { ar: 'إنشاء', en: 'Create' },
+        put: { ar: 'تحديث', en: 'Update' },
+        patch: { ar: 'تحديث', en: 'Update' },
+        delete: { ar: 'حذف', en: 'Delete' },
+        create: { ar: 'إنشاء', en: 'Create' },
+        read: { ar: 'عرض', en: 'View' },
+        view: { ar: 'عرض', en: 'View' },
+        list: { ar: 'عرض قائمة', en: 'List' },
+        update: { ar: 'تحديث', en: 'Update' },
+        edit: { ar: 'تعديل', en: 'Edit' },
+        remove: { ar: 'حذف', en: 'Delete' },
+        approve: { ar: 'قبول', en: 'Approve' },
+        reject: { ar: 'رفض', en: 'Reject' },
+        assign: { ar: 'تعيين', en: 'Assign' },
+        revoke: { ar: 'إلغاء', en: 'Revoke' },
+        join: { ar: 'دخول', en: 'Join' },
+        leave: { ar: 'مغادرة', en: 'Leave' },
+        handle: { ar: 'معالجة', en: 'Handle' },
+        manage: { ar: 'إدارة', en: 'Manage' },
+    };
+
+    const permissionResourceLabels: Record<string, { ar: string; en: string }> = {
+        general: { ar: 'عام', en: 'General' },
+        dashboard: { ar: 'لوحة التحكم', en: 'Dashboard' },
+        policies: { ar: 'السياسات', en: 'Policies' },
+        settings: { ar: 'الإعدادات', en: 'Settings' },
+        users: { ar: 'المستخدمين', en: 'Users' },
+        roles: { ar: 'الأدوار', en: 'Roles' },
+        permissions: { ar: 'الصلاحيات', en: 'Permissions' },
+        courses: { ar: 'الكورسات', en: 'Courses' },
+        lectures: { ar: 'المحاضرات', en: 'Lectures' },
+        sessions: { ar: 'الحصص', en: 'Sessions' },
+        homework: { ar: 'الواجبات', en: 'Homework' },
+        assignments: { ar: 'الواجبات', en: 'Assignments' },
+        exams: { ar: 'الامتحانات', en: 'Exams' },
+        profile: { ar: 'الملف الشخصي', en: 'Profile' },
+        requests: { ar: 'الطلبات', en: 'Requests' },
+        withdrawals: { ar: 'طلبات السحب', en: 'Withdrawals' },
+        weekly_reports: { ar: 'التقارير الأسبوعية', en: 'Weekly Reports' },
+        subscriptions: { ar: 'الاشتراكات', en: 'Subscriptions' },
+        support: { ar: 'الدعم', en: 'Support' },
+        calendar: { ar: 'التقويم', en: 'Calendar' },
+        plans: { ar: 'الخطط', en: 'Plans' },
+        plan: { ar: 'الخطة', en: 'Plan' },
+        chat: { ar: 'المحادثات', en: 'Chat' },
+        finances: { ar: 'الماليات', en: 'Finances' },
+        currency: { ar: 'العملة', en: 'Currency' },
+        currencies: { ar: 'العملات', en: 'Currencies' },
+        currencyies: { ar: 'العملات', en: 'Currencies' },
+        transactions: { ar: 'المعاملات', en: 'Transactions' },
+        expenses: { ar: 'المصروفات', en: 'Expenses' },
+        ranks: { ar: 'الترتيب', en: 'Ranks' },
+        subjects: { ar: 'المواد', en: 'Subjects' },
+        subject: { ar: 'المادة', en: 'Subject' },
+        students: { ar: 'الطلاب', en: 'Students' },
+        teachers: { ar: 'المعلمين', en: 'Teachers' },
+        staff: { ar: 'الموظفين', en: 'Staff' },
+        stuff: { ar: 'الموظفين', en: 'Staff' },
+        parents: { ar: 'أولياء الأمور', en: 'Parents' },
+    };
+
+    const getLocalizedLabel = (
+        labels: Record<string, { ar: string; en: string }>,
+        key: string,
+        fallback?: string | null
+    ) => {
+        const normalizedKey = normalizeKey(key);
+        const currentLanguage = language === 'ar' ? 'ar' : 'en';
+        return labels[normalizedKey]?.[currentLanguage] || prettify(fallback || key);
+    };
+
+    const parsePermissionSource = (value?: string | null) => {
+        const parts = normalizeKey(value).split('_').filter(Boolean);
+
+        if (parts.length < 2) {
+            return { actionKey: '', resourceKey: '' };
+        }
+
+        const firstPart = parts[0];
+        const lastPart = parts[parts.length - 1];
+
+        if (actionKeys.has(firstPart)) {
+            return {
+                actionKey: firstPart,
+                resourceKey: parts.slice(1).join('_'),
+            };
+        }
+
+        if (actionKeys.has(lastPart)) {
+            return {
+                actionKey: lastPart,
+                resourceKey: parts.slice(0, -1).join('_'),
+            };
+        }
+
+        return { actionKey: '', resourceKey: '' };
+    };
+
+    const getPermissionParts = (permission: Permission) => {
+        const parsedCode = parsePermissionSource(permission.code);
+        const parsedName = parsePermissionSource(permission.name);
+
+        let resourceKey = normalizeKey(permission.resource);
+        let actionKey = normalizeKey(permission.action || permission.method);
+
+        if (!actionKey || !actionKeys.has(actionKey)) {
+            actionKey = parsedCode.actionKey || parsedName.actionKey || actionKey;
+        }
+
+        if (!resourceKey) {
+            resourceKey = parsedCode.resourceKey || parsedName.resourceKey;
+        }
+
+        return { actionKey, resourceKey };
+    };
+
+    const translatePermissionCategory = (category: string) => {
+        const normalizedCategory = normalizeKey(category);
+        return getLocalizedLabel(permissionResourceLabels, normalizedCategory, category);
+    };
+
+    const translatePermission = (permission: Permission) => {
+        const codeKey = normalizeKey(permission.code);
+        if (codeKey) {
+            const translatedCode = t(`permissionsList.${codeKey}`, { defaultValue: '' });
+            if (translatedCode) return translatedCode;
+        }
+
+        const { actionKey, resourceKey } = getPermissionParts(permission);
+
+        if (actionKey && resourceKey) {
+            const action = getLocalizedLabel(permissionActionLabels, actionKey, permission.action || permission.method);
+            const resource = getLocalizedLabel(permissionResourceLabels, resourceKey, permission.resource);
+            return `${action} ${resource}`.trim();
+        }
+
+        if (actionKey) {
+            return getLocalizedLabel(permissionActionLabels, actionKey, permission.action || permission.method);
+        }
+
+        if (resourceKey) {
+            return getLocalizedLabel(permissionResourceLabels, resourceKey, permission.resource);
+        }
+
+        const nameKey = normalizeKey(permission.name);
+        if (nameKey) {
+            const translatedName = t(`permissionsList.${nameKey}`, { defaultValue: '' });
+            if (translatedName) return translatedName;
+        }
+
+        return prettify(permission.name || permission.code || permission.resource);
+    };
 
     useEffect(() => {
         if (initialData) {
@@ -173,9 +367,9 @@ export default function AddRoleModal({
                                     };
 
                                     const filteredData = permissions?.data ? Object.entries(permissions.data).reduce((acc, [category, items]) => {
-                                        const filteredItems = (items as any[]).filter(p => 
-                                            p.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
-                                            category.toLowerCase().includes(searchQuery.toLowerCase())
+                                        const filteredItems = (items as Permission[]).filter(p =>
+                                            translatePermission(p).toLowerCase().includes(searchQuery.toLowerCase()) ||
+                                            translatePermissionCategory(category).toLowerCase().includes(searchQuery.toLowerCase())
                                         );
                                         if (filteredItems.length > 0) acc[category] = filteredItems;
                                         return acc;
@@ -219,7 +413,7 @@ export default function AddRoleModal({
                                                                         <Shield size={16} className="text-primary" />
                                                                     </div>
                                                                     <span className="font-semibold text-sm text-gray-800 capitalize">
-                                                                        {category.replace(/_/g, ' ')}
+                                                                        {translatePermissionCategory(category)}
                                                                     </span>
                                                                     {/* Count Badge */}
                                                                     <span
@@ -285,7 +479,7 @@ export default function AddRoleModal({
                                                                                     }}
                                                                                 />
                                                                                 <span className={`text-sm leading-tight ${isChecked ? 'text-primary font-medium' : 'text-gray-600'}`}>
-                                                                                    {permission.name}
+                                                                                    {translatePermission(permission)}
                                                                                 </span>
                                                                             </label>
                                                                         );

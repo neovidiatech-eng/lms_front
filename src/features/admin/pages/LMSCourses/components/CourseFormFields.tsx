@@ -139,14 +139,14 @@ const CourseFormFields = ({
         <input ref={thumbnailInputRef} type="file" accept="image/*" className="hidden" onChange={handleThumbnailChange} />
       </div>
 
-      <button
+      {/* <button
         type="button"
         onClick={() => attachInputRef.current?.click()}
         className="w-full flex items-center justify-center gap-2 border border-dashed border-gray-300 hover:border-blue-400 text-gray-500 py-2.5 rounded-xl text-sm transition-colors"
       >
         <Upload className="w-4 h-4" /> {t('uploadAdditionalFiles')}
       </button>
-      <input ref={attachInputRef} type="file" multiple className="hidden" onChange={handleAttachFiles} />
+      <input ref={attachInputRef} type="file" multiple className="hidden" onChange={handleAttachFiles} /> */}
     </div>
   );
 };

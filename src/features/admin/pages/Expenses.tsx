@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useConfirm } from '../../../hooks/useConfirm';
 import {
   Plus,
@@ -19,6 +19,7 @@ import { useExpenses, useCreateExpense, useUpdateExpense, useDeleteExpense } fro
 import { Expense } from "../../../types/expenses";
 import { message } from "antd";
 import { useCurrency } from "../hooks/useCurrency";
+import Pagination from "../../../components/ui/Pagination";
 
 export default function Expenses() {
   const { language } = useLanguage();
@@ -27,7 +28,11 @@ export default function Expenses() {
   const [showViewModal, setShowViewModal] = useState(false);
   const [selectedExpense, setSelectedExpense] = useState<Expense | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
-    const [selectedCurrency, setSelectedCurrency] = useState('EGP');
+  const [fromDate, setFromDate] = useState("");
+  const [toDate, setToDate] = useState("");
+  const [selectedCurrency, setSelectedCurrency] = useState('EGP');
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
   
   const { data: currenciesData } = useCurrency();
     
@@ -36,8 +41,20 @@ export default function Expenses() {
       return curr?.code || '';
     }, [currenciesData, selectedCurrency]);
 
-  const { data: expensesData, isLoading } = useExpenses(selectedCurrencyId);
+  const expenseFilters = useMemo(() => ({
+    search: searchQuery,
+    fromDate,
+    toDate,
+  }), [searchQuery, fromDate, toDate]);
+
+  const { data: expensesData, isLoading } = useExpenses(
+    selectedCurrencyId,
+    currentPage,
+    itemsPerPage,
+    expenseFilters,
+  );
   const expenses = expensesData?.expenses || [];
+  const pagination = expensesData?.pagination;
   const totalExpenses = expensesData?.totalExpenses || 0;
 
   
@@ -78,6 +95,9 @@ export default function Expenses() {
     other: { ar: "أخرى", en: "Other" },
     allStatuses: { ar: "كل الحالات", en: "All Statuses" },
     allCurrencies: { ar: "كل العملات", en: "All Currencies" },
+    fromDate: { ar: "من تاريخ", en: "From Date" },
+    toDate: { ar: "إلى تاريخ", en: "To Date" },
+    clearDate: { ar: "مسح التاريخ", en: "Clear Date" },
   };
  const CURRENCIES = useMemo(() => {
     if (!currenciesData?.currencies) return [];
@@ -127,8 +147,28 @@ export default function Expenses() {
   };
 
   const filteredExpenses = expenses.filter((expense) => {
-    return expense.title.toLowerCase().includes(searchQuery.toLowerCase());
+    const expenseDate = new Date(expense.date);
+    const from = fromDate ? new Date(`${fromDate}T00:00:00`) : null;
+    const to = toDate ? new Date(`${toDate}T23:59:59.999`) : null;
+    const matchesSearch = expense.title.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesFromDate = !from || expenseDate >= from;
+    const matchesToDate = !to || expenseDate <= to;
+
+    return matchesSearch && matchesFromDate && matchesToDate;
   });
+
+  const totalItems = pagination?.totalItems ?? filteredExpenses.length;
+  const totalPages = Math.max(1, pagination?.totalPages ?? Math.ceil(totalItems / itemsPerPage));
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [selectedCurrencyId, searchQuery, fromDate, toDate]);
+
+  useEffect(() => {
+    if (currentPage > totalPages) {
+      setCurrentPage(totalPages);
+    }
+  }, [currentPage, totalPages]);
 
   const totalAmount = totalExpenses;
 
@@ -147,7 +187,7 @@ export default function Expenses() {
                   {text.title[language]}
                 </h1>
                 <p className="text-sm text-gray-500">
-                  {filteredExpenses.length} {text.totalCount[language]}
+                  {totalItems} {text.totalCount[language]}
                 </p>
               </div>
             </div>
@@ -216,10 +256,47 @@ export default function Expenses() {
         </div>
       </div>
 
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <label className="block">
+          <span className="block text-xs font-medium text-gray-500 mb-1">{text.fromDate[language]}</span>
+          <input
+            type="date"
+            value={fromDate}
+            onChange={(e) => setFromDate(e.target.value)}
+            className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-primary text-start bg-white"
+          />
+        </label>
+        <label className="block">
+          <span className="block text-xs font-medium text-gray-500 mb-1">{text.toDate[language]}</span>
+          <input
+            type="date"
+            value={toDate}
+            min={fromDate || undefined}
+            onChange={(e) => setToDate(e.target.value)}
+            className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-primary text-start bg-white"
+          />
+        </label>
+      </div>
+
+      {(fromDate || toDate) && (
+        <div className="flex justify-end">
+          <button
+            type="button"
+            onClick={() => {
+              setFromDate('');
+              setToDate('');
+            }}
+            className="text-sm font-medium text-primary hover:underline"
+          >
+            {text.clearDate[language]}
+          </button>
+        </div>
+      )}
+
       {/* Table */}
       <div className="bg-white border border-gray-200 rounded-3xl overflow-hidden shadow-sm">
         {isLoading ? (
-          <TableSkeleton rows={8} columns={7} />
+          <TableSkeleton rows={itemsPerPage} columns={7} />
         ) : filteredExpenses.length === 0 ? (
           <div className="py-20 text-center">
             <DollarSign className="w-16 h-16 text-gray-300 mx-auto mb-4" />
@@ -339,6 +416,15 @@ export default function Expenses() {
               </tbody>
             </table>
           </div>
+        )}
+        {!isLoading && filteredExpenses.length > 0 && (
+          <Pagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            totalItems={totalItems}
+            itemsPerPage={itemsPerPage}
+            onPageChange={setCurrentPage}
+          />
         )}
       </div>
 

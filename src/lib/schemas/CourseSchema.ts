@@ -8,7 +8,10 @@ export const getCourseSchema = (t: TFunc) => z.object({
   attachments: z.array(z.any()).optional(),
   description: z.string().trim().min(1, t("validation.required")),
   videoUrl: z.string().trim().url(t("validation.invalidUrl")),
-  pdfUrl: z.string().trim().url(t("validation.invalidUrl")),
+  pdfUrl: z.preprocess(
+    (value) => (typeof value === "string" && value.trim() === "" ? undefined : value),
+    z.string().trim().url(t("validation.invalidUrl")).optional()
+  ),
   thumbnailFile: z.any().nullable(),
   thumbnailPreview: z.string().trim().optional(),
 }).refine((data) => data.thumbnailFile !== null || (data.thumbnailPreview && data.thumbnailPreview.trim() !== ""), {

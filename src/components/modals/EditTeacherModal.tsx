@@ -57,6 +57,7 @@ export default function EditTeacherModal({ isOpen, onClose, onSubmit, teacher }:
         gender: (teacher.gender?.toLowerCase() as 'male' | 'female') || 'male',
         status: teacher.active ? 'active' : 'inactive',
         subjects: subjectIds,
+        meeting_link: teacher.meeting_link || '',
       });
     }
   }, [teacher, reset]);

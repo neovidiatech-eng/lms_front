@@ -19,7 +19,10 @@ export const getTeacherSchema = (t: TFunc) => z.object({
 
   // Changed from a fixed object to a dynamic array of GUIDs
   subjects: z.array(z.string()).min(1, t("validation.required")),
-  meeting_link: z.string().url().min(1, t("validation.required")),
+  meeting_link: z.preprocess(
+    (value) => (typeof value === 'string' && value.trim() === '' ? undefined : value),
+    z.string().url(t("validation.url")).optional()
+  ),
   timezone: z.string().optional(),
 });
 
