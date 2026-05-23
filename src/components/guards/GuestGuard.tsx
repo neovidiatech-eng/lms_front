@@ -1,15 +1,12 @@
 import { Navigate, Outlet } from 'react-router-dom';
+import { getDashboardPathForRole } from '../../utils/auth';
 
 const GuestGuard = () => {
   const token = localStorage.getItem('token') || sessionStorage.getItem('token');
   const role = localStorage.getItem('role');
 
   if (token) {
-    // If already logged in, redirect to the appropriate dashboard based on role
-    if (role === 'teacher') return <Navigate to="/teacher-dashboard" replace />;
-    if (role === 'student') return <Navigate to="/student-dashboard" replace />;
-    if (role === 'parent') return <Navigate to="/parent-dashboard" replace />;
-    if (role === 'super_admin' || role === 'admin') return <Navigate to="/dashboard" replace />;
+    if (role) return <Navigate to={getDashboardPathForRole(role)} replace />;
     
     // If token exists but no role is found, clear and stay at login
     localStorage.removeItem('token');

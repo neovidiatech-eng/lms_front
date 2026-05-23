@@ -1,10 +1,12 @@
 import { Navigate, Outlet } from 'react-router-dom';
+import { getDashboardPathForRole, isAdminDashboardRole } from '../../utils/auth';
 
 interface AuthGuardProps {
   allowedRoles?: string[];
+  allowCustomAdminRoles?: boolean;
 }
 
-const AuthGuard = ({ allowedRoles }: AuthGuardProps) => {
+const AuthGuard = ({ allowedRoles, allowCustomAdminRoles = false }: AuthGuardProps) => {
   const token = localStorage.getItem('token') || sessionStorage.getItem('token');
   const role = localStorage.getItem('role');
 
@@ -13,13 +15,13 @@ const AuthGuard = ({ allowedRoles }: AuthGuardProps) => {
     return <Navigate to="/login" replace />;
   }
 
-  if (allowedRoles && !allowedRoles.includes(role || '')) {
+  const isAllowedCustomAdmin =
+    allowCustomAdminRoles && isAdminDashboardRole(role);
+
+  if (allowedRoles && !allowedRoles.includes(role || '') && !isAllowedCustomAdmin) {
     console.warn(`Access denied for role: ${role}. Allowed roles: ${allowedRoles}`);
 
-    if (role === 'student') return <Navigate to="/student-dashboard" replace />;
-    if (role === 'teacher') return <Navigate to="/teacher-dashboard" replace />;
-    if (role === 'parent') return <Navigate to="/parent-dashboard" replace />;
-    if (role === 'super_admin' || role === "admin") return <Navigate to="/dashboard" replace />;
+    if (role) return <Navigate to={getDashboardPathForRole(role)} replace />;
 
     // If no valid role is found, clear and redirect to login
     localStorage.removeItem('token');

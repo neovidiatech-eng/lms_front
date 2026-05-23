@@ -6,6 +6,7 @@ import WhatsAppPhone from "../../../components/ui/WhatsAppPhone";
 import ViewSubscriptionRequestModal from "../../../components/modals/ViewSubscriptionRequestModal";
 import CustomSelect from "../../../components/ui/CustomSelect";
 import { TableSkeleton } from "../../../components/ui/CustomSkeleton";
+import { hasPermission } from "../../../utils/auth";
 import {
   changeSubscriptionRequestStatus,
   getSubscriptionRequests,
@@ -42,6 +43,13 @@ export default function SubscriptionRequests() {
   const [selectedRequest, setSelectedRequest] =
     useState<SubscriptionRequest | null>(null);
   const itemsPerPage = 10;
+  const canUpdateSubscriptionRequests = hasPermission("subscriptions", [
+    "update",
+    "write",
+    "manage",
+    "approve",
+    "reject",
+  ]);
 
   const text = {
     title: { ar: "طلبات الاشتراك", en: "Subscription Requests" },
@@ -154,6 +162,8 @@ export default function SubscriptionRequests() {
   };
 
   const handleApprove = async (id: string) => {
+    if (!canUpdateSubscriptionRequests) return;
+
     try {
       await changeSubscriptionRequestStatus(id, "approved");
       setRequests((prev) =>
@@ -165,6 +175,8 @@ export default function SubscriptionRequests() {
   };
 
   const handleReject = async (id: string) => {
+    if (!canUpdateSubscriptionRequests) return;
+
     try {
       await changeSubscriptionRequestStatus(id, "rejected");
       setRequests((prev) =>
@@ -356,30 +368,34 @@ export default function SubscriptionRequests() {
                         >
                           <Eye className="w-5 h-5" />
                         </button>
-                        <button
-                          onClick={() => handleReject(request.id)}
-                          disabled={request.status !== "pending"}
-                          className={`p-2 rounded-lg transition-colors ${
-                            request.status === "pending"
-                              ? "text-red-600 hover:bg-red-50"
-                              : "text-gray-300 cursor-not-allowed"
-                          }`}
-                          title={text.reject[language]}
-                        >
-                          <XCircle className="w-5 h-5" />
-                        </button>
-                        <button
-                          onClick={() => handleApprove(request.id)}
-                          disabled={request.status !== "pending"}
-                          className={`p-2 rounded-lg transition-colors ${
-                            request.status === "pending"
-                              ? "text-green-600 hover:bg-green-50"
-                              : "text-gray-300 cursor-not-allowed"
-                          }`}
-                          title={text.approve[language]}
-                        >
-                          <CheckCircle className="w-5 h-5" />
-                        </button>
+                        {canUpdateSubscriptionRequests && (
+                          <>
+                            <button
+                              onClick={() => handleReject(request.id)}
+                              disabled={request.status !== "pending"}
+                              className={`p-2 rounded-lg transition-colors ${
+                                request.status === "pending"
+                                  ? "text-red-600 hover:bg-red-50"
+                                  : "text-gray-300 cursor-not-allowed"
+                              }`}
+                              title={text.reject[language]}
+                            >
+                              <XCircle className="w-5 h-5" />
+                            </button>
+                            <button
+                              onClick={() => handleApprove(request.id)}
+                              disabled={request.status !== "pending"}
+                              className={`p-2 rounded-lg transition-colors ${
+                                request.status === "pending"
+                                  ? "text-green-600 hover:bg-green-50"
+                                  : "text-gray-300 cursor-not-allowed"
+                              }`}
+                              title={text.approve[language]}
+                            >
+                              <CheckCircle className="w-5 h-5" />
+                            </button>
+                          </>
+                        )}
                       </div>
                     </td>
                   </tr>

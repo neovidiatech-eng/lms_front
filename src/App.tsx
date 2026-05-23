@@ -97,7 +97,7 @@ function SocketProvider() {
                       </Route>
 
                       {/* Protected Dashboard Routes */}
-                      <Route element={<AuthGuard allowedRoles={['super_admin', 'admin']} />}>
+                      <Route element={<AuthGuard allowedRoles={['super_admin', 'admin']} allowCustomAdminRoles />}>
                         <Route path="/dashboard/*" element={<AdminDashboard />} />
                       </Route>
 

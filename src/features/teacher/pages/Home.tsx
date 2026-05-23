@@ -76,6 +76,19 @@ export default function TeacherDashboardHome() {
       return '';
     }
   };
+
+  const formatSessionDate = (dateString: string) => {
+    try {
+      const date = new Date(dateString);
+      return new Intl.DateTimeFormat(isRtl ? 'ar-EG' : 'en-US', {
+        weekday: 'short',
+        day: 'numeric',
+        month: 'short',
+      }).format(date);
+    } catch (e) {
+      return '';
+    }
+  };
   interface NormalizedSchedule {
     title: string;
     description: string;
@@ -245,23 +258,15 @@ export default function TeacherDashboardHome() {
                     </div>
                   </div>
                   <div className="flex items-center justify-between sm:justify-end gap-4">
-                    <div className="text-right">
+                    <div className="flex flex-wrap items-center justify-end gap-2 text-right">
+                      <span className="inline-block px-3 py-1 bg-white border border-gray-200 rounded-full text-xs font-semibold text-gray-700">
+                        {formatSessionDate(session.startTime)}
+                      </span>
                       <span className="inline-block px-3 py-1 bg-white border border-gray-200 rounded-full text-xs font-semibold text-gray-700">
                         {formatSessionTime(session.startTime, session.endTime)}
                       </span>
                     </div>
-                    {session.link && (
-                      <a
-                        href={session.link}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-flex items-center gap-1 px-3 py-1.5 text-white rounded-lg text-xs font-bold transition-all hover:opacity-90 active:scale-95 shadow-sm"
-                        style={{ backgroundColor: settings.primaryColor }}
-                      >
-                        <Video size={14} />
-                        {isRtl ? 'دخول الحصة' : 'Join Class'}
-                      </a>
-                    )}
+                   
                   </div>
                 </div>
               ))

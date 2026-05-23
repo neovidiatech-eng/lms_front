@@ -1,5 +1,7 @@
 import { Notebook, Users, ClipboardList } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
 import DashboardCard from "../../../components/ui/Card";
+import Pagination from "../../../components/ui/Pagination";
 import ActiveUsersChart from "../components/ActiveUsersChart";
 import RevenueExpenseChart from "../components/RevenueExpenseChart";
 import RecentActivity from "../components/RecentActivity";
@@ -34,6 +36,20 @@ export default function Dashboard() {
 
   const { data: stats, isLoading, isError } = useAdminDashboard();
   const { data: logsData, isLoading: logsLoading } = useActivityLogs();
+  const [logsCurrentPage, setLogsCurrentPage] = useState(1);
+  const logsItemsPerPage = 5;
+  const activityLogs = logsData?.data || [];
+  const logsTotalPages = Math.max(1, Math.ceil(activityLogs.length / logsItemsPerPage));
+  const paginatedLogs = useMemo(() => {
+    const startIndex = (logsCurrentPage - 1) * logsItemsPerPage;
+    return activityLogs.slice(startIndex, startIndex + logsItemsPerPage);
+  }, [activityLogs, logsCurrentPage]);
+
+  useEffect(() => {
+    if (logsCurrentPage > logsTotalPages) {
+      setLogsCurrentPage(logsTotalPages);
+    }
+  }, [logsCurrentPage, logsTotalPages]);
 
   if (isLoading) {
     return (
@@ -256,13 +272,14 @@ export default function Dashboard() {
       {/* Activity Logs */}
 <div className="bg-white rounded-3xl shadow-sm border border-gray-100 p-6 mx-3">
   <div className="flex items-center justify-between mb-6">
-    <span className="text-xs bg-[#eefcfc] text-[#00a8a8] px-3 py-1 rounded-full font-bold">
-  {logsData?.data?.length || 0} {t("dashboard.logsCount")}
-</span>
+   
 
 <h2 className="text-lg font-bold text-gray-800">
   {t("dashboard.activityLogs")}
 </h2>
+ <span className="text-xs bg-[#eefcfc] text-[#00a8a8] px-3 py-1 rounded-full font-bold">
+  {logsData?.data?.length || 0} {t("dashboard.logsCount")}
+</span>
   </div>
 
   {logsLoading ? (
@@ -314,7 +331,7 @@ export default function Dashboard() {
         </thead>
 
         <tbody className="divide-y divide-gray-50">
-          {logsData.data.map((log) => (
+          {paginatedLogs.map((log) => (
             <tr
               key={log.id}
               className="hover:bg-gray-50 transition-colors"
@@ -331,6 +348,10 @@ export default function Dashboard() {
               <td className="py-4 px-4 text-sm text-gray-600">
                 {log.user.email}
               </td>
+              
+              <td className="py-4 px-4 text-sm font-medium text-gray-700">
+                {log.role}
+              </td>
 
               <td className="py-4 px-4">
                 <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-blue-50 text-blue-600">
@@ -340,9 +361,6 @@ export default function Dashboard() {
                 </span>
               </td>
 
-              <td className="py-4 px-4 text-sm font-medium text-gray-700">
-                {log.role}
-              </td>
 
                             <td className="py-4 px-4">
                 <span
@@ -370,6 +388,13 @@ export default function Dashboard() {
           ))}
         </tbody>
       </table>
+      <Pagination
+        currentPage={logsCurrentPage}
+        totalPages={logsTotalPages}
+        totalItems={activityLogs.length}
+        itemsPerPage={logsItemsPerPage}
+        onPageChange={setLogsCurrentPage}
+      />
     </div>
   )}
 </div>

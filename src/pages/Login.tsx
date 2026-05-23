@@ -10,6 +10,7 @@ import { CustomCheckbox } from "../components/ui/CustomCheckbox";
 import { GoogleLogin } from "@react-oauth/google";
 import { message } from "antd";
 import { connectSocket } from "../utils/socket";
+import { getDashboardPathForRole, storeAuthPermissions } from "../utils/auth";
 
 interface LoginProps {
   onLoginSuccess: () => void;
@@ -53,23 +54,16 @@ export default function Login({ onLoginSuccess }: LoginProps) {
         }
 
         const role = result.data?.role || result.role;
+        const permissions = result.data?.permissions || result.permissions || [];
         localStorage.setItem("role", role);
+        storeAuthPermissions(permissions, data.rememberMe || false);
         onLoginSuccess();
         message.success(result.message || t('loginSuccess'));
 
         const userEmail = data.email;
         localStorage.setItem("email", userEmail);
 
-        if (role === "teacher") {
-          navigate("/teacher-dashboard");
-        } else if (role === "student") {
-          navigate("/student-dashboard");
-        }else if (role==="parent") {
-
-          navigate("/parent-dashboard");
-        } else {
-          navigate("/dashboard");
-        }
+        navigate(getDashboardPathForRole(role));
       }
       connectSocket(token);
     } catch (error) {
