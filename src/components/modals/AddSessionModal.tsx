@@ -67,6 +67,7 @@ export default function AddSessionModal({
   const [schedulingMode, setSchedulingMode] = useState<'single' | 'batch'>(
     'single'
   );
+  const [sessionsLimitError, setSessionsLimitError] = useState('');
 
   const { data: students } = useStudents();
   const { data: instructors } = useTeacher();
@@ -272,6 +273,21 @@ export default function AddSessionModal({
     watch('sessionDate'),
   ]);
 
+  const remainingSessions = Number(studentPlanInfo?.sessionsRemaining) || 0;
+  const requestedSessionsCount = previewSessions.length;
+  const sessionsExceedRemaining =
+    !!selectedStudentData && requestedSessionsCount > remainingSessions;
+
+  const sessionsLimitMessage = sessionsExceedRemaining
+    ? language === 'ar'
+      ? `عدد الحصص المختارة ${requestedSessionsCount} أكبر من المتبقي للطالب. المتبقي ${remainingSessions} حصة فقط.`
+      : `Selected sessions (${requestedSessionsCount}) exceed the student's remaining sessions. Remaining: ${remainingSessions}.`
+    : '';
+
+  useEffect(() => {
+    setSessionsLimitError(sessionsLimitMessage);
+  }, [sessionsLimitMessage]);
+
   const formatDateCard = (date: string) => {
     if (!date) {
       return {
@@ -299,6 +315,11 @@ export default function AddSessionModal({
   };
 
   const onSubmit = (data: any) => {
+    if (sessionsExceedRemaining) {
+      setSessionsLimitError(sessionsLimitMessage);
+      return;
+    }
+
     if (schedulingMode === 'single') {
       onAdd(data as SessionFormData);
     } else {
@@ -598,7 +619,8 @@ export default function AddSessionModal({
 
               <button
                 type="submit"
-                className="primary-btn"
+                disabled={sessionsExceedRemaining}
+                className={`primary-btn ${sessionsExceedRemaining ? 'opacity-50 cursor-not-allowed' : ''}`}
               >
                 {schedulingMode === 'single'
                   ? 'Create Session'
@@ -613,6 +635,9 @@ export default function AddSessionModal({
             watchTitle={watchTitle}
             selectedSubject={selectedSubject}
             watchStartTime={watchStartTime}
+            sessionsLimitError={sessionsLimitError}
+            requestedSessionsCount={requestedSessionsCount}
+            remainingSessions={remainingSessions}
           />
         </form>
 

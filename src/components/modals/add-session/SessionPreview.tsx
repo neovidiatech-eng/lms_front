@@ -1,4 +1,4 @@
-import { Calendar, ChevronDown } from 'lucide-react';
+import { AlertTriangle, Calendar, ChevronDown } from 'lucide-react';
 import { Subject } from '../../../types/subject';
 import { useTranslation } from 'react-i18next';
 
@@ -11,6 +11,9 @@ interface SessionPreviewProps {
   watchTitle: string;
   selectedSubject: Subject | null;
   watchStartTime: string;
+  sessionsLimitError?: string;
+  requestedSessionsCount?: number;
+  remainingSessions?: number;
 }
 
 export default function SessionPreview({
@@ -19,6 +22,9 @@ export default function SessionPreview({
   watchTitle,
   selectedSubject,
   watchStartTime,
+  sessionsLimitError,
+  requestedSessionsCount = 0,
+  remainingSessions = 0,
 }: SessionPreviewProps) {
   const { i18n } = useTranslation();
   const language = i18n.language.split('-')[0];
@@ -33,6 +39,25 @@ export default function SessionPreview({
       </div>
 
       <div className="p-6 space-y-4">
+        {sessionsLimitError && (
+          <div className="rounded-2xl border border-red-200 bg-red-50 p-4 text-start">
+            <div className="flex items-start gap-3">
+              <AlertTriangle className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
+              <div>
+                <p className="text-sm font-bold text-red-700">
+                  {language === 'ar' ? 'لا يمكن إنشاء هذه الحصص' : 'Cannot create these sessions'}
+                </p>
+                <p className="text-xs text-red-600 mt-1">{sessionsLimitError}</p>
+                <p className="text-xs text-red-500 mt-2">
+                  {language === 'ar'
+                    ? `المطلوب: ${requestedSessionsCount} - المتبقي: ${remainingSessions}`
+                    : `Requested: ${requestedSessionsCount} - Remaining: ${remainingSessions}`}
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
+
         {previewSessions.length ? (
           previewSessions.map((session, index) => {
             const date = formatDateCard(session.date);

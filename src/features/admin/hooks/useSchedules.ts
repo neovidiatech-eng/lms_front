@@ -18,18 +18,35 @@ import {
 } from "../services/SessionsServices";
 import { message } from "antd";
 
-export const useGetSchedules = (page: number = 1, limit: number = 10) => {
+export const useGetSchedules = (
+  page: number = 1,
+  limit: number = 10,
+  filters: {
+    fromDate?: string;
+    toDate?: string;
+  } = {},
+) => {
   return useQuery({
-    queryKey: ["schedules", page, limit],
-    queryFn: () => getAllSchedules(page, limit),
+    queryKey: ["schedules", page, limit, filters],
+    queryFn: () => getAllSchedules(page, limit, filters),
   });
 };
 
-export const useSearchSchedules = (searchTerm: string, page: number = 1, limit: number = 10) => {
+export const useSearchSchedules = (
+  searchTerm: string,
+  page: number = 1,
+  limit: number = 10,
+  filters: {
+    fromDate?: string;
+    toDate?: string;
+  } = {},
+) => {
   return useQuery({
-    queryKey: ["schedules", searchTerm, page, limit],
+    queryKey: ["schedules", searchTerm, page, limit, filters],
     queryFn: () =>
-      searchTerm ? searchSchedules(searchTerm, page, limit) : getAllSchedules(page, limit),
+      searchTerm
+        ? searchSchedules(searchTerm, page, limit, filters)
+        : getAllSchedules(page, limit, filters),
   });
 };
 

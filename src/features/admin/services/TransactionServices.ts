@@ -6,9 +6,31 @@ import {
     WithdrawalApiResponse,
 } from "../../../types/transaction";
 
-export const getTransactions = async (currencyId: string): Promise<WalletHistoryResponse> => {
+interface TransactionFilters {
+    search?: string;
+    status?: string;
+    type?: string;
+    fromDate?: string;
+    toDate?: string;
+}
+
+export const getTransactions = async (
+    currencyId: string,
+    page: number = 1,
+    limit: number = 20,
+    filters: TransactionFilters = {},
+): Promise<WalletHistoryResponse> => {
     const response = await api.get("/transactions/", {
-        params: { currencyId },
+        params: {
+            currencyId,
+            page,
+            limit,
+            search: filters.search || undefined,
+            status: filters.status && filters.status !== "all" ? filters.status : undefined,
+            type: filters.type && filters.type !== "all" ? filters.type : undefined,
+            fromDate: filters.fromDate || undefined,
+            toDate: filters.toDate || undefined,
+        },
     });
     return response.data;
 }

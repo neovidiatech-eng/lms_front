@@ -113,9 +113,10 @@ const uniqueFilters = [
 
   const handleDelete = async (id: string) => {
     const confirmed = await confirm({
-      title: t('delete_course') || 'حذف الكورس',
+      title: t('deleteCourse') || 'حذف الكورس',
       message: t('confirm_delete_course') || 'هل أنت متأكد من حذف هذا الكورس؟',
     });
+
     if (confirmed) {
       deleteCourseMutation.mutate(id);
     }

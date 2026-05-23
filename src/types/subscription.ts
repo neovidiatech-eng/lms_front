@@ -6,6 +6,24 @@ export interface User {
     phone: string;
 }
 
+export interface Student {
+    id: string;
+    user_id: string;
+    birth_date: string;
+    gender: string;
+    active: boolean;
+    planId: string;
+    country: string;
+    status: string;
+    createdAt: string;
+    updatedAt: string;
+    sessions: number;
+    sessions_attended: number;
+    sessions_remaining: number;
+    avgRating: number;
+    totalReviews: number;
+}
+
 export interface Plan {
     id: string;
     name_en: string;
@@ -41,6 +59,7 @@ export interface SubscriptionData {
     startDate: string;
     paidAt: string;
     user: User;
+    student: Student;
     plan: Plan;
     currency: Currency;
 }

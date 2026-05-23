@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { Search, Plus, Eye, Trash2, Edit } from "lucide-react";
 import Pagination from "../../../components/ui/Pagination";
 import { useTranslation } from "react-i18next";
@@ -28,6 +28,8 @@ export default function Sessions() {
   const [searchTerm, setSearchTerm] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
+  const [fromDate, setFromDate] = useState("");
+  const [toDate, setToDate] = useState("");
   const [showAddModal, setShowAddModal] = useState(false);
   const [showViewModal, setShowViewModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
@@ -143,7 +145,11 @@ export default function Sessions() {
   }, [searchTerm]);
 
   const itemsPerPage = 10;
-  const { data: searchResults } = useSearchSchedules(debouncedSearch, currentPage, itemsPerPage);
+  const dateFilters = useMemo(() => ({
+    fromDate,
+    toDate,
+  }), [fromDate, toDate]);
+  const { data: searchResults } = useSearchSchedules(debouncedSearch, currentPage, itemsPerPage, dateFilters);
 
   const scheduleData: Schedule[] = searchResults?.data?.schedule ?? [];
 
@@ -201,7 +207,16 @@ export default function Sessions() {
   const totalItems = searchResults?.data?.pagination?.totalItems || 0;
   const totalPages = searchResults?.data?.pagination?.totalPages || 1;
 
-  const displaySchedules = groupedSchedules;
+  const displaySchedules = groupedSchedules.filter((session) => {
+    const sessionDate = new Date(session.start_time);
+    const from = fromDate ? new Date(`${fromDate}T00:00:00`) : null;
+    const to = toDate ? new Date(`${toDate}T23:59:59.999`) : null;
+    return (!from || sessionDate >= from) && (!to || sessionDate <= to);
+  });
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [debouncedSearch, fromDate, toDate]);
 
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
@@ -336,6 +351,47 @@ export default function Sessions() {
             
             </div>
           </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-4">
+            <label className="block text-start">
+              <span className="block text-xs font-medium text-gray-500 mb-1">
+                {language === "ar" ? "من تاريخ" : "From Date"}
+              </span>
+              <input
+                type="date"
+                value={fromDate}
+                onChange={(e) => setFromDate(e.target.value)}
+                className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary text-start bg-white"
+              />
+            </label>
+            <label className="block text-start">
+              <span className="block text-xs font-medium text-gray-500 mb-1">
+                {language === "ar" ? "إلى تاريخ" : "To Date"}
+              </span>
+              <input
+                type="date"
+                value={toDate}
+                min={fromDate || undefined}
+                onChange={(e) => setToDate(e.target.value)}
+                className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary text-start bg-white"
+              />
+            </label>
+          </div>
+
+          {(fromDate || toDate) && (
+            <div className="flex justify-end mt-3">
+              <button
+                type="button"
+                onClick={() => {
+                  setFromDate("");
+                  setToDate("");
+                }}
+                className="text-sm font-medium text-primary hover:underline"
+              >
+                {language === "ar" ? "مسح التاريخ" : "Clear Date"}
+              </button>
+            </div>
+          )}
         </div>
 
         <div className="overflow-x-auto">

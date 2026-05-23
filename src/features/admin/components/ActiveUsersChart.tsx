@@ -1,4 +1,5 @@
-import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from "recharts";
+import { Cell, Pie, PieChart, ResponsiveContainer, Tooltip } from "recharts";
+import { useTranslation } from "react-i18next";
 import { ActiveUsers } from "../../../types/AdminDasboard";
 
 interface ActiveUsersChartProps {
@@ -11,13 +12,14 @@ const COLORS = {
 };
 
 export default function ActiveUsersChart({ activeUsers }: ActiveUsersChartProps) {
+  const { t } = useTranslation();
   const students = activeUsers?.students ?? 0;
   const instructors = activeUsers?.instructors ?? 0;
   const total = students + instructors;
 
   const chartData = [
-    { name: "الطلاب", value: students, color: COLORS.students },
-    { name: "المعلمون", value: instructors, color: COLORS.instructors },
+    { name: t("dashboard.students"), value: students, color: COLORS.students },
+    { name: t("dashboard.instructors"), value: instructors, color: COLORS.instructors },
   ];
 
   const studentsPercent = total > 0 ? Math.round((students / total) * 100) : 0;
@@ -27,8 +29,8 @@ export default function ActiveUsersChart({ activeUsers }: ActiveUsersChartProps)
     <div className="bg-white rounded-3xl shadow-sm border border-gray-100 p-6 flex flex-col items-center h-full">
       <div className="w-full flex justify-end items-start mb-6">
         <div className="text-right">
-          <h2 className="text-xl font-bold text-gray-800">المستخدمون النشطون</h2>
-          <p className="text-gray-400 text-sm">توزيع المستخدمين على المنصة</p>
+          <h2 className="text-xl font-bold text-gray-800">{t("dashboard.activeUsers")}</h2>
+          <p className="text-gray-400 text-sm">{t("dashboard.activeUsersSubtitle")}</p>
         </div>
       </div>
 
@@ -51,7 +53,7 @@ export default function ActiveUsersChart({ activeUsers }: ActiveUsersChartProps)
               ))}
             </Pie>
             <Tooltip
-              formatter={(value: any, name: any) => [`${value} مستخدم`, name]}
+              formatter={(value: unknown, name: unknown) => [`${value} ${t("dashboard.user")}`, name]}
               contentStyle={{
                 borderRadius: "12px",
                 border: "none",
@@ -63,21 +65,18 @@ export default function ActiveUsersChart({ activeUsers }: ActiveUsersChartProps)
           </PieChart>
         </ResponsiveContainer>
 
-        {/* Center Label */}
         <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-          <span className="text-gray-400 text-xs font-medium">الإجمالي</span>
+          <span className="text-gray-400 text-xs font-medium">{t("dashboard.total")}</span>
           <span className="text-3xl font-black text-gray-900">{total}</span>
-          <span className="text-gray-400 text-[11px] mt-0.5">مستخدم نشط</span>
+          <span className="text-gray-400 text-[11px] mt-0.5">{t("dashboard.activeUser")}</span>
         </div>
       </div>
 
-      {/* Legend */}
       <div className="w-full mt-6 space-y-3">
-        {/* Students */}
         <div className="flex items-center justify-between text-sm">
           <div className="flex items-center gap-2 order-2">
             <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: COLORS.students }} />
-            <span className="text-gray-600 font-medium">الطلاب</span>
+            <span className="text-gray-600 font-medium">{t("dashboard.students")}</span>
           </div>
           <div className="flex items-center gap-2 order-1">
             <span className="text-gray-800 font-black text-base">{students}</span>
@@ -85,7 +84,6 @@ export default function ActiveUsersChart({ activeUsers }: ActiveUsersChartProps)
           </div>
         </div>
 
-        {/* Progress bar for students */}
         <div className="w-full h-1.5 bg-gray-100 rounded-full overflow-hidden">
           <div
             className="h-full rounded-full transition-all duration-700"
@@ -93,11 +91,10 @@ export default function ActiveUsersChart({ activeUsers }: ActiveUsersChartProps)
           />
         </div>
 
-        {/* Instructors */}
         <div className="flex items-center justify-between text-sm mt-3">
           <div className="flex items-center gap-2 order-2">
             <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: COLORS.instructors }} />
-            <span className="text-gray-600 font-medium">المعلمون</span>
+            <span className="text-gray-600 font-medium">{t("dashboard.instructors")}</span>
           </div>
           <div className="flex items-center gap-2 order-1">
             <span className="text-gray-800 font-black text-base">{instructors}</span>
@@ -105,7 +102,6 @@ export default function ActiveUsersChart({ activeUsers }: ActiveUsersChartProps)
           </div>
         </div>
 
-        {/* Progress bar for instructors */}
         <div className="w-full h-1.5 bg-gray-100 rounded-full overflow-hidden">
           <div
             className="h-full rounded-full transition-all duration-700"

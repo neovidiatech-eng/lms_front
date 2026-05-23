@@ -1,10 +1,10 @@
 export interface Permission {
   id: string;
   name: string;
-  code?: string;
-  action?: string;
-  resource?: string;
-  method?: string;
+  code?: string | null;
+  action?: string | null;
+  resource?: string | null;
+  method?: string | null;
 }
 
 export interface PermissionsData {

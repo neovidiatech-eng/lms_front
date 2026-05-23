@@ -1,19 +1,24 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { TrendingUp, TrendingDown, DollarSign, Search, Eye, RefreshCw } from 'lucide-react';
 import { useLanguage } from '../../../contexts/LanguageContext';
 import ViewTransactionModal from '../../../components/modals/ViewTransactionModal';
 import { useTransactionStats, useTransactions } from '../hooks/useTransaction';
 import { Transaction, TransactionType } from '../../../types/transaction';
 import { useCurrency } from '../hooks/useCurrency';
+import Pagination from '../../../components/ui/Pagination';
 
 export default function Transactions() {
   const { language } = useLanguage();
   const [searchQuery, setSearchQuery] = useState('');
   const [filterStatus, setFilterStatus] = useState('all');
   const [filterType, setFilterType] = useState('all');
+  const [fromDate, setFromDate] = useState('');
+  const [toDate, setToDate] = useState('');
   const [selectedCurrency, setSelectedCurrency] = useState('EGP');
+  const [currentPage, setCurrentPage] = useState(1);
   const [selectedTransaction, setSelectedTransaction] = useState<Transaction | null>(null);
   const [showViewModal, setShowViewModal] = useState(false);
+  const itemsPerPage = 20;
   
   const { data: currenciesData } = useCurrency();
   
@@ -22,8 +27,22 @@ export default function Transactions() {
     return curr?.id || '';
   }, [currenciesData, selectedCurrency]);
 
-  const { data: response, isLoading: transactionsLoading, error } = useTransactions(selectedCurrencyId);
+  const transactionFilters = useMemo(() => ({
+    search: searchQuery,
+    status: filterStatus,
+    type: filterType,
+    fromDate,
+    toDate,
+  }), [searchQuery, filterStatus, filterType, fromDate, toDate]);
+
+  const { data: response, isLoading: transactionsLoading, error } = useTransactions(
+    selectedCurrencyId,
+    currentPage,
+    itemsPerPage,
+    transactionFilters,
+  );
   const transactions = response?.data?.transactions || [];
+  const serverPagination = response?.data?.pagination;
 
   const { data: statsData, isLoading: statsLoading } = useTransactionStats(selectedCurrencyId);
 
@@ -63,8 +82,12 @@ export default function Transactions() {
     credit: { ar: 'إيداع', en: 'Credit' },
     debit: { ar: 'سحب', en: 'Debit' },
     subscription: { ar: 'اشتراك', en: 'Subscription' },
+    payout: { ar: 'دفعة لمعلم', en: 'Payout' },
     allStatuses: { ar: 'كل الحالات', en: 'All Statuses' },
     allTypes: { ar: 'كل الأنواع', en: 'All Types' },
+    fromDate: { ar: 'من تاريخ', en: 'From Date' },
+    toDate: { ar: 'إلى تاريخ', en: 'To Date' },
+    clearDate: { ar: 'مسح التاريخ', en: 'Clear Date' },
     currency: { ar: 'العملة', en: 'Currency' },
     noTransactions: { ar: 'لا توجد معاملات', en: 'No transactions found' },
     loading: { ar: 'جاري التحميل...', en: 'Loading...' },
@@ -75,7 +98,9 @@ export default function Transactions() {
     switch (type) {
       case 'credit': return text.credit[language];
       case 'debit': return text.debit[language];
+      case 'expense': return text.expense[language];
       case 'subscription': return text.subscription[language];
+      case 'payout': return text.payout[language];
       default: return type;
     }
   };
@@ -86,9 +111,28 @@ export default function Transactions() {
                            t.id.toLowerCase().includes(searchQuery.toLowerCase());
       const matchesStatus = filterStatus === 'all' || t.status === filterStatus;
       const matchesType = filterType === 'all' || t.type === filterType;
-      return matchesSearch && matchesStatus && matchesType;
+      const transactionDate = new Date(t.createdAt);
+      const from = fromDate ? new Date(`${fromDate}T00:00:00`) : null;
+      const to = toDate ? new Date(`${toDate}T23:59:59.999`) : null;
+      const matchesFromDate = !from || transactionDate >= from;
+      const matchesToDate = !to || transactionDate <= to;
+
+      return matchesSearch && matchesStatus && matchesType && matchesFromDate && matchesToDate;
     });
-  }, [transactions, searchQuery, filterStatus, filterType]);
+  }, [transactions, searchQuery, filterStatus, filterType, fromDate, toDate]);
+
+  const totalItems = serverPagination?.totalItems ?? filteredTransactions.length;
+  const totalPages = Math.max(1, serverPagination?.totalPages ?? Math.ceil(totalItems / itemsPerPage));
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchQuery, filterStatus, filterType, fromDate, toDate, selectedCurrencyId]);
+
+  useEffect(() => {
+    if (currentPage > totalPages) {
+      setCurrentPage(totalPages);
+    }
+  }, [currentPage, totalPages]);
 
   const stats = useMemo(() => {
     if (statsData) {
@@ -217,6 +261,8 @@ export default function Transactions() {
             <option value="all">{text.allTypes[language]}</option>
             <option value="credit">{text.credit[language]}</option>
             <option value="debit">{text.debit[language]}</option>
+            <option value="expense">{text.expense[language]}</option>
+            <option value="payout">{text.payout[language]}</option>
             <option value="subscription">{text.subscription[language]}</option>
           </select>
           <select
@@ -231,6 +277,43 @@ export default function Transactions() {
           </select>
         </div>
       </div>
+
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <label className="block">
+          <span className="block text-xs font-medium text-gray-500 mb-1">{text.fromDate[language]}</span>
+          <input
+            type="date"
+            value={fromDate}
+            onChange={(e) => setFromDate(e.target.value)}
+            className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-primary text-start bg-white"
+          />
+        </label>
+        <label className="block">
+          <span className="block text-xs font-medium text-gray-500 mb-1">{text.toDate[language]}</span>
+          <input
+            type="date"
+            value={toDate}
+            min={fromDate || undefined}
+            onChange={(e) => setToDate(e.target.value)}
+            className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-primary text-start bg-white"
+          />
+        </label>
+      </div>
+
+      {(fromDate || toDate) && (
+        <div className="flex justify-end">
+          <button
+            type="button"
+            onClick={() => {
+              setFromDate('');
+              setToDate('');
+            }}
+            className="text-sm font-medium text-primary hover:underline"
+          >
+            {text.clearDate[language]}
+          </button>
+        </div>
+      )}
 
       {filteredTransactions.length === 0 ? (
         <div className="bg-white rounded-2xl border border-gray-200 p-12 text-center">
@@ -299,6 +382,13 @@ export default function Transactions() {
               </tbody>
             </table>
           </div>
+          <Pagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            totalItems={totalItems}
+            itemsPerPage={itemsPerPage}
+            onPageChange={setCurrentPage}
+          />
         </div>
       )}
 

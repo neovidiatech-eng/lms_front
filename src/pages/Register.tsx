@@ -379,45 +379,6 @@ export default function Register({ onRegisterSuccess }: RegisterProps) {
             {t("afterRegistration")}
           </p>
 
-          {/* Divider */}
-          <div className="relative flex items-center justify-center my-6">
-            <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-slate-100"></div>
-            </div>
-            <span className="relative px-4 text-xs font-bold text-slate-400 bg-white uppercase tracking-wider">{t("or")}</span>
-          </div>
-
-          {/* Google Register */}
-          <div className="flex justify-center">
-            <GoogleLogin
-              onSuccess={async (credentialResponse) => {
-                const idToken = credentialResponse.credential;
-                if (idToken) {
-                  try {
-                    const result = await googleRegister({ idToken });
-                    const token = result.data?.accessToken || result.accessToken;
-
-                    if (token) {
-                      localStorage.setItem("token", token);
-                      onRegisterSuccess();
-                      message.success(result.message || t('registeredSuccess'));
-                      navigate("/login");
-                    }
-                  } catch (error) {
-                    console.error("Google Login failed:", error);
-                  }
-                }
-              }}
-              onError={() => {
-                console.log("Login Failed");
-              }}
-              useOneTap
-              theme="outline"
-              size="large"
-              shape="circle"
-              width="384px"
-            />
-          </div>
         </form>
       </div>
     </ConfigProvider>

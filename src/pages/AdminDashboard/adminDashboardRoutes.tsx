@@ -208,12 +208,7 @@ export const adminDashboardRoutes: RouteConfig[] = [
       },
     ],
   },
-  {
-    id: 'roles-group',
-    label: 'sidebar_roles',
-    icon: ShieldCheck,
-    path: 'roles-group',
-    subItems: [
+
       {
         id: 'roles',
         label: 'sidebar_roles',
@@ -221,15 +216,8 @@ export const adminDashboardRoutes: RouteConfig[] = [
         path: 'roles',
         element: <RolesPage />
       },
-      {
-        id: 'permissions',
-        label: 'sidebar_permissions',
-        icon: KeyRound,
-        path: 'permissions',
-        element: <PermissionsPage />
-      },
-    ],
-  },
+
+
   {
     id: "finance",
     label: "sidebar_finance",

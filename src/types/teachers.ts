@@ -66,7 +66,7 @@ export interface CreateTeacherInput {
     hour_price: number;
     active: boolean;
     subject_ids: string[];
-    meeting_link: string;
+    meeting_link?: string;
     timezone?: string;
 }
 
@@ -82,6 +82,7 @@ export interface UpdateTeacherInput {
     active: boolean;
     subject_ids: string[];
     timezone?: string;
+    meeting_link?: string;
 }
 
 export type TeachersData = TeachersFetchResponse['data'];

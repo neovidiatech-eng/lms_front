@@ -1,5 +1,5 @@
 
-export type TransactionType = 'credit' | 'subscription' | 'debit' | 'expense';
+export type TransactionType = 'credit' | 'subscription' | 'debit' | 'expense' | 'payout';
 export type TransactionStatus = 'completed' | 'pending' | 'failed';
 
 export interface Transaction {

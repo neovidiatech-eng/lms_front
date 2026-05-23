@@ -1,4 +1,4 @@
-import { X, User, GraduationCap, Calendar, Clock, CheckCircle, AlertCircle } from 'lucide-react';
+import { X, User, Calendar, Clock, CheckCircle, AlertCircle } from 'lucide-react';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { useSessions } from '../../contexts/SessionsContext';
 
@@ -8,13 +8,23 @@ interface ViewSubscriptionDetailsModalProps {
   subscription: {
     id: string;
     studentName: string;
+    email: string;
+    phone: string;
+    country: string;
+    gender: string;
     planName: string;
     planPrice: string;
+    currencyName: string;
     startDate: string;
+    paidAt: string;
     endDate: string;
     status: 'active' | 'expired' | 'cancelled';
     sessionsRemaining: number;
     totalSessions: number;
+    attendedSessions: number;
+    avgRating: number;
+    totalReviews: number;
+    sessionTime: number;
   };
 }
 
@@ -30,10 +40,16 @@ export default function ViewSubscriptionDetailsModal({
     title: { ar: 'تفاصيل الاشتراك', en: 'Subscription Details' },
     studentInfo: { ar: 'معلومات الطالب', en: 'Student Information' },
     studentName: { ar: 'اسم الطالب', en: 'Student Name' },
+    email: { ar: 'البريد الإلكتروني', en: 'Email' },
+    phone: { ar: 'رقم الهاتف', en: 'Phone' },
+    country: { ar: 'الدولة', en: 'Country' },
+    gender: { ar: 'النوع', en: 'Gender' },
     planDetails: { ar: 'تفاصيل الباقة', en: 'Plan Details' },
     planName: { ar: 'اسم الباقة', en: 'Plan Name' },
     price: { ar: 'السعر', en: 'Price' },
+    currency: { ar: 'العملة', en: 'Currency' },
     startDate: { ar: 'تاريخ البدء', en: 'Start Date' },
+    paidAt: { ar: 'تاريخ الدفع', en: 'Paid At' },
     endDate: { ar: 'تاريخ الانتهاء', en: 'End Date' },
     status: { ar: 'الحالة', en: 'Status' },
     active: { ar: 'نشط', en: 'Active' },
@@ -43,6 +59,10 @@ export default function ViewSubscriptionDetailsModal({
     totalSessions: { ar: 'إجمالي الحصص', en: 'Total Sessions' },
     completedSessions: { ar: 'الحصص المكتملة', en: 'Completed Sessions' },
     remainingSessions: { ar: 'الحصص المتبقية', en: 'Remaining Sessions' },
+    scheduledSoon: { ar: 'مجدولة قريبًا', en: 'Scheduled Soon' },
+    sessionTime: { ar: 'مدة الحصة', en: 'Session Time' },
+    rating: { ar: 'التقييم', en: 'Rating' },
+    reviews: { ar: 'عدد التقييمات', en: 'Reviews' },
     teacherInfo: { ar: 'معلومات المعلم', en: 'Teacher Information' },
     teacher: { ar: 'المعلم', en: 'Teacher' },
     subject: { ar: 'المادة', en: 'Subject' },
@@ -76,8 +96,6 @@ export default function ViewSubscriptionDetailsModal({
     return sessionDate >= today;
   });
 
-  const teacherName = studentSessions.length > 0 ? studentSessions[0].teacherName : '-';
-  const subject = studentSessions.length > 0 ? studentSessions[0].subject : '-';
 
   const getStatusStyle = (status: string) => {
     switch (status) {
@@ -116,26 +134,24 @@ export default function ViewSubscriptionDetailsModal({
                 <p className="text-sm text-gray-600 mb-1">{text.studentName[language]}</p>
                 <p className="text-base font-semibold text-gray-900">{subscription.studentName}</p>
               </div>
-            </div>
-          </div>
-
-          <div className="bg-gradient-to-br from-green-50 to-emerald-50 border border-green-200 rounded-xl p-5">
-            <div className="flex items-center gap-3 mb-4">
-              <GraduationCap className="w-6 h-6 text-green-600" />
-              <h3 className="text-lg font-bold text-gray-900">{text.teacherInfo[language]}</h3>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <p className="text-sm text-gray-600 mb-1">{text.teacher[language]}</p>
-                <p className="text-base font-semibold text-gray-900">{teacherName}</p>
+                <p className="text-sm text-gray-600 mb-1">{text.phone[language]}</p>
+                <p className="text-base font-semibold text-gray-900" dir="ltr">{subscription.phone || '-'}</p>
               </div>
               <div>
-                <p className="text-sm text-gray-600 mb-1">{text.subject[language]}</p>
-                <p className="text-base font-semibold text-gray-900">{subject}</p>
+                <p className="text-sm text-gray-600 mb-1">{text.email[language]}</p>
+                <p className="text-base font-semibold text-gray-900">{subscription.email}</p>
+              </div>
+              <div>
+                <p className="text-sm text-gray-600 mb-1">{text.country[language]}</p>
+                <p className="text-base font-semibold text-gray-900">{subscription.country}</p>
+              </div>
+              <div>
+                <p className="text-sm text-gray-600 mb-1">{text.gender[language]}</p>
+                <p className="text-base font-semibold text-gray-900">{subscription.gender}</p>
               </div>
             </div>
           </div>
-
           <div className="bg-gray-50 border border-gray-200 rounded-xl p-5">
             <h3 className="text-lg font-bold text-gray-900 mb-4">{text.planDetails[language]}</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -148,13 +164,22 @@ export default function ViewSubscriptionDetailsModal({
                 <p className="text-base font-semibold text-gray-900">{subscription.planPrice}</p>
               </div>
               <div>
+                <p className="text-sm text-gray-600 mb-1">{text.currency[language]}</p>
+                <p className="text-base font-semibold text-gray-900">{subscription.currencyName}</p>
+              </div>
+              <div>
                 <p className="text-sm text-gray-600 mb-1">{text.startDate[language]}</p>
                 <p className="text-base font-semibold text-gray-900">{subscription.startDate}</p>
               </div>
               <div>
-                <p className="text-sm text-gray-600 mb-1">{text.endDate[language]}</p>
-                <p className="text-base font-semibold text-gray-900">{subscription.endDate}</p>
+                <p className="text-sm text-gray-600 mb-1">{text.paidAt[language]}</p>
+                <p className="text-base font-semibold text-gray-900">{subscription.paidAt}</p>
               </div>
+              <div>
+                <p className="text-sm text-gray-600 mb-1">{text.sessionTime[language]}</p>
+                <p className="text-base font-semibold text-gray-900">{subscription.sessionTime} {language === 'ar' ? 'دقيقة' : 'min'}</p>
+              </div>
+
               <div>
                 <p className="text-sm text-gray-600 mb-1">{text.status[language]}</p>
                 <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium border ${getStatusStyle(subscription.status)}`}>
@@ -173,11 +198,23 @@ export default function ViewSubscriptionDetailsModal({
               </div>
               <div className="bg-white rounded-lg p-4 border border-green-200">
                 <p className="text-sm text-gray-600 mb-1">{text.completedSessions[language]}</p>
-                <p className="text-2xl font-bold text-green-600">{completedSessions.length}</p>
+                <p className="text-2xl font-bold text-green-600">{subscription.attendedSessions}</p>
               </div>
               <div className="bg-white rounded-lg p-4 border border-blue-200">
                 <p className="text-sm text-gray-600 mb-1">{text.remainingSessions[language]}</p>
                 <p className="text-2xl font-bold text-blue-600">{subscription.sessionsRemaining}</p>
+              </div>
+               <div className="bg-white rounded-lg p-4 border border-blue-200">
+                <p className="text-sm text-gray-600 mb-1">{text.scheduledSoon[language]}</p>
+                <p className="text-2xl font-bold text-blue-600">{subscription.totalSessions - subscription.attendedSessions}</p>
+              </div>
+              <div className="bg-white rounded-lg p-4 border border-yellow-200">
+                <p className="text-sm text-gray-600 mb-1">{text.rating[language]}</p>
+                <p className="text-2xl font-bold text-yellow-600">{subscription.avgRating}</p>
+              </div>
+              <div className="bg-white rounded-lg p-4 border border-gray-200">
+                <p className="text-sm text-gray-600 mb-1">{text.reviews[language]}</p>
+                <p className="text-2xl font-bold text-gray-700">{subscription.totalReviews}</p>
               </div>
             </div>
           </div>

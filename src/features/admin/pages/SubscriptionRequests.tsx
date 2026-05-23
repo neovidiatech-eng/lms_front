@@ -23,6 +23,7 @@ interface SubscriptionRequest {
     sessionsCount: number;
   };
   requestDate: string;
+  rawRequestDate: string;
   status: "pending" | "approved" | "rejected";
   notes?: string;
 }
@@ -34,6 +35,8 @@ export default function SubscriptionRequests() {
   const [statusFilter, setStatusFilter] = useState<
     "all" | "pending" | "approved" | "rejected"
   >("all");
+  const [fromDate, setFromDate] = useState("");
+  const [toDate, setToDate] = useState("");
   const [viewModalOpen, setViewModalOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [selectedRequest, setSelectedRequest] =
@@ -60,6 +63,9 @@ export default function SubscriptionRequests() {
     sessionsCount: { ar: "عدد الحصص", en: "Sessions Count" },
     session: { ar: "حصة", en: "session" },
     requestDate: { ar: "تاريخ الطلب", en: "Request Date" },
+    fromDate: { ar: "من تاريخ الطلب", en: "From Request Date" },
+    toDate: { ar: "إلى تاريخ الطلب", en: "To Request Date" },
+    clearDate: { ar: "مسح التاريخ", en: "Clear Date" },
     status: { ar: "الحالة", en: "Status" },
     actions: { ar: "الإجراءات", en: "Actions" },
     approve: { ar: "قبول", en: "Approve" },
@@ -98,6 +104,7 @@ export default function SubscriptionRequests() {
             sessionsCount: typeof item.plan?.sessionsCount === 'number' ? item.plan.sessionsCount : 0,
           },
           requestDate: typeof item.createdAt === 'string' ? item.createdAt.split("T")[0] : "—",
+          rawRequestDate: typeof item.createdAt === 'string' ? item.createdAt : "",
           status: item.status,
         }));
         setRequests(formatted);
@@ -117,7 +124,13 @@ export default function SubscriptionRequests() {
       request.parentName.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesStatus =
       statusFilter === "all" || request.status === statusFilter;
-    return matchesSearch && matchesStatus;
+    const requestDate = new Date(request.rawRequestDate);
+    const from = fromDate ? new Date(`${fromDate}T00:00:00`) : null;
+    const to = toDate ? new Date(`${toDate}T23:59:59.999`) : null;
+    const matchesFromDate = !from || requestDate >= from;
+    const matchesToDate = !to || requestDate <= to;
+
+    return matchesSearch && matchesStatus && matchesFromDate && matchesToDate;
   });
 
   const totalPages = Math.ceil(filteredRequests.length / itemsPerPage);
@@ -183,7 +196,10 @@ export default function SubscriptionRequests() {
               type="text"
               placeholder={text.search[language]}
               value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
+              onChange={(e) => {
+                setSearchTerm(e.target.value);
+                setCurrentPage(1);
+              }}
               className={`w-full ${language === 'ar' ? 'pr-10 pl-4' : 'pl-10 pr-4'} py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent text-start transition-all`}
             />
           </div>
@@ -191,11 +207,12 @@ export default function SubscriptionRequests() {
           <div className="flex items-center gap-2">
             <CustomSelect
               value={statusFilter}
-              onChange={(value) =>
+              onChange={(value) => {
                 setStatusFilter(
                   value as "all" | "pending" | "approved" | "rejected"
-                )
-              }
+                );
+                setCurrentPage(1);
+              }}
               options={[
                 { value: "all", label: text.all[language] },
                 { value: "pending", label: text.pending[language] },
@@ -206,6 +223,50 @@ export default function SubscriptionRequests() {
             />
           </div>
         </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-6">
+          <label className="block">
+            <span className="block text-xs font-medium text-gray-500 mb-1">{text.fromDate[language]}</span>
+            <input
+              type="date"
+              value={fromDate}
+              onChange={(e) => {
+                setFromDate(e.target.value);
+                setCurrentPage(1);
+              }}
+              className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-primary text-start bg-white"
+            />
+          </label>
+          <label className="block">
+            <span className="block text-xs font-medium text-gray-500 mb-1">{text.toDate[language]}</span>
+            <input
+              type="date"
+              value={toDate}
+              min={fromDate || undefined}
+              onChange={(e) => {
+                setToDate(e.target.value);
+                setCurrentPage(1);
+              }}
+              className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-primary text-start bg-white"
+            />
+          </label>
+        </div>
+
+        {(fromDate || toDate) && (
+          <div className="flex justify-end mb-6">
+            <button
+              type="button"
+              onClick={() => {
+                setFromDate("");
+                setToDate("");
+                setCurrentPage(1);
+              }}
+              className="text-sm font-medium text-primary hover:underline"
+            >
+              {text.clearDate[language]}
+            </button>
+          </div>
+        )}
 
         {isLoading ? (
           <TableSkeleton rows={itemsPerPage} columns={9} />

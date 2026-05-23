@@ -7,17 +7,29 @@ import CustomSelect from "../../../components/ui/CustomSelect";
 import { TableSkeleton } from "../../../components/ui/CustomSkeleton";
 import { useSubscription } from "../hooks/useSubscription";
 import { SubscriptionData } from "../../../types/subscription";
+import WhatsAppPhone from "../../../components/ui/WhatsAppPhone";
 
 interface Subscription {
   id: string;
   studentName: string;
+  email: string;
+  phone: string;
+  country: string;
+  gender: string;
   planName: string;
   planPrice: string;
+  currencyName: string;
   startDate: string;
+  rawStartDate: string;
+  paidAt: string;
   endDate: string;
   status: "active" | "expired" | "cancelled";
   sessionsRemaining: number;
   totalSessions: number;
+  attendedSessions: number;
+  avgRating: number;
+  totalReviews: number;
+  sessionTime: number;
 }
 
 export default function AllSubscriptions() {
@@ -27,6 +39,8 @@ export default function AllSubscriptions() {
   const [statusFilter, setStatusFilter] = useState<
     "all" | "active" | "expired" | "cancelled"
   >("all");
+  const [fromDate, setFromDate] = useState("");
+  const [toDate, setToDate] = useState("");
   const [showViewModal, setShowViewModal] = useState(false);
   const [selectedSubscription, setSelectedSubscription] =
     useState<Subscription | null>(null);
@@ -47,12 +61,16 @@ export default function AllSubscriptions() {
     expired: { ar: "منتهي", en: "Expired" },
     cancelled: { ar: "ملغي", en: "Cancelled" },
     studentName: { ar: "اسم الطالب", en: "Student Name" },
+    phone: { ar: "رقم الهاتف", en: "Phone" },
+    email: { ar: "البريد الإلكتروني", en: "Email" },
     plan: { ar: "الخطة", en: "Plan" },
     price: { ar: "السعر", en: "Price" },
     sessionsCount: { ar: "عدد الحصص", en: "Sessions Count" },
     session: { ar: "حصة", en: "session" },
     startDate: { ar: "تاريخ البدء", en: "Start Date" },
-    endDate: { ar: "تاريخ الانتهاء", en: "End Date" },
+    fromDate: { ar: "من تاريخ البدء", en: "From Start Date" },
+    toDate: { ar: "إلى تاريخ البدء", en: "To Start Date" },
+    clearDate: { ar: "مسح التاريخ", en: "Clear Date" },
     status: { ar: "الحالة", en: "Status" },
     progress: { ar: "التقدم", en: "Progress" },
     actions: { ar: "الإجراءات", en: "Actions" },
@@ -78,13 +96,26 @@ export default function AllSubscriptions() {
     return {
       id: apiData.id,
       studentName: apiData.user?.name || "—",
+      email: apiData.user?.email || "—",
+      phone: `${apiData.user?.code_country || ""} ${apiData.user?.phone || ""}`.trim(),
+      country: apiData.student?.country || "—",
+      gender: apiData.student?.gender || "—",
       planName: language === "ar" ? apiData.plan?.name_ar : apiData.plan?.name_en || "—",
       planPrice: `${apiData.amount} ${apiData.currency?.symbol || ""}`,
+      currencyName: (language === "ar" ? apiData.currency?.name_ar : apiData.currency?.name_en) || apiData.currency?.code || "—",
       startDate: startDate.toLocaleDateString(language === "ar" ? "ar-EG" : "en-US"),
+      rawStartDate: apiData.startDate,
+      paidAt: apiData.paidAt
+        ? new Date(apiData.paidAt).toLocaleDateString(language === "ar" ? "ar-EG" : "en-US")
+        : "—",
       endDate: endDate.toLocaleDateString(language === "ar" ? "ar-EG" : "en-US"),
       status: (apiData.status as any) || "active",
-      sessionsRemaining: apiData.plan?.sessionsCount || 0, // Should ideally be from API
-      totalSessions: apiData.plan?.sessionsCount || 0,
+      sessionsRemaining: apiData.student?.sessions_remaining ?? 0,
+      totalSessions: apiData.student?.sessions ?? apiData.plan?.sessionsCount ?? 0,
+      attendedSessions: apiData.student?.sessions_attended ?? 0,
+      avgRating: apiData.student?.avgRating ?? 0,
+      totalReviews: apiData.student?.totalReviews ?? 0,
+      sessionTime: apiData.plan?.sessionTime ?? 0,
     };
   };
 
@@ -96,10 +127,18 @@ export default function AllSubscriptions() {
   const filteredSubscriptions = formattedSubscriptions.filter((subscription) => {
     const matchesSearch =
       subscription.studentName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      subscription.phone.includes(searchTerm) ||
+      subscription.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
       subscription.planName.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesStatus =
       statusFilter === "all" || subscription.status === statusFilter;
-    return matchesSearch && matchesStatus;
+    const subscriptionStartDate = new Date(subscription.rawStartDate);
+    const from = fromDate ? new Date(`${fromDate}T00:00:00`) : null;
+    const to = toDate ? new Date(`${toDate}T23:59:59.999`) : null;
+    const matchesFromDate = !from || subscriptionStartDate >= from;
+    const matchesToDate = !to || subscriptionStartDate <= to;
+
+    return matchesSearch && matchesStatus && matchesFromDate && matchesToDate;
   });
 
   const totalPages = Math.ceil(filteredSubscriptions.length / itemsPerPage);
@@ -122,11 +161,10 @@ export default function AllSubscriptions() {
     }
   };
 
-  const calculateProgress = (remaining: number, total: number) => {
-    if (total === 0) return 100;
-    const used = total - remaining;
-    return (used / total) * 100;
-  };
+ const calculateProgress = (attended: number, total: number) => {
+  if (total === 0) return 0;
+  return (attended / total) * 100;
+};
 
   const handleView = (subscription: Subscription) => {
     setSelectedSubscription(subscription);
@@ -150,18 +188,22 @@ export default function AllSubscriptions() {
               type="text"
               placeholder={text.search[language]}
               value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
+              onChange={(e) => {
+                setSearchTerm(e.target.value);
+                setCurrentPage(1);
+              }}
               className={`w-full ${language === 'ar' ? 'pr-10 pl-4 text-right' : 'pl-10 pr-4 text-left'} py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent transition-all`}
             />
           </div>
           <div className="w-full md:w-[220px]">
             <CustomSelect
               value={statusFilter}
-              onChange={(value) =>
+              onChange={(value) => {
                 setStatusFilter(
                   value as "all" | "active" | "expired" | "cancelled",
-                )
-              }
+                );
+                setCurrentPage(1);
+              }}
               options={[
                 { value: "all", label: text.all[language] },
                 { value: "active", label: text.active[language] },
@@ -173,8 +215,52 @@ export default function AllSubscriptions() {
           </div>
         </div>
 
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-6">
+          <label className="block">
+            <span className="block text-xs font-medium text-gray-500 mb-1">{text.fromDate[language]}</span>
+            <input
+              type="date"
+              value={fromDate}
+              onChange={(e) => {
+                setFromDate(e.target.value);
+                setCurrentPage(1);
+              }}
+              className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-primary text-start bg-white"
+            />
+          </label>
+          <label className="block">
+            <span className="block text-xs font-medium text-gray-500 mb-1">{text.toDate[language]}</span>
+            <input
+              type="date"
+              value={toDate}
+              min={fromDate || undefined}
+              onChange={(e) => {
+                setToDate(e.target.value);
+                setCurrentPage(1);
+              }}
+              className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-primary text-start bg-white"
+            />
+          </label>
+        </div>
+
+        {(fromDate || toDate) && (
+          <div className="flex justify-end mb-6">
+            <button
+              type="button"
+              onClick={() => {
+                setFromDate("");
+                setToDate("");
+                setCurrentPage(1);
+              }}
+              className="text-sm font-medium text-primary hover:underline"
+            >
+              {text.clearDate[language]}
+            </button>
+          </div>
+        )}
+
         {isLoading ? (
-          <TableSkeleton rows={itemsPerPage} columns={9} />
+          <TableSkeleton rows={itemsPerPage} columns={10} />
         ) : paginatedSubscriptions.length === 0 ? (
           <div className="text-center py-12">
             <CreditCard className="w-16 h-16 text-gray-300 mx-auto mb-4" />
@@ -191,6 +277,12 @@ export default function AllSubscriptions() {
                     {text.studentName[language]}
                   </th>
                   <th className="px-4 py-4 text-start text-sm font-semibold text-gray-700">
+                    {text.phone[language]}
+                  </th>
+                  <th className="px-4 py-4 text-start text-sm font-semibold text-gray-700">
+                    {text.email[language]}
+                  </th>
+                  <th className="px-4 py-4 text-start text-sm font-semibold text-gray-700">
                     {text.plan[language]}
                   </th>
                   <th className="px-4 py-4 text-start text-sm font-semibold text-gray-700">
@@ -202,9 +294,7 @@ export default function AllSubscriptions() {
                   <th className="px-4 py-4 text-start text-sm font-semibold text-gray-700">
                     {text.startDate[language]}
                   </th>
-                  <th className="px-4 py-4 text-start text-sm font-semibold text-gray-700">
-                    {text.endDate[language]}
-                  </th>
+
                   <th className="px-4 py-4 text-start text-sm font-semibold text-gray-700">
                     {text.status[language]}
                   </th>
@@ -226,6 +316,19 @@ export default function AllSubscriptions() {
                       {subscription.studentName}
                     </td>
                     <td className="px-4 py-4 text-start text-sm text-gray-900">
+                      {subscription.phone ? (
+                        <WhatsAppPhone
+                          phone={subscription.phone}
+                          className="text-sm text-green-600 hover:text-green-700"
+                        />
+                      ) : (
+                        "—"
+                      )}
+                    </td>
+                    <td className="px-4 py-4 text-start text-sm text-gray-900">
+                      {subscription.email}
+                    </td>
+                    <td className="px-4 py-4 text-start text-sm text-gray-900">
                       {subscription.planName}
                     </td>
                     <td className="px-4 py-4 text-start text-sm font-semibold text-gray-900">
@@ -240,9 +343,6 @@ export default function AllSubscriptions() {
                     <td className="px-4 py-4 text-start text-sm text-gray-900">
                       {subscription.startDate}
                     </td>
-                    <td className="px-4 py-4 text-start text-sm text-gray-900">
-                      {subscription.endDate}
-                    </td>
                     <td className="px-4 py-4 text-start">
                       <span
                         className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium border ${getStatusStyle(
@@ -256,7 +356,7 @@ export default function AllSubscriptions() {
                       <div className="w-32">
                         <div className="flex items-center justify-between mb-1">
                           <span className="text-xs text-gray-600">
-                            {subscription.sessionsRemaining}/
+                            {subscription.attendedSessions}/
                             {subscription.totalSessions}
                           </span>
                         </div>
@@ -265,7 +365,7 @@ export default function AllSubscriptions() {
                             className="bg-primary h-2 rounded-full transition-all"
                             style={{
                               width: `${calculateProgress(
-                                subscription.sessionsRemaining,
+                                subscription.attendedSessions,
                                 subscription.totalSessions
                               )}%`,
                             }}

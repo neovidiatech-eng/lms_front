@@ -18,3 +18,8 @@ export const getLateDiscountRules = async (): Promise<LateDiscountRule[]> => {
     const response = await api.get<LateDiscountRulesResponse>('/settings/late-discount');
     return response.data.data.lateDiscountRules;
 }
+
+export const addLateDiscountRule = async (rule: LateDiscountRule): Promise<void> => {
+  const response = await api.patch('/settings/late-discount', rule);
+  return response.data;
+}
