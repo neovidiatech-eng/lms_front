@@ -5,6 +5,7 @@ import { useSettings } from '../../contexts/SettingsContext';
 import { adminDashboardRoutes } from './adminDashboardRoutes';
 import { useTranslation } from 'react-i18next';
 import SidebarToggle from '../../components/layout/SidebarToggle';
+import { filterAdminRoutesByPermissions } from '../../utils/auth';
 interface AdminSidebarProps {
   isOpen: boolean;
   onClose: () => void;
@@ -17,6 +18,7 @@ export default function AdminSidebar({ isOpen, onClose, isCollapsed, setIsCollap
   const language = i18n.language.split('-')[0];
   const { settings } = useSettings();
   const [expandedItems, setExpandedItems] = useState<string[]>(['users']);
+  const visibleRoutes = filterAdminRoutesByPermissions(adminDashboardRoutes);
 
   const toggleExpand = (itemId: string) => {
     setExpandedItems(prev =>
@@ -85,7 +87,7 @@ export default function AdminSidebar({ isOpen, onClose, isCollapsed, setIsCollap
         {/* Menu Items */}
         <nav className="p-4 overflow-y-auto no-scrollbar h-[calc(100vh-120px)]">
           <div className="space-y-1">
-            {adminDashboardRoutes.map((item) => (
+            {visibleRoutes.map((item) => (
               <div key={item.id}>
                 {item.subItems ? (
                   <>

@@ -46,6 +46,8 @@ export default function Header({
     sessionStorage.removeItem("role");
     localStorage.removeItem("email");
     sessionStorage.removeItem("email");
+    localStorage.removeItem("permissions");
+    sessionStorage.removeItem("permissions");
     window.location.href = "/login";
   };
 
