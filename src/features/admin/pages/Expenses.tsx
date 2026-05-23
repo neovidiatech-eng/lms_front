@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useConfirm } from '../../../hooks/useConfirm';
 import {
   Plus,
@@ -7,7 +7,6 @@ import {
   Eye,
   DollarSign,
   Search,
-  Filter,
   CreditCard,
   TrendingDown,
   Calendar,
@@ -20,7 +19,6 @@ import { useExpenses, useCreateExpense, useUpdateExpense, useDeleteExpense } fro
 import { Expense } from "../../../types/expenses";
 import { message } from "antd";
 import { useCurrency } from "../hooks/useCurrency";
-import { Currency } from "../../../types/currency";
 
 export default function Expenses() {
   const { language } = useLanguage();
@@ -29,14 +27,23 @@ export default function Expenses() {
   const [showViewModal, setShowViewModal] = useState(false);
   const [selectedExpense, setSelectedExpense] = useState<Expense | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
-  const [filterType, setFilterType] = useState("all");
-  const [filterStatus, setFilterStatus] = useState("all");
+    const [selectedCurrency, setSelectedCurrency] = useState('EGP');
+  
+  const { data: currenciesData } = useCurrency();
+    
+    const selectedCurrencyId = useMemo(() => {
+      const curr = currenciesData?.currencies?.find(c => c.code === selectedCurrency);
+      return curr?.code || '';
+    }, [currenciesData, selectedCurrency]);
 
-  const { data: expenses = [], isLoading } = useExpenses(filterStatus);
+  const { data: expensesData, isLoading } = useExpenses(selectedCurrencyId);
+  const expenses = expensesData?.expenses || [];
+  const totalExpenses = expensesData?.totalExpenses || 0;
+
+  
   const createMutation = useCreateExpense();
   const updateMutation = useUpdateExpense();
   const deleteMutation = useDeleteExpense();
-
   const text = {
     title: { ar: "إدارة المصروفات", en: "Expenses Management" },
     addExpense: { ar: "إضافة مصروف جديد", en: "Add New Expense" },
@@ -70,12 +77,21 @@ export default function Expenses() {
     marketing: { ar: "تسويق", en: "Marketing" },
     other: { ar: "أخرى", en: "Other" },
     allStatuses: { ar: "كل الحالات", en: "All Statuses" },
+    allCurrencies: { ar: "كل العملات", en: "All Currencies" },
   };
+ const CURRENCIES = useMemo(() => {
+    if (!currenciesData?.currencies) return [];
+    return currenciesData.currencies.map(c => ({
+      name: language === 'ar' ? c.name_ar : c.name_en,
+      symbol: c.symbol,
+      code: c.code,
+      rate: c.exchangeRate,
+    }));
+  }, [currenciesData, language]);
 
-  const {data: currenciesData} = useCurrency();
-
-  const defaultCurrency = currenciesData?.currencies.find((c: Currency) => c.default);
-  console.log(defaultCurrency);
+ const getCurrencySymbol = (code: string) => {
+    return CURRENCIES.find(c => c.code === code)?.code || code;
+  };
 
   
 
@@ -111,13 +127,10 @@ export default function Expenses() {
   };
 
   const filteredExpenses = expenses.filter((expense) => {
-    const matchesSearch = expense.title.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesType = filterType === "all" || expense.type === filterType;
-    const matchesStatus = filterStatus === "all" || expense.status === filterStatus;
-    return matchesSearch && matchesType && matchesStatus;
+    return expense.title.toLowerCase().includes(searchQuery.toLowerCase());
   });
 
-  const totalAmount = filteredExpenses.reduce((sum, exp) => sum + exp.amount, 0);
+  const totalAmount = totalExpenses;
 
   return (
     <div className="p-6 space-y-6" dir={language === 'ar' ? 'rtl' : 'ltr'}>
@@ -140,16 +153,31 @@ export default function Expenses() {
             </div>
           </div>
 
-          <button
-            onClick={() => {
-              setSelectedExpense(null);
-              setShowModal(true);
-            }}
-            className="flex items-center gap-2 px-6 py-4 bg-primary text-white rounded-2xl transition-all hover:bg-primary/90 shadow-lg shadow-primary/20 w-fit"
-          >
-            <Plus className="w-5 h-5" />
-            <span className="font-semibold">{text.addExpense[language]}</span>
-          </button>
+          <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2 px-4 py-3 border border-gray-200 rounded-2xl bg-gray-50 hover:bg-white transition-colors">
+              <DollarSign className="w-5 h-5 text-primary" />
+              <select
+                value={selectedCurrency}
+                onChange={(e) => setSelectedCurrency(e.target.value)}
+                className="text-sm font-semibold text-gray-700 bg-transparent border-none outline-none cursor-pointer appearance-none pr-6"
+              >
+                {CURRENCIES.map(c => (
+                  <option key={c.code} value={c.code}>{c.name} ({c.symbol})</option>
+                ))}
+              </select>
+            </div>
+
+            <button
+              onClick={() => {
+                setSelectedExpense(null);
+                setShowModal(true);
+              }}
+              className="flex items-center gap-2 px-6 py-4 bg-primary text-white rounded-2xl transition-all hover:bg-primary/90 shadow-lg shadow-primary/20 w-fit"
+            >
+              <Plus className="w-5 h-5" />
+              <span className="font-semibold">{text.addExpense[language]}</span>
+            </button>
+          </div>
         </div>
       </div>
 
@@ -167,60 +195,24 @@ export default function Expenses() {
               <h2 className="text-4xl font-bold text-gray-900">
                 {totalAmount.toLocaleString()}
               </h2>
-              <span className="text-sm font-medium text-gray-400">{defaultCurrency?.symbol}</span>
+              <span className="text-sm font-medium text-gray-400">{getCurrencySymbol(selectedCurrency)}</span>
             </div>
           </div>
         </div>
         <div className="absolute right-0 top-0 w-32 h-full bg-gradient-to-l from-red-50/50 to-transparent" />
       </div>
 
-      {/* Filters */}
+{/* Search */}
       <div className="bg-white border border-gray-200 rounded-3xl p-5 shadow-sm">
-        <div className="flex flex-col lg:flex-row gap-4">
-          {/* Search */}
-          <div className="flex-1 relative">
-            <Search className={`absolute ${language === 'ar' ? 'right-4' : 'left-4'} top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400`} />
-            <input
-              type="text"
-              placeholder={text.search[language]}
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className={`w-full h-14 rounded-2xl border border-gray-200 bg-gray-50 ${language === 'ar' ? 'pr-12 pl-5' : 'pl-12 pr-5'} outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-start`}
-            />
-          </div>
-
-          <div className="flex gap-3 flex-wrap">
-            <div className="relative">
-              <Filter className={`absolute ${language === 'ar' ? 'right-4' : 'left-4'} top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400`} />
-              <select
-                value={filterType}
-                onChange={(e) => setFilterType(e.target.value)}
-                className={`h-14 rounded-2xl border border-gray-200 bg-gray-50 ${language === 'ar' ? 'pr-11 pl-5' : 'pl-11 pr-5'} outline-none appearance-none min-w-[170px] text-gray-700 font-medium`}
-              >
-                <option value="all">{text.allTypes[language]}</option>
-                <option value="salary">{text.salary[language]}</option>
-                <option value="amenities">{text.amenities[language]}</option>
-                <option value="general">{text.general[language]}</option>
-                <option value="management">{text.management[language]}</option>
-                <option value="marketing">{text.marketing[language]}</option>
-                <option value="other">{text.other[language]}</option>
-              </select>
-            </div>
-
-            <div className="relative">
-              <Filter className={`absolute ${language === 'ar' ? 'right-4' : 'left-4'} top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400`} />
-              <select
-                value={filterStatus}
-                onChange={(e) => setFilterStatus(e.target.value)}
-                className={`h-14 rounded-2xl border border-gray-200 bg-gray-50 ${language === 'ar' ? 'pr-11 pl-5' : 'pl-11 pr-5'} outline-none appearance-none min-w-[170px] text-gray-700 font-medium`}
-              >
-                <option value="all">{text.allStatuses[language]}</option>
-                <option value="paid">{text.paid[language]}</option>
-                <option value="pending">{text.pending[language]}</option>
-                <option value="failed">{text.failed[language]}</option>
-              </select>
-            </div>
-          </div>
+        <div className="relative">
+          <Search className={`absolute ${language === 'ar' ? 'right-4' : 'left-4'} top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400`} />
+          <input
+            type="text"
+            placeholder={text.search[language]}
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className={`w-full h-14 rounded-2xl border border-gray-200 bg-gray-50 ${language === 'ar' ? 'pr-12 pl-5' : 'pl-12 pr-5'} outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-start`}
+          />
         </div>
       </div>
 
@@ -280,10 +272,10 @@ export default function Expenses() {
                     <td className="px-6 py-5">
                       <div className="flex items-center gap-1">
                         <span className="text-sm font-bold text-red-600">
-                          {expense.amount.toLocaleString()}
+                          {expense.convertedAmount ? expense.convertedAmount.toLocaleString(undefined, { maximumFractionDigits: 2 }) : expense.amount.toLocaleString()}
                         </span>
                         <span className="text-xs font-medium text-gray-400 uppercase">
-                          {expense.currency?.code || "USD"}
+                          {getCurrencySymbol(expense.convertedCurrency?.code || expense.currency?.code || selectedCurrency)}
                         </span>
                       </div>
                     </td>

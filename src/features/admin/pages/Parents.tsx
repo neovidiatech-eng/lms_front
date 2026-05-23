@@ -6,20 +6,11 @@ import EditParentModal from '../../../components/modals/EditParentModal';
 import ViewParentModal from '../../../components/modals/ViewParentModal';
 import Pagination from '../../../components/ui/Pagination';
 import { useConfirm } from '../../../hooks/useConfirm';
-import { useCreateParent } from '../hooks/useParents';
+import { useCreateParent, useGetParents, useDeleteParent, useUpdateParentStatus } from '../hooks/useParents';
 import { ParentFormData } from '../../../lib/schemas/ParentSchema';
+import { Parent } from '../../../types/parentsAdmin';
 import { message } from 'antd';
 
-interface Parent {
-  id: string;
-  name: string;
-  email: string;
-  phone: string;
-  numberOfChildren: number;
-  studentNames: string[];
-  username: string;
-  password: string;
-}
 
 export default function Parents() {
   const { language } = useLanguage();
@@ -32,38 +23,9 @@ export default function Parents() {
   const { confirm, ConfirmDialog } = useConfirm();
   const itemsPerPage = 7;
 
-  const [parents, setParents] = useState<Parent[]>([
-    {
-      id: '1',
-      name: 'أحمد خالد',
-      email: 'aj@demo.app',
-      phone: '+20 0181261245',
-      numberOfChildren: 2,
-      studentNames: ['محمد أحمد', 'فاطمة أحمد'],
-      username: 'admin@admin.com',
-      password: '••••••••'
-    },
-    {
-      id: '2',
-      name: 'والد أحمد',
-      email: 'parent1@example.com',
-      phone: '+20 011111111',
-      numberOfChildren: 0,
-      studentNames: [],
-      username: 'parent1',
-      password: '••••••••'
-    },
-    {
-      id: '3',
-      name: 'والدة أحمد',
-      email: 'parent2@example.com',
-      phone: '+20 012222222',
-      numberOfChildren: 0,
-      studentNames: [],
-      username: 'parent2',
-      password: '••••••••'
-    }
-  ]);
+const { data: parentsData } = useGetParents();
+
+const parents = parentsData?.data?.parents || [];
 
   const filteredParents = parents.filter(parent =>
     parent.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -81,6 +43,8 @@ export default function Parents() {
   };
 
   const { mutateAsync: createParentMutate } = useCreateParent();
+  const { mutateAsync: deleteParentMutate } = useDeleteParent();
+  const { mutateAsync: updateParentMutate } = useUpdateParentStatus();
 
   const handleAddParent = async (parentData: ParentFormData) => {
     try {
@@ -92,13 +56,33 @@ export default function Parents() {
     }
   };
 
-  const handleEditParent = (parentData: Omit<Parent, 'id'>) => {
+  const handleEditParent = async (parentData: ParentFormData) => {
     if (selectedParent) {
-      setParents(parents.map(p =>
-        p.id === selectedParent.id ? { ...parentData, id: p.id } : p
-      ));
-      setShowEditModal(false);
-      setSelectedParent(null);
+      try {
+        const studentIds = Array.isArray(parentData.students) 
+          ? parentData.students 
+          : [];
+        
+        const updateData = {
+          name: parentData.name,
+          email: parentData.email,
+          phone: parentData.phone,
+          password: parentData.password || undefined,
+          students: studentIds,
+        };
+        
+        // Remove undefined values
+        const cleanData = Object.fromEntries(
+          Object.entries(updateData).filter(([_, v]) => v !== undefined)
+        ) as unknown as Parent;
+        
+        await updateParentMutate({ parentId: selectedParent.id, data: cleanData });
+        message.success(language === 'ar' ? 'تم تحديث ولي الأمر بنجاح' : 'Parent updated successfully');
+        setShowEditModal(false);
+        setSelectedParent(null);
+      } catch (error: any) {
+        message.error(error.response?.data?.message || (language === 'ar' ? 'حدث خطأ أثناء تحديث ولي الأمر' : 'Failed to update parent'));
+      }
     }
   };
 
@@ -108,7 +92,12 @@ export default function Parents() {
       message: language === 'ar' ? 'هل أنت متأكد من حذف ولي الأمر؟' : 'Are you sure you want to delete this parent?',
     });
     if (confirmed) {
-      setParents(parents.filter(p => p.id !== id));
+      try {
+        await deleteParentMutate(id);
+        message.success(language === 'ar' ? 'تم حذف ولي الأمر بنجاح' : 'Parent deleted successfully');
+      } catch (error: any) {
+        message.error(error.response?.data?.message || (language === 'ar' ? 'حدث خطأ أثناء حذف ولي الأمر' : 'Failed to delete parent'));
+      }
     }
   };
 
@@ -180,7 +169,7 @@ export default function Parents() {
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">
-              {currentParents.map((parent) => (
+              {currentParents.map((parent: Parent) => (
                 <tr key={parent.id} className="hover:bg-gray-50 transition-colors">
                   <td className="px-6 py-4">
                     <div className="flex items-center gap-3">
@@ -194,7 +183,7 @@ export default function Parents() {
                   <td className="px-6 py-4 text-gray-700 text-start">{parent.phone}</td>
                   <td className="px-6 py-4 text-start">
                     <span className="inline-flex items-center gap-2 px-3 py-1 bg-primary-light text-white rounded-full text-sm font-medium">
-                      {parent.numberOfChildren} {text.students[language]}
+                      {parent.students?.length} {text.students[language]}
                     </span>
                   </td>
                   <td className="px-6 py-4 text-start">
@@ -239,6 +228,7 @@ export default function Parents() {
 
       {showAddModal && (
         <AddParentModal
+          isOpen={showAddModal}
           onClose={() => setShowAddModal(false)}
           onAdd={handleAddParent}
         />

@@ -2,11 +2,11 @@ import api from "../../../lib/axios";
 import { ExpensesResponse, CreateExpenseDto, UpdateExpenseDto } from "../../../types/expenses";
 
 export const ExpenseService = {
-  getExpenses: async (status?: string) => {
+  getExpenses: async (currencyCode?: string) => {
     const response = await api.get<ExpensesResponse>(
-      `/finances/expenses${status && status !== 'all' ? `?status=${status}` : ""}`
+      `/finances/expenses${currencyCode ? `?currencyCode=${currencyCode}` : ""}`
     );
-    return response.data.data.expenses;
+    return response.data.data;
   },
 
   createExpense: async (data: CreateExpenseDto) => {

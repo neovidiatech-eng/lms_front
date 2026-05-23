@@ -1,5 +1,5 @@
 import { useLanguage } from '../../contexts/LanguageContext';
-import { X, Calendar, Clock, Link } from "lucide-react";
+import { X, Calendar, Clock } from "lucide-react";
 import { AgendaSession } from "../../types/Agenda";
 
 interface Props {
@@ -56,16 +56,7 @@ export default function SessionsDayModal({
                   {new Date(s.end_time).toLocaleTimeString()}
                 </div>
 
-                {s.link && (
-                  <a
-                    href={s.link}
-                    target="_blank"
-                    className="flex items-center gap-2 text-green-600 mt-3 text-sm"
-                  >
-                    <Link className="w-4 h-4" />
-                    Join Session
-                  </a>
-                )}
+              
               </div>
             ))
           )}

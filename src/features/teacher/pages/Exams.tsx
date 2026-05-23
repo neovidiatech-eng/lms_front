@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Search, Trash2, Filter, Plus, Edit2, Eye } from "lucide-react";
+import { Search, Trash2, Filter, Plus, Eye } from "lucide-react";
 import { useLanguage } from "../../../contexts/LanguageContext";
 import Pagination from "../../../components/ui/Pagination";
 import { useConfirm } from "../../../hooks/useConfirm";
@@ -24,6 +24,7 @@ interface Exam {
   dueDate: string;
   duration: number;
   grade: number;
+  totalMarks?: number;
   status: "upcoming" | "completed";
 }
 
@@ -72,6 +73,7 @@ export default function Exams() {
       dueDate: exam.dueDate
         ? new Date(exam.dueDate).toISOString().split("T")[0]
         : "",
+        totalMarks: exam.totalMarks,
       duration: exam.duration,
       grade: exam.grade,
       status: exam.status === "pending" ? "upcoming" : "completed",
@@ -88,25 +90,11 @@ export default function Exams() {
     columnStudent: { ar: "الطالب", en: "Student" },
     columnDueDate: { ar: "التاريخ", en: "Due" },
     columnDuration: { ar: "المدة", en: "Duration" },
-    columnGrade: { ar: "الدرجة", en: "Grade" },
+    columnTotalMarks: { ar: "الدرجة الكاملة", en: "Total Marks" },
+    columnGrade: { ar: "درجة الطالب", en: "Student Grade" },
     columnStatus: { ar: "الحالة", en: "Status" },
     columnActions: { ar: "الإجراءات", en: "Actions" },
   };
-  const handleEditExam = (exam: Exam) => {
-    setEditingExam({
-      title: exam.title,
-      subjectId: exam.subjectId || "",
-      studentId: exam.studentId || "",
-      teacher: exam.teacher,
-      dueDate: exam.dueDate,
-      duration: exam.duration,
-      grade: exam.grade,
-      status: exam.status,
-    });
-
-    setShowAddModal(true);
-  };
-
   const handleCloseModal = () => {
     setShowAddModal(false);
     setEditingExam(null);
@@ -268,6 +256,7 @@ export default function Exams() {
                 <th className="px-6 py-4">{text.columnStudent[language]}</th>
                 <th className="px-6 py-4">{text.columnDueDate[language]}</th>
                 <th className="px-6 py-4">{text.columnDuration[language]}</th>
+                <th className="px-6 py-4">{text.columnTotalMarks[language]}</th>
                 <th className="px-6 py-4">{text.columnGrade[language]}</th>
                 <th className="px-6 py-4">{text.columnStatus[language]}</th>
                 <th className="px-6 py-4">{text.columnActions[language]}</th>
@@ -277,13 +266,13 @@ export default function Exams() {
             <tbody>
               {currentExams.map((exam) => (
                 <tr key={exam.id} className="border-t hover:bg-gray-50">
-                  <td className="px-6 py-4">{exam.title}</td>
-                  <td className="px-6 py-4">{exam.subject}</td>
-                  <td className="px-6 py-4">{exam.studentName}</td>
-                  <td className="px-6 py-4">{exam.dueDate}</td>
-                  <td className="px-6 py-4">{exam.duration}</td>
-                  <td className="px-6 py-4">{exam.grade}</td>
-
+                  <td className="text-center">{exam.title}</td>
+                  <td className="text-center">{exam.subject}</td>
+                  <td className="text-center">{exam.studentName}</td>
+                  <td className="text-center">{exam.dueDate}</td>
+                  <td className="text-center">{exam.duration}</td>
+                  <td className="text-center">{exam.totalMarks}</td>
+                  <td className="text-center">{exam.grade}</td>
                   {/* <td className="px-6 py-4">
                     <span
                       className={
@@ -308,13 +297,6 @@ export default function Exams() {
                   </td>
                   <td className="px-6 py-4 text-start">
                     <div className="flex items-center gap-2 justify-start">
-                      <button
-                        onClick={() => handleEditExam(exam)}
-                        className="p-2 icon-btn-primary rounded-lg transition-colors"
-                        title="تعديل"
-                      >
-                        <Edit2 className="w-5 h-5" />
-                      </button>
                       <button
                         onClick={() => handleDeleteExam(exam.id)}
                         disabled={deleteExamMutation.isPending}

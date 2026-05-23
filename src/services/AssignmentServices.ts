@@ -1,8 +1,13 @@
 import api from "../lib/axios"
-import { Assignment, AssignmentsResponse } from "../types/assignment"
+import { Assignment, AdminAssignmentsResponse } from "../types/assignment"
 
-export const getAssignments = async (): Promise<AssignmentsResponse> => {
-    const response = await api.get<AssignmentsResponse>("/homework")
+export const getAssignments = async (): Promise<AdminAssignmentsResponse> => {
+    const response = await api.get<AdminAssignmentsResponse>("/homework")
+    return response.data
+} 
+
+export const getAssignmentById = async (id: string): Promise<Assignment> => {
+    const response = await api.get<Assignment>(`/homework/${id}`)
     return response.data
 }
 

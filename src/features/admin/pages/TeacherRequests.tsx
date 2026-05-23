@@ -86,8 +86,8 @@ export default function TeacherRequests() {
   const getStatusBadge = (status: RequestStatus) => {
     if (status === 'pending') return 'bg-yellow-100 text-yellow-700';
     if (status === 'approved') return 'bg-green-100 text-green-700';
-    if (status === 'cancelled') return 'bg-gray-100 text-gray-700';
-    return 'bg-red-100 text-red-700';
+    if (status === 'rejected') return 'bg-red-100 text-red-700';
+    return 'bg-gray-100 text-gray-700';
   };
 
 
@@ -96,7 +96,6 @@ export default function TeacherRequests() {
       pending: { ar: 'معلق', en: 'Pending' },
       approved: { ar: 'مقبول', en: 'Approved' },
       rejected: { ar: 'مرفوض', en: 'Rejected' },
-      cancelled: { ar: 'ملغي', en: 'Cancelled' }
     };
     return labels[status][language];
   };
@@ -291,7 +290,7 @@ export default function TeacherRequests() {
 
 
       {selectedRequest && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4" onClick={() => setSelectedRequest(null)}>
+        <div className="fixed inset-0 !mt-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4" onClick={() => setSelectedRequest(null)}>
           <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg" onClick={e => e.stopPropagation()}>
             <div className="border-b border-gray-200 px-6 py-4 flex items-center justify-between">
               <button onClick={() => setSelectedRequest(null)} className="p-2 hover:bg-gray-100 rounded-lg">
@@ -377,7 +376,7 @@ export default function TeacherRequests() {
         </div>
       )}
       {actionModal.isOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[60] p-4" onClick={() => setActionModal({ ...actionModal, isOpen: false })}>
+        <div className="fixed inset-0 !mt-0 bg-black bg-opacity-50 flex items-center justify-center z-[60] p-4" onClick={() => setActionModal({ ...actionModal, isOpen: false })}>
           <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden" onClick={e => e.stopPropagation()}>
             <div className={`px-6 py-4 flex items-center justify-between border-b ${actionModal.type === 'approve' ? 'bg-green-50 border-green-100' : 'bg-red-50 border-red-100'}`}>
               <h3 className={`font-bold text-lg ${actionModal.type === 'approve' ? 'text-green-700' : 'text-red-700'}`}>

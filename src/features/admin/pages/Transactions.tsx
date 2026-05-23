@@ -11,7 +11,7 @@ export default function Transactions() {
   const [searchQuery, setSearchQuery] = useState('');
   const [filterStatus, setFilterStatus] = useState('all');
   const [filterType, setFilterType] = useState('all');
-  const [selectedCurrency, setSelectedCurrency] = useState('SAR');
+  const [selectedCurrency, setSelectedCurrency] = useState('EGP');
   const [selectedTransaction, setSelectedTransaction] = useState<Transaction | null>(null);
   const [showViewModal, setShowViewModal] = useState(false);
   

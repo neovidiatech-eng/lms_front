@@ -180,7 +180,6 @@ export default function AddAssignmentModal({ isOpen, onClose, initialData }: Add
                 onChange={(val) => setValue('dueDate', val, { shouldValidate: true })}
                 error={errors.dueDate?.message}
               />
-              {errors.dueDate && <p className="text-red-500 text-xs mt-1 text-start">{errors.dueDate.message}</p>}
             </div>
             <CustomSelect
               label={text.status[language]}

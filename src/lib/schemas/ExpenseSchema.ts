@@ -2,16 +2,9 @@ import { z } from "zod";
 
 type TFunc = (key: string, options?: any) => string;
 
-export const getExpenseCategoryEnum = () => z.enum([
-  'salary',
-  'amenities',
-  'general',
-  'management',
-  'marketing',
-  'other'
-]);
+export const getExpenseCategoryEnum = () => z.string();
 
-export const getExpenseStatusEnum = () => z.enum(['paid', 'pending', 'failed']);
+export const getExpenseStatusEnum = () => z.string();
 
 export const getExpenseSchema = (t: TFunc) => z.object({
   title: z
@@ -37,16 +30,3 @@ export const getExpenseSchema = (t: TFunc) => z.object({
 });
 
 export type ExpenseFormData = z.infer<ReturnType<typeof getExpenseSchema>>;
-
-export interface Expense extends ExpenseFormData {
-  id: string;
-  createdAt?: string;
-  updatedAt?: string;
-  currency?: {
-    id: string;
-    name_en: string;
-    name_ar: string;
-    symbol: string;
-    code: string;
-  };
-}

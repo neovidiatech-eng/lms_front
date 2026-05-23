@@ -1,9 +1,9 @@
 import { useQuery } from "@tanstack/react-query"
 import { getAssignments } from "../services/AssignmentsStudentsServices"
-import { AssignmentsResponse } from "../../../types/assignment"
+import { HomeworkResponse } from "../../../types/assignment"
 
 export const useGetAssignments = () => {
-    return useQuery<AssignmentsResponse>({
+    return useQuery<HomeworkResponse>({
         queryKey: ["assignments"],
         queryFn: getAssignments,
     })

@@ -2,10 +2,10 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { ExpenseService } from "../services/ExpenseService";
 import { CreateExpenseDto, UpdateExpenseDto } from "../../../types/expenses";
 
-export const useExpenses = (status?: string) => {
+export const useExpenses = (currencyCode?: string) => {
   return useQuery({
-    queryKey: ["expenses", status],
-    queryFn: () => ExpenseService.getExpenses(status),
+    queryKey: ["expenses", currencyCode],
+    queryFn: () => ExpenseService.getExpenses(currencyCode),
   });
 };
 

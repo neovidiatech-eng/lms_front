@@ -90,14 +90,6 @@ export default function ViewTransactionModal({ isOpen, onClose, transaction, cur
               <p className="font-semibold text-gray-900">{new Date(transaction.createdAt).toLocaleString(language === 'ar' ? 'ar-EG' : 'en-US')}</p>
             </div>
 
-            <div className="bg-gray-50 rounded-xl p-4 border border-gray-200">
-              <div className="flex items-center gap-2 mb-2">
-                <User className="w-4 h-4 text-gray-500" />
-                <p className="text-sm text-gray-600">{text.walletId[language]}</p>
-              </div>
-              <p className="font-semibold text-gray-900 truncate">{transaction.walletId}</p>
-            </div>
-
 
             <div className="bg-gray-50 rounded-xl p-4 border border-gray-200">
               <div className="flex items-center gap-2 mb-2">

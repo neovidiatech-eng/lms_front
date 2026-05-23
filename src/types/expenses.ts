@@ -16,12 +16,17 @@ export interface Expense {
   currencyId: string;
   amount: number;
   payment_type: string;
-  type: "salary" | "amenities" | "general" | "management" | "marketing" | "other";
-  status: "paid" | "pending" | "failed";
+  type: "salary" | "amenities" | "general" | "management" | "marketing" | "Monthly" | "other" | string;
+  status: "paid" | "pending" | "failed" | string;
   date: string;
   createdAt: string;
   updatedAt: string;
   currency: Currency;
+  originalAmount: number;
+  originalCurrency: Currency;
+  convertedAmount: number;
+  exchangeRate: number;
+  convertedCurrency: Currency;
 }
 
 export interface ExpensesPagination {
@@ -33,6 +38,7 @@ export interface ExpensesPagination {
 }
 
 export interface ExpensesData {
+  totalExpenses: number;
   expenses: Expense[];
   pagination: ExpensesPagination;
 }
@@ -54,4 +60,4 @@ export interface CreateExpenseDto {
   date: string;
 }
 
-export interface UpdateExpenseDto extends Partial<CreateExpenseDto> { }
+export interface UpdateExpenseDto extends Partial<CreateExpenseDto> { }

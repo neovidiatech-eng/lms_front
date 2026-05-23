@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
-import { getAssignments, deleteAssignment, createAssignment, updateAssignment } from "../services/AssignmentServices"
+import { getAssignments, deleteAssignment, createAssignment, updateAssignment, getAssignmentById } from "../services/AssignmentServices"
 import { Assignment } from "../types/assignment"
 import { message } from "antd"
 
@@ -7,6 +7,13 @@ export const useGetAssignments = () => {
     return useQuery({
         queryKey: ["assignments"],
         queryFn: getAssignments,
+    })
+}
+
+export const useGetAssignmentById = (id: string) => {
+    return useQuery({
+        queryKey: ["assignment", id],
+        queryFn: () => getAssignmentById(id),
     })
 }
 
