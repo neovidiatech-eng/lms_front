@@ -256,13 +256,14 @@ export default function Dashboard() {
       {/* Activity Logs */}
 <div className="bg-white rounded-3xl shadow-sm border border-gray-100 p-6 mx-3">
   <div className="flex items-center justify-between mb-6">
-    <span className="text-xs bg-[#eefcfc] text-[#00a8a8] px-3 py-1 rounded-full font-bold">
-  {logsData?.data?.length || 0} {t("dashboard.logsCount")}
-</span>
+   
 
 <h2 className="text-lg font-bold text-gray-800">
   {t("dashboard.activityLogs")}
 </h2>
+ <span className="text-xs bg-[#eefcfc] text-[#00a8a8] px-3 py-1 rounded-full font-bold">
+  {logsData?.data?.length || 0} {t("dashboard.logsCount")}
+</span>
   </div>
 
   {logsLoading ? (

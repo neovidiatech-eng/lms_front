@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Search, Eye, Plus, Video, X, MessageSquare } from 'lucide-react';
+import { Search, Eye, Plus, Video, X } from 'lucide-react';
 import Pagination from '../../../components/ui/Pagination';
 import { useTranslation } from 'react-i18next';
 import ViewSessionModal from '../../../components/modals/ViewSessionModal';
@@ -306,6 +306,8 @@ export default function Sessions() {
                           onClick={async () => {
                             try {
                               await leaveSession(session.id);
+                              setSessionForFeedback(session);
+                              setShowFeedbackModal(true);
                             } catch (error) {
                               console.log(error);
                             }
@@ -349,17 +351,6 @@ export default function Sessions() {
                             title={t('view')}
                           >
                             <Eye className="w-4 h-4" />
-                          </button>
-
-                          <button
-                            onClick={() => {
-                              setSessionForFeedback(session);
-                              setShowFeedbackModal(true);
-                            }}
-                            className="p-2 icon-btn-primary rounded-lg transition-colors"
-                            title={t('feedback') || 'Feedback'}
-                          >
-                            <MessageSquare className="w-4 h-4" />
                           </button>
                         </div>
                       </td>
