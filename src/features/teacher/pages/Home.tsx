@@ -266,18 +266,7 @@ export default function TeacherDashboardHome() {
                         {formatSessionTime(session.startTime, session.endTime)}
                       </span>
                     </div>
-                    {session.link && (
-                      <a
-                        href={session.link}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-flex items-center gap-1 px-3 py-1.5 text-white rounded-lg text-xs font-bold transition-all hover:opacity-90 active:scale-95 shadow-sm"
-                        style={{ backgroundColor: settings.primaryColor }}
-                      >
-                        <Video size={14} />
-                        {isRtl ? 'دخول الحصة' : 'Join Class'}
-                      </a>
-                    )}
+                   
                   </div>
                 </div>
               ))
